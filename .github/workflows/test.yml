@@ -1,0 +1,56 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, rewrite ]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+  pull_request:
+    branches: [ "**" ]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+
+jobs:
+  build:
+    name: Swift 5 on ${{ matrix.host.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [
+          { type: macos, os: macos-latest },
+          { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage },
+        ]
+    runs-on: ${{ matrix.host.os }}
+    steps:
+    - name: Setup swift
+      uses: swift-actions/setup-swift@v1
+    - run: |
+        git config --global core.autocrlf input
+    - uses: actions/checkout@v3
+
+    - name: Swift version
+      run: swift --version
+
+    - name: Install LLVM
+      run: |
+        brew install llvm@15
+
+    - name: Configure pkg-config
+      run: |
+        export PATH=$(brew --prefix llvm@15)/bin:${PATH}
+        bash .build/checkouts/Swifty-LLVM/Tools/make-pkgconfig.sh
+
+    - name: Build (Debug)
+      run: swift build -v -c debug
+    - name: Test (Debug)
+      run: swift test -v -c debug ${{matrix.host.test-options}}
+
+    - name: Build (Release)
+      run: swift build -v -c release
+    - name: Test (Release)
+      run: swift test -c release -Xswiftc -enable-testing ${{matrix.host.test-options}}
+  
