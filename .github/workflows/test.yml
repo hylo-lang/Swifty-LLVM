@@ -35,13 +35,13 @@ jobs:
     - name: Swift version
       run: swift --version
 
-    - name: Install libc++
+    - name: Install LLVM
       if: matrix.host.type == 'linux'
       run: |
-        sudo apt-get install libc++-dev
-        sudo apt-get install libc++abi-dev
+        sudo apt-get install llvm-15 llvm-15-dev libc++-dev libc++-abi-dev
 
-    - name: Setup LLVM
+    - name: Install LLVM
+      if: matrix.host.type == 'macos'
       uses: KyleMayes/install-llvm-action@v1
       with:
         version: "15.0"
