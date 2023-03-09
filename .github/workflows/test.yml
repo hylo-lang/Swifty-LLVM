@@ -46,14 +46,15 @@ jobs:
         version: "15.0"
 
     - name: LLVM version
-      run: llvm-config --version
+      run: sudo llvm-config --version
 
     - name: LLVM location
       run: echo $(which llvm-config)
 
     - name: Configure pkg-config
       run: |
-        sudo bash Tools/make-pkgconfig.sh
+        swift Tools/make-pkgconfig.swift 15
+        sudo mv llvm.pc /usr/local/lib/pkgconfig/llvm.pc
 
     - name: Build (Debug)
       run: swift build -v -c debug

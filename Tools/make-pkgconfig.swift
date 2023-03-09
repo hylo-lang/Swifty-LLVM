@@ -89,7 +89,7 @@ func llvmConfig(_ arguments: String...) throws -> String? {
   try runCommandLine(llvmConfigExecutable, arguments)
 }
 
-let requiredVersionMajor = CommandLine.arguments.count > 0 ? Int(CommandLine.arguments[1])! : 15
+let requiredVersionMajor = CommandLine.arguments.count > 1 ? Int(CommandLine.arguments[1])! : 15
 
 guard let version = try llvmConfig("--version") else {
   throw EnvironmentError(message: "cannot identify LLVM version")
@@ -123,6 +123,6 @@ Cflags: \(cflags)
 """
 
 try file.write(
-  to: URL(fileURLWithPath: "/usr/local/lib/pkgconfig/llvm.pc"),
+  to: URL(fileURLWithPath: "llvm.pc"),
   atomically: true,
   encoding: String.Encoding.utf8)
