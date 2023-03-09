@@ -1,0 +1,94 @@
+import llvmc
+
+/// A struct type in LLVM IR.
+public struct StructType: IRType, Hashable {
+
+  /// A handle to the LLVM object wrapped by this instance.
+  public let llvm: LLVMTypeRef
+
+  /// Creates an instance with given `fields` in `module`, packed iff `packed` is `true`.
+  public init(_ fields: [IRType], packed: Bool = false, in module: inout Module) {
+    self.llvm = fields.withHandles { (f) in
+      LLVMStructTypeInContext(module.context, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
+    }
+  }
+
+  /// Creates a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
+  ///
+  /// A unique name is generated if `name` is empty or if `module` already contains a struct with
+  /// the same name.
+  public init(
+    named name: String, _ fields: [IRType], packed: Bool = false, in module: inout Module
+  ) {
+    self.llvm = LLVMStructCreateNamed(module.context, name)
+    fields.withHandles { (f) in
+      LLVMStructSetBody(self.llvm, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
+    }
+  }
+
+  /// Creates an instance with `t`, failing iff `t` isn't a struct type.
+  public init?(_ t: IRType) {
+    if LLVMGetTypeKind(t.llvm) == LLVMStructTypeKind {
+      self.llvm = t.llvm
+    } else {
+      return nil
+    }
+  }
+
+  /// The name of the struct.
+  public var name: String? {
+    guard let s = LLVMGetStructName(llvm) else { return nil }
+    return String(cString: s)
+  }
+
+  /// `true` iff the fields of the struct are packed.
+  public var isPacked: Bool { LLVMIsPackedStruct(llvm) != 0 }
+
+  /// `true` iff the struct is opaque.
+  public var isOpaque: Bool { LLVMIsOpaqueStruct(llvm) != 0 }
+
+  /// `true` iff the struct is literal.
+  public var isLiteral: Bool { LLVMIsLiteralStruct(llvm) != 0 }
+
+  /// The fields of the struct.
+  public var fields: Fields { .init(of: self) }
+
+}
+
+extension StructType {
+
+  /// A collection containing the fields of a struct type in LLVM IR.
+  public struct Fields: Collection {
+
+    public typealias Index = Int
+
+    public typealias Element = IRType
+
+    /// The struct type containing the elements of the collection.
+    private let parent: StructType
+
+    /// Creates a collection containing the fields of `t`.
+    fileprivate init(of t: StructType) {
+      self.parent = t
+    }
+
+    /// The number of fields in the collection.
+    public var count: Int {
+      Int(LLVMCountStructElementTypes(parent.llvm))
+    }
+
+    public var startIndex: Int { 0 }
+
+    public var endIndex: Int { count }
+
+    public func index(after position: Int) -> Int {
+      position + 1
+    }
+
+    public subscript(position: Int) -> IRType {
+      AnyType(LLVMStructGetTypeAtIndex(parent.llvm, UInt32(position)))
+    }
+
+  }
+
+}

@@ -1,0 +1,10 @@
+# Swift Package Manager
+/.build
+/Packages
+
+# IDEs
+/.swiftpm
+/.vscode
+
+# macOS
+.DS_Store

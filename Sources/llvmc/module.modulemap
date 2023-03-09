@@ -1,0 +1,4 @@
+module llvmc {
+  umbrella header "llvmc.h"
+  link "llvmc"
+}
