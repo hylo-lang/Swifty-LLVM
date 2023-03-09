@@ -53,8 +53,8 @@ func find(_ executable: String) throws -> String {
         return candidateURL.path
       }
     }
-    if let p = runCommandLine("/usr/bin/which", [executable]) {
-      return URL(fileURLWithPath: p)
+    if let p = try runCommandLine("/usr/bin/which", [executable]) {
+      return p
     }
   #endif
   throw EnvironmentError(message: "executable not found: \(executable)")
