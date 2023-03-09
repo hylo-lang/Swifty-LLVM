@@ -35,6 +35,10 @@ jobs:
     - name: Swift version
       run: swift --version
 
+    - name: pkg-config path
+      run: |
+         pkg-config --variable pc_path pkg-config
+
     - name: Setup LLVM
       uses: KyleMayes/install-llvm-action@v1
       with:
