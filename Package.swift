@@ -8,9 +8,10 @@ let package = Package(
   ],
   targets: [
     // LLVM API Wrapper.
-    .target(name: "LLVM", dependencies: ["llvmc"], linkerSettings: [.linkedLibrary("c++")]),
+    .target(name: "LLVM", dependencies: ["llvmc"]),
     .testTarget(name: "LLVMTests", dependencies: ["LLVM"]),
 
     // LLVM's C API
     .systemLibrary(name: "llvmc", pkgConfig: "llvm"),
-  ])
+  ],
+  cxxLanguageStandard: .cxx20)
