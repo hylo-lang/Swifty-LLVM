@@ -38,6 +38,7 @@ jobs:
     - name: pkg-config path
       run: |
         sudo mkdir -p /usr/local/lib/pkgconfig/
+        echo $PATH
         pkg-config --variable pc_path pkg-config
 
     - name: Setup LLVM
@@ -48,7 +49,7 @@ jobs:
     - name: Configure pkg-config
       run: |
         llvm-config --version
-        sudo swift Tools/make-pkgconfig.swift
+        sudo swift Tools/make-pkgconfig.swift 15
 
     - name: Build (Debug)
       run: swift build -v -c debug

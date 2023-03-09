@@ -46,7 +46,8 @@ func find(_ executable: String) throws -> String {
       }
     }
   #else
-    let environmentPath = ProcessInfo.processInfo.environment["PATH"] ?? ""
+    let environmentPath = ProcessInfo.processInfo.environment["PATH"] ?? "/usr/bin"
+    print(environmentPath)
     for base in environmentPath.split(separator: ":") {
       candidateURL = URL(fileURLWithPath: String(base)).appendingPathComponent(executable)
       if FileManager.default.fileExists(atPath: candidateURL.path) {
@@ -86,6 +87,8 @@ func llvmConfig(_ arguments: String...) throws -> String? {
   try runCommandLine(llvmConfigExecutable, arguments)
 }
 
+let requiredVersionMajor = CommandLine.arguments.count > 0 ? Int(CommandLine.arguments[1])! : 15
+
 guard let version = try llvmConfig("--version") else {
   throw EnvironmentError(message: "cannot identify LLVM version")
 }
@@ -94,8 +97,8 @@ let versionComponents = version.components(separatedBy: ".").compactMap({ Int($0
 guard versionComponents.count == 3 else {
   throw EnvironmentError(message: "invalid LLVM version: \(version)")
 }
-guard versionComponents[0] >= 15 else {
-  throw EnvironmentError(message: "requires LLVM 15.0+")
+guard versionComponents[0] >= requiredVersionMajor else {
+  throw EnvironmentError(message: "requires LLVM \(requiredVersionMajor)")
 }
 
 #if os(Linux)
