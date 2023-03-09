@@ -54,8 +54,8 @@ func find(_ executable: String) throws -> String {
       }
     }
   #endif
-  print(environmentPath)
-  throw EnvironmentError(message: "executable not found: \(executable)")
+  throw EnvironmentError(
+    message: "executable not found: \(executable), looked in \(environmentPath)")
 }
 
 /// Executes the program at `path` with the specified arguments in a subprocess.
