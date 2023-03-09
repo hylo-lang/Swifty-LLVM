@@ -37,7 +37,8 @@ jobs:
 
     - name: pkg-config path
       run: |
-         pkg-config --variable pc_path pkg-config
+        mkdir -p /usr/local/lib/pkgconfig/
+        pkg-config --variable pc_path pkg-config
 
     - name: Setup LLVM
       uses: KyleMayes/install-llvm-action@v1
