@@ -39,7 +39,7 @@ jobs:
       if: matrix.host.type == 'linux'
       run: |
         sudo apt update
-        sudo apt install clang lldb lld llvm llvm-dev libc++-dev
+        sudo apt install clang-15 lldb-15 lld-15 llvm-15 llvm-15-dev libc++-dev
 
     - name: Install LLVM
       if: matrix.host.type == 'macos'
