@@ -103,15 +103,13 @@ guard versionComponents[0] >= requiredVersionMajor else {
   throw EnvironmentError(message: "requires LLVM \(requiredVersionMajor)")
 }
 
+var libs = try "-L\(llvmConfig("--libdir", "--system-libs", "--libs",  "core", "analysis")!)"
+  .replacingNewlinesBySpaces()
 #if os(Linux)
-  // var libs = "-L/usr/lib -lc++ -L"
-  var libs = "-lc++ -L"
+  libs += " -L/usr/lib -lc++"
 #elseif os(macOS)
-  var libs = "-lc++ -L"
+  libs += " -lc++"
 #endif
-libs +=
-  try llvmConfig("--libdir", "--system-libs", "--libs",  "core", "analysis")!
-    .replacingNewlinesBySpaces()
 let cflags = try "-I" + llvmConfig("--includedir")!.replacingNewlinesBySpaces()
 
 let file = """

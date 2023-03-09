@@ -35,11 +35,11 @@ jobs:
     - name: Swift version
       run: swift --version
 
-    - name: pkg-config path
+    - name: Install libc++
+      if: matrix.host.type == 'linux'
       run: |
-        sudo mkdir -p /usr/local/lib/pkgconfig/
-        echo $PATH
-        pkg-config --variable pc_path pkg-config
+        sudo apt-get install libc++-dev
+        sudo apt-get install libc++abi-dev
 
     - name: Setup LLVM
       uses: KyleMayes/install-llvm-action@v1
