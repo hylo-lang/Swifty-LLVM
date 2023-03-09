@@ -35,14 +35,14 @@ jobs:
     - name: Swift version
       run: swift --version
 
-    - name: Install LLVM
-      run: |
-        brew install llvm@15
+    - name: Setup LLVM
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "15.0"
 
     - name: Configure pkg-config
       run: |
-        export PATH=$(brew --prefix llvm@15)/bin:${PATH}
-        bash .build/checkouts/Swifty-LLVM/Tools/make-pkgconfig.sh
+        bash Tools/make-pkgconfig.sh
 
     - name: Build (Debug)
       run: swift build -v -c debug
