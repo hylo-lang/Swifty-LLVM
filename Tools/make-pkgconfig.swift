@@ -53,9 +53,11 @@ func find(_ executable: String) throws -> String {
         return candidateURL.path
       }
     }
+    if let p = runCommandLine("/usr/bin/which", [executable]) {
+      return URL(fileURLWithPath: p)
+    }
   #endif
-  throw EnvironmentError(
-    message: "executable not found: \(executable), looked in \(environmentPath)")
+  throw EnvironmentError(message: "executable not found: \(executable)")
 }
 
 /// Executes the program at `path` with the specified arguments in a subprocess.
