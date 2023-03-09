@@ -47,7 +47,6 @@ func find(_ executable: String) throws -> String {
     }
   #else
     let environmentPath = ProcessInfo.processInfo.environment["PATH"] ?? "/usr/bin"
-    print(environmentPath)
     for base in environmentPath.split(separator: ":") {
       candidateURL = URL(fileURLWithPath: String(base)).appendingPathComponent(executable)
       if FileManager.default.fileExists(atPath: candidateURL.path) {
@@ -55,6 +54,7 @@ func find(_ executable: String) throws -> String {
       }
     }
   #endif
+  print(environmentPath)
   throw EnvironmentError(message: "executable not found: \(executable)")
 }
 
