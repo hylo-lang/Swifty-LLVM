@@ -41,19 +41,10 @@ jobs:
         echo $PATH
         pkg-config --variable pc_path pkg-config
 
-    - name: Cache LLVM
-      id: cache-llvm
-      uses: actions/cache@v3
-      with:
-        path: |
-          C:/Program Files/LLVM
-          ./llvm
-        key: llvm-15
     - name: Setup LLVM
       uses: KyleMayes/install-llvm-action@v1
       with:
         version: "15.0"
-        cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
     - name: Configure pkg-config
       run: |
