@@ -46,6 +46,12 @@ jobs:
       with:
         version: "15.0"
 
+    - name: LLVM version
+      run: llvm-config --version
+
+    - name: LLVM location
+      run: echo $(which llvm-config)
+
     - name: Configure pkg-config
       run: |
         sudo bash Tools/make-pkgconfig.sh
