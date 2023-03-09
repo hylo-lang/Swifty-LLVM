@@ -42,6 +42,7 @@ jobs:
 
     - name: Configure pkg-config
       run: |
+        echo $PKG_CONFIG_PATH
         bash Tools/make-pkgconfig.sh
 
     - name: Build (Debug)
