@@ -53,6 +53,7 @@ jobs:
       run: |
         swift Tools/make-pkgconfig.swift 15
         cat llvm.pc
+        sudo mkdir -p /usr/local/lib/pkgconfig/
         sudo mv llvm.pc /usr/local/lib/pkgconfig/llvm.pc
 
     - name: Build (Debug)
