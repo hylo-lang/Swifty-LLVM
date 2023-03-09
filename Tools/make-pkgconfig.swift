@@ -104,7 +104,7 @@ guard versionComponents[0] >= requiredVersionMajor else {
 }
 
 #if os(Linux)
-  var libs = "-L/usr/lib -lc++ -L"
+  var libs = "-L/usr/lib -lstdc++ -L"
 #elseif os(macOS)
   var libs = "-lc++ -L"
 #endif
