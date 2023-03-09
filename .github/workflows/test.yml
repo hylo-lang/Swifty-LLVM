@@ -46,10 +46,7 @@ jobs:
         version: "15.0"
 
     - name: LLVM version
-      run: sudo llvm-config --version
-
-    - name: LLVM location
-      run: echo $(which llvm-config)
+      run: llvm-config --version
 
     - name: Configure pkg-config
       run: |
