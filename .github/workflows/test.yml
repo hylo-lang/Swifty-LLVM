@@ -58,7 +58,7 @@ jobs:
     - name: Configure pkg-config
       run: |
         llvm-config --version
-        sudo swift Tools/make-pkgconfig.sh
+        sudo bash Tools/make-pkgconfig.sh
 
     - name: Build (Debug)
       run: swift build -v -c debug
