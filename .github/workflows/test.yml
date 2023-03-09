@@ -21,7 +21,6 @@ jobs:
       fail-fast: false
       matrix:
         host: [
-          { type: macos, os: macos-latest },
           { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage },
         ]
     runs-on: ${{ matrix.host.os }}

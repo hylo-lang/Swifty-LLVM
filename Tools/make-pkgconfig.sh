@@ -4,7 +4,8 @@
 filename=koala.pc
 llvmconfig=$(which llvm-config)
 
-version=$(${llvmconfig} --version)
+echo $llvmconfig
+version=$(/home/runner/work/Swifty-LLVM/Swifty-LLVM/llvm/bin/llvm-config --version)
 machine="$(uname -s)"
 case "${machine}" in
     Linux*)   libs="-L/usr/lib -lc++";;
