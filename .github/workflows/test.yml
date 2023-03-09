@@ -54,7 +54,7 @@ jobs:
 
     - name: Configure pkg-config
       run: |
-        sudo bash Tools/make-pkgconfig.sh
+        sudo swift Tools/make-pkgconfig.swift
 
     - name: Build (Debug)
       run: swift build -v -c debug
