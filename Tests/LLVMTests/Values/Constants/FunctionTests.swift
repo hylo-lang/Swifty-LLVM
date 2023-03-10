@@ -12,6 +12,14 @@ final class FunctionTests: XCTestCase {
     XCTAssertFalse(f.isWellFormed())
   }
 
+  func testEntry() {
+    var m = Module("foo")
+    let f = m.declareFunction("fn", .init(from: [], in: &m))
+    XCTAssertNil(f.entry)
+    m.appendBlock(to: f)
+    XCTAssertNotNil(f.entry)
+  }
+
   func testParameters() {
     var m = Module("foo")
     let t = IntegerType(64, in: &m)
@@ -28,6 +36,38 @@ final class FunctionTests: XCTestCase {
     XCTAssertEqual(f2.parameters.count, 2)
     XCTAssert(f2.parameters[0].type == t)
     XCTAssert(f2.parameters[1].type == u)
+  }
+
+  func testBasicBlocks() {
+    var m = Module("foo")
+
+    let f = m.declareFunction("f", .init(from: [], in: &m))
+    XCTAssertEqual(f.basicBlocks.count, 0)
+    XCTAssert(f.basicBlocks.elementsEqual([]))
+
+    let b0 = m.appendBlock(to: f)
+    XCTAssertEqual(f.basicBlocks.count, 1)
+    XCTAssert(f.basicBlocks.elementsEqual([b0]))
+
+    let b1 = m.appendBlock(to: f)
+    XCTAssertEqual(f.basicBlocks.count, 2)
+    XCTAssert(f.basicBlocks.contains(b0))
+    XCTAssert(f.basicBlocks.contains(b1))
+  }
+
+  func testBasicBlockIndices() {
+    var m = Module("foo")
+    let f = m.declareFunction("f", .init(from: [], in: &m))
+    XCTAssertEqual(f.basicBlocks.startIndex, f.basicBlocks.endIndex)
+
+    m.appendBlock(to: f)
+    XCTAssertEqual(f.basicBlocks.index(after: f.basicBlocks.startIndex), f.basicBlocks.endIndex)
+    XCTAssertEqual(f.basicBlocks.index(before: f.basicBlocks.endIndex), f.basicBlocks.startIndex)
+
+    m.appendBlock(to: f)
+    let middle = f.basicBlocks.index(after: f.basicBlocks.startIndex)
+    XCTAssertEqual(f.basicBlocks.index(after: middle), f.basicBlocks.endIndex)
+    XCTAssertEqual(f.basicBlocks.index(before: f.basicBlocks.endIndex), middle)
   }
 
   func testConversion() {
