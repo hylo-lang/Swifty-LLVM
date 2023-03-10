@@ -278,7 +278,7 @@ public struct Module {
     at p: InsertionPoint
   ) -> Instruction {
     var i = indices.map({ $0.llvm as Optional })
-    let h = LLVMBuildGEP2(p.llvm, baseType.llvm, baseType.llvm, &i, UInt32(i.count), "")!
+    let h = LLVMBuildGEP2(p.llvm, baseType.llvm, base.llvm, &i, UInt32(i.count), "")!
     return .init(h)
   }
 
@@ -289,7 +289,7 @@ public struct Module {
     at p: InsertionPoint
   ) -> Instruction {
     var i = indices.map({ $0.llvm as Optional })
-    let h = LLVMBuildInBoundsGEP2(p.llvm, baseType.llvm, baseType.llvm, &i, UInt32(i.count), "")!
+    let h = LLVMBuildInBoundsGEP2(p.llvm, baseType.llvm, base.llvm, &i, UInt32(i.count), "")!
     return .init(h)
   }
 
