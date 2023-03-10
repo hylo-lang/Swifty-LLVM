@@ -264,6 +264,13 @@ public struct Module {
     .init(LLVMBuildAlloca(p.llvm, type.llvm, ""))
   }
 
+  /// Inerts an `alloca` allocating memory on the stack a value of `type`, at the entry of `f`.
+  ///
+  /// - Requires: `f` has an entry block.
+  public mutating func insertAlloca(_ type: IRType, atEntryOf f: Function) -> Alloca {
+    insertAlloca(type, at: startOf(f.entry!))
+  }
+
   public mutating func insertLoad(
     _ type: IRType, from source: IRValue, at p: InsertionPoint
   ) -> Instruction {
