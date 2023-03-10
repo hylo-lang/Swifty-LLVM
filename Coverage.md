@@ -282,6 +282,60 @@
 
   `FloatingPointConstant.value()`
 
+##### Function Values
+
+- [ ] LLVMDeleteFunction
+- [ ] LLVMHasPersonalityFn
+- [ ] LLVMGetPersonalityFn
+- [ ] LLVMSetPersonalityFn
+- [ ] LLVMLookupIntrinsicID
+- [ ] LLVMGetIntrinsicID
+- [ ] LLVMGetIntrinsicDeclaration
+- [ ] LLVMIntrinsicGetType
+- [ ] LLVMIntrinsicGetName
+- [ ] LLVMIntrinsicCopyOverloadedName
+- [ ] LLVMIntrinsicCopyOverloadedName2
+- [ ] LLVMIntrinsicIsOverloaded
+- [ ] LLVMGetFunctionCallConv
+- [ ] LLVMSetFunctionCallConv
+- [ ] LLVMGetGC
+- [ ] LLVMSetGC
+- [x] LLVMAddAttributeAtIndex
+
+  `Module.addAttribute(_:_:to:)`
+
+- [ ] LLVMGetAttributeCountAtIndex
+- [x] LLVMGetAttributesAtIndex
+
+  Implemented by `Function.attributes`.
+
+- [ ] LLVMGetEnumAttributeAtIndex
+- [ ] LLVMGetStringAttributeAtIndex
+- [x] LLVMRemoveEnumAttributeAtIndex
+
+  `Module.removeAttribute(_:from:)`
+
+- [ ] LLVMRemoveStringAttributeAtIndex
+- [ ] LLVMAddTargetDependentFunctionAttr
+
+###### Function Parameters
+
+- [x] LLVMCountParams
+
+  `Function.Parameters.count`
+
+- [ ] LLVMGetParams
+- [x] LLVMGetParam
+
+  `Function.Parameters[_:]`
+
+- [ ] LLVMGetParamParent
+- [ ] LLVMGetFirstParam
+- [ ] LLVMGetLastParam
+- [ ] LLVMGetNextParam
+- [ ] LLVMGetPreviousParam
+- [ ] LLVMSetParamAlignment
+
 ### Types
 
 - [x] LLVMGetTypeKind
