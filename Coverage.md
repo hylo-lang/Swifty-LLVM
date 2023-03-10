@@ -329,7 +329,10 @@
 
   `Function.Parameters[_:]`
 
-- [ ] LLVMGetParamParent
+- [x] LLVMGetParamParent
+
+  Implemented by `Parameter.init?(_:)`.
+
 - [ ] LLVMGetFirstParam
 - [ ] LLVMGetLastParam
 - [ ] LLVMGetNextParam

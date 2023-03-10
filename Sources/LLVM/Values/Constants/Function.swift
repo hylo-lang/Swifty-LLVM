@@ -61,10 +61,9 @@ extension Function {
     }
 
     public subscript(position: Int) -> Parameter {
-      Parameter(LLVMGetParam(parent.llvm, UInt32(position)))
+      Parameter(LLVMGetParam(parent.llvm, UInt32(position)), position)
     }
 
   }
-
 
 }
