@@ -35,6 +35,12 @@ jobs:
     - name: Swift version
       run: swift --version
 
+    - name: Install libc++
+      if: matrix.host.type == 'linux'
+      run: |
+        sudo apt update
+        sudo apt install libc++-15-dev libc++abi-15-dev
+
     - name: Install LLVM
       uses: KyleMayes/install-llvm-action@v1
       with:
