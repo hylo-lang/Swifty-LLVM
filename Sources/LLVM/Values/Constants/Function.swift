@@ -53,7 +53,7 @@ extension Function {
 extension Function {
 
   /// A collection containing the parameters of a LLVM IR function.
-  public struct Parameters: Collection {
+  public struct Parameters: BidirectionalCollection {
 
     public typealias Index = Int
 
@@ -77,10 +77,17 @@ extension Function {
     public var endIndex: Int { count }
 
     public func index(after position: Int) -> Int {
-      position + 1
+      precondition(position < count, "index is out of bounds")
+      return position + 1
+    }
+
+    public func index(before position: Int) -> Int {
+      precondition(position > 0, "index is out of bounds")
+      return position - 1
     }
 
     public subscript(position: Int) -> Parameter {
+      precondition(position > 0 && position < count, "index is out of bounds")
       Parameter(LLVMGetParam(parent.llvm, UInt32(position)), position)
     }
 

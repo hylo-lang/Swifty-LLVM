@@ -58,7 +58,7 @@ public struct StructType: IRType, Hashable {
 extension StructType {
 
   /// A collection containing the fields of a struct type in LLVM IR.
-  public struct Fields: Collection {
+  public struct Fields: BidirectionalCollection {
 
     public typealias Index = Int
 
@@ -82,11 +82,18 @@ extension StructType {
     public var endIndex: Int { count }
 
     public func index(after position: Int) -> Int {
-      position + 1
+      precondition(position < count, "index is out of bounds")
+      return position + 1
+    }
+
+    public func index(before position: Int) -> Int {
+      precondition(position > 0, "index is out of bounds")
+      return position - 1
     }
 
     public subscript(position: Int) -> IRType {
-      AnyType(LLVMStructGetTypeAtIndex(parent.llvm, UInt32(position)))
+      precondition(position >= 0 && position < count, "index is out of bounds")
+      return AnyType(LLVMStructGetTypeAtIndex(parent.llvm, UInt32(position)))
     }
 
   }
