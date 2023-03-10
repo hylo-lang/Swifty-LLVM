@@ -271,6 +271,37 @@ public struct Module {
     insertAlloca(type, at: startOf(f.entry!))
   }
 
+  public mutating func insertGetElementPointer(
+    of base: IRValue,
+    typed baseType: IRType,
+    indices: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    var i = indices.map({ $0.llvm as Optional })
+    let h = LLVMBuildGEP2(p.llvm, baseType.llvm, baseType.llvm, &i, UInt32(i.count), "")!
+    return .init(h)
+  }
+
+  public mutating func insertGetElementPointerInBounds(
+    of base: IRValue,
+    typed baseType: IRType,
+    indices: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    var i = indices.map({ $0.llvm as Optional })
+    let h = LLVMBuildInBoundsGEP2(p.llvm, baseType.llvm, baseType.llvm, &i, UInt32(i.count), "")!
+    return .init(h)
+  }
+
+  public mutating func insertGetStructElementPointer(
+    of base: IRValue,
+    typed baseType: StructType,
+    index: Int,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildStructGEP2(p.llvm, baseType.llvm, base.llvm, UInt32(index), ""))
+  }
+
   public mutating func insertLoad(
     _ type: IRType, from source: IRValue, at p: InsertionPoint
   ) -> Instruction {
