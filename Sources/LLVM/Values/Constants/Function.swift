@@ -32,19 +32,6 @@ public struct Function: Global, Hashable {
 
 extension Function {
 
-  /// A parameter in a LLVM IR function.
-  public struct Parameter: IRValue, Hashable {
-
-    /// A handle to the LLVM object wrapped by this instance.
-    public let llvm: LLVMValueRef
-
-    /// Creates an instance wrapping `llvm`.
-    internal init(_ llvm: LLVMValueRef) {
-      self.llvm = llvm
-    }
-
-  }
-
   /// A collection containing the parameters of a LLVM IR function.
   public struct Parameters: Collection {
 
@@ -78,5 +65,6 @@ extension Function {
     }
 
   }
+
 
 }
