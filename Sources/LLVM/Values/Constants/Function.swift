@@ -116,6 +116,27 @@ extension Function {
 
 extension Function {
 
+
+  /// The return value of a LLVM IR function.
+  public struct Return: Hashable {
+
+    /// The function defining the return value.
+    public let parent: Function
+
+    /// Creates an instance representing the return value of `parent`.
+    fileprivate init(_ parent: Function) {
+      self.parent = parent
+    }
+
+  }
+
+  /// The return value of the function.
+  public var returnValue: Return { .init(self) }
+
+}
+
+extension Function {
+
   /// A collection containing the parameters of a LLVM IR function.
   public struct Parameters: Collection {
 
