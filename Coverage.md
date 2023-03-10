@@ -43,7 +43,10 @@
 - [ ] LLVMGetMDKindID
 - [ ] LLVMGetEnumAttributeKindForName
 - [ ] LLVMGetLastEnumAttributeKind
-- [ ] LLVMCreateEnumAttribute
+- [x] LLVMCreateEnumAttribute
+
+  `Module.addAttribute(_:_:to:)`
+
 - [ ] LLVMGetEnumAttributeKind
 - [ ] LLVMGetEnumAttributeValue
 - [ ] LLVMCreateTypeAttribute
