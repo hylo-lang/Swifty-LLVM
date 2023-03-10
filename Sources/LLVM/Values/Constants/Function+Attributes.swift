@@ -43,11 +43,6 @@ extension Function: AttributeHolder {
     /// `SEH`, will still provide their implementation defined semantics.
     case nounwind
 
-    /// The unique kind identifier corresponding to this name.
-    public var id: UInt32 {
-      return LLVMGetEnumAttributeKindForName(rawValue, rawValue.count)
-    }
-
   }
 
   /// The attributes of the function.

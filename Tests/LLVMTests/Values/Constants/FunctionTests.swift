@@ -29,6 +29,22 @@ final class FunctionTests: XCTestCase {
     XCTAssert(f2.parameters[1].type == u)
   }
 
+  func testAttributes() {
+    var m = Module("foo")
+    let f = m.declareFunction("f", .init(from: [], in: &m))
+    let a = Function.Attribute(.alwaysinline, in: &m)
+    let b = Function.Attribute(.hot, in: &m)
+
+    m.addAttribute(a, to: f)
+    m.addAttribute(b, to: f)
+    XCTAssertEqual(f.attributes.count, 2)
+    XCTAssert(f.attributes.contains(a))
+    XCTAssert(f.attributes.contains(b))
+
+    m.removeAttribute(a, from: f)
+    XCTAssertEqual(f.attributes, [b])
+  }
+
   func testConversion() {
     var m = Module("foo")
     let t: IRValue = m.declareFunction("fn", .init(from: [], in: &m))

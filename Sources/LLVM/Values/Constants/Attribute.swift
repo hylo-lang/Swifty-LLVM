@@ -1,6 +1,9 @@
 import llvmc
 
 /// An entity capable of holding attributes.
+///
+/// Do not declare new conformances to `AttributeHolder`. Only the `Function` and `Parameter` in
+/// are valid conforming types.
 public protocol AttributeHolder {
 
   /// The name of targe-independent attributes for this holder.
@@ -9,10 +12,14 @@ public protocol AttributeHolder {
 }
 
 /// A target-independent attribute name.
-public protocol AttributeNameProtocol {
+public protocol AttributeNameProtocol: RawRepresentable where RawValue == String {}
+
+extension AttributeNameProtocol {
 
   /// The unique kind identifier corresponding to this name.
-  var id: UInt32 { get }
+  internal var id: UInt32 {
+    return LLVMGetEnumAttributeKindForName(rawValue, rawValue.count)
+  }
 
 }
 
