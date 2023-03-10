@@ -82,8 +82,14 @@
 - [ ] LLVMGetBasicBlockName
 - [ ] LLVMGetBasicBlockParent
 - [ ] LLVMGetBasicBlockTerminator
-- [ ] LLVMCountBasicBlocks
-- [ ] LLVMGetBasicBlocks
+- [x] LLVMCountBasicBlocks
+
+  Implemented as the `count` property of `Function.basicBlocks`.
+
+- [x] LLVMGetBasicBlocks
+
+  `Function.basicBlocks`
+
 - [ ] LLVMGetFirstBasicBlock
 - [ ] LLVMGetLastBasicBlock
 - [ ] LLVMGetNextBasicBlock
