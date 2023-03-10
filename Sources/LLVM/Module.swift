@@ -86,7 +86,7 @@ public struct Module {
   @discardableResult
   public mutating func addAttribute(
     _ name: Function.AttributeName, _ value: UInt64 = 0, to f: Function
-  ) -> Function.Attribute {
+  ) -> Attribute {
     let a = LLVMCreateEnumAttribute(context, name.id, value)!
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
     LLVMAddAttributeAtIndex(f.llvm, i, a)
@@ -94,7 +94,7 @@ public struct Module {
   }
 
   /// Removes `a` from `f`.
-  public mutating func removeAttribute(_ a: Function.Attribute, from f: Function) {
+  public mutating func removeAttribute(_ a: Attribute, from f: Function) {
     switch a {
     case .targetIndependent(let h):
       let k = LLVMGetEnumAttributeKind(h)
