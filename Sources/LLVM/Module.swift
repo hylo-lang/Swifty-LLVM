@@ -82,15 +82,21 @@ public struct Module {
     }
   }
 
-  /// Adds a target-independent attribute with given `name` and optional `value` to `f`.
-  @discardableResult
-  public mutating func addAttribute(
-    _ name: Function.AttributeName, _ value: UInt64 = 0, to f: Function
-  ) -> Function.Attribute {
-    let a = LLVMCreateEnumAttribute(context, name.id, value)!
+  /// Adds attribute `a` to `f`.
+  public mutating func addAttribute(_ a: Function.Attribute, to f: Function) {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    LLVMAddAttributeAtIndex(f.llvm, i, a)
-    return .targetIndependent(llvm: a)
+    LLVMAddAttributeAtIndex(f.llvm, i, a.llvm)
+  }
+
+  /// Adds attribute `a` to the return value of `r`.
+  public mutating func addAttribute(_ a: Function.Return.Attribute, to r: Function.Return) {
+    LLVMAddAttributeAtIndex(r.parent.llvm, 0, a.llvm)
+  }
+
+  /// Adds attribute `a` to `p`.
+  public mutating func addAttribute(_ a: Parameter.Attribute, to p: Parameter) {
+    let i = UInt32(p.index + 1)
+    LLVMAddAttributeAtIndex(p.parent.llvm, i, a.llvm)
   }
 
   /// Removes `a` from `f`.
@@ -100,6 +106,25 @@ public struct Module {
       let k = LLVMGetEnumAttributeKind(h)
       let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
       LLVMRemoveEnumAttributeAtIndex(f.llvm, i, k)
+    }
+  }
+
+  /// Removes `a` from `p`.
+  public mutating func removeAttribute(_ a: Parameter.Attribute, from p: Parameter) {
+    switch a {
+    case .targetIndependent(let h):
+      let k = LLVMGetEnumAttributeKind(h)
+      let i = UInt32(p.index + 1)
+      LLVMRemoveEnumAttributeAtIndex(p.parent.llvm, i, k)
+    }
+  }
+
+  /// Removes `a` from `r`.
+  public mutating func removeAttribute(_ a: Function.Return.Attribute, from r: Function.Return) {
+    switch a {
+    case .targetIndependent(let h):
+      let k = LLVMGetEnumAttributeKind(h)
+      LLVMRemoveEnumAttributeAtIndex(r.parent.llvm, 0, k)
     }
   }
 
@@ -118,7 +143,16 @@ public struct Module {
     return .init(h)
   }
 
-  /// Returns an insertion point at the ebd of `b`.
+  /// Returns an insertion point at the start of `b`.
+  public func startOf(_ b: BasicBlock) -> InsertionPoint {
+    if let h = LLVMGetFirstInstruction(b.llvm) {
+      return before(Instruction(h))
+    } else {
+      return endOf(b)
+    }
+  }
+
+  /// Returns an insertion point at the end of `b`.
   public func endOf(_ b: BasicBlock) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
     LLVMPositionBuilderAtEnd(h, b.llvm)
@@ -228,6 +262,13 @@ public struct Module {
 
   public mutating func insertAlloca(_ type: IRType, at p: InsertionPoint) -> Alloca {
     .init(LLVMBuildAlloca(p.llvm, type.llvm, ""))
+  }
+
+  /// Inerts an `alloca` allocating memory on the stack a value of `type`, at the entry of `f`.
+  ///
+  /// - Requires: `f` has an entry block.
+  public mutating func insertAlloca(_ type: IRType, atEntryOf f: Function) -> Alloca {
+    insertAlloca(type, at: startOf(f.entry!))
   }
 
   public mutating func insertLoad(

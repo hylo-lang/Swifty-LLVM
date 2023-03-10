@@ -2,6 +2,9 @@
 
 filename=/usr/local/lib/pkgconfig/llvm.pc
 
+mkdir -p `dirname $filename`
+touch $filename
+
 version=$(llvm-config --version)
 machine="$(uname -s)"
 case "${machine}" in

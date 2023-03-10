@@ -14,6 +14,8 @@ port install llvm-15 llvm_select
 port select llvm mp-llvm-15
 ```
 
+On Windows, the official version of llvm does not include `llvm-config.exe`, so you need to compile LLVM by yourself or use third-party versions of LLVM.
+
 Then, make sure `llvm-config` is in your path.
 The command below should print the LLVM version installed on your system. 
 
@@ -29,6 +31,8 @@ It will create a file `/usr/local/lib/pkgconfig/llvm.pc`:
 ```bash
 ./Tools/make-pkgconfig.sh
 ``` 
+
+On Windows, you can copy the file in LLVM's `include` folder to the C++ standard library folder or customize `Sources/llvmc/llvmc.h`.
 
 Finally, you should be able to build this project using Swift package manager:
 

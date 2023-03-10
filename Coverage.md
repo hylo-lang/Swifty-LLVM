@@ -41,11 +41,23 @@
 - [ ] LLVMGetDiagInfoSeverity
 - [ ] LLVMGetMDKindIDInContext
 - [ ] LLVMGetMDKindID
-- [ ] LLVMGetEnumAttributeKindForName
+- [x] LLVMGetEnumAttributeKindForName
+
+  `Function.AttributeName.id`
+
 - [ ] LLVMGetLastEnumAttributeKind
-- [ ] LLVMCreateEnumAttribute
-- [ ] LLVMGetEnumAttributeKind
-- [ ] LLVMGetEnumAttributeValue
+- [x] LLVMCreateEnumAttribute
+
+  `Attribute.init(_:_:in:)`
+
+- [x] LLVMGetEnumAttributeKind
+
+  Implemented by `Module.removeAttribute(_:from:)`.
+
+- [x] LLVMGetEnumAttributeValue
+
+  `Attribute.value`
+
 - [ ] LLVMCreateTypeAttribute
 - [ ] LLVMGetTypeAttributeValue
 - [ ] LLVMCreateStringAttribute
@@ -281,6 +293,66 @@
 - [x] LLVMConstRealGetDouble
 
   `FloatingPointConstant.value()`
+
+##### Function Values
+
+- [ ] LLVMDeleteFunction
+- [ ] LLVMHasPersonalityFn
+- [ ] LLVMGetPersonalityFn
+- [ ] LLVMSetPersonalityFn
+- [ ] LLVMLookupIntrinsicID
+- [ ] LLVMGetIntrinsicID
+- [ ] LLVMGetIntrinsicDeclaration
+- [ ] LLVMIntrinsicGetType
+- [ ] LLVMIntrinsicGetName
+- [ ] LLVMIntrinsicCopyOverloadedName
+- [ ] LLVMIntrinsicCopyOverloadedName2
+- [ ] LLVMIntrinsicIsOverloaded
+- [ ] LLVMGetFunctionCallConv
+- [ ] LLVMSetFunctionCallConv
+- [ ] LLVMGetGC
+- [ ] LLVMSetGC
+- [x] LLVMAddAttributeAtIndex
+
+  `Module.addAttribute(_:_:to:)`
+
+- [x] LLVMGetAttributeCountAtIndex
+
+  Implemented as the `count` property of `Function.attributes`.
+
+- [x] LLVMGetAttributesAtIndex
+
+  Implemented by `Function.attributes`.
+
+- [ ] LLVMGetEnumAttributeAtIndex
+- [ ] LLVMGetStringAttributeAtIndex
+- [x] LLVMRemoveEnumAttributeAtIndex
+
+  `Module.removeAttribute(_:from:)`
+
+- [ ] LLVMRemoveStringAttributeAtIndex
+- [ ] LLVMAddTargetDependentFunctionAttr
+
+###### Function Parameters
+
+- [x] LLVMCountParams
+
+  `Function.Parameters.count`
+
+- [ ] LLVMGetParams
+- [x] LLVMGetParam
+
+  `Function.Parameters[_:]`
+
+- [x] LLVMGetParamParent
+
+  `Parameter.parent`
+
+- [ ] LLVMGetFirstParam
+- [ ] LLVMGetLastParam
+- [ ] LLVMGetNextParam
+- [ ] LLVMGetPreviousParam
+- [ ] LLVMSetParamAlignment
 
 ### Types
 
