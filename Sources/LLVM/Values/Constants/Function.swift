@@ -32,18 +32,25 @@ public struct Function: Global, Hashable {
 
 extension Function {
 
-  /// A parameter in a LLVM IR function.
-  public struct Parameter: IRValue, Hashable {
+  /// The return value of a LLVM IR function.
+  public struct Return: Hashable {
 
-    /// A handle to the LLVM object wrapped by this instance.
-    public let llvm: LLVMValueRef
+    /// The function defining the return value.
+    public let parent: Function
 
-    /// Creates an instance wrapping `llvm`.
-    internal init(_ llvm: LLVMValueRef) {
-      self.llvm = llvm
+    /// Creates an instance representing the return value of `parent`.
+    fileprivate init(_ parent: Function) {
+      self.parent = parent
     }
 
   }
+
+  /// The return value of the function.
+  public var returnValue: Return { .init(self) }
+
+}
+
+extension Function {
 
   /// A collection containing the parameters of a LLVM IR function.
   public struct Parameters: Collection {
@@ -74,7 +81,7 @@ extension Function {
     }
 
     public subscript(position: Int) -> Parameter {
-      Parameter(LLVMGetParam(parent.llvm, UInt32(position)))
+      Parameter(LLVMGetParam(parent.llvm, UInt32(position)), position)
     }
 
   }
