@@ -764,7 +764,11 @@
 - [ ] LLVMBuildICmp
 - [ ] LLVMBuildFCmp
 - [ ] LLVMBuildPhi
-- [ ] LLVMBuildCall2
+- [x] LLVMBuildCall2
+
+  `Module.insertCall(_:typed:on:at:)`
+  `Module.insertCall(_:on:at:)`
+
 - [ ] LLVMBuildSelect
 - [ ] LLVMBuildVAArg
 - [ ] LLVMBuildExtractElement

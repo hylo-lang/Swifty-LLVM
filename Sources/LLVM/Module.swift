@@ -340,6 +340,26 @@ public struct Module {
     .init(LLVMBuildRet(p.llvm, value.llvm))
   }
 
+  // MARK: Others
+
+  public mutating func insertCall(
+    _ callee: Function,
+    on arguments: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    insertCall(callee, typed: callee.valueType, on: arguments, at: p)
+  }
+
+  public mutating func insertCall(
+    _ callee: IRValue,
+    typed calleeType: IRType,
+    on arguments: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    var a = arguments.map({ $0.llvm as Optional })
+    return .init(LLVMBuildCall2(p.llvm, calleeType.llvm, callee.llvm, &a, UInt32(a.count), ""))
+  }
+
 }
 
 extension Module: CustomStringConvertible {
