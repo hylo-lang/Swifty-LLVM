@@ -1,5 +1,5 @@
 {
-	"name": "Swift",
+    "name": "Swift",
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
@@ -8,11 +8,11 @@
     },
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
-            "installZsh": "true",
+            "installZsh": "false",
             "username": "vscode",
             "userUid": "1000",
             "userGid": "1000",
-            "upgradePackages": "true"
+            "upgradePackages": "false"
         },
         "ghcr.io/devcontainers/features/git:1": {
             "version": "os-provided",
