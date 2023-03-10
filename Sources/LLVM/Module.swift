@@ -143,7 +143,16 @@ public struct Module {
     return .init(h)
   }
 
-  /// Returns an insertion point at the ebd of `b`.
+  /// Returns an insertion point at the start of `b`.
+  public func startOf(_ b: BasicBlock) -> InsertionPoint {
+    if let h = LLVMGetFirstInstruction(b.llvm) {
+      return before(Instruction(h))
+    } else {
+      return endOf(b)
+    }
+  }
+
+  /// Returns an insertion point at the end of `b`.
   public func endOf(_ b: BasicBlock) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
     LLVMPositionBuilderAtEnd(h, b.llvm)
