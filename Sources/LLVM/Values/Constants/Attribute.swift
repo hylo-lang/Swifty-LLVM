@@ -2,8 +2,8 @@ import llvmc
 
 /// An entity capable of holding attributes.
 ///
-/// Do not declare new conformances to `AttributeHolder`. Only the `Function` and `Parameter` in
-/// are valid conforming types.
+/// Do not declare new conformances to `AttributeHolder`. Only `Function`, `Function.Return`, and
+/// `Parameter` are valid conforming types.
 public protocol AttributeHolder {
 
   /// The name of targe-independent attributes for this holder.

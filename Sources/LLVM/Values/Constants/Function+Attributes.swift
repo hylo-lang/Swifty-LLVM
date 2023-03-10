@@ -55,3 +55,21 @@ extension Function: AttributeHolder {
   }
 
 }
+
+extension Function.Return: AttributeHolder {
+
+  /// An attribute on a function in LLVM IR.
+  public typealias Attribute = LLVM.Attribute<Parameter>
+
+  /// The name of an attribute on a return value in LLVM IR.
+  public typealias AttributeName = Parameter.AttributeName
+
+  /// The attributes of the return value.
+  public var attributes: [Attribute] {
+    let n = LLVMGetAttributeCountAtIndex(parent.llvm, 0)
+    var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
+    LLVMGetAttributesAtIndex(parent.llvm, 0, &handles)
+    return handles.map(Attribute.init(_:))
+  }
+
+}

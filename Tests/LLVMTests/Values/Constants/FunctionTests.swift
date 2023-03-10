@@ -45,6 +45,23 @@ final class FunctionTests: XCTestCase {
     XCTAssertEqual(f.attributes, [b])
   }
 
+  func testReturnAttributes() {
+    var m = Module("foo")
+    let f = m.declareFunction("f", .init(from: [], to: PointerType(in: &m), in: &m))
+    let r = f.returnValue
+    let a = Function.Return.Attribute(.noalias, in: &m)
+    let b = Parameter.Attribute(.dereferenceable_or_null, 8, in: &m)
+
+    m.addAttribute(a, to: r)
+    m.addAttribute(b, to: r)
+    XCTAssertEqual(r.attributes.count, 2)
+    XCTAssert(r.attributes.contains(a))
+    XCTAssert(r.attributes.contains(b))
+
+    m.removeAttribute(a, from: r)
+    XCTAssertEqual(r.attributes, [b])
+  }
+
   func testConversion() {
     var m = Module("foo")
     let t: IRValue = m.declareFunction("fn", .init(from: [], in: &m))
@@ -60,6 +77,16 @@ final class FunctionTests: XCTestCase {
     XCTAssertEqual(f, g)
 
     let h = m.declareFunction("fn1", .init(from: [], in: &m))
+    XCTAssertNotEqual(f, h)
+  }
+
+  func testReturnEquality() {
+    var m = Module("foo")
+    let f = m.declareFunction("fn", .init(from: [], in: &m)).returnValue
+    let g = m.declareFunction("fn", .init(from: [], in: &m)).returnValue
+    XCTAssertEqual(f, g)
+
+    let h = m.declareFunction("fn1", .init(from: [], in: &m)).returnValue
     XCTAssertNotEqual(f, h)
   }
 
