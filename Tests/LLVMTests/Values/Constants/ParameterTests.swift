@@ -15,6 +15,14 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(p?.index, 1)
   }
 
+  func testParent() {
+    var m = Module("foo")
+    let i64 = IntegerType(64, in: &m)
+
+    let f = m.declareFunction("fn", .init(from: [i64, i64], in: &m))
+    XCTAssertEqual(f.parameters[0].parent, f)
+  }
+
   func testConversion() {
     var m = Module("foo")
     let i64 = IntegerType(64, in: &m)

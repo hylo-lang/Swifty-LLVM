@@ -343,7 +343,7 @@
 
 - [x] LLVMGetParamParent
 
-  Implemented by `Parameter.init?(_:)`.
+  `Parameter.parent`
 
 - [ ] LLVMGetFirstParam
 - [ ] LLVMGetLastParam

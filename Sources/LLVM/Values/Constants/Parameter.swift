@@ -25,6 +25,9 @@ public struct Parameter: IRValue {
     }
   }
 
+  /// The function containing the parameter.
+  public var parent: Function { .init(LLVMGetParamParent(llvm)) }
+
 }
 
 extension Parameter: Hashable {
