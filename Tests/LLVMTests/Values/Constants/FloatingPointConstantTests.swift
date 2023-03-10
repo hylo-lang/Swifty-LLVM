@@ -17,7 +17,7 @@ final class FloatingPointConstantTests: XCTestCase {
 
   func testInitWithText() {
     var m = Module("foo")
-    let x = FloatingPointType.double(in: &m).constant("4.2")
+    let x = FloatingPointType.double(in: &m).constant(parsing: "4.2")
     XCTAssertEqual(x.value().value, 4.2, accuracy: .ulpOfOne)
   }
 
