@@ -54,7 +54,10 @@
 
   Implemented by `Module.removeAttribute(_:from:)`.
 
-- [ ] LLVMGetEnumAttributeValue
+- [x] LLVMGetEnumAttributeValue
+
+  `Attribute.value`
+
 - [ ] LLVMCreateTypeAttribute
 - [ ] LLVMGetTypeAttributeValue
 - [ ] LLVMCreateStringAttribute

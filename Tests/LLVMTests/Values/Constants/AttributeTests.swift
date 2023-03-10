@@ -13,4 +13,9 @@ final class AttributeTests: XCTestCase {
     XCTAssertNotEqual(a, c)
   }
 
+  func testValue() {
+    var m = Module("foo")
+    XCTAssertEqual(Parameter.Attribute(.dereferenceable_or_null, 64, in: &m).value, 64)
+  }
+
 }

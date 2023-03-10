@@ -43,6 +43,15 @@ public enum Attribute<T: AttributeHolder>: Hashable {
     self = .targetIndependent(llvm: LLVMCreateEnumAttribute(module.context, name.id, value)!)
   }
 
+  /// The value of the attribute if it is target-independent.
+  public var value: UInt64? {
+    if case .targetIndependent(let h) = self {
+      return LLVMGetEnumAttributeValue(h)
+    } else {
+      return nil
+    }
+  }
+
   /// A handle to the LLVM object wrapped by this instance.
   internal var llvm: LLVMAttributeRef {
     switch self {
