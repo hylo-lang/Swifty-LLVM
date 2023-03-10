@@ -172,8 +172,8 @@ extension Function {
     }
 
     public subscript(position: Int) -> Parameter {
-      precondition(position > 0 && position < count, "index is out of bounds")
-      Parameter(LLVMGetParam(parent.llvm, UInt32(position)), position)
+      precondition(position >= 0 && position < count, "index is out of bounds")
+      return .init(LLVMGetParam(parent.llvm, UInt32(position)), position)
     }
 
   }
