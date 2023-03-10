@@ -761,7 +761,10 @@
 - [ ] LLVMBuildFPCast
 - [ ] LLVMBuildIntCast
 - [ ] LLVMGetCastOpcode
-- [ ] LLVMBuildICmp
+- [x] LLVMBuildICmp
+
+  `Module.insertIntegerComparison(_:_:_:at:)`
+
 - [ ] LLVMBuildFCmp
 - [ ] LLVMBuildPhi
 - [x] LLVMBuildCall2

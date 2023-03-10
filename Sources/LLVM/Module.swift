@@ -360,6 +360,14 @@ public struct Module {
     return .init(LLVMBuildCall2(p.llvm, calleeType.llvm, callee.llvm, &a, UInt32(a.count), ""))
   }
 
+  public mutating func insertIntegerComparison(
+    _ predicate: IntegerPredicate,
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
 }
 
 extension Module: CustomStringConvertible {
