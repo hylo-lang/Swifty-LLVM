@@ -14,7 +14,7 @@ port install llvm-15 llvm_select
 port select llvm mp-llvm-15
 ```
 
-The official version of llvm for Windows does not contain `llvm-config`, so you need to compile it by yourself or find someone else who has already compiled it.
+On Windows, The official version of llvm for Windows does not include `llvm-config.exe`, so you need to compile LLVM by yourself or use third-party versions of LLVM.
 
 Then, make sure `llvm-config` is in your path.
 The command below should print the LLVM version installed on your system. 
