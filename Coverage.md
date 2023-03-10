@@ -88,7 +88,10 @@
 - [ ] LLVMGetLastBasicBlock
 - [ ] LLVMGetNextBasicBlock
 - [ ] LLVMGetPreviousBasicBlock
-- [ ] LLVMGetEntryBasicBlock
+- [x] LLVMGetEntryBasicBlock
+
+  `Function.entry`
+
 - [ ] LLVMInsertExistingBasicBlockAfterInsertBlock
 - [ ] LLVMAppendExistingBasicBlock
 - [ ] LLVMCreateBasicBlockInContext
@@ -708,9 +711,18 @@
 
   `Module.insertStore(_:_:at:)`
 
-- [ ] LLVMBuildGEP2
-- [ ] LLVMBuildInBoundsGEP2
-- [ ] LLVMBuildStructGEP2
+- [x] LLVMBuildGEP2
+
+  `Module.insertGetElementPointer(of:typed:indices:at:)`
+
+- [x] LLVMBuildInBoundsGEP2
+
+  `Module.insertGetElementPointerInBounds(of:typed:indices:at:)`
+
+- [x] LLVMBuildStructGEP2
+
+  `Module.insertGetStructElementPointer(of:typed:index:at:)`
+
 - [ ] LLVMBuildGlobalString
 - [ ] LLVMBuildGlobalStringPtr
 - [ ] LLVMGetVolatile
