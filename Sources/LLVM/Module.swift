@@ -88,6 +88,12 @@ public struct Module {
     LLVMAddAttributeAtIndex(f.llvm, i, a.llvm)
   }
 
+  /// Adds attribute `a` to `p`.
+  public mutating func addAttribute(_ a: Parameter.Attribute, to p: Parameter) {
+    let i = UInt32(p.index + 1)
+    LLVMAddAttributeAtIndex(p.parent.llvm, i, a.llvm)
+  }
+
   /// Removes `a` from `f`.
   public mutating func removeAttribute(_ a: Function.Attribute, from f: Function) {
     switch a {
@@ -95,6 +101,16 @@ public struct Module {
       let k = LLVMGetEnumAttributeKind(h)
       let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
       LLVMRemoveEnumAttributeAtIndex(f.llvm, i, k)
+    }
+  }
+
+  /// Removes `a` from `p`.
+  public mutating func removeAttribute(_ a: Parameter.Attribute, from p: Parameter) {
+    switch a {
+    case .targetIndependent(let h):
+      let k = LLVMGetEnumAttributeKind(h)
+      let i = UInt32(p.index + 1)
+      LLVMRemoveEnumAttributeAtIndex(p.parent.llvm, i, k)
     }
   }
 
