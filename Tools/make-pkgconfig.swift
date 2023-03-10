@@ -16,7 +16,7 @@ struct EnvironmentError: Error, CustomStringConvertible {
 extension String {
 
   /// Returns `self` in which occurrences of new lines have been replaced by spaces.
-  func replacingNewlinesBySpaces() -> String {
+  func replacingNewlinesWithSpaces() -> String {
     reduce(into: "") { (s, c) in
       s.append(c.isNewline ? " " : c)
     }
@@ -118,13 +118,13 @@ func generateConfigFile() throws {
   }
 
   var libs = try "-L\(llvmConfig("--libdir", "--system-libs", "--libs",  "core", "analysis")!)"
-    .replacingNewlinesBySpaces()
+    .replacingNewlinesWithSpaces()
   #if os(Linux)
     libs += " -L/usr/lib -lc++"
   #elseif os(macOS)
     libs += " -lc++"
   #endif
-  let cflags = try "-I" + llvmConfig("--includedir")!.replacingNewlinesBySpaces()
+  let cflags = try "-I" + llvmConfig("--includedir")!.replacingNewlinesWithSpaces()
 
   let file = """
   Name: LLVM
