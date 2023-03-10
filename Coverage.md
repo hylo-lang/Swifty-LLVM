@@ -41,13 +41,19 @@
 - [ ] LLVMGetDiagInfoSeverity
 - [ ] LLVMGetMDKindIDInContext
 - [ ] LLVMGetMDKindID
-- [ ] LLVMGetEnumAttributeKindForName
+- [x] LLVMGetEnumAttributeKindForName
+
+  `Function.AttributeName.id`
+
 - [ ] LLVMGetLastEnumAttributeKind
 - [x] LLVMCreateEnumAttribute
 
-  `Module.addAttribute(_:_:to:)`
+  `Attribute.init(_:_:in:)`
 
-- [ ] LLVMGetEnumAttributeKind
+- [x] LLVMGetEnumAttributeKind
+
+  Implemented by `Module.removeAttribute(_:from:)`.
+
 - [ ] LLVMGetEnumAttributeValue
 - [ ] LLVMCreateTypeAttribute
 - [ ] LLVMGetTypeAttributeValue
@@ -307,7 +313,10 @@
 
   `Module.addAttribute(_:_:to:)`
 
-- [ ] LLVMGetAttributeCountAtIndex
+- [x] LLVMGetAttributeCountAtIndex
+
+  Implemented as the `count` property of `Function.attributes`.
+
 - [x] LLVMGetAttributesAtIndex
 
   Implemented by `Function.attributes`.

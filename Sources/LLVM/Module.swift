@@ -82,19 +82,14 @@ public struct Module {
     }
   }
 
-  /// Adds a target-independent attribute with given `name` and optional `value` to `f`.
-  @discardableResult
-  public mutating func addAttribute(
-    _ name: Function.AttributeName, _ value: UInt64 = 0, to f: Function
-  ) -> Attribute {
-    let a = LLVMCreateEnumAttribute(context, name.id, value)!
+  /// Adds attribute `a` to `f`.
+  public mutating func addAttribute(_ a: Function.Attribute, to f: Function) {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    LLVMAddAttributeAtIndex(f.llvm, i, a)
-    return .targetIndependent(llvm: a)
+    LLVMAddAttributeAtIndex(f.llvm, i, a.llvm)
   }
 
   /// Removes `a` from `f`.
-  public mutating func removeAttribute(_ a: Attribute, from f: Function) {
+  public mutating func removeAttribute(_ a: Function.Attribute, from f: Function) {
     switch a {
     case .targetIndependent(let h):
       let k = LLVMGetEnumAttributeKind(h)

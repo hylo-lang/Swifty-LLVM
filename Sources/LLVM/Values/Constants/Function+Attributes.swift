@@ -1,9 +1,12 @@
 import llvmc
 
-extension Function {
+extension Function: AttributeHolder {
+
+  /// An attribute on a function in LLVM IR.
+  public typealias Attribute = LLVM.Attribute<Function>
 
   /// The name of an attribute on a function in LLVM IR.
-  public enum AttributeName: String {
+  public enum AttributeName: String, AttributeNameProtocol {
 
     /// Indicates that the inliner should attempt to inline this function into callers whenever
     /// possible, ignoring any active inlining size threshold for this caller.
@@ -41,25 +44,8 @@ extension Function {
     case nounwind
 
     /// The unique kind identifier corresponding to this name.
-    internal var id: UInt32 {
+    public var id: UInt32 {
       return LLVMGetEnumAttributeKindForName(rawValue, rawValue.count)
-    }
-
-  }
-
-  /// An attribute on a function in LLVM IR.
-  public enum Attribute {
-
-    /// A target-independent attribute.
-    case targetIndependent(llvm: LLVMAttributeRef)
-
-    /// Creates an instance wrapping `llvm`.
-    fileprivate init(_ llvm: LLVMAttributeRef?) {
-      if LLVMIsEnumAttribute(llvm) != 0 {
-        self = .targetIndependent(llvm: llvm!)
-      } else {
-        fatalError()
-      }
     }
 
   }
