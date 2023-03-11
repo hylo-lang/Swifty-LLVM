@@ -365,7 +365,17 @@ public struct Module {
     _ lhs: IRValue, _ rhs: IRValue,
     at p: InsertionPoint
   ) -> Instruction {
-    .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.llvm, rhs.llvm, ""))
+    precondition(lhs.type == rhs.type)
+    return .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
+  public mutating func insertFloatingPointComparison(
+    _ predicate: FloatingPointPredicate,
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    precondition(lhs.type == rhs.type)
+    return .init(LLVMBuildFCmp(p.llvm, predicate.llvm, lhs.llvm, rhs.llvm, ""))
   }
 
 }

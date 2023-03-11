@@ -765,7 +765,10 @@
 
   `Module.insertIntegerComparison(_:_:_:at:)`
 
-- [ ] LLVMBuildFCmp
+- [x] LLVMBuildFCmp
+
+  `Module.insertFloatingPointComparison(_:_:_:at:)`
+
 - [ ] LLVMBuildPhi
 - [x] LLVMBuildCall2
 
