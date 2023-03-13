@@ -19,9 +19,11 @@ jobs:
     name: Swift 5 on ${{ matrix.host.os }} using .devcontainer
     strategy: 
       fail-fast: false
-      matrix: [
-        { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
-      ]
+      matrix: 
+        host: [
+          { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
+        ]
+        configuration: [ "debug", "release" ]
 
     runs-on: ${{ matrix.host.os }}
     steps:
@@ -34,9 +36,7 @@ jobs:
       if: matrix.host.uses-devcontainer
       uses: devcontainers/ci@v0.3
       with:
-        runCmd: |
-          swift test -v -c debug ${{ matrix.host.test-options }}
-          swift test -v -c release ${{ matrix.host.test-options }}
+        runCmd: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
   build-native:
     name: Swift 5 on ${{ matrix.host.os }} natively
@@ -46,6 +46,7 @@ jobs:
         host: [
           { type: macos, os: macos-latest}
         ]
+        configuration: [ "debug", "release" ]
 
     runs-on: ${{ matrix.host.os }}
     steps:
@@ -63,23 +64,17 @@ jobs:
       uses: KyleMayes/install-llvm-action@v1
       with:
         version: "15.0"
-        
+
     - run: llvm-config --version
 
     - name: Configure pkgconfig
       run: sudo ./Tools/make-pkgconfig.sh
 
-    - name: Build (Debug)
-      run: swift build -v -c debug
+    - name: Build
+      run: swift build -v -c ${{ matrix.configuration }}
 
-    - name: Test (Debug)
-      run: swift test -v -c debug ${{ matrix.host.test-options }}
-
-    - name: Build (Release)
-      run: swift build -v -c release
-
-    - name: Test (Release)
-      run: swift test -c release -Xswiftc -enable-testing ${{ matrix.host.test-options }}
+    - name: Test 
+      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
 
   
