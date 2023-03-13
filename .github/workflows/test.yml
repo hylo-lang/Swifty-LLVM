@@ -17,10 +17,11 @@ on:
 jobs:
   build-devcontainer:
     name: Swift 5 on ${{ matrix.host.os }} using .devcontainer
-    strategy: fail-fast: false
-    matrix: [
-      { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
-    ]
+    strategy: 
+      fail-fast: false
+      matrix: [
+        { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
+      ]
 
     runs-on: ${{ matrix.host.os }}
     steps:
