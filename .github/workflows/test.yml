@@ -16,7 +16,7 @@ on:
 
 jobs:
   build-devcontainer:
-    name: Test ${{ matrix.configuration }} on ${{ matrix.host.os }} using .devcontainer
+    name: "Devcontainer: ${{ matrix.host.os }}/${{ matrix.configuration }}"
     strategy: 
       fail-fast: false
       matrix: 
@@ -38,7 +38,7 @@ jobs:
         runCmd: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
   build-native:
-    name: Test ${{ matrix.configuration }} on ${{ matrix.host.os }} natively
+    name: "Native: ${{ matrix.host.os }}/${{ matrix.configuration }}"
     strategy:
       fail-fast: false
       matrix:
