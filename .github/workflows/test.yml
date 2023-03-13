@@ -15,27 +15,72 @@ on:
       - ".gitignore"
 
 jobs:
-  build:
-    name: Swift 5 on ${{ matrix.host.os }}
+  build-devcontainer:
+    name: Swift 5 on ${{ matrix.host.os }} using .devcontainer
+    strategy: fail-fast: false
+    matrix: [
+      { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
+    ]
+
+    runs-on: ${{ matrix.host.os }}
+    steps:
+    - name: Checkout (GitHub)
+      uses: actions/checkout@v3
+      run: | 
+        git config --global core.autocrlf input
+
+    - name: Build and run devcontainer task
+      if: matrix.host.uses-devcontainer
+      uses: devcontainers/ci@v0.3
+      with:
+        runCmd: |
+          swift test -v -c debug ${{ matrix.host.test-options }}
+          swift test -v -c release ${{ matrix.host.test-options }}
+
+  build-native:
+    name: Swift 5 on ${{ matrix.host.os }} natively
     strategy:
       fail-fast: false
       matrix:
         host: [
-          { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
+          { type: macos, os: macos-latest}
         ]
+
     runs-on: ${{ matrix.host.os }}
     steps:
+    - name: Checkout (GitHub)
+      uses: actions/checkout@v3
+      run: | 
+        git config --global core.autocrlf input
 
-      - name: Checkout (GitHub)
-        uses: actions/checkout@v3
-
-      - name: Build and run devcontainer task
-        uses: devcontainers/ci@v0.3
-        with:
-          runCmd: swift test
-
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v1
+      run: swift --version
       
+    - name: Install LLVM
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "15.0"
+      run: llvm-config --version
+
+    - name: Configure pkgconfig
+      if: ${{ !matrix.host.uses-devcontainer }}
+      run: sudo ./Tools/make-pkgconfig.sh
+
+    - name: Build (Debug)
+      if: ${{ !matrix.host.uses-devcontainer }}
+      run: swift build -v -c debug
+
+    - name: Test (Debug)
+      run: swift test -v -c debug ${{ matrix.host.test-options }}
+
+    - name: Build (Release)
+      if: ${{ !matrix.host.uses-devcontainer }}
+      run: swift build -v -c release
+
+    - name: Test (Release)
+      run: swift test -c release -Xswiftc -enable-testing ${{ matrix.host.test-options }}
 
 
-    
-    
+  
+  
