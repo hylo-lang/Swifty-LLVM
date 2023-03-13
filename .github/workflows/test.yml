@@ -51,10 +51,7 @@ jobs:
 
     - name: Configure pkg-config
       run: |
-        swift Tools/make-pkgconfig.swift 15
-        cat llvm.pc
-        sudo mkdir -p /usr/local/lib/pkgconfig/
-        sudo mv llvm.pc /usr/local/lib/pkgconfig/llvm.pc
+        ./Tools/make-pkgconfig.sh
 
     - name: Build (Debug)
       run: swift build -v -c debug
