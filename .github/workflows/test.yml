@@ -46,6 +46,10 @@ jobs:
       with:
         version: "15.0"
 
+    - name: Add llvm-config to PATH
+      run: |
+        echo "${{ env.LLVM_PATH }}/bin" >> $GITHUB_PATH
+
     - name: LLVM version
       run: | 
         llvm-config --version
