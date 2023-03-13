@@ -16,7 +16,7 @@ on:
 
 jobs:
   build-devcontainer:
-    name: Swift 5 on ${{ matrix.host.os }} using .devcontainer
+    name: Test ${{ matrix.configuration }} on ${{ matrix.host.os }} using .devcontainer
     strategy: 
       fail-fast: false
       matrix: 
@@ -33,13 +33,12 @@ jobs:
     - run: git config --global core.autocrlf input
 
     - name: Build and run devcontainer task
-      if: matrix.host.uses-devcontainer
       uses: devcontainers/ci@v0.3
       with:
         runCmd: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
   build-native:
-    name: Swift 5 on ${{ matrix.host.os }} natively
+    name: Test ${{ matrix.configuration }} on ${{ matrix.host.os }} natively
     strategy:
       fail-fast: false
       matrix:
