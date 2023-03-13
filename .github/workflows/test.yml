@@ -47,7 +47,10 @@ jobs:
         version: "15.0"
 
     - name: LLVM version
-      run: llvm-config --version
+      run: | 
+        llvm-config --version
+        llvm-config --includedir
+        llvm-config --libdir
 
     - name: Configure pkg-config
       run: |
