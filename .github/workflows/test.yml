@@ -74,7 +74,3 @@ jobs:
 
     - name: Test 
       run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
-
-
-  
-  

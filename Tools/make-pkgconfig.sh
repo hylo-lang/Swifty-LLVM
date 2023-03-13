@@ -6,7 +6,8 @@ filename=$1
 mkdir -p `dirname $filename`
 touch $filename
 
-# REVISIT: Why does macos need the standard library explicitly linked, while linux does not?
+# REVISIT(nickpdemarco):
+# Why does macos need the standard library explicitly linked, while linux does not?
 # This does not feel like the correct place for this logic.
 machine="$(uname -s)"
 case "${machine}" in
