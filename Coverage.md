@@ -74,6 +74,62 @@
 
 - [ ] LLVMLinkModules2
 
+### Modules
+
+- [ ] LLVMModuleCreateWithName
+- [ ] LLVMModuleCreateWithNameInContext
+- [ ] LLVMCloneModule
+- [ ] LLVMDisposeModule
+- [ ] LLVMGetModuleIdentifier
+- [ ] LLVMSetModuleIdentifier
+- [ ] LLVMGetSourceFileName
+- [ ] LLVMSetSourceFileName
+- [ ] LLVMGetDataLayoutStr
+- [ ] LLVMGetDataLayout
+- [ ] LLVMSetDataLayout
+- [ ] LLVMGetTarget
+- [ ] Target
+- [ ] LLVMCopyModuleFlagsMetadata
+- [ ] LLVMDisposeModuleFlagsMetadata
+- [ ] LLVMModuleFlagEntriesGetFlagBehavior
+- [ ] LLVMModuleFlagEntriesGetKey
+- [ ] LLVMModuleFlagEntriesGetMetadata
+- [ ] LLVMGetModuleFlag
+- [ ] LLVMAddModuleFlag
+- [ ] LLVMDumpModule
+- [ ] LLVMPrintModuleToFile
+- [ ] LLVMPrintModuleToString
+- [ ] LLVMGetModuleInlineAsm
+- [ ] LLVMSetModuleInlineAsm2
+- [ ] LLVMAppendModuleInlineAsm
+- [ ] LLVMGetInlineAsm
+- [ ] LLVMGetModuleContext
+- [ ] LLVMGetTypeByName
+- [ ] LLVMGetFirstNamedMetadata
+- [ ] LLVMGetLastNamedMetadata
+- [ ] LLVMGetNextNamedMetadata
+- [ ] LLVMGetPreviousNamedMetadata
+- [ ] LLVMGetNamedMetadata
+- [ ] LLVMGetOrInsertNamedMetadata
+- [ ] LLVMGetNamedMetadataName
+- [ ] LLVMGetNamedMetadataNumOperands
+- [ ] LLVMGetNamedMetadataOperands
+- [ ] LLVMAddNamedMetadataOperand
+- [ ] LLVMGetDebugLocDirectory
+- [ ] LLVMGetDebugLocFilename
+- [ ] LLVMGetDebugLocLine
+- [ ] LLVMGetDebugLocColumn
+- [ ] LLVMAddFunction
+- [x] LLVMGetNamedFunction
+
+  `Module.function(named:)`
+
+- [ ] LLVMGetFirstFunction
+- [ ] LLVMGetLastFunction
+- [ ] LLVMGetNextFunction
+- [ ] LLVMGetPreviousFunction
+- [ ] LLVMSetModuleInlineAsm
+
 ### Basic Blocks
 
 - [ ] LLVMBasicBlockAsValue

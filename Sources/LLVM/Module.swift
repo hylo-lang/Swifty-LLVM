@@ -65,9 +65,14 @@ public struct Module {
     }
   }
 
-  /// Returns the with given `name`, or `nil` if no such type exists.
+  /// Returns the type with given `name`, or `nil` if no such type exists.
   public func type(named name: String) -> IRType? {
     LLVMGetTypeByName2(context, name).map(AnyType.init(_:))
+  }
+
+  /// Returns the function with given `name`, or `nil` if no such function exists.
+  public func function(named name: String) -> Function? {
+    LLVMGetNamedFunction(llvm, name).map(Function.init(_:))
   }
 
   /// Returns an a function with given `name` and `type`, declaring it in `self` if it doesn't
