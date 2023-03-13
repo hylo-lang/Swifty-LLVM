@@ -27,8 +27,8 @@ jobs:
     steps:
     - name: Checkout (GitHub)
       uses: actions/checkout@v3
-      run: | 
-        git config --global core.autocrlf input
+
+    - run: git config --global core.autocrlf input
 
     - name: Build and run devcontainer task
       if: matrix.host.uses-devcontainer
@@ -51,18 +51,20 @@ jobs:
     steps:
     - name: Checkout (GitHub)
       uses: actions/checkout@v3
-      run: | 
-        git config --global core.autocrlf input
+
+    - run: git config --global core.autocrlf input
 
     - name: Setup Swift
       uses: swift-actions/setup-swift@v1
-      run: swift --version
+
+    - run: swift --version
       
     - name: Install LLVM
       uses: KyleMayes/install-llvm-action@v1
       with:
         version: "15.0"
-      run: llvm-config --version
+        
+    - run: llvm-config --version
 
     - name: Configure pkgconfig
       run: sudo ./Tools/make-pkgconfig.sh
