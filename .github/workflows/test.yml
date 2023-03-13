@@ -65,18 +65,15 @@ jobs:
       run: llvm-config --version
 
     - name: Configure pkgconfig
-      if: ${{ !matrix.host.uses-devcontainer }}
       run: sudo ./Tools/make-pkgconfig.sh
 
     - name: Build (Debug)
-      if: ${{ !matrix.host.uses-devcontainer }}
       run: swift build -v -c debug
 
     - name: Test (Debug)
       run: swift test -v -c debug ${{ matrix.host.test-options }}
 
     - name: Build (Release)
-      if: ${{ !matrix.host.uses-devcontainer }}
       run: swift build -v -c release
 
     - name: Test (Release)
