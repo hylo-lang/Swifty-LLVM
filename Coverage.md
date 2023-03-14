@@ -649,7 +649,10 @@
 - [ ] LLVMBuildSwitch
 - [ ] LLVMBuildIndirectBr
 - [ ] LLVMBuildInvoke2
-- [ ] LLVMBuildUnreachable
+- [x] LLVMBuildUnreachable
+
+  `Module.insertUnreachable(at:)`
+
 - [ ] LLVMBuildResume
 - [ ] LLVMBuildLandingPad
 - [ ] LLVMBuildCleanupRet

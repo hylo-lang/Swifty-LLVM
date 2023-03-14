@@ -320,7 +320,7 @@ public struct Module {
     .init(LLVMBuildStore(p.llvm, value.llvm, location.llvm))
   }
 
-  // MARK: Control flow
+  // MARK: Terminators
 
   @discardableResult
   public mutating func insertBr(to destination: BasicBlock, at p: InsertionPoint) -> Instruction {
@@ -343,6 +343,11 @@ public struct Module {
   @discardableResult
   public mutating func insertReturn(_ value: IRValue, at p: InsertionPoint) -> Instruction {
     .init(LLVMBuildRet(p.llvm, value.llvm))
+  }
+
+  @discardableResult
+  public mutating func insertUnreachable(at p: InsertionPoint) -> Instruction {
+    .init(LLVMBuildUnreachable(p.llvm))
   }
 
   // MARK: Aggregate operations
