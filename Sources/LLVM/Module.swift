@@ -388,14 +388,14 @@ public struct Module {
   }
 
   public mutating func insertFPTrunc(
-    _ source: IRValue, to target: IRValue,
+    _ source: IRValue, to target: IRType,
     at p: InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFPTrunc(p.llvm, source.llvm, target.llvm, ""))
   }
 
   public mutating func insertFPExtend(
-    _ source: IRValue, to target: IRValue,
+    _ source: IRValue, to target: IRType,
     at p: InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFPExt(p.llvm, source.llvm, target.llvm, ""))
