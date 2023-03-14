@@ -364,6 +364,15 @@ public struct Module {
     .init(LLVMBuildInsertValue(p.llvm, whole.llvm, part.llvm, UInt32(index), ""))
   }
 
+  // MARK: Conversions
+
+  public mutating func insertTrunc(
+    _ source: IRValue, to target: IRType,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildTrunc(p.llvm, source.llvm, target.llvm, ""))
+  }
+
   // MARK: Others
 
   public mutating func insertCall(

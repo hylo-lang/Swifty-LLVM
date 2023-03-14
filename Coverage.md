@@ -795,7 +795,10 @@
 - [ ] LLVMSetOrdering
 - [ ] LLVMGetAtomicRMWBinOp
 - [ ] LLVMSetAtomicRMWBinOp
-- [ ] LLVMBuildTrunc
+- [x] LLVMBuildTrunc
+
+  `Module.LLVMBuildTrunc(_:to:at:)`
+
 - [ ] LLVMBuildZExt
 - [ ] LLVMBuildSExt
 - [ ] LLVMBuildFPToUI
