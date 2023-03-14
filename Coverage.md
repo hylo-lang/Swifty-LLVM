@@ -815,7 +815,10 @@
 
   `Module.insertFPTrunc(_:to:at:)`
 
-- [ ] LLVMBuildFPExt
+- [x] LLVMBuildFPExt
+
+  `Module.insertFPExt(_:to:at:)`
+
 - [ ] LLVMBuildPtrToInt
 - [ ] LLVMBuildIntToPtr
 - [ ] LLVMBuildBitCast

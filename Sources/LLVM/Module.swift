@@ -394,6 +394,13 @@ public struct Module {
     .init(LLVMBuildFPTrunc(p.llvm, source.llvm, target.llvm, ""))
   }
 
+  public mutating func insertFPExtend(
+    _ source: IRValue, to target: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildFPExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
   // MARK: Others
 
   public mutating func insertCall(
