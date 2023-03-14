@@ -380,6 +380,13 @@ public struct Module {
     .init(LLVMBuildSExt(p.llvm, source.llvm, target.llvm, ""))
   }
 
+  public mutating func insertZeroExtend(
+    _ source: IRValue, to target: IRType,
+    at p: Instruction
+  ) -> Instruction {
+    .init(LLVMBuildZExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
   // MARK: Others
 
   public mutating func insertCall(

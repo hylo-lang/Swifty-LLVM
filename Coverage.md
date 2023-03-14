@@ -799,7 +799,10 @@
 
   `Module.insertTrunc(_:to:at:)`
 
-- [ ] LLVMBuildZExt
+- [x] LLVMBuildZExt
+
+  `Module.insertZeroExtend(_:to:at:)`
+
 - [x] LLVMBuildSExt
 
   `Module.insertSignedExtend(_:to:at:)`
