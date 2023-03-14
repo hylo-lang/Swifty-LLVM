@@ -387,6 +387,13 @@ public struct Module {
     .init(LLVMBuildZExt(p.llvm, source.llvm, target.llvm, ""))
   }
 
+  public mutating func insertFPTrunc(
+    _ source: IRValue, to target: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildFPTrunc(p.llvm, source.llvm, target.llvm, ""))
+  }
+
   // MARK: Others
 
   public mutating func insertCall(

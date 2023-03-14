@@ -811,7 +811,10 @@
 - [ ] LLVMBuildFPToSI
 - [ ] LLVMBuildUIToFP
 - [ ] LLVMBuildSIToFP
-- [ ] LLVMBuildFPTrunc
+- [x] LLVMBuildFPTrunc
+
+  `Module.insertFPTrunc(_:to:at:)`
+
 - [ ] LLVMBuildFPExt
 - [ ] LLVMBuildPtrToInt
 - [ ] LLVMBuildIntToPtr
