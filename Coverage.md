@@ -797,10 +797,13 @@
 - [ ] LLVMSetAtomicRMWBinOp
 - [x] LLVMBuildTrunc
 
-  `Module.LLVMBuildTrunc(_:to:at:)`
+  `Module.insertTrunc(_:to:at:)`
 
 - [ ] LLVMBuildZExt
-- [ ] LLVMBuildSExt
+- [x] LLVMBuildSExt
+
+  `Module.insertSignedExtend(_:to:at:)`
+
 - [ ] LLVMBuildFPToUI
 - [ ] LLVMBuildFPToSI
 - [ ] LLVMBuildUIToFP

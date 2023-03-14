@@ -373,6 +373,13 @@ public struct Module {
     .init(LLVMBuildTrunc(p.llvm, source.llvm, target.llvm, ""))
   }
 
+  public mutating func insertSignExtend(
+    _ source: IRValue, to target: IRType,
+    at p: Instruction
+  ) -> Instruction {
+    .init(LLVMBuildSExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
   // MARK: Others
 
   public mutating func insertCall(
