@@ -837,7 +837,10 @@
 - [ ] LLVMBuildInsertElement
 - [ ] LLVMBuildShuffleVector
 - [ ] LLVMBuildExtractValue
-- [ ] LLVMBuildInsertValue
+- [x] LLVMBuildInsertValue
+
+  `Module.insertInserValue(_:at:into:at:)`
+
 - [ ] LLVMBuildFreeze
 - [ ] LLVMBuildIsNull
 - [ ] LLVMBuildIsNotNull

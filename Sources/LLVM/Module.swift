@@ -345,6 +345,17 @@ public struct Module {
     .init(LLVMBuildRet(p.llvm, value.llvm))
   }
 
+  // MARK: Aggregate operations
+
+  public mutating func insertInsertValue(
+    _ part: IRValue,
+    at index: Int,
+    into whole: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildInsertValue(p.llvm, whole.llvm, part.llvm, UInt32(index), ""))
+  }
+
   // MARK: Others
 
   public mutating func insertCall(
