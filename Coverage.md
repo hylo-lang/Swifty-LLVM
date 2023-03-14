@@ -836,7 +836,10 @@
 - [ ] LLVMBuildExtractElement
 - [ ] LLVMBuildInsertElement
 - [ ] LLVMBuildShuffleVector
-- [ ] LLVMBuildExtractValue
+- [x] LLVMBuildExtractValue
+
+  `Module.insertExtractValue(from:at:at:)`
+
 - [x] LLVMBuildInsertValue
 
   `Module.insertInserValue(_:at:into:at:)`

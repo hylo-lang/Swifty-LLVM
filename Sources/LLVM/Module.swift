@@ -347,6 +347,14 @@ public struct Module {
 
   // MARK: Aggregate operations
 
+  public mutating func insertExtractValue(
+    from whole: IRValue,
+    at index: Int,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildExtractValue(p.llvm, whole.llvm, UInt32(index), ""))
+  }
+
   public mutating func insertInsertValue(
     _ part: IRValue,
     at index: Int,
