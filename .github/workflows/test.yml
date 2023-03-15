@@ -55,7 +55,7 @@ jobs:
     - run: Add-Content -Path "$env:GITHUB_ENV" -Value "GITHUB_RUNNER_CPU=$((Get-CimInstance Win32_Processor).Name)"
     
     - name: Add LLVM to Path
-      run: setx "Path" "%Path%;C:\LLVM-15.0.6-win64\bin"
+      run: set path=%path%;C:\LLVM-15.0.6-win64\bin
       
     - name: Run llvm-config
       run: powershell.exe llvm-config
