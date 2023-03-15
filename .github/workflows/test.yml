@@ -52,7 +52,7 @@ jobs:
         7z x llvm-15.0.6-windows-x64-msvc17-mt.7z -oC:\LLVM-15.0.6-win64
         
     - name: Copy LLVM's include to MSVC's include
-      run: xcopy c:\llvm\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
+      run: xcopy c:\llvm-15.0.6-win64\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
 
     - name: Run llvm-config
       run: llvm-config
