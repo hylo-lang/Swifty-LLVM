@@ -53,7 +53,7 @@ jobs:
       run: xcopy c:\llvm-15.0.6-win64\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
       
     - name: Add LLVM to Path
-      run: setx "Path" "%Path%;C:\LLVM-15.0.6-win64"
+      run: setx "Path" "%Path%;C:\LLVM-15.0.6-win64\bin"
       
     - run: Add-Content -Path "$env:GITHUB_ENV" -Value "GITHUB_RUNNER_CPU=$((Get-CimInstance Win32_Processor).Name)"
       
