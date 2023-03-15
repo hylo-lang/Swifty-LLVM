@@ -49,7 +49,7 @@ jobs:
     - name: Set up LLVM 15.0.6
       run: |
         curl.exe -L -O -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"https://github.com/mun-lang/llvm-package-windows/releases/download/v15.0.6/llvm-15.0.6-windows-x64-msvc17-mt.7z
-        7z x llvm-15.0.6-windows-x64-msvc17-mt.7z -C:\LLVM-15.0.6-win64
+        7z x llvm-15.0.6-windows-x64-msvc17-mt.7z -oC:\LLVM-15.0.6-win64
         
     - name: Copy LLVM's include to MSVC's include
       run: xcopy c:\llvm\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
