@@ -1,0 +1,78 @@
+name: Test
+
+on:
+  push:
+    branches: [ "**" ]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+  pull_request:
+    branches: [ "**" ]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+
+jobs:
+  build-on-windows:
+    env:
+      LLVM_SYS_150_PREFIX: C:\LLVM-15.0.6-win64
+    name: ${{ matrix.host.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [
+          { type: windows, os: windows-latest },
+        ]
+        swift: [
+          { windows-branch: "development", windows-tag: "DEVELOPMENT-SNAPSHOT-2023-02-27-a" }
+        ]
+    runs-on: ${{ matrix.host.os }}
+    steps:
+    - name: Setup swift
+      uses: compnerd/gha-setup-swift@main
+      if: matrix.host.type == 'windows'
+      with:
+        branch: ${{ matrix.swift.windows-branch }}
+        tag: ${{ matrix.swift.windows-tag }}
+
+    - run: |
+        git config --global core.autocrlf input
+    - uses: actions/checkout@v3
+
+    - name: Swift version
+      run: swift --version
+      
+    - run: Add-Content -Path "$env:GITHUB_ENV" -Value "GITHUB_RUNNER_CPU=$((Get-CimInstance Win32_Processor).Name)"
+    
+    - name: Set up LLVM 15.0.6
+      run: |
+        curl.exe -L -O -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"https://github.com/mun-lang/llvm-package-windows/releases/download/v15.0.6/llvm-15.0.6-windows-x64-msvc17-mt.7z
+        7z x llvm-15.0.6-windows-x64-msvc17-mt.7z -C:\LLVM-15.0.6-win64
+        
+    - name: Copy LLVM's include to MSVC's include
+      run: xcopy c:\llvm\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
+
+    - name: Run llvm-config
+      run: llvm-config
+
+    - name: Build (Release)
+      id: first-build
+      continue-on-error: true
+      run: swift build -v -c release
+
+    - name: Retry again on failure
+      continue-on-error: false
+      if: steps.first-build.outcome != 'success'
+      run: swift build -v -c release
+
+    - name: Test (Release)
+      id: first-test
+      continue-on-error: true
+      run: swift test -c release -Xswiftc -enable-testing ${{matrix.host.test-options}}
+
+    - name: Retry again on failure
+      continue-on-error: false
+      if: steps.first-test.outcome != 'success'
+      run: swift test -c release -Xswiftc -enable-testing ${{matrix.host.test-options}}
