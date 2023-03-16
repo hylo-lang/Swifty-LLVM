@@ -55,7 +55,7 @@ jobs:
     - run: Add-Content $env:GITHUB_PATH 'C:\LLVM-15.0.6-win64\bin'
       
     - name: Run llvm-config
-      run: powershell.exe llvm-config
+      run: llvm-config --version
 
     - name: Build (Release)
       id: first-build
