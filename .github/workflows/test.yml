@@ -53,9 +53,8 @@ jobs:
       run: xcopy c:\llvm-15.0.6-win64\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
       
     - run: Add-Content $env:GITHUB_PATH 'C:\LLVM-15.0.6-win64\bin'
-      
-    - name: Run llvm-config
-      run: llvm-config --version
+
+    - run: llvm-config --version
 
     - name: Build (Release)
       id: first-build
