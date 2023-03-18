@@ -16,8 +16,6 @@ on:
 
 jobs:
   build-on-windows:
-    env:
-      LLVM_SYS_150_PREFIX: C:\LLVM-15.0.6-win64
     name: ${{ matrix.host.os }}
     strategy:
       fail-fast: false
@@ -47,15 +45,15 @@ jobs:
     - name: Set up LLVM 15.0.6
       run: |
         curl.exe -L -O -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"https://github.com/c3lang/win-llvm/releases/download/llvm_15_0_6/llvm-15.0.6-windows-x86-msvc17-libcmt.7z
-        7z x llvm-15.0.6-windows-x86-msvc17-libcmt.7z -oC:\LLVM-15.0.6-win64
+        7z x llvm-15.0.6-windows-x86-msvc17-libcmt.7z -oC:\
         
     - name: Copy include in LLVM folder
-      run: xcopy c:\llvm-15.0.6-win64\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
+      run: xcopy c:\llvm-15.0.6-windows-x86-msvc17-libcmt\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
          
     - name: Copy lib in LLVM folder
-      run: xcopy c:\llvm-15.0.6-win64\lib\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\lib\x64 /s /h
+      run: xcopy c:\llvm-15.0.6-windows-x86-msvc17-libcmt\lib\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\lib\x64 /s /h
     
-    - run: Add-Content $env:GITHUB_PATH 'C:\LLVM-15.0.6-win64\bin'
+    - run: Add-Content $env:GITHUB_PATH 'C:\llvm-15.0.6-windows-x86-msvc17-libcmt\bin'
 
     - run: llvm-config --version
 
