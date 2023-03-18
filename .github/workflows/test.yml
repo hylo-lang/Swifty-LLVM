@@ -49,9 +49,12 @@ jobs:
         curl.exe -L -O -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"https://github.com/mun-lang/llvm-package-windows/releases/download/v15.0.6/llvm-15.0.6-windows-x64-msvc17-mt.7z
         7z x llvm-15.0.6-windows-x64-msvc17-mt.7z -oC:\LLVM-15.0.6-win64
         
-    - name: Copy LLVM's include to MSVC's include
+    - name: Copy include in LLVM folder
       run: xcopy c:\llvm-15.0.6-win64\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\include /s /h
-      
+         
+    - name: Copy lib in LLVM folder
+      run: xcopy c:\llvm-15.0.6-win64\lib\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\lib\x64 /s /h
+    
     - run: Add-Content $env:GITHUB_PATH 'C:\LLVM-15.0.6-win64\bin'
 
     - run: llvm-config --version
