@@ -1,4 +1,5 @@
 module llvmc {
   umbrella header "llvmc.h"
+  link "LLVM-C"
   export *
 }
