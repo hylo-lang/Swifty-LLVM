@@ -23,6 +23,20 @@ public struct Function: Global, Hashable {
   /// The parameters of the function.
   public var parameters: Parameters { .init(of: self) }
 
+  /// The basic blocks of the function.
+  public var basicBlocks: [BasicBlock] {
+    let n = LLVMCountBasicBlocks(llvm)
+    var handles: [LLVMBasicBlockRef?] = .init(repeating: nil, count: Int(n))
+    LLVMGetBasicBlocks(llvm, &handles)
+    return handles.map({ .init($0!) })
+  }
+
+  /// The the function's entry, if any.
+  public var entry: BasicBlock? {
+    guard LLVMCountBasicBlocks(llvm) > 0 else { return nil }
+    return .init(LLVMGetEntryBasicBlock(llvm))
+  }
+
   /// Returns `true` iff the IR in `self` is well formed.
   public func isWellFormed() -> Bool {
     LLVMVerifyFunction(llvm, LLVMReturnStatusAction) == 0
@@ -32,21 +46,29 @@ public struct Function: Global, Hashable {
 
 extension Function {
 
-  /// A parameter in a LLVM IR function.
-  public struct Parameter: IRValue, Hashable {
 
-    /// A handle to the LLVM object wrapped by this instance.
-    public let llvm: LLVMValueRef
+  /// The return value of a LLVM IR function.
+  public struct Return: Hashable {
 
-    /// Creates an instance wrapping `llvm`.
-    internal init(_ llvm: LLVMValueRef) {
-      self.llvm = llvm
+    /// The function defining the return value.
+    public let parent: Function
+
+    /// Creates an instance representing the return value of `parent`.
+    fileprivate init(_ parent: Function) {
+      self.parent = parent
     }
 
   }
 
+  /// The return value of the function.
+  public var returnValue: Return { .init(self) }
+
+}
+
+extension Function {
+
   /// A collection containing the parameters of a LLVM IR function.
-  public struct Parameters: Collection {
+  public struct Parameters: BidirectionalCollection {
 
     public typealias Index = Int
 
@@ -70,11 +92,18 @@ extension Function {
     public var endIndex: Int { count }
 
     public func index(after position: Int) -> Int {
-      position + 1
+      precondition(position < count, "index is out of bounds")
+      return position + 1
+    }
+
+    public func index(before position: Int) -> Int {
+      precondition(position > 0, "index is out of bounds")
+      return position - 1
     }
 
     public subscript(position: Int) -> Parameter {
-      Parameter(LLVMGetParam(parent.llvm, UInt32(position)))
+      precondition(position >= 0 && position < count, "index is out of bounds")
+      return .init(LLVMGetParam(parent.llvm, UInt32(position)), position)
     }
 
   }

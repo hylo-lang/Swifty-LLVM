@@ -30,13 +30,23 @@ public struct IntegerType: IRType, Hashable {
     .init(LLVMConstInt(llvm, v, sext ? 1 : 0))
   }
 
+  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, sign extended
+  /// iff `sext` is `true`.
+  ///
+  /// - Requires: `v` must be representable in `self.`
+  func constant<T: BinaryInteger>(
+    truncatingIfNeeded i: T, extendingSign sext: Bool = false
+  ) -> LLVM.IntegerConstant {
+    constant(.init(truncatingIfNeeded: i), extendingSign: sext)
+  }
+
   /// Returns a constant whose LLVM IR type is `self` and whose value is parsed from `text` with
   /// given `radix`.
   ///
   /// Zero is returned if `text` is not a valid integer value.
   ///
   /// - Requires: `radix` must be in the range `2...36`.
-  public func constant(_ text: String, radix: Int = 10) -> IntegerConstant {
+  public func constant(parsing text: String, radix: Int = 10) -> IntegerConstant {
     let h = text.withCString { (s) in
       LLVMConstIntOfStringAndSize(llvm, s, UInt32(text.utf8.count), UInt8(radix))!
     }

@@ -33,7 +33,7 @@ final class IntegerConstantTests: XCTestCase {
 
   func testInitWithText() {
     var m = Module("foo")
-    let x = IntegerType(8, in: &m).constant("11111111", radix: 2)
+    let x = IntegerType(8, in: &m).constant(parsing: "11111111", radix: 2)
     XCTAssertEqual(x.sext, -1)
     XCTAssertEqual(x.zext, 255)
   }

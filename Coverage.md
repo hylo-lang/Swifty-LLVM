@@ -41,11 +41,23 @@
 - [ ] LLVMGetDiagInfoSeverity
 - [ ] LLVMGetMDKindIDInContext
 - [ ] LLVMGetMDKindID
-- [ ] LLVMGetEnumAttributeKindForName
+- [x] LLVMGetEnumAttributeKindForName
+
+  `Function.AttributeName.id`
+
 - [ ] LLVMGetLastEnumAttributeKind
-- [ ] LLVMCreateEnumAttribute
-- [ ] LLVMGetEnumAttributeKind
-- [ ] LLVMGetEnumAttributeValue
+- [x] LLVMCreateEnumAttribute
+
+  `Attribute.init(_:_:in:)`
+
+- [x] LLVMGetEnumAttributeKind
+
+  Implemented by `Module.removeAttribute(_:from:)`.
+
+- [x] LLVMGetEnumAttributeValue
+
+  `Attribute.value`
+
 - [ ] LLVMCreateTypeAttribute
 - [ ] LLVMGetTypeAttributeValue
 - [ ] LLVMCreateStringAttribute
@@ -62,6 +74,62 @@
 
 - [ ] LLVMLinkModules2
 
+### Modules
+
+- [ ] LLVMModuleCreateWithName
+- [ ] LLVMModuleCreateWithNameInContext
+- [ ] LLVMCloneModule
+- [ ] LLVMDisposeModule
+- [ ] LLVMGetModuleIdentifier
+- [ ] LLVMSetModuleIdentifier
+- [ ] LLVMGetSourceFileName
+- [ ] LLVMSetSourceFileName
+- [ ] LLVMGetDataLayoutStr
+- [ ] LLVMGetDataLayout
+- [ ] LLVMSetDataLayout
+- [ ] LLVMGetTarget
+- [ ] Target
+- [ ] LLVMCopyModuleFlagsMetadata
+- [ ] LLVMDisposeModuleFlagsMetadata
+- [ ] LLVMModuleFlagEntriesGetFlagBehavior
+- [ ] LLVMModuleFlagEntriesGetKey
+- [ ] LLVMModuleFlagEntriesGetMetadata
+- [ ] LLVMGetModuleFlag
+- [ ] LLVMAddModuleFlag
+- [ ] LLVMDumpModule
+- [ ] LLVMPrintModuleToFile
+- [ ] LLVMPrintModuleToString
+- [ ] LLVMGetModuleInlineAsm
+- [ ] LLVMSetModuleInlineAsm2
+- [ ] LLVMAppendModuleInlineAsm
+- [ ] LLVMGetInlineAsm
+- [ ] LLVMGetModuleContext
+- [ ] LLVMGetTypeByName
+- [ ] LLVMGetFirstNamedMetadata
+- [ ] LLVMGetLastNamedMetadata
+- [ ] LLVMGetNextNamedMetadata
+- [ ] LLVMGetPreviousNamedMetadata
+- [ ] LLVMGetNamedMetadata
+- [ ] LLVMGetOrInsertNamedMetadata
+- [ ] LLVMGetNamedMetadataName
+- [ ] LLVMGetNamedMetadataNumOperands
+- [ ] LLVMGetNamedMetadataOperands
+- [ ] LLVMAddNamedMetadataOperand
+- [ ] LLVMGetDebugLocDirectory
+- [ ] LLVMGetDebugLocFilename
+- [ ] LLVMGetDebugLocLine
+- [ ] LLVMGetDebugLocColumn
+- [ ] LLVMAddFunction
+- [x] LLVMGetNamedFunction
+
+  `Module.function(named:)`
+
+- [ ] LLVMGetFirstFunction
+- [ ] LLVMGetLastFunction
+- [ ] LLVMGetNextFunction
+- [ ] LLVMGetPreviousFunction
+- [ ] LLVMSetModuleInlineAsm
+
 ### Basic Blocks
 
 - [ ] LLVMBasicBlockAsValue
@@ -70,13 +138,22 @@
 - [ ] LLVMGetBasicBlockName
 - [ ] LLVMGetBasicBlockParent
 - [ ] LLVMGetBasicBlockTerminator
-- [ ] LLVMCountBasicBlocks
-- [ ] LLVMGetBasicBlocks
+- [x] LLVMCountBasicBlocks
+
+  Implemented as the `count` property of `Function.basicBlocks`.
+
+- [x] LLVMGetBasicBlocks
+
+  `Function.basicBlocks`
+
 - [ ] LLVMGetFirstBasicBlock
 - [ ] LLVMGetLastBasicBlock
 - [ ] LLVMGetNextBasicBlock
 - [ ] LLVMGetPreviousBasicBlock
-- [ ] LLVMGetEntryBasicBlock
+- [x] LLVMGetEntryBasicBlock
+
+  `Function.entry`
+
 - [ ] LLVMInsertExistingBasicBlockAfterInsertBlock
 - [ ] LLVMAppendExistingBasicBlock
 - [ ] LLVMCreateBasicBlockInContext
@@ -281,6 +358,66 @@
 - [x] LLVMConstRealGetDouble
 
   `FloatingPointConstant.value()`
+
+##### Function Values
+
+- [ ] LLVMDeleteFunction
+- [ ] LLVMHasPersonalityFn
+- [ ] LLVMGetPersonalityFn
+- [ ] LLVMSetPersonalityFn
+- [ ] LLVMLookupIntrinsicID
+- [ ] LLVMGetIntrinsicID
+- [ ] LLVMGetIntrinsicDeclaration
+- [ ] LLVMIntrinsicGetType
+- [ ] LLVMIntrinsicGetName
+- [ ] LLVMIntrinsicCopyOverloadedName
+- [ ] LLVMIntrinsicCopyOverloadedName2
+- [ ] LLVMIntrinsicIsOverloaded
+- [ ] LLVMGetFunctionCallConv
+- [ ] LLVMSetFunctionCallConv
+- [ ] LLVMGetGC
+- [ ] LLVMSetGC
+- [x] LLVMAddAttributeAtIndex
+
+  `Module.addAttribute(_:_:to:)`
+
+- [x] LLVMGetAttributeCountAtIndex
+
+  Implemented as the `count` property of `Function.attributes`.
+
+- [x] LLVMGetAttributesAtIndex
+
+  Implemented by `Function.attributes`.
+
+- [ ] LLVMGetEnumAttributeAtIndex
+- [ ] LLVMGetStringAttributeAtIndex
+- [x] LLVMRemoveEnumAttributeAtIndex
+
+  `Module.removeAttribute(_:from:)`
+
+- [ ] LLVMRemoveStringAttributeAtIndex
+- [ ] LLVMAddTargetDependentFunctionAttr
+
+###### Function Parameters
+
+- [x] LLVMCountParams
+
+  `Function.Parameters.count`
+
+- [ ] LLVMGetParams
+- [x] LLVMGetParam
+
+  `Function.Parameters[_:]`
+
+- [x] LLVMGetParamParent
+
+  `Parameter.parent`
+
+- [ ] LLVMGetFirstParam
+- [ ] LLVMGetLastParam
+- [ ] LLVMGetNextParam
+- [ ] LLVMGetPreviousParam
+- [ ] LLVMSetParamAlignment
 
 ### Types
 
@@ -512,7 +649,10 @@
 - [ ] LLVMBuildSwitch
 - [ ] LLVMBuildIndirectBr
 - [ ] LLVMBuildInvoke2
-- [ ] LLVMBuildUnreachable
+- [x] LLVMBuildUnreachable
+
+  `Module.insertUnreachable(at:)`
+
 - [ ] LLVMBuildResume
 - [ ] LLVMBuildLandingPad
 - [ ] LLVMBuildCleanupRet
@@ -636,9 +776,18 @@
 
   `Module.insertStore(_:_:at:)`
 
-- [ ] LLVMBuildGEP2
-- [ ] LLVMBuildInBoundsGEP2
-- [ ] LLVMBuildStructGEP2
+- [x] LLVMBuildGEP2
+
+  `Module.insertGetElementPointer(of:typed:indices:at:)`
+
+- [x] LLVMBuildInBoundsGEP2
+
+  `Module.insertGetElementPointerInBounds(of:typed:indices:at:)`
+
+- [x] LLVMBuildStructGEP2
+
+  `Module.insertGetStructElementPointer(of:typed:index:at:)`
+
 - [ ] LLVMBuildGlobalString
 - [ ] LLVMBuildGlobalStringPtr
 - [ ] LLVMGetVolatile
@@ -649,15 +798,30 @@
 - [ ] LLVMSetOrdering
 - [ ] LLVMGetAtomicRMWBinOp
 - [ ] LLVMSetAtomicRMWBinOp
-- [ ] LLVMBuildTrunc
-- [ ] LLVMBuildZExt
-- [ ] LLVMBuildSExt
+- [x] LLVMBuildTrunc
+
+  `Module.insertTrunc(_:to:at:)`
+
+- [x] LLVMBuildZExt
+
+  `Module.insertZeroExtend(_:to:at:)`
+
+- [x] LLVMBuildSExt
+
+  `Module.insertSignedExtend(_:to:at:)`
+
 - [ ] LLVMBuildFPToUI
 - [ ] LLVMBuildFPToSI
 - [ ] LLVMBuildUIToFP
 - [ ] LLVMBuildSIToFP
-- [ ] LLVMBuildFPTrunc
-- [ ] LLVMBuildFPExt
+- [x] LLVMBuildFPTrunc
+
+  `Module.insertFPTrunc(_:to:at:)`
+
+- [x] LLVMBuildFPExt
+
+  `Module.insertFPExt(_:to:at:)`
+
 - [ ] LLVMBuildPtrToInt
 - [ ] LLVMBuildIntToPtr
 - [ ] LLVMBuildBitCast
@@ -671,17 +835,33 @@
 - [ ] LLVMBuildFPCast
 - [ ] LLVMBuildIntCast
 - [ ] LLVMGetCastOpcode
-- [ ] LLVMBuildICmp
-- [ ] LLVMBuildFCmp
+- [x] LLVMBuildICmp
+
+  `Module.insertIntegerComparison(_:_:_:at:)`
+
+- [x] LLVMBuildFCmp
+
+  `Module.insertFloatingPointComparison(_:_:_:at:)`
+
 - [ ] LLVMBuildPhi
-- [ ] LLVMBuildCall2
+- [x] LLVMBuildCall2
+
+  `Module.insertCall(_:typed:on:at:)`
+  `Module.insertCall(_:on:at:)`
+
 - [ ] LLVMBuildSelect
 - [ ] LLVMBuildVAArg
 - [ ] LLVMBuildExtractElement
 - [ ] LLVMBuildInsertElement
 - [ ] LLVMBuildShuffleVector
-- [ ] LLVMBuildExtractValue
-- [ ] LLVMBuildInsertValue
+- [x] LLVMBuildExtractValue
+
+  `Module.insertExtractValue(from:at:at:)`
+
+- [x] LLVMBuildInsertValue
+
+  `Module.insertInserValue(_:at:into:at:)`
+
 - [ ] LLVMBuildFreeze
 - [ ] LLVMBuildIsNull
 - [ ] LLVMBuildIsNotNull

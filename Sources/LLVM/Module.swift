@@ -65,9 +65,14 @@ public struct Module {
     }
   }
 
-  /// Returns the with given `name`, or `nil` if no such type exists.
+  /// Returns the type with given `name`, or `nil` if no such type exists.
   public func type(named name: String) -> IRType? {
     LLVMGetTypeByName2(context, name).map(AnyType.init(_:))
+  }
+
+  /// Returns the function with given `name`, or `nil` if no such function exists.
+  public func function(named name: String) -> Function? {
+    LLVMGetNamedFunction(llvm, name).map(Function.init(_:))
   }
 
   /// Returns an a function with given `name` and `type`, declaring it in `self` if it doesn't
@@ -82,15 +87,21 @@ public struct Module {
     }
   }
 
-  /// Adds a target-independent attribute with given `name` and optional `value` to `f`.
-  @discardableResult
-  public mutating func addAttribute(
-    _ name: Function.AttributeName, _ value: UInt64 = 0, to f: Function
-  ) -> Function.Attribute {
-    let a = LLVMCreateEnumAttribute(context, name.id, value)!
+  /// Adds attribute `a` to `f`.
+  public mutating func addAttribute(_ a: Function.Attribute, to f: Function) {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    LLVMAddAttributeAtIndex(f.llvm, i, a)
-    return .targetIndependent(llvm: a)
+    LLVMAddAttributeAtIndex(f.llvm, i, a.llvm)
+  }
+
+  /// Adds attribute `a` to the return value of `r`.
+  public mutating func addAttribute(_ a: Function.Return.Attribute, to r: Function.Return) {
+    LLVMAddAttributeAtIndex(r.parent.llvm, 0, a.llvm)
+  }
+
+  /// Adds attribute `a` to `p`.
+  public mutating func addAttribute(_ a: Parameter.Attribute, to p: Parameter) {
+    let i = UInt32(p.index + 1)
+    LLVMAddAttributeAtIndex(p.parent.llvm, i, a.llvm)
   }
 
   /// Removes `a` from `f`.
@@ -100,6 +111,25 @@ public struct Module {
       let k = LLVMGetEnumAttributeKind(h)
       let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
       LLVMRemoveEnumAttributeAtIndex(f.llvm, i, k)
+    }
+  }
+
+  /// Removes `a` from `p`.
+  public mutating func removeAttribute(_ a: Parameter.Attribute, from p: Parameter) {
+    switch a {
+    case .targetIndependent(let h):
+      let k = LLVMGetEnumAttributeKind(h)
+      let i = UInt32(p.index + 1)
+      LLVMRemoveEnumAttributeAtIndex(p.parent.llvm, i, k)
+    }
+  }
+
+  /// Removes `a` from `r`.
+  public mutating func removeAttribute(_ a: Function.Return.Attribute, from r: Function.Return) {
+    switch a {
+    case .targetIndependent(let h):
+      let k = LLVMGetEnumAttributeKind(h)
+      LLVMRemoveEnumAttributeAtIndex(r.parent.llvm, 0, k)
     }
   }
 
@@ -118,7 +148,16 @@ public struct Module {
     return .init(h)
   }
 
-  /// Returns an insertion point at the ebd of `b`.
+  /// Returns an insertion point at the start of `b`.
+  public func startOf(_ b: BasicBlock) -> InsertionPoint {
+    if let h = LLVMGetFirstInstruction(b.llvm) {
+      return before(Instruction(h))
+    } else {
+      return endOf(b)
+    }
+  }
+
+  /// Returns an insertion point at the end of `b`.
   public func endOf(_ b: BasicBlock) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
     LLVMPositionBuilderAtEnd(h, b.llvm)
@@ -230,6 +269,44 @@ public struct Module {
     .init(LLVMBuildAlloca(p.llvm, type.llvm, ""))
   }
 
+  /// Inerts an `alloca` allocating memory on the stack a value of `type`, at the entry of `f`.
+  ///
+  /// - Requires: `f` has an entry block.
+  public mutating func insertAlloca(_ type: IRType, atEntryOf f: Function) -> Alloca {
+    insertAlloca(type, at: startOf(f.entry!))
+  }
+
+  public mutating func insertGetElementPointer(
+    of base: IRValue,
+    typed baseType: IRType,
+    indices: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    var i = indices.map({ $0.llvm as Optional })
+    let h = LLVMBuildGEP2(p.llvm, baseType.llvm, base.llvm, &i, UInt32(i.count), "")!
+    return .init(h)
+  }
+
+  public mutating func insertGetElementPointerInBounds(
+    of base: IRValue,
+    typed baseType: IRType,
+    indices: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    var i = indices.map({ $0.llvm as Optional })
+    let h = LLVMBuildInBoundsGEP2(p.llvm, baseType.llvm, base.llvm, &i, UInt32(i.count), "")!
+    return .init(h)
+  }
+
+  public mutating func insertGetStructElementPointer(
+    of base: IRValue,
+    typed baseType: StructType,
+    index: Int,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildStructGEP2(p.llvm, baseType.llvm, base.llvm, UInt32(index), ""))
+  }
+
   public mutating func insertLoad(
     _ type: IRType, from source: IRValue, at p: InsertionPoint
   ) -> Instruction {
@@ -243,7 +320,7 @@ public struct Module {
     .init(LLVMBuildStore(p.llvm, value.llvm, location.llvm))
   }
 
-  // MARK: Control flow
+  // MARK: Terminators
 
   @discardableResult
   public mutating func insertBr(to destination: BasicBlock, at p: InsertionPoint) -> Instruction {
@@ -266,6 +343,105 @@ public struct Module {
   @discardableResult
   public mutating func insertReturn(_ value: IRValue, at p: InsertionPoint) -> Instruction {
     .init(LLVMBuildRet(p.llvm, value.llvm))
+  }
+
+  @discardableResult
+  public mutating func insertUnreachable(at p: InsertionPoint) -> Instruction {
+    .init(LLVMBuildUnreachable(p.llvm))
+  }
+
+  // MARK: Aggregate operations
+
+  public mutating func insertExtractValue(
+    from whole: IRValue,
+    at index: Int,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildExtractValue(p.llvm, whole.llvm, UInt32(index), ""))
+  }
+
+  public mutating func insertInsertValue(
+    _ part: IRValue,
+    at index: Int,
+    into whole: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildInsertValue(p.llvm, whole.llvm, part.llvm, UInt32(index), ""))
+  }
+
+  // MARK: Conversions
+
+  public mutating func insertTrunc(
+    _ source: IRValue, to target: IRType,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildTrunc(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertSignExtend(
+    _ source: IRValue, to target: IRType,
+    at p: Instruction
+  ) -> Instruction {
+    .init(LLVMBuildSExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertZeroExtend(
+    _ source: IRValue, to target: IRType,
+    at p: Instruction
+  ) -> Instruction {
+    .init(LLVMBuildZExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertFPTrunc(
+    _ source: IRValue, to target: IRType,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildFPTrunc(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertFPExtend(
+    _ source: IRValue, to target: IRType,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildFPExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  // MARK: Others
+
+  public mutating func insertCall(
+    _ callee: Function,
+    on arguments: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    insertCall(callee, typed: callee.valueType, on: arguments, at: p)
+  }
+
+  public mutating func insertCall(
+    _ callee: IRValue,
+    typed calleeType: IRType,
+    on arguments: [IRValue],
+    at p: InsertionPoint
+  ) -> Instruction {
+    var a = arguments.map({ $0.llvm as Optional })
+    return .init(LLVMBuildCall2(p.llvm, calleeType.llvm, callee.llvm, &a, UInt32(a.count), ""))
+  }
+
+  public mutating func insertIntegerComparison(
+    _ predicate: IntegerPredicate,
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    precondition(lhs.type == rhs.type)
+    return .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
+  public mutating func insertFloatingPointComparison(
+    _ predicate: FloatingPointPredicate,
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    precondition(lhs.type == rhs.type)
+    return .init(LLVMBuildFCmp(p.llvm, predicate.llvm, lhs.llvm, rhs.llvm, ""))
   }
 
 }
