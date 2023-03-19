@@ -16,7 +16,7 @@ on:
 
 jobs:
   build-on-windows:
-    name: ${{ matrix.host.os }}
+    name: "Native: ${{ matrix.host.os }}/release"
     strategy:
       fail-fast: false
       matrix:
