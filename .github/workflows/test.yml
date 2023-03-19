@@ -53,7 +53,8 @@ jobs:
     - name: Copy lib in LLVM folder
       run: xcopy c:\llvm-15.0.6-windows-x86-msvc17-libcmt\lib\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.34.31933\lib\x64 /s /h
     
-    - run: Add-Content $env:GITHUB_PATH 'C:\llvm-15.0.6-windows-x86-msvc17-libcmt\bin'
+    - name: Add LLVM to Path
+      run: Add-Content $env:GITHUB_PATH 'C:\llvm-15.0.6-windows-x86-msvc17-libcmt\bin'
 
     - run: llvm-config --version
 
