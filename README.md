@@ -6,6 +6,14 @@ See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)
 
 ## Insallation:
 
+### Setting the Environment
+
+On Windows, the official version of llvm does not include `llvm-config.exe`, so you need to compile LLVM by yourself or use third-party versions of LLVM.
+
+For details about how to configure the environment in Windows, see Windows CI.
+
+On MacOS and Linux:
+
 First, install LLVM 15.0+ on your system using your favorite package manager and make sure `llvm-config` is in your path.
 For example, using [MacPorts](https://www.macports.org) on macOS:
 
@@ -13,8 +21,6 @@ For example, using [MacPorts](https://www.macports.org) on macOS:
 port install llvm-15 llvm_select
 port select llvm mp-llvm-15
 ```
-
-On Windows, the official version of llvm does not include `llvm-config.exe`, so you need to compile LLVM by yourself or use third-party versions of LLVM.
 
 Then, make sure `llvm-config` is in your path.
 The command below should print the LLVM version installed on your system. 
@@ -25,16 +31,16 @@ llvm-config --version
 
 Next, you need to create a `pkgconfig` file specific to your installation.
 
-On Unix systems, you can run the script `Tools/make-pkgconfig.sh`.
+You can run the script `Tools/make-pkgconfig.sh`.
 It will create a file `/usr/local/lib/pkgconfig/llvm.pc`:
 
 ```bash
 ./Tools/make-pkgconfig.sh
 ``` 
 
-On Windows, you can copy the file in LLVM's `include` folder to the C++ standard library folder or customize `Sources/llvmc/llvmc.h`.
+### Build
 
-Finally, you should be able to build this project using Swift package manager:
+You should be able to build this project using Swift package manager:
 
 ```bash
 swift build -c release
