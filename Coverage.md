@@ -887,3 +887,30 @@
 - [ ] LLVMSetCmpXchgSuccessOrdering
 - [ ] LLVMGetCmpXchgFailureOrdering
 - [ ] LLVMSetCmpXchgFailureOrdering
+
+## Memory Buffers
+
+- [x] LLVMCreateMemoryBufferWithContentsOfFile
+
+  `MemoryBuffer.init(contentsOf:)`
+
+- [ ] LLVMCreateMemoryBufferWithSTDIN
+- [x] LLVMCreateMemoryBufferWithMemoryRange
+
+  `MemoryBuffer.withInstanceBorrowing(_:named:_:)`
+
+- [x] LLVMCreateMemoryBufferWithMemoryRangeCopy
+
+  `MemoryBuffer.init(copying:named:)`
+
+- [x] LLVMGetBufferStart
+
+  `MemoryBuffer.withUnsafeBytes`
+
+- [x] LLVMGetBufferSize
+
+  `MemoryBuffer.count`
+
+- [x] LLVMDisposeMemoryBuffer
+
+  Implemented by `MemoryBuffer.wrapped`.
