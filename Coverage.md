@@ -13,6 +13,15 @@
 - [ ] LLVMViewFunctionCFG
 - [ ] LLVMViewFunctionCFGOnly
 
+## Bit Writer
+
+- [x] LLVMWriteBitcodeToFile
+
+  `Module.writeBitcode()`
+
+- [ ] LLVMWriteBitcodeToFD
+- [ ] LLVMWriteBitcodeToMemoryBuffer
+
 ## Core
 
 ### Comdats

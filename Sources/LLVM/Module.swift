@@ -1,4 +1,5 @@
 import llvmc
+import Foundation
 
 /// The top-level structure in an LLVM program.
 public struct Module {
@@ -62,6 +63,13 @@ public struct Module {
 
     if status != 0 {
       throw VerificationError(description: String(cString: message!))
+    }
+  }
+
+  /// Writes the LLVM bitcode of this module to `filename`.
+  public func writeBitcode(to filename: URL) throws {
+    guard LLVMWriteBitcodeToFile(llvm, filename.path) == 0 else {
+      throw IOError.writeFailure
     }
   }
 
