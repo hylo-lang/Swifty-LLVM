@@ -39,7 +39,7 @@ public struct Module {
   /// A handle to the LLVM object wrapped by this instance.
   public var llvm: LLVMModuleRef { handles.module }
 
-  /// A handle to the LLVM context associated to this module.
+  /// A handle to the LLVM context associated with this module.
   internal var context: LLVMContextRef { handles.context }
 
   /// The name of the module.
@@ -52,6 +52,29 @@ public struct Module {
     }
   }
 
+  /// The data layout of the module.
+  public var layout: DataLayout {
+    get {
+      let s = LLVMGetDataLayoutStr(llvm)
+      let h = LLVMCreateTargetData(s)
+      return .init(h!)
+    }
+    set {
+      LLVMSetDataLayout(llvm, newValue.description)
+    }
+  }
+
+  /// The target of the module.
+  public var target: Target? {
+    get {
+      guard let t = LLVMGetTarget(llvm) else { return nil }
+      return try? Target(triple: .init(cString: t))
+    }
+    set {
+      LLVMSetTarget(llvm, newValue?.triple)
+    }
+  }
+
   /// Verifies if the IR in `self` is well formed and throws an error if it isn't.
   public func verify() throws {
     var message: UnsafeMutablePointer<CChar>? = nil
@@ -61,8 +84,52 @@ public struct Module {
     })
 
     if status != 0 {
-      throw VerificationError(description: String(cString: message!))
+      throw LLVMError(.init(cString: message!))
     }
+  }
+
+  /// Writes the LLVM bitcode of this module to `filepath`.
+  public func writeBitcode(to filepath: String) throws {
+    guard LLVMWriteBitcodeToFile(llvm, filepath) == 0 else {
+      throw LLVMError("write failure")
+    }
+  }
+
+  /// Returns the LLVM bitcode of this module.
+  public func bitcode() -> MemoryBuffer {
+    .init(LLVMWriteBitcodeToMemoryBuffer(llvm), owned: true)
+  }
+
+  /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
+  public func write(
+    _ type: CodeGenerationResultType,
+    for machine:TargetMachine,
+    to filepath: String
+  ) throws {
+    var error: UnsafeMutablePointer<CChar>? = nil
+    LLVMTargetMachineEmitToFile(machine.llvm, llvm, filepath, type.llvm, &error)
+
+    if let e = error {
+      defer { LLVMDisposeMessage(e) }
+      throw LLVMError(.init(cString: e))
+    }
+  }
+
+  /// Compiles this module for given `machine` and returns a result of kind `type`.
+  public func compile(
+    _ type: CodeGenerationResultType,
+    for machine: TargetMachine
+  ) throws -> MemoryBuffer {
+    var output: LLVMMemoryBufferRef? = nil
+    var error: UnsafeMutablePointer<CChar>? = nil
+    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvm, type.llvm, &error, &output)
+
+    if let e = error {
+      defer { LLVMDisposeMessage(e) }
+      throw LLVMError(.init(cString: e))
+    }
+
+    return .init(output!, owned: true)
   }
 
   /// Returns the type with given `name`, or `nil` if no such type exists.
@@ -320,7 +387,7 @@ public struct Module {
     .init(LLVMBuildStore(p.llvm, value.llvm, location.llvm))
   }
 
-  // MARK: Control flow
+  // MARK: Terminators
 
   @discardableResult
   public mutating func insertBr(to destination: BasicBlock, at p: InsertionPoint) -> Instruction {
@@ -343,6 +410,67 @@ public struct Module {
   @discardableResult
   public mutating func insertReturn(_ value: IRValue, at p: InsertionPoint) -> Instruction {
     .init(LLVMBuildRet(p.llvm, value.llvm))
+  }
+
+  @discardableResult
+  public mutating func insertUnreachable(at p: InsertionPoint) -> Instruction {
+    .init(LLVMBuildUnreachable(p.llvm))
+  }
+
+  // MARK: Aggregate operations
+
+  public mutating func insertExtractValue(
+    from whole: IRValue,
+    at index: Int,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildExtractValue(p.llvm, whole.llvm, UInt32(index), ""))
+  }
+
+  public mutating func insertInsertValue(
+    _ part: IRValue,
+    at index: Int,
+    into whole: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildInsertValue(p.llvm, whole.llvm, part.llvm, UInt32(index), ""))
+  }
+
+  // MARK: Conversions
+
+  public mutating func insertTrunc(
+    _ source: IRValue, to target: IRType,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildTrunc(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertSignExtend(
+    _ source: IRValue, to target: IRType,
+    at p: Instruction
+  ) -> Instruction {
+    .init(LLVMBuildSExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertZeroExtend(
+    _ source: IRValue, to target: IRType,
+    at p: Instruction
+  ) -> Instruction {
+    .init(LLVMBuildZExt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertFPTrunc(
+    _ source: IRValue, to target: IRType,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildFPTrunc(p.llvm, source.llvm, target.llvm, ""))
+  }
+
+  public mutating func insertFPExtend(
+    _ source: IRValue, to target: IRType,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildFPExt(p.llvm, source.llvm, target.llvm, ""))
   }
 
   // MARK: Others

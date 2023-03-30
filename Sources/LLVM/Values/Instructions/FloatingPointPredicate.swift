@@ -4,13 +4,13 @@ import llvmc
 ///
 /// - Note: Ordered means that neither operand is a QNAN while unordered means that either operand
 ///   may be a QNAN.
-public enum FloatingPointPredicate: Hashable {
+public enum FloatingPointPredicate: String, Hashable {
 
   /// No comparison; always false.
-  case alwaysFalse
+  case alwaysFalse = "false"
 
   /// No comparison; always true.
-  case alwaysTrue
+  case alwaysTrue = "true"
 
   /// Values are ordered and equal.
   case oeq
@@ -91,5 +91,15 @@ public enum FloatingPointPredicate: Hashable {
       return LLVMRealUNO
     }
   }
+
+}
+
+extension FloatingPointPredicate: LosslessStringConvertible {
+
+  public init?(_ description: String) {
+    self.init(rawValue: description)
+  }
+
+  public var description: String { self.rawValue }
 
 }

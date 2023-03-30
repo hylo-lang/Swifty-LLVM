@@ -1,7 +1,7 @@
 import llvmc
 
 /// The predicate of an integer comparison.
-public enum IntegerPredicate: Hashable {
+public enum IntegerPredicate: String, Hashable {
 
   /// Values are equal.
   case eq
@@ -58,5 +58,15 @@ public enum IntegerPredicate: Hashable {
       return LLVMIntSLE
     }
   }
+
+}
+
+extension IntegerPredicate: LosslessStringConvertible {
+
+  public init?(_ description: String) {
+    self.init(rawValue: description)
+  }
+
+  public var description: String { self.rawValue }
 
 }
