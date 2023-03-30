@@ -49,7 +49,7 @@ public struct MemoryBuffer {
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
-      throw IOError.readFailure(message: .init(cString: e))
+      throw LLVMError("read failure: \(String(cString: e))")
     }
 
     self.init(handle!, owned: true)

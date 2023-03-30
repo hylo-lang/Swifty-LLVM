@@ -51,7 +51,7 @@ public struct Target {
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
-      throw TargetError(description: .init(cString: e))
+      throw LLVMError(.init(cString: e))
     }
 
     if let t = triple {

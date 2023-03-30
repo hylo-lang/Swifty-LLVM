@@ -61,14 +61,14 @@ public struct Module {
     })
 
     if status != 0 {
-      throw VerificationError(description: String(cString: message!))
+      throw LLVMError(.init(cString: message!))
     }
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
   public func writeBitcode(to filepath: String) throws {
     guard LLVMWriteBitcodeToFile(llvm, filepath) == 0 else {
-      throw IOError.writeFailure
+      throw LLVMError("write failure")
     }
   }
 
@@ -84,7 +84,7 @@ public struct Module {
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
-      throw CodeGenerationError(description: .init(cString: e))
+      throw LLVMError(.init(cString: e))
     }
   }
 
@@ -96,7 +96,7 @@ public struct Module {
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
-      throw CodeGenerationError(description: .init(cString: e))
+      throw LLVMError(.init(cString: e))
     }
 
     return .init(output!, owned: true)
