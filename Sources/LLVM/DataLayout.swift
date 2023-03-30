@@ -6,8 +6,8 @@ public struct DataLayout {
   /// A handle to the LLVM object wrapped by this instance.
   private let wrapped: ManagedPointer<LLVMTargetDataRef>
 
-  /// Creates an instance wrapping `llvm`.
-  public init(_ machine: TargetMachine) {
+  /// Creates an instance representing the data layout associated with `machine`.
+  public init(of machine: TargetMachine) {
     let handle = LLVMCreateTargetDataLayout(machine.llvm)
     self.wrapped = .init(handle!, dispose: LLVMDisposeTargetData(_:))
   }

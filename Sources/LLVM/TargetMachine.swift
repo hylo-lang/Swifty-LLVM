@@ -54,6 +54,11 @@ public struct TargetMachine {
     .init(of: self)
   }
 
+  /// The data layout of the machine.
+  public var layout: DataLayout {
+    .init(of: self)
+  }
+
   /// A handle to the LLVM object wrapped by this instance.
   internal var llvm: LLVMTargetMachineRef { wrapped.llvm }
 
