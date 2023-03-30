@@ -28,6 +28,27 @@ public struct TargetMachine {
     self.wrapped = .init(handle!, dispose: LLVMDisposeTargetMachine(_:))
   }
 
+  /// The triple of the machine.
+  public var triple: String {
+    guard let s = LLVMGetTargetMachineTriple(llvm) else { return "" }
+    defer { LLVMDisposeMessage(s) }
+    return .init(cString: s)
+  }
+
+  /// The CPU of the machine.
+  public var cpu: String {
+    guard let s = LLVMGetTargetMachineCPU(llvm) else { return "" }
+    defer { LLVMDisposeMessage(s) }
+    return .init(cString: s)
+  }
+
+  /// The features of the machine.
+  public var features: String {
+    guard let s = LLVMGetTargetMachineFeatureString(llvm) else { return "" }
+    defer { LLVMDisposeMessage(s) }
+    return .init(cString: s)
+  }
+
   /// A handle to the LLVM object wrapped by this instance.
   internal var llvm: LLVMTargetMachineRef { wrapped.llvm }
 
@@ -35,10 +56,6 @@ public struct TargetMachine {
 
 extension TargetMachine: CustomStringConvertible {
 
-  public var description: String {
-    let s = LLVMGetTargetMachineTriple(llvm)
-    defer { LLVMDisposeMessage(s) }
-    return s.map({ .init(cString: $0) }) ?? ""
-  }
+  public var description: String { triple }
 
 }

@@ -26,6 +26,13 @@ public struct Target {
     self.llvm = llvm
   }
 
+  /// The name of the target.
+  public var name: String {
+    guard let s = LLVMGetTargetName(llvm) else { return "" }
+    defer { LLVMDisposeMessage(UnsafeMutablePointer(mutating: s)) }
+    return .init(cString: s)
+  }
+
   /// Returns the target representing the machine host.
   public static func host() throws -> Target {
     // Ensures LLVM targets are initialized.
@@ -53,5 +60,25 @@ public struct Target {
   private static let initializeHost: Void = {
     LLVMInitializeNativeTarget()
   }()
+
+}
+
+extension Target: Hashable {
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(llvm)
+  }
+
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.llvm == rhs.llvm
+  }
+
+}
+
+extension Target: CustomStringConvertible {
+
+  public var description: String {
+    .init(cString: LLVMGetTargetDescription(llvm))
+  }
 
 }
