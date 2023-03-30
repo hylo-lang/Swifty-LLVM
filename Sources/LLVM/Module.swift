@@ -73,8 +73,33 @@ public struct Module {
   }
 
   /// Returns the LLVM bitcode of this module.
-  public func bitcode(to target: Int) -> MemoryBuffer {
+  public func bitcode() -> MemoryBuffer {
     .init(LLVMWriteBitcodeToMemoryBuffer(llvm), owned: true)
+  }
+
+  /// Compiles this module for given `machine` and writes an object file to `filepath`.
+  public func writeObjectFile(for machine:TargetMachine, to filepath: String) throws {
+    var error: UnsafeMutablePointer<CChar>? = nil
+    LLVMTargetMachineEmitToFile(machine.llvm, llvm, filepath, LLVMObjectFile, &error)
+
+    if let e = error {
+      defer { LLVMDisposeMessage(e) }
+      throw CodeGenerationError(description: .init(cString: e))
+    }
+  }
+
+  /// Compiles this module for given `machine` and returns an object file.
+  public func objectFile(for machine: TargetMachine) throws -> MemoryBuffer {
+    var output: LLVMMemoryBufferRef? = nil
+    var error: UnsafeMutablePointer<CChar>? = nil
+    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvm, LLVMObjectFile, &error, &output)
+
+    if let e = error {
+      defer { LLVMDisposeMessage(e) }
+      throw CodeGenerationError(description: .init(cString: e))
+    }
+
+    return .init(output!, owned: true)
   }
 
   /// Returns the type with given `name`, or `nil` if no such type exists.
