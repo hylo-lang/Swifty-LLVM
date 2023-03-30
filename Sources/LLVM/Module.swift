@@ -39,7 +39,7 @@ public struct Module {
   /// A handle to the LLVM object wrapped by this instance.
   public var llvm: LLVMModuleRef { handles.module }
 
-  /// A handle to the LLVM context associated to this module.
+  /// A handle to the LLVM context associated with this module.
   internal var context: LLVMContextRef { handles.context }
 
   /// The name of the module.
