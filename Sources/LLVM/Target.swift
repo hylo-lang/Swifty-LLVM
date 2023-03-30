@@ -39,6 +39,17 @@ public struct Target {
     return .init(cString: s)
   }
 
+
+  /// `true` if the target has a JIT.
+  public var hasJIT: Bool {
+    LLVMTargetHasJIT(llvm) != 0
+  }
+
+  /// `true` if the target has an assembly back-end.
+  public var hasAssemblyBackEnd: Bool {
+    LLVMTargetHasAsmBackend(llvm) != 0
+  }
+
   /// Returns the target representing the machine host.
   public static func host() throws -> Target {
     // Ensures LLVM targets are initialized.
