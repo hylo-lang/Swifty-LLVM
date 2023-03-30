@@ -6,6 +6,11 @@ public struct DataLayout {
   /// A handle to the LLVM object wrapped by this instance.
   private let wrapped: ManagedPointer<LLVMTargetDataRef>
 
+  /// Creates an instance wrapping `llvm`.
+  internal init(_ llvm: LLVMTargetDataRef) {
+    self.wrapped = .init(llvm, dispose: LLVMDisposeTargetData(_:))
+  }
+
   /// Creates an instance representing the data layout associated with `machine`.
   public init(of machine: TargetMachine) {
     let handle = LLVMCreateTargetDataLayout(machine.llvm)
@@ -55,6 +60,22 @@ public struct DataLayout {
   /// - Requires: `offset` is a valid byte offset in `type`.
   public func index(at offset: Int, in type: StructType) -> Int {
     Int(LLVMElementAtOffset(llvm, type.llvm, UInt64(offset)))
+  }
+
+}
+
+extension DataLayout: Equatable {
+
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.description == rhs.description
+  }
+
+}
+
+extension DataLayout: Hashable {
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(description)
   }
 
 }

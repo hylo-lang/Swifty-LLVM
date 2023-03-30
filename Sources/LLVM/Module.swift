@@ -52,6 +52,29 @@ public struct Module {
     }
   }
 
+  /// The data layout of the module.
+  public var layout: DataLayout {
+    get {
+      let s = LLVMGetDataLayoutStr(llvm)
+      let h = LLVMCreateTargetData(s)
+      return .init(h!)
+    }
+    set {
+      LLVMSetDataLayout(llvm, newValue.description)
+    }
+  }
+
+  /// The target of the module.
+  public var target: Target? {
+    get {
+      guard let t = LLVMGetTarget(llvm) else { return nil }
+      return try? Target(triple: .init(cString: t))
+    }
+    set {
+      LLVMSetTarget(llvm, newValue?.triple)
+    }
+  }
+
   /// Verifies if the IR in `self` is well formed and throws an error if it isn't.
   public func verify() throws {
     var message: UnsafeMutablePointer<CChar>? = nil
@@ -83,9 +106,6 @@ public struct Module {
     for machine:TargetMachine,
     to filepath: String
   ) throws {
-    LLVMSetDataLayout(llvm, machine.layout.description)
-    LLVMSetTarget(llvm, machine.triple)
-
     var error: UnsafeMutablePointer<CChar>? = nil
     LLVMTargetMachineEmitToFile(machine.llvm, llvm, filepath, type.llvm, &error)
 
@@ -100,9 +120,6 @@ public struct Module {
     _ type: CodeGenerationResultType,
     for machine: TargetMachine
   ) throws -> MemoryBuffer {
-    LLVMSetDataLayout(llvm, machine.layout.description)
-    LLVMSetTarget(llvm, machine.triple)
-
     var output: LLVMMemoryBufferRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
     LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvm, type.llvm, &error, &output)

@@ -20,16 +20,30 @@ public struct Target {
   /// A handle to the LLVM object wrapped by this instance.
   internal let llvm: LLVMTargetRef
 
+  /// Creates an instance wrapping `llvm`, which represents the target associated with `triple`.
+  private init(wrapping llvm: LLVMTargetRef, for triple: String) {
+    self.triple = triple
+    self.llvm = llvm
+  }
+
+  /// Creates an instance from a triple.
+  public init(triple: String) throws {
+    var handle: LLVMTargetRef? = nil
+    var error: UnsafeMutablePointer<CChar>? = nil
+    LLVMGetTargetFromTriple(triple, &handle, &error)
+
+    if let e = error {
+      defer { LLVMDisposeMessage(e) }
+      throw LLVMError(.init(cString: e))
+    }
+
+    self.init(wrapping: handle!, for: triple)
+  }
+
   /// Creates an instance representing the target associated with `machine`.
   public init(of machine: TargetMachine) {
     let h = LLVMGetTargetMachineTarget(machine.llvm)
-    self.init(triple: machine.triple, llvm: h!)
-  }
-
-  /// Creates an instance wrapping `llvm`, which represents the target associated with `triple`.
-  private init(triple: String, llvm: LLVMTargetRef) {
-    self.triple = triple
-    self.llvm = llvm
+    self.init(wrapping: h!, for: machine.triple)
   }
 
   /// The name of the target.
@@ -56,20 +70,11 @@ public struct Target {
     _ = initializeHost
 
     let triple = LLVMGetDefaultTargetTriple()
-    var handle: LLVMTargetRef? = nil
-    var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMGetTargetFromTriple(triple, &handle, &error)
-
-    if let e = error {
-      defer { LLVMDisposeMessage(e) }
-      throw LLVMError(.init(cString: e))
-    }
-
     if let t = triple {
       defer { LLVMDisposeMessage(t) }
-      return .init(triple: .init(cString: t), llvm: handle!)
+      return try .init(triple: .init(cString: t))
     } else {
-      return .init(triple: "", llvm: handle!)
+      return try .init(triple: "")
     }
   }
 

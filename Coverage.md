@@ -93,9 +93,15 @@
 - [ ] LLVMSetModuleIdentifier
 - [ ] LLVMGetSourceFileName
 - [ ] LLVMSetSourceFileName
-- [ ] LLVMGetDataLayoutStr
+- [x] LLVMGetDataLayoutStr
+
+  `Module.layout`
+
 - [ ] LLVMGetDataLayout
-- [ ] LLVMSetDataLayout
+- [x] LLVMSetDataLayout
+
+  `Module.layout`
+
 - [ ] LLVMGetTarget
 - [ ] Target
 - [ ] LLVMCopyModuleFlagsMetadata
