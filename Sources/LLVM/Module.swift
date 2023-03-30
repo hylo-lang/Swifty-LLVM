@@ -77,10 +77,17 @@ public struct Module {
     .init(LLVMWriteBitcodeToMemoryBuffer(llvm), owned: true)
   }
 
-  /// Compiles this module for given `machine` and writes an object file to `filepath`.
-  public func writeObjectFile(for machine:TargetMachine, to filepath: String) throws {
+  /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
+  public func write(
+    _ type: CodeGenerationResultType,
+    for machine:TargetMachine,
+    to filepath: String
+  ) throws {
+    LLVMSetDataLayout(llvm, machine.layout.description)
+    LLVMSetTarget(llvm, machine.triple)
+
     var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMTargetMachineEmitToFile(machine.llvm, llvm, filepath, LLVMObjectFile, &error)
+    LLVMTargetMachineEmitToFile(machine.llvm, llvm, filepath, type.llvm, &error)
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
@@ -88,11 +95,17 @@ public struct Module {
     }
   }
 
-  /// Compiles this module for given `machine` and returns an object file.
-  public func objectFile(for machine: TargetMachine) throws -> MemoryBuffer {
+  /// Compiles this module for given `machine` and returns a result of kind `type`.
+  public func compile(
+    _ type: CodeGenerationResultType,
+    for machine: TargetMachine
+  ) throws -> MemoryBuffer {
+    LLVMSetDataLayout(llvm, machine.layout.description)
+    LLVMSetTarget(llvm, machine.triple)
+
     var output: LLVMMemoryBufferRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvm, LLVMObjectFile, &error, &output)
+    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvm, type.llvm, &error, &output)
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }

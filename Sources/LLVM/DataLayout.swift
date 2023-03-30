@@ -58,3 +58,13 @@ public struct DataLayout {
   }
 
 }
+
+extension DataLayout: CustomStringConvertible {
+
+  public var description: String {
+    guard let s = LLVMCopyStringRepOfTargetData(llvm) else { return "" }
+    defer { LLVMDisposeMessage(s) }
+    return .init(cString: s)
+  }
+
+}
