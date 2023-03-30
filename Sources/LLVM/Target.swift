@@ -64,6 +64,9 @@ public struct Target {
 
   /// The initialization of the native target.
   private static let initializeHost: Void = {
+    LLVMInitializeNativeAsmParser()
+    LLVMInitializeNativeAsmPrinter()
+    LLVMInitializeNativeDisassembler()
     LLVMInitializeNativeTarget()
   }()
 
