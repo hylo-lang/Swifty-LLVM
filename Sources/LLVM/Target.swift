@@ -20,6 +20,12 @@ public struct Target {
   /// A handle to the LLVM object wrapped by this instance.
   internal let llvm: LLVMTargetRef
 
+  /// Creates an instance representing the target associated with `machine`.
+  public init(of machine: TargetMachine) {
+    let h = LLVMGetTargetMachineTarget(machine.llvm)
+    self.init(triple: machine.triple, llvm: h!)
+  }
+
   /// Creates an instance wrapping `llvm`, which represents the target associated with `triple`.
   private init(triple: String, llvm: LLVMTargetRef) {
     self.triple = triple

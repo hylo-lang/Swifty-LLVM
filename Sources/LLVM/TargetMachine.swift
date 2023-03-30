@@ -49,6 +49,11 @@ public struct TargetMachine {
     return .init(cString: s)
   }
 
+  /// The target associated with the machine.
+  public var target: Target {
+    .init(of: self)
+  }
+
   /// A handle to the LLVM object wrapped by this instance.
   internal var llvm: LLVMTargetMachineRef { wrapped.llvm }
 
