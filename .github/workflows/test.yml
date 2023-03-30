@@ -1,0 +1,76 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, rewrite ]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+  pull_request:
+    branches: [ "**" ]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+
+jobs:
+  build-devcontainer:
+    name: "Devcontainer: ${{ matrix.host.os }}/${{ matrix.configuration }}"
+    strategy: 
+      fail-fast: false
+      matrix: 
+        host: [
+          { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
+        ]
+        configuration: [ "debug", "release" ]
+
+    runs-on: ${{ matrix.host.os }}
+    steps:
+    - name: Checkout (GitHub)
+      uses: actions/checkout@v3
+
+    - run: git config --global core.autocrlf input
+
+    - name: Build and run devcontainer task
+      uses: devcontainers/ci@v0.3
+      with:
+        runCmd: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
+
+  build-native:
+    name: "Native: ${{ matrix.host.os }}/${{ matrix.configuration }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [
+          { type: macos, os: macos-latest}
+        ]
+        configuration: [ "debug", "release" ]
+
+    runs-on: ${{ matrix.host.os }}
+    steps:
+    - name: Checkout (GitHub)
+      uses: actions/checkout@v3
+
+    - run: git config --global core.autocrlf input
+
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v1
+
+    - run: swift --version
+      
+    - name: Install LLVM
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "15.0"
+
+    - run: llvm-config --version
+
+    - name: Configure pkgconfig
+      run: sudo ./Tools/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc
+
+    - name: Build
+      run: swift build -v -c ${{ matrix.configuration }}
+
+    - name: Test 
+      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
