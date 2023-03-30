@@ -914,3 +914,140 @@
 - [x] LLVMDisposeMemoryBuffer
 
   Implemented by `MemoryBuffer.wrapped`.
+
+## Target Information
+
+- [ ] LLVMInitializeAllTargetInfos
+- [ ] LLVMInitializeAllTargets
+- [ ] LLVMInitializeAllTargetMCs
+- [ ] LLVMInitializeAllAsmPrinters
+- [ ] LLVMInitializeAllAsmParsers
+- [ ] LLVMInitializeAllDisassemblers
+- [x] LLVMInitializeNativeTarget
+
+  `Target.host()`
+
+- [x] LLVMInitializeNativeAsmParser
+
+  `Target.host()`
+
+- [x] LLVMInitializeNativeAsmPrinter
+
+  `Target.host()`
+
+- [x] LLVMInitializeNativeDisassembler
+
+  `Target.host()`
+
+- [ ] LLVMGetModuleDataLayout
+- [ ] LLVMSetModuleDataLayout
+- [ ] LLVMCreateTargetData
+- [x] LLVMDisposeTargetData
+
+  Implemented by `DataLayout.wrapped`
+
+- [ ] LLVMAddTargetLibraryInfo
+- [x] LLVMCopyStringRepOfTargetData
+
+  `DataLayout.description`
+
+- [ ] LLVMByteOrder
+- [ ] LLVMPointerSize
+- [ ] LLVMPointerSizeForAS
+- [ ] LLVMIntPtrType
+- [ ] LLVMIntPtrTypeForAS
+- [ ] LLVMIntPtrTypeInContext
+- [ ] LLVMIntPtrTypeForASInContext
+- [ ] LLVMSizeOfTypeInBits
+- [x] LLVMStoreSizeOfType
+
+  `DataLayout.storageSize(of:)`
+
+- [ ] LLVMABISizeOfType
+- [x] LLVMABIAlignmentOfType
+
+  `DataLayout.abiAlignment(of:)`
+
+- [ ] LLVMCallFrameAlignmentOfType
+- [x] LLVMPreferredAlignmentOfType
+
+  `DataLayout.preferredAlignment(of:)`
+
+- [ ] LLVMPreferredAlignmentOfGlobal
+- [x] LLVMElementAtOffset
+
+  `DataLayout.element(at:in:)`
+
+- [x] LLVMOffsetOfElement
+
+  `DataLayout.offset(of:in:)`
+
+- [ ] LLVMGetFirstTarget
+- [ ] LLVMGetNextTarget
+- [ ] LLVMGetTargetFromName
+- [x] LLVMGetTargetFromTriple
+
+  `Target.host()`
+
+- [x] LLVMGetTargetName
+
+  `Target.name`
+
+- [x] LLVMGetTargetDescription
+
+  `Target.description`
+
+- [x] LLVMTargetHasJIT
+
+  `Target.hasJIT`
+
+- [ ] LLVMTargetHasTargetMachine
+- [x] LLVMTargetHasAsmBackend
+
+  `Target.hasAssemblyBackEnd`
+
+- [x] LLVMCreateTargetMachine
+
+  `TargetMachine.init(for:cpu:features:optimization:relocation:code:)`
+
+- [x] LLVMDisposeTargetMachine
+
+  Implemented by `TargetMachine.wrapped`.
+
+- [x] LLVMGetTargetMachineTarget
+
+  `Target.init(of:)`
+
+- [x] LLVMGetTargetMachineTriple
+
+  `TargetMachine.triple`
+
+- [x] LLVMGetTargetMachineCPU
+
+  `TargetMachine.cpu`
+
+- [x] LLVMGetTargetMachineFeatureString
+
+  `TargetMachine.features`
+
+- [x] LLVMCreateTargetDataLayout
+
+  `DataLayout.init(of:)`
+
+- [ ] LLVMSetTargetMachineAsmVerbosity
+- [x] LLVMTargetMachineEmitToFile
+
+  `Module.write(_:for:to:)`
+
+- [ ] LLVMTargetMachineEmitToMemoryBuffer
+
+  `Module.compile(_:for:)`
+
+- [x] LLVMGetDefaultTargetTriple
+
+  `Target.host()`
+
+- [ ] LLVMNormalizeTargetTriple
+- [ ] LLVMGetHostCPUName
+- [ ] LLVMGetHostCPUFeatures
+- [ ] LLVMAddAnalysisPasses
