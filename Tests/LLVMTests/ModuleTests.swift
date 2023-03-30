@@ -35,4 +35,17 @@ final class ModuleTests: XCTestCase {
     XCTAssertThrowsError(try m.verify())
   }
 
+  func testCompile() throws {
+    var m = Module("foo")
+    let i32 = IntegerType(32, in: &m)
+
+    let f = m.declareFunction("main", .init(from: [], to: i32, in: &m))
+    let b = m.appendBlock(to: f)
+    m.insertReturn(i32.zero, at: m.endOf(b))
+
+    let t = try TargetMachine(for: .host())
+    let a = try m.compile(.assembly, for: t)
+    XCTAssert(a.count != 0)
+  }
+
 }
