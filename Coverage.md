@@ -89,8 +89,14 @@
 - [ ] LLVMModuleCreateWithNameInContext
 - [ ] LLVMCloneModule
 - [ ] LLVMDisposeModule
-- [ ] LLVMGetModuleIdentifier
-- [ ] LLVMSetModuleIdentifier
+- [x] LLVMGetModuleIdentifier
+
+  `Module.name`
+
+- [x] LLVMSetModuleIdentifier
+
+  `Module.name`
+
 - [ ] LLVMGetSourceFileName
 - [ ] LLVMSetSourceFileName
 - [x] LLVMGetDataLayoutStr
@@ -259,8 +265,14 @@
   `IRValue.type`
 
 - [ ] LLVMGetValueKind
-- [ ] LLVMGetValueName2
-- [ ] LLVMSetValueName2
+- [x] LLVMGetValueName2
+
+  `IRValue.name`
+
+- [x] LLVMSetValueName2
+
+  `IRValue.name`
+
 - [ ] LLVMDumpValue
 - [x] LLVMPrintValueToString
 
@@ -340,6 +352,36 @@
 - [ ] LLVMConstNamedStruct
 - [ ] LLVMGetAggregateElement
 - [ ] LLVMConstVector
+
+##### Global Values
+
+- [ ] LLVMGetGlobalParent
+- [ ] LLVMIsDeclaration
+- [ ] LLVMGetLinkage
+- [ ] LLVMSetLinkage
+- [ ] LLVMGetSection
+- [ ] LLVMSetSection
+- [ ] LLVMGetVisibility
+- [ ] LLVMSetVisibility
+- [ ] LLVMGetDLLStorageClass
+- [ ] LLVMSetDLLStorageClass
+- [ ] LLVMGetUnnamedAddress
+- [ ] LLVMSetUnnamedAddress
+- [x] LLVMGlobalGetValueType
+
+  `Global.valueType`
+
+- [ ] LLVMHasUnnamedAddr
+- [ ] LLVMSetUnnamedAddr
+- [ ] LLVMGetAlignment
+- [ ] LLVMSetAlignment
+- [ ] LLVMGlobalSetMetadata
+- [ ] LLVMGlobalEraseMetadata
+- [ ] LLVMGlobalClearMetadata
+- [ ] LLVMGlobalCopyAllMetadata
+- [ ] LLVMDisposeValueMetadataEntries
+- [ ] LLVMValueMetadataEntriesGetKind
+- [ ] LLVMValueMetadataEntriesGetMetadata
 
 ##### Scalar Constants
 
