@@ -142,7 +142,26 @@ public struct Module {
     LLVMGetNamedFunction(llvm, name).map(Function.init(_:))
   }
 
-  /// Returns a function with given `name` and `type`, declaring it in `self` if it doesn't exist.
+  /// Returns the global with given `name`, or `nil` if no such global exists.
+  public func global(named name: String) -> GlobalVariable? {
+    LLVMGetNamedGlobal(llvm, name).map(GlobalVariable.init(_:))
+  }
+
+  /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
+  public mutating func declareGlobalVariable(
+    _ name: String,
+    _ type: IRType,
+    inAddressSpace s: AddressSpace = .default
+  ) -> GlobalVariable {
+    if let g = global(named: name) {
+      precondition(g.valueType == type)
+      return g
+    } else {
+      return .init(LLVMAddGlobalInAddressSpace(llvm, type.llvm, name, s.llvm))
+    }
+  }
+
+  /// Returns a function with given `name` and `type`, declaring it if it doesn't exist.
   public mutating func declareFunction(_ name: String, _ type: FunctionType) -> Function {
     if let f = function(named: name) {
       precondition(f.valueType == type)

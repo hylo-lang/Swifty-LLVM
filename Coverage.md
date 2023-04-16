@@ -437,6 +437,50 @@
 - [ ] LLVMGetPreviousParam
 - [ ] LLVMSetParamAlignment
 
+##### Global Variables
+
+- [ ] LLVMAddGlobal
+- [x] LLVMAddGlobalInAddressSpace
+
+  `Module.declareGlobal(_:_:inAddressSpace:)`
+
+- [x] LLVMGetNamedGlobal
+
+  `Module.global(named:)`
+
+- [ ] LLVMGetFirstGlobal
+- [ ] LLVMGetLastGlobal
+- [ ] LLVMGetNextGlobal
+- [ ] LLVMGetPreviousGlobal
+- [ ] LLVMDeleteGlobal
+- [x] LLVMGetInitializer
+
+  `GlobalVariable.initializer`
+
+- [x] LLVMSetInitializer
+
+  `GlobalVariable.initializer`
+
+- [ ] LLVMIsThreadLocal
+- [ ] LLVMSetThreadLocal
+- [x] LLVMIsGlobalConstant
+
+  `GlobalVariable.isGlobalConstant`
+
+- [x] LLVMSetGlobalConstant
+
+  `GlobalVariable.isGlobalConstant`
+
+- [ ] LLVMGetThreadLocalMode
+- [ ] LLVMSetThreadLocalMode
+- [x] LLVMIsExternallyInitialized
+
+  `GlobalVariable.isExternallyInitialized`
+
+- [x] LLVMSetExternallyInitialized
+
+  `GlobalVariable.isExternallyInitialized`
+
 ### Types
 
 - [x] LLVMGetTypeKind
