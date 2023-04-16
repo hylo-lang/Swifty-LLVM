@@ -332,7 +332,10 @@
 
 - [ ] LLVMConstStructInContext
 - [ ] LLVMConstStruct
-- [ ] LLVMConstArray
+- [x] LLVMConstArray
+
+  `ArrayConstant.init(of:containing:in:)`
+
 - [ ] LLVMConstArray2
 - [ ] LLVMConstNamedStruct
 - [ ] LLVMGetAggregateElement
