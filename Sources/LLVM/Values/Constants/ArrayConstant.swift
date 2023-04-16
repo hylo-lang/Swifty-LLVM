@@ -20,6 +20,12 @@ public struct ArrayConstant: IRValue, Hashable {
     self.count = values.count
   }
 
+  /// Creates a constant array of `i8` in `module`, filled with the contents of `bytes`.
+  public init<S: Sequence>(bytes: S, in module: inout Module) where S.Element == UInt8 {
+    let i8 = IntegerType(8, in: &module)
+    self.init(of: i8, containing: bytes.map({ i8.constant(UInt64($0)) }), in: &module)
+  }
+
 }
 
 extension ArrayConstant: BidirectionalCollection {
