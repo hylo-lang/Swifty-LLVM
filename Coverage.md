@@ -501,7 +501,7 @@
 
 - [x] LLVMSetInitializer
 
-  `GlobalVariable.initializer`
+  `Module.setInitializer(_:for:)`
 
 - [ ] LLVMIsThreadLocal
 - [ ] LLVMSetThreadLocal
@@ -511,7 +511,7 @@
 
 - [x] LLVMSetGlobalConstant
 
-  `GlobalVariable.isGlobalConstant`
+  `Module.setGlobalConstant(_:for:)`
 
 - [ ] LLVMGetThreadLocalMode
 - [ ] LLVMSetThreadLocalMode
@@ -521,7 +521,7 @@
 
 - [x] LLVMSetExternallyInitialized
 
-  `GlobalVariable.isExternallyInitialized`
+  `Module.setExternallyInitialized(_:for:)`
 
 ### Types
 

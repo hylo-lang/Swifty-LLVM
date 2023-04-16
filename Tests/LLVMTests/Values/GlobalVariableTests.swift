@@ -7,7 +7,7 @@ final class GlobalVariableTests: XCTestCase {
     var m = Module("foo")
     var g = m.declareGlobalVariable("gl", PointerType(in: &m))
     XCTAssertFalse(g.isGlobalConstant)
-    g.isGlobalConstant = true
+    m.setGlobalConstant(true, for: g)
     XCTAssert(g.isGlobalConstant)
   }
 
@@ -15,7 +15,7 @@ final class GlobalVariableTests: XCTestCase {
     var m = Module("foo")
     var g = m.declareGlobalVariable("gl", PointerType(in: &m))
     XCTAssertFalse(g.isExternallyInitialized)
-    g.isExternallyInitialized = true
+    m.setExternallyInitialized(true, for: g)
     XCTAssert(g.isExternallyInitialized)
   }
 
@@ -25,9 +25,9 @@ final class GlobalVariableTests: XCTestCase {
     var g = m.declareGlobalVariable("x", i8)
 
     XCTAssertNil(g.initializer)
-    g.initializer = i8.zero
+    m.setInitializer(i8.zero, for: g)
     XCTAssertEqual(g.initializer.map(IntegerConstant.init(_:)), i8.zero)
-    g.initializer = nil
+    m.setInitializer(nil, for: g)
     XCTAssertNil(g.initializer)
   }
 

@@ -248,6 +248,26 @@ public struct Module {
     return .init(h)
   }
 
+  /// Sets the name of `v` to `n`.
+  public mutating func setName(_ n: String, for v: IRValue) {
+    n.withCString({ LLVMSetValueName2(v.llvm, $0, n.utf8.count) })
+  }
+
+  /// Configures whether `g` is a global constant.
+  public mutating func setGlobalConstant(_ newValue: Bool, for g: GlobalVariable) {
+    LLVMSetGlobalConstant(g.llvm, newValue ? 1 : 0)
+  }
+
+  /// Configures whether `g` is externally initialized.
+  public mutating func setExternallyInitialized(_ newValue: Bool, for g: GlobalVariable) {
+    LLVMSetExternallyInitialized(g.llvm, newValue ? 1 : 0)
+  }
+
+  /// Sets the initializer of `g` to `v`.
+  public mutating func setInitializer(_ newValue: IRValue?, for g: GlobalVariable) {
+    LLVMSetInitializer(g.llvm, newValue?.llvm)
+  }
+
   // MARK: Arithmetics
 
   public mutating func insertAdd(

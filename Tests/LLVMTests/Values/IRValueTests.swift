@@ -7,7 +7,7 @@ final class IRValueTests: XCTestCase {
     var m = Module("foo")
     var g = m.declareGlobalVariable("x", PointerType(in: &m))
     XCTAssertEqual(g.name, "x")
-    g.name = "y"
+    m.setName("y", for: g)
     XCTAssertEqual(g.name, "y")
   }
 

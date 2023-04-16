@@ -18,21 +18,12 @@ public struct GlobalVariable: Global {
   ///
   /// - Note: This property should not be confused with `IRValue.isConstant`, which indicates
   ///   whether a value is a constant user, as opposed to an instruction.
-  public var isGlobalConstant: Bool {
-    get { LLVMIsGlobalConstant(llvm) != 0 }
-    set { LLVMSetGlobalConstant(llvm, newValue ? 1 : 0) }
-  }
+  public var isGlobalConstant: Bool { LLVMIsGlobalConstant(llvm) != 0 }
 
   /// `true` is this value is initialized externally.
-  public var isExternallyInitialized: Bool {
-    get { LLVMIsExternallyInitialized(llvm) != 0 }
-    set { LLVMSetExternallyInitialized(llvm, newValue ? 1 : 0) }
-  }
+  public var isExternallyInitialized: Bool { LLVMIsExternallyInitialized(llvm) != 0 }
 
   /// The initial value of this global.
-  public var initializer: IRValue? {
-    get { LLVMGetInitializer(llvm).map(AnyValue.init(_:)) }
-    set { LLVMSetInitializer(llvm, newValue?.llvm) }
-  }
+  public var initializer: IRValue? { LLVMGetInitializer(llvm).map(AnyValue.init(_:)) }
 
 }
