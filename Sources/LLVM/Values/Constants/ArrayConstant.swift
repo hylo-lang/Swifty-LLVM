@@ -9,13 +9,13 @@ public struct ArrayConstant: IRValue, Hashable {
   /// The number of elements in the array.
   public let count: Int
 
-  /// Creates an constant array of `type` in `module`, filled with the contents of `elements`.
+  /// Creates a constant array of `type` in `module`, filled with the contents of `elements`.
   ///
   /// - Requires: The type of each element in `contents` is `type`.
   public init<S: Sequence>(
-    of type: IRType, containing contents: S, in module: inout Module
+    of type: IRType, containing elements: S, in module: inout Module
   ) where S.Element == IRValue {
-    var values = contents.map({ $0.llvm as Optional })
+    var values = elements.map({ $0.llvm as Optional })
     self.llvm = LLVMConstArray(type.llvm, &values, UInt32(values.count))
     self.count = values.count
   }
