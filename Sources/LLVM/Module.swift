@@ -142,8 +142,7 @@ public struct Module {
     LLVMGetNamedFunction(llvm, name).map(Function.init(_:))
   }
 
-  /// Returns an a function with given `name` and `type`, declaring it in `self` if it doesn't
-  /// exist yet.
+  /// Returns a function with given `name` and `type`, declaring it in `self` if it doesn't exist.
   public mutating func declareFunction(_ name: String, _ type: FunctionType) -> Function {
     if let h = LLVMGetNamedFunction(llvm, name) {
       let f = Function(h)
