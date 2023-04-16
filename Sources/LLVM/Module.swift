@@ -144,8 +144,7 @@ public struct Module {
 
   /// Returns a function with given `name` and `type`, declaring it in `self` if it doesn't exist.
   public mutating func declareFunction(_ name: String, _ type: FunctionType) -> Function {
-    if let h = LLVMGetNamedFunction(llvm, name) {
-      let f = Function(h)
+    if let f = function(named: name) {
       precondition(f.valueType == type)
       return f
     } else {
