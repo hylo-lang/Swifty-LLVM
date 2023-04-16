@@ -20,6 +20,16 @@ extension IRValue {
   /// The LLVM IR type of this value.
   public var type: IRType { AnyType(LLVMTypeOf(llvm)) }
 
+  /// The name of this value.
+  public var name: String {
+    get {
+      String(from: llvm, readingWith: LLVMGetValueName2(_:_:)) ?? ""
+    }
+    set {
+      newValue.withCString({ LLVMSetValueName2(llvm, $0, newValue.utf8.count) })
+    }
+  }
+
   /// `true` iff this value is the `null` instance of its type.
   public var isNull: Bool { LLVMIsNull(llvm) != 0 }
 
