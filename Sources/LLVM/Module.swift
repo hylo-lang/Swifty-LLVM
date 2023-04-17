@@ -39,7 +39,7 @@ public struct Module {
   /// A handle to the LLVM object wrapped by this instance.
   public var llvm: LLVMModuleRef { handles.module }
 
-  /// A handle to the LLVM context associated to this module.
+  /// A handle to the LLVM context associated with this module.
   internal var context: LLVMContextRef { handles.context }
 
   /// The name of the module.
@@ -52,6 +52,29 @@ public struct Module {
     }
   }
 
+  /// The data layout of the module.
+  public var layout: DataLayout {
+    get {
+      let s = LLVMGetDataLayoutStr(llvm)
+      let h = LLVMCreateTargetData(s)
+      return .init(h!)
+    }
+    set {
+      LLVMSetDataLayout(llvm, newValue.description)
+    }
+  }
+
+  /// The target of the module.
+  public var target: Target? {
+    get {
+      guard let t = LLVMGetTarget(llvm) else { return nil }
+      return try? Target(triple: .init(cString: t))
+    }
+    set {
+      LLVMSetTarget(llvm, newValue?.triple)
+    }
+  }
+
   /// Verifies if the IR in `self` is well formed and throws an error if it isn't.
   public func verify() throws {
     var message: UnsafeMutablePointer<CChar>? = nil
@@ -61,8 +84,52 @@ public struct Module {
     })
 
     if status != 0 {
-      throw VerificationError(description: String(cString: message!))
+      throw LLVMError(.init(cString: message!))
     }
+  }
+
+  /// Writes the LLVM bitcode of this module to `filepath`.
+  public func writeBitcode(to filepath: String) throws {
+    guard LLVMWriteBitcodeToFile(llvm, filepath) == 0 else {
+      throw LLVMError("write failure")
+    }
+  }
+
+  /// Returns the LLVM bitcode of this module.
+  public func bitcode() -> MemoryBuffer {
+    .init(LLVMWriteBitcodeToMemoryBuffer(llvm), owned: true)
+  }
+
+  /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
+  public func write(
+    _ type: CodeGenerationResultType,
+    for machine:TargetMachine,
+    to filepath: String
+  ) throws {
+    var error: UnsafeMutablePointer<CChar>? = nil
+    LLVMTargetMachineEmitToFile(machine.llvm, llvm, filepath, type.llvm, &error)
+
+    if let e = error {
+      defer { LLVMDisposeMessage(e) }
+      throw LLVMError(.init(cString: e))
+    }
+  }
+
+  /// Compiles this module for given `machine` and returns a result of kind `type`.
+  public func compile(
+    _ type: CodeGenerationResultType,
+    for machine: TargetMachine
+  ) throws -> MemoryBuffer {
+    var output: LLVMMemoryBufferRef? = nil
+    var error: UnsafeMutablePointer<CChar>? = nil
+    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvm, type.llvm, &error, &output)
+
+    if let e = error {
+      defer { LLVMDisposeMessage(e) }
+      throw LLVMError(.init(cString: e))
+    }
+
+    return .init(output!, owned: true)
   }
 
   /// Returns the type with given `name`, or `nil` if no such type exists.
@@ -75,11 +142,28 @@ public struct Module {
     LLVMGetNamedFunction(llvm, name).map(Function.init(_:))
   }
 
-  /// Returns an a function with given `name` and `type`, declaring it in `self` if it doesn't
-  /// exist yet.
+  /// Returns the global with given `name`, or `nil` if no such global exists.
+  public func global(named name: String) -> GlobalVariable? {
+    LLVMGetNamedGlobal(llvm, name).map(GlobalVariable.init(_:))
+  }
+
+  /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
+  public mutating func declareGlobalVariable(
+    _ name: String,
+    _ type: IRType,
+    inAddressSpace s: AddressSpace = .default
+  ) -> GlobalVariable {
+    if let g = global(named: name) {
+      precondition(g.valueType == type)
+      return g
+    } else {
+      return .init(LLVMAddGlobalInAddressSpace(llvm, type.llvm, name, s.llvm))
+    }
+  }
+
+  /// Returns a function with given `name` and `type`, declaring it if it doesn't exist.
   public mutating func declareFunction(_ name: String, _ type: FunctionType) -> Function {
-    if let h = LLVMGetNamedFunction(llvm, name) {
-      let f = Function(h)
+    if let f = function(named: name) {
       precondition(f.valueType == type)
       return f
     } else {
@@ -162,6 +246,26 @@ public struct Module {
     let h = LLVMCreateBuilderInContext(context)!
     LLVMPositionBuilderAtEnd(h, b.llvm)
     return .init(h)
+  }
+
+  /// Sets the name of `v` to `n`.
+  public mutating func setName(_ n: String, for v: IRValue) {
+    n.withCString({ LLVMSetValueName2(v.llvm, $0, n.utf8.count) })
+  }
+
+  /// Configures whether `g` is a global constant.
+  public mutating func setGlobalConstant(_ newValue: Bool, for g: GlobalVariable) {
+    LLVMSetGlobalConstant(g.llvm, newValue ? 1 : 0)
+  }
+
+  /// Configures whether `g` is externally initialized.
+  public mutating func setExternallyInitialized(_ newValue: Bool, for g: GlobalVariable) {
+    LLVMSetExternallyInitialized(g.llvm, newValue ? 1 : 0)
+  }
+
+  /// Sets the initializer of `g` to `v`.
+  public mutating func setInitializer(_ newValue: IRValue?, for g: GlobalVariable) {
+    LLVMSetInitializer(g.llvm, newValue?.llvm)
   }
 
   // MARK: Arithmetics

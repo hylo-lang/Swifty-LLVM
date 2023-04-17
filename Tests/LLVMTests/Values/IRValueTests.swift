@@ -3,6 +3,14 @@ import XCTest
 
 final class IRValueTests: XCTestCase {
 
+  func testName() {
+    var m = Module("foo")
+    let g = m.declareGlobalVariable("x", PointerType(in: &m))
+    XCTAssertEqual(g.name, "x")
+    m.setName("y", for: g)
+    XCTAssertEqual(g.name, "y")
+  }
+
   func testIsNull() {
     var m = Module("foo")
     XCTAssert(IntegerType(64, in: &m).null.isNull)

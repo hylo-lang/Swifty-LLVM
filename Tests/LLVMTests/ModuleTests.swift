@@ -26,6 +26,14 @@ final class ModuleTests: XCTestCase {
     XCTAssertNil(m.type(named: "gn"))
   }
 
+  func testGlobalNamed() throws {
+    var m = Module("foo")
+    let x = m.declareGlobalVariable("gl", PointerType(in: &m))
+    let y = try XCTUnwrap(m.global(named: "gl"))
+    XCTAssert(x == y)
+    XCTAssertNil(m.type(named: "gn"))
+  }
+
   func testVerify() {
     var m = Module("foo")
     XCTAssertNoThrow(try m.verify())
@@ -33,6 +41,19 @@ final class ModuleTests: XCTestCase {
     let f = m.declareFunction("fn", .init(from: [], in: &m))
     m.appendBlock(to: f)
     XCTAssertThrowsError(try m.verify())
+  }
+
+  func testCompile() throws {
+    var m = Module("foo")
+    let i32 = IntegerType(32, in: &m)
+
+    let f = m.declareFunction("main", .init(from: [], to: i32, in: &m))
+    let b = m.appendBlock(to: f)
+    m.insertReturn(i32.zero, at: m.endOf(b))
+
+    let t = try TargetMachine(for: .host())
+    let a = try m.compile(.assembly, for: t)
+    XCTAssert(a.count != 0)
   }
 
 }

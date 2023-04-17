@@ -13,6 +13,15 @@
 - [ ] LLVMViewFunctionCFG
 - [ ] LLVMViewFunctionCFGOnly
 
+## Bit Writer
+
+- [x] LLVMWriteBitcodeToFile
+
+  `Module.writeBitcode()`
+
+- [ ] LLVMWriteBitcodeToFD
+- [ ] LLVMWriteBitcodeToMemoryBuffer
+
 ## Core
 
 ### Comdats
@@ -80,13 +89,25 @@
 - [ ] LLVMModuleCreateWithNameInContext
 - [ ] LLVMCloneModule
 - [ ] LLVMDisposeModule
-- [ ] LLVMGetModuleIdentifier
-- [ ] LLVMSetModuleIdentifier
+- [x] LLVMGetModuleIdentifier
+
+  `Module.name`
+
+- [x] LLVMSetModuleIdentifier
+
+  `Module.name`
+
 - [ ] LLVMGetSourceFileName
 - [ ] LLVMSetSourceFileName
-- [ ] LLVMGetDataLayoutStr
+- [x] LLVMGetDataLayoutStr
+
+  `Module.layout`
+
 - [ ] LLVMGetDataLayout
-- [ ] LLVMSetDataLayout
+- [x] LLVMSetDataLayout
+
+  `Module.layout`
+
 - [ ] LLVMGetTarget
 - [ ] Target
 - [ ] LLVMCopyModuleFlagsMetadata
@@ -244,8 +265,14 @@
   `IRValue.type`
 
 - [ ] LLVMGetValueKind
-- [ ] LLVMGetValueName2
-- [ ] LLVMSetValueName2
+- [x] LLVMGetValueName2
+
+  `IRValue.name`
+
+- [x] LLVMSetValueName2
+
+  `IRValue.name`
+
 - [ ] LLVMDumpValue
 - [x] LLVMPrintValueToString
 
@@ -317,11 +344,44 @@
 
 - [ ] LLVMConstStructInContext
 - [ ] LLVMConstStruct
-- [ ] LLVMConstArray
+- [x] LLVMConstArray
+
+  `ArrayConstant.init(of:containing:in:)`
+
 - [ ] LLVMConstArray2
 - [ ] LLVMConstNamedStruct
 - [ ] LLVMGetAggregateElement
 - [ ] LLVMConstVector
+
+##### Global Values
+
+- [ ] LLVMGetGlobalParent
+- [ ] LLVMIsDeclaration
+- [ ] LLVMGetLinkage
+- [ ] LLVMSetLinkage
+- [ ] LLVMGetSection
+- [ ] LLVMSetSection
+- [ ] LLVMGetVisibility
+- [ ] LLVMSetVisibility
+- [ ] LLVMGetDLLStorageClass
+- [ ] LLVMSetDLLStorageClass
+- [ ] LLVMGetUnnamedAddress
+- [ ] LLVMSetUnnamedAddress
+- [x] LLVMGlobalGetValueType
+
+  `Global.valueType`
+
+- [ ] LLVMHasUnnamedAddr
+- [ ] LLVMSetUnnamedAddr
+- [ ] LLVMGetAlignment
+- [ ] LLVMSetAlignment
+- [ ] LLVMGlobalSetMetadata
+- [ ] LLVMGlobalEraseMetadata
+- [ ] LLVMGlobalClearMetadata
+- [ ] LLVMGlobalCopyAllMetadata
+- [ ] LLVMDisposeValueMetadataEntries
+- [ ] LLVMValueMetadataEntriesGetKind
+- [ ] LLVMValueMetadataEntriesGetMetadata
 
 ##### Scalar Constants
 
@@ -418,6 +478,50 @@
 - [ ] LLVMGetNextParam
 - [ ] LLVMGetPreviousParam
 - [ ] LLVMSetParamAlignment
+
+##### Global Variables
+
+- [ ] LLVMAddGlobal
+- [x] LLVMAddGlobalInAddressSpace
+
+  `Module.declareGlobal(_:_:inAddressSpace:)`
+
+- [x] LLVMGetNamedGlobal
+
+  `Module.global(named:)`
+
+- [ ] LLVMGetFirstGlobal
+- [ ] LLVMGetLastGlobal
+- [ ] LLVMGetNextGlobal
+- [ ] LLVMGetPreviousGlobal
+- [ ] LLVMDeleteGlobal
+- [x] LLVMGetInitializer
+
+  `GlobalVariable.initializer`
+
+- [x] LLVMSetInitializer
+
+  `Module.setInitializer(_:for:)`
+
+- [ ] LLVMIsThreadLocal
+- [ ] LLVMSetThreadLocal
+- [x] LLVMIsGlobalConstant
+
+  `GlobalVariable.isGlobalConstant`
+
+- [x] LLVMSetGlobalConstant
+
+  `Module.setGlobalConstant(_:for:)`
+
+- [ ] LLVMGetThreadLocalMode
+- [ ] LLVMSetThreadLocalMode
+- [x] LLVMIsExternallyInitialized
+
+  `GlobalVariable.isExternallyInitialized`
+
+- [x] LLVMSetExternallyInitialized
+
+  `Module.setExternallyInitialized(_:for:)`
 
 ### Types
 
@@ -878,3 +982,167 @@
 - [ ] LLVMSetCmpXchgSuccessOrdering
 - [ ] LLVMGetCmpXchgFailureOrdering
 - [ ] LLVMSetCmpXchgFailureOrdering
+
+## Memory Buffers
+
+- [x] LLVMCreateMemoryBufferWithContentsOfFile
+
+  `MemoryBuffer.init(contentsOf:)`
+
+- [ ] LLVMCreateMemoryBufferWithSTDIN
+- [x] LLVMCreateMemoryBufferWithMemoryRange
+
+  `MemoryBuffer.withInstanceBorrowing(_:named:_:)`
+
+- [x] LLVMCreateMemoryBufferWithMemoryRangeCopy
+
+  `MemoryBuffer.init(copying:named:)`
+
+- [x] LLVMGetBufferStart
+
+  `MemoryBuffer.withUnsafeBytes`
+
+- [x] LLVMGetBufferSize
+
+  `MemoryBuffer.count`
+
+- [x] LLVMDisposeMemoryBuffer
+
+  Implemented by `MemoryBuffer.wrapped`.
+
+## Target Information
+
+- [ ] LLVMInitializeAllTargetInfos
+- [ ] LLVMInitializeAllTargets
+- [ ] LLVMInitializeAllTargetMCs
+- [ ] LLVMInitializeAllAsmPrinters
+- [ ] LLVMInitializeAllAsmParsers
+- [ ] LLVMInitializeAllDisassemblers
+- [x] LLVMInitializeNativeTarget
+
+  `Target.host()`
+
+- [x] LLVMInitializeNativeAsmParser
+
+  `Target.host()`
+
+- [x] LLVMInitializeNativeAsmPrinter
+
+  `Target.host()`
+
+- [x] LLVMInitializeNativeDisassembler
+
+  `Target.host()`
+
+- [ ] LLVMGetModuleDataLayout
+- [ ] LLVMSetModuleDataLayout
+- [ ] LLVMCreateTargetData
+- [x] LLVMDisposeTargetData
+
+  Implemented by `DataLayout.wrapped`
+
+- [ ] LLVMAddTargetLibraryInfo
+- [x] LLVMCopyStringRepOfTargetData
+
+  `DataLayout.description`
+
+- [ ] LLVMByteOrder
+- [ ] LLVMPointerSize
+- [ ] LLVMPointerSizeForAS
+- [ ] LLVMIntPtrType
+- [ ] LLVMIntPtrTypeForAS
+- [ ] LLVMIntPtrTypeInContext
+- [ ] LLVMIntPtrTypeForASInContext
+- [ ] LLVMSizeOfTypeInBits
+- [x] LLVMStoreSizeOfType
+
+  `DataLayout.storageSize(of:)`
+
+- [ ] LLVMABISizeOfType
+- [x] LLVMABIAlignmentOfType
+
+  `DataLayout.abiAlignment(of:)`
+
+- [ ] LLVMCallFrameAlignmentOfType
+- [x] LLVMPreferredAlignmentOfType
+
+  `DataLayout.preferredAlignment(of:)`
+
+- [ ] LLVMPreferredAlignmentOfGlobal
+- [x] LLVMElementAtOffset
+
+  `DataLayout.element(at:in:)`
+
+- [x] LLVMOffsetOfElement
+
+  `DataLayout.offset(of:in:)`
+
+- [ ] LLVMGetFirstTarget
+- [ ] LLVMGetNextTarget
+- [ ] LLVMGetTargetFromName
+- [x] LLVMGetTargetFromTriple
+
+  `Target.host()`
+
+- [x] LLVMGetTargetName
+
+  `Target.name`
+
+- [x] LLVMGetTargetDescription
+
+  `Target.description`
+
+- [x] LLVMTargetHasJIT
+
+  `Target.hasJIT`
+
+- [ ] LLVMTargetHasTargetMachine
+- [x] LLVMTargetHasAsmBackend
+
+  `Target.hasAssemblyBackEnd`
+
+- [x] LLVMCreateTargetMachine
+
+  `TargetMachine.init(for:cpu:features:optimization:relocation:code:)`
+
+- [x] LLVMDisposeTargetMachine
+
+  Implemented by `TargetMachine.wrapped`.
+
+- [x] LLVMGetTargetMachineTarget
+
+  `Target.init(of:)`
+
+- [x] LLVMGetTargetMachineTriple
+
+  `TargetMachine.triple`
+
+- [x] LLVMGetTargetMachineCPU
+
+  `TargetMachine.cpu`
+
+- [x] LLVMGetTargetMachineFeatureString
+
+  `TargetMachine.features`
+
+- [x] LLVMCreateTargetDataLayout
+
+  `DataLayout.init(of:)`
+
+- [ ] LLVMSetTargetMachineAsmVerbosity
+- [x] LLVMTargetMachineEmitToFile
+
+  `Module.write(_:for:to:)`
+
+- [ ] LLVMTargetMachineEmitToMemoryBuffer
+
+  `Module.compile(_:for:)`
+
+- [x] LLVMGetDefaultTargetTriple
+
+  `Target.host()`
+
+- [ ] LLVMNormalizeTargetTriple
+- [ ] LLVMGetHostCPUName
+- [ ] LLVMGetHostCPUFeatures
+- [ ] LLVMAddAnalysisPasses
