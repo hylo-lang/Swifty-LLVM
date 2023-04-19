@@ -356,7 +356,10 @@
 
   `StructConstant.init(of:aggregating:in:)`
 
-- [ ] LLVMGetAggregateElement
+- [x] LLVMGetAggregateElement
+
+  `AggregateConstant.subscript[_:]`
+
 - [ ] LLVMConstVector
 
 ##### Global Values
