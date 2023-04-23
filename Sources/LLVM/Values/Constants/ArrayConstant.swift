@@ -1,7 +1,7 @@
 import llvmc
 
 /// A constant array in LLVM IR.
-public struct ArrayConstant: IRValue, Hashable {
+public struct ArrayConstant: Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: LLVMValueRef
@@ -28,29 +28,10 @@ public struct ArrayConstant: IRValue, Hashable {
 
 }
 
-extension ArrayConstant: BidirectionalCollection {
+extension ArrayConstant: AggregateConstant {
 
   public typealias Index = Int
 
   public typealias Element = IRValue
-
-  public var startIndex: Int { 0 }
-
-  public var endIndex: Int { count }
-
-  public func index(after position: Int) -> Int {
-    precondition(position < count, "index is out of bounds")
-    return position + 1
-  }
-
-  public func index(before position: Int) -> Int {
-    precondition(position > 0, "index is out of bounds")
-    return position - 1
-  }
-
-  public subscript(position: Int) -> IRValue {
-    precondition(position >= 0 && position < count, "index is out of bounds")
-    return AnyValue(LLVMGetAggregateElement(llvm, UInt32(position)))
-  }
 
 }

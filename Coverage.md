@@ -342,15 +342,24 @@
 
   `StringConstant.value`
 
-- [ ] LLVMConstStructInContext
+- [x] LLVMConstStructInContext
+
+  `StructConstant.init(aggregating:packed:in:)`
+
 - [ ] LLVMConstStruct
 - [x] LLVMConstArray
 
   `ArrayConstant.init(of:containing:in:)`
 
 - [ ] LLVMConstArray2
-- [ ] LLVMConstNamedStruct
-- [ ] LLVMGetAggregateElement
+- [x] LLVMConstNamedStruct
+
+  `StructConstant.init(of:aggregating:in:)`
+
+- [x] LLVMGetAggregateElement
+
+  `AggregateConstant.subscript[_:]`
+
 - [ ] LLVMConstVector
 
 ##### Global Values
