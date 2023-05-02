@@ -10,7 +10,7 @@ public protocol IRValue: CustomStringConvertible {
 
 extension IRValue {
 
-  /// A string representation of the type.
+  /// A string representation of the value.
   public var description: String {
     guard let s = LLVMPrintValueToString(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }

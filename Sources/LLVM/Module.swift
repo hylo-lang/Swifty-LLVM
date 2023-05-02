@@ -147,6 +147,26 @@ public struct Module {
     LLVMGetNamedGlobal(llvm, name).map(GlobalVariable.init(_:))
   }
 
+  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
+  /// intrinsic exists.
+  public mutating func intrinsic(named name: String, for parameters: [IRType] = []) -> Intrinsic? {
+    let i = name.withCString({ LLVMLookupIntrinsicID($0, name.utf8.count) })
+    guard i != 0 else { return nil }
+
+    let h = parameters.withHandles { (p) in
+      LLVMGetIntrinsicDeclaration(llvm, i, p.baseAddress, parameters.count)
+    }
+    return h.map(Intrinsic.init(_:))
+  }
+
+  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
+  /// intrinsic exists.
+  public mutating func intrinsic(
+    named name: Intrinsic.Name, for parameters: [IRType] = []
+  ) -> Intrinsic? {
+    intrinsic(named: name.value, for: parameters)
+  }
+
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
   public mutating func declareGlobalVariable(
     _ name: String,

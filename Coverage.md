@@ -434,14 +434,29 @@
 - [ ] LLVMHasPersonalityFn
 - [ ] LLVMGetPersonalityFn
 - [ ] LLVMSetPersonalityFn
-- [ ] LLVMLookupIntrinsicID
-- [ ] LLVMGetIntrinsicID
-- [ ] LLVMGetIntrinsicDeclaration
+- [x] LLVMLookupIntrinsicID
+
+  `Module.intrinsic(named:for:)`
+
+- [x] LLVMGetIntrinsicID
+
+  `Intrinsic.identifier`
+
+- [x] LLVMGetIntrinsicDeclaration
+
+  `Module.intrinsic(named:for:)`
+
 - [ ] LLVMIntrinsicGetType
-- [ ] LLVMIntrinsicGetName
+- [x] LLVMIntrinsicGetName
+
+  `Intrinsic.name`
+
 - [ ] LLVMIntrinsicCopyOverloadedName
 - [ ] LLVMIntrinsicCopyOverloadedName2
-- [ ] LLVMIntrinsicIsOverloaded
+- [x] LLVMIntrinsicIsOverloaded
+
+  `Intrinsic.isOverloaded`
+
 - [ ] LLVMGetFunctionCallConv
 - [ ] LLVMSetFunctionCallConv
 - [ ] LLVMGetGC
