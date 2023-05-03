@@ -88,6 +88,18 @@ public struct Module {
     }
   }
 
+  /// Runs standard optimization passes on `self` with given level of `optimization`.
+  public mutating func applyStandardModulePasses(optimization: OptimitzationLevel = .none) {
+    let b = LLVMPassManagerBuilderCreate()!
+    LLVMPassManagerBuilderSetOptLevel(b, optimization.rawValue)
+
+    let p = LLVMCreatePassManager()!
+    LLVMPassManagerBuilderPopulateModulePassManager(b, p)
+    LLVMPassManagerBuilderDispose(b)
+    LLVMRunPassManager(p, llvm)
+    LLVMDisposePassManager(p)
+  }
+
   /// Writes the LLVM bitcode of this module to `filepath`.
   public func writeBitcode(to filepath: String) throws {
     guard LLVMWriteBitcodeToFile(llvm, filepath) == 0 else {

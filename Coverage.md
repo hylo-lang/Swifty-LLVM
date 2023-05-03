@@ -682,12 +682,21 @@
 
 #### Sequential Types
 
-- [ ] LLVMGetElementType
+- [x] LLVMGetElementType
+
+  `ArrayType.element`
+
 - [ ] LLVMGetSubtypes
 - [ ] LLVMGetNumContainedTypes
-- [ ] LLVMArrayType
+- [x] LLVMArrayType
+
+  `ArrayType.init(_:_:in:)`
+
 - [ ] LLVMArrayType2
-- [ ] LLVMGetArrayLength
+- [x] LLVMGetArrayLength
+
+  `ArrayType.count`
+
 - [ ] LLVMGetArrayLength2
 - [ ] LLVMPointerType
 - [ ] LLVMPointerTypeIsOpaque

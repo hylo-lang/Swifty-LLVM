@@ -56,4 +56,15 @@ final class ModuleTests: XCTestCase {
     XCTAssert(a.count != 0)
   }
 
+  func testStandardModulePasses() throws {
+    var m = Module("foo")
+    let i32 = IntegerType(32, in: &m)
+
+    let f = m.declareFunction("main", .init(from: [], to: i32, in: &m))
+    let b = m.appendBlock(to: f)
+    m.insertReturn(i32.zero, at: m.endOf(b))
+
+    m.applyStandardModulePasses()
+  }
+
 }
