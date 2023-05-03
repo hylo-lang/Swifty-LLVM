@@ -15,8 +15,8 @@ public enum OptimitzationLevel: UInt32, Hashable {
   /// Full optimization with aggressive inlining and vectorization (a.k.a. `O3`).
   case aggressive
 
-  /// The LLVM representation of this instance.
-  internal var llvm: LLVMCodeGenOptLevel {
+  /// The LLVM representation of this instance for code generation.
+  internal var codegen: LLVMCodeGenOptLevel {
     switch self {
     case .none:
       return LLVMCodeGenLevelNone

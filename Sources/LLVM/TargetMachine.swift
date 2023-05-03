@@ -24,7 +24,7 @@ public struct TargetMachine {
     code: CodeModel = .default
   ) {
     let handle = LLVMCreateTargetMachine(
-      target.llvm, target.triple, cpu, features, optimization.llvm, relocation.llvm, code.llvm)
+      target.llvm, target.triple, cpu, features, optimization.codegen, relocation.llvm, code.llvm)
     self.wrapped = .init(handle!, dispose: LLVMDisposeTargetMachine(_:))
   }
 
