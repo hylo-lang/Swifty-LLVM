@@ -4,7 +4,7 @@ import PackageDescription
 let packageTarget: [Target]
 
 #if os(Windows)
-let customLinkerSettings: Optional = [.linkedLibrary("LLVM-C")]
+let customLinkerSettings: [LinkerSetting]? = [.linkedLibrary("LLVM-C")]
 #else
 let customLinkerSettings: [LinkerSetting]? = nil
 #endif
