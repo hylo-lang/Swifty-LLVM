@@ -288,6 +288,13 @@ public struct Module {
     LLVMSetInitializer(g.llvm, newValue?.llvm)
   }
 
+  /// Sets the preferred alignment of `v` to `a`.
+  ///
+  /// - Requires: `a` is whole power of 2.
+  public mutating func setAlignment(_ a: Int, for v: Alloca) {
+    LLVMSetAlignment(v.llvm, UInt32(a))
+  }
+
   // MARK: Arithmetics
 
   public mutating func insertAdd(

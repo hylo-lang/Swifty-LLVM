@@ -382,8 +382,14 @@
 
 - [ ] LLVMHasUnnamedAddr
 - [ ] LLVMSetUnnamedAddr
-- [ ] LLVMGetAlignment
-- [ ] LLVMSetAlignment
+- [x] LLVMGetAlignment
+
+  `Alloca.alignment`
+
+- [x] LLVMSetAlignment
+
+  `Module.setAlignment(_:for:)`
+
 - [ ] LLVMGlobalSetMetadata
 - [ ] LLVMGlobalEraseMetadata
 - [ ] LLVMGlobalClearMetadata

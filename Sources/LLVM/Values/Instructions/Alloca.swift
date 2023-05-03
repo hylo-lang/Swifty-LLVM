@@ -23,4 +23,7 @@ public struct Alloca: IRValue {
   /// The type of the value allocated by the instruction.
   public var allocatedType: IRType { AnyType(LLVMGetAllocatedType(llvm)) }
 
+  /// The preferred alignment of the allocated memory.
+  public var alignment: Int { Int(LLVMGetAlignment(llvm)) }
+
 }
