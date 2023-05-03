@@ -95,9 +95,12 @@ public struct Module {
 
     let p = LLVMCreatePassManager()!
     LLVMPassManagerBuilderPopulateModulePassManager(b, p)
+    let q = LLVMCreateFunctionPassManagerForModule(llvm)
+    LLVMPassManagerBuilderPopulateFunctionPassManager(b, q)
     LLVMPassManagerBuilderDispose(b)
     LLVMRunPassManager(p, llvm)
     LLVMDisposePassManager(p)
+    LLVMDisposePassManager(q)
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
