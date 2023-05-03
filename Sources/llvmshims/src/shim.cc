@@ -1,25 +1,48 @@
+#include "llvm-c/TargetMachine.h"
 #include "llvm-c/Transforms/PassBuilder.h"
-#include "llvm/IR/Verifier.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/StandardInstrumentations.h"
-#include "llvm/Support/CBindingWrapping.h"
+#include "shim.h"
 
 using namespace llvm;
 
+template<typename T, typename U>
+T* unsafe_as(U* s) {
+  return static_cast<T*>(static_cast<void*>(s));
+}
+
+llvm::OptimizationLevel as_llvm(SwiftyLLVMPassOptimizationLevel x) {
+  switch (x) {
+  case SwiftyLLVMPassOptimizationLevelO0:
+    return llvm::OptimizationLevel::O0;
+  case SwiftyLLVMPassOptimizationLevelO1:
+    return llvm::OptimizationLevel::O1;
+  case SwiftyLLVMPassOptimizationLevelO2:
+    return llvm::OptimizationLevel::O2;
+  case SwiftyLLVMPassOptimizationLevelO3:
+    return llvm::OptimizationLevel::O3;
+  case SwiftyLLVMPassOptimizationLevelOs:
+    return llvm::OptimizationLevel::Os;
+  case SwiftyLLVMPassOptimizationLevelOz:
+    return llvm::OptimizationLevel::Oz;
+  }
+}
+
 extern "C" {
 
-  void SwiftyLLVMRunDefaultModulePasses(LLVMModuleRef m, unsigned int opt) {
+  void SwiftyLLVMRunDefaultModulePasses(
+    LLVMModuleRef self,
+    LLVMTargetMachineRef t,
+    SwiftyLLVMPassOptimizationLevel optimization
+  ) {
     // Create the analysis managers.
     LoopAnalysisManager lam;
     FunctionAnalysisManager fam;
     CGSCCAnalysisManager cgam;
     ModuleAnalysisManager mam;
 
-    // Create the new pass manager builder.
-    // Take a look at the PassBuilder constructor parameters for more
-    // customization, e.g. specifying a TargetMachine or various debugging
-    // options.
-    PassBuilder p;
+    // Create a new pass manager builder.
+    PassBuilder p(unsafe_as<llvm::TargetMachine>(t));
 
     // Register all the basic analyses with the managers.
     p.registerModuleAnalyses(mam);
@@ -28,23 +51,15 @@ extern "C" {
     p.registerLoopAnalyses(lam);
     p.crossRegisterProxies(lam, fam, cgam, mam);
 
-    // Create the pass manager.
-    OptimizationLevel o;
-    switch (opt) {
-    case 0:
-      o = OptimizationLevel::O0;
-    case 1:
-      o = OptimizationLevel::O1;
-    case 2:
-      o = OptimizationLevel::O2;
-    case 3:
-      o = OptimizationLevel::O3;
+    ModulePassManager mpm;
+    if (optimization == SwiftyLLVMPassOptimizationLevelO0) {
+      mpm = p.buildO0DefaultPipeline(OptimizationLevel::O0);
+    } else {
+      mpm = p.buildPerModuleDefaultPipeline(as_llvm(optimization));
     }
-    ModulePassManager mpm = p.buildPerModuleDefaultPipeline(o);
 
-    // Optimize the IR!
-    Module *mod = unwrap(m);
-    mpm.run(*mod, mam);
+    // Run the passes.
+    mpm.run(*unwrap(self), mam);
   }
 
 }

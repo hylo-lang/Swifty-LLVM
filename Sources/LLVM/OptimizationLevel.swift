@@ -1,7 +1,7 @@
 import llvmc
 
 /// The level of optimization used during code generation.
-public enum OptimitzationLevel: UInt32, Hashable {
+public enum OptimitzationLevel: Hashable {
 
   /// No optimization (a.k.a. `O0`).
   case none

@@ -1,7 +1,7 @@
 import LLVM
 import XCTest
 
-final class MachineTargetTests: XCTestCase {
+final class TargetMachineTests: XCTestCase {
 
   func testTarget() throws {
     let h = try Target.host()

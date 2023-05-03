@@ -89,9 +89,23 @@ public struct Module {
     }
   }
 
-  /// Runs standard optimization passes on `self` with given level of `optimization`.
-  public mutating func runDefaultModulePasses(optimization: OptimitzationLevel = .none) {
-    SwiftyLLVMRunDefaultModulePasses(llvm)
+  /// Runs standard optimization passes on `self` tuned for given `optimization` and `machine`.
+  public mutating func runDefaultModulePasses(
+    optimization: OptimitzationLevel = .none,
+    for machine: TargetMachine? = nil
+  ) {
+    let o: SwiftyLLVMPassOptimizationLevel
+    switch optimization {
+    case .none:
+      o = SwiftyLLVMPassOptimizationLevelO0
+    case .less:
+      o = SwiftyLLVMPassOptimizationLevelO1
+    case .default:
+      o = SwiftyLLVMPassOptimizationLevelO2
+    case .aggressive:
+      o = SwiftyLLVMPassOptimizationLevelO3
+    }
+    SwiftyLLVMRunDefaultModulePasses(llvm, machine?.llvm, o)
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
