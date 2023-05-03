@@ -64,7 +64,8 @@ final class ModuleTests: XCTestCase {
     let b = m.appendBlock(to: f)
     m.insertReturn(i32.zero, at: m.endOf(b))
 
-    m.runDefaultModulePasses()
+    let h = try Target.host()
+    m.runDefaultModulePasses(for: TargetMachine(for: h))
   }
 
 }
