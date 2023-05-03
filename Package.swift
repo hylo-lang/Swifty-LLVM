@@ -3,16 +3,10 @@ import PackageDescription
 
 let packageTarget: [Target]
 
-// LLVM API Wrapper.
 #if os(Windows)
-  packageTarget = [
-    .target(name: "LLVM", dependencies: ["llvmc"], linkerSettings: [.linkedLibrary("LLVM-C")])
-  ]
+let customLinkerSettings: Optional = [.linkedLibrary("LLVM-C")]
 #else
-  packageTarget = [
-    .target(name: "LLVM", dependencies: ["llvmc", "llvmshims"]),
-    .target(name: "llvmshims", dependencies: ["llvmc"]),
-  ]
+let customLinkerSettings: [LinkerSetting]? = nil
 #endif
 
 let package = Package(
@@ -20,8 +14,18 @@ let package = Package(
   products: [
     .library(name: "LLVM", targets: ["LLVM"]),
   ],
-  targets: packageTarget + [
-    // LLVM API Wrapper Test.
+  targets: [
+    // LLVM API Wrappers.
+    .target(
+      name: "LLVM",
+      dependencies: ["llvmc", "llvmshims"],
+      linkerSettings: customLinkerSettings),
+    .target(
+      name: "llvmshims",
+      dependencies: ["llvmc"],
+      linkerSettings: customLinkerSettings),
+
+    // Tests.
     .testTarget(name: "LLVMTests", dependencies: ["LLVM"]),
 
     // LLVM's C API
