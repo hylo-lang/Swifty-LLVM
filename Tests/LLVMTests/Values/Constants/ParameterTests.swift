@@ -36,6 +36,8 @@ final class ParameterTests: XCTestCase {
     XCTAssert(p.attributes.contains(a))
     XCTAssert(p.attributes.contains(b))
 
+    XCTAssertEqual(m.addAttribute(named: .nofree, to: p), a)
+
     m.removeAttribute(a, from: p)
     XCTAssertEqual(p.attributes, [b])
   }
