@@ -1,17 +1,11 @@
 // swift-tools-version: 5.7
 import PackageDescription
 
-var packageTarget = [Target]()
-
-// LLVM API Wrapper.
+// Custom linker settings are required because Windows doesn't support pkg-config.
 #if os(Windows)
-  packageTarget.append(
-    .target(name: "LLVM", dependencies: ["llvmc"], linkerSettings: [.linkedLibrary("LLVM-C")])
-  )
+let customLinkerSettings: [LinkerSetting]? = [.linkedLibrary("LLVM-C"), .linkedLibrary("LLVM-15")]
 #else
-  packageTarget.append(
-    .target(name: "LLVM", dependencies: ["llvmc"])
-  )
+let customLinkerSettings: [LinkerSetting]? = nil
 #endif
 
 let package = Package(
@@ -19,10 +13,21 @@ let package = Package(
   products: [
     .library(name: "LLVM", targets: ["LLVM"]),
   ],
-  targets: packageTarget + [
-    // LLVM API Wrapper Test.
+  targets: [
+    // LLVM API Wrappers.
+    .target(
+      name: "LLVM",
+      dependencies: ["llvmc", "llvmshims"],
+      linkerSettings: customLinkerSettings),
+    .target(
+      name: "llvmshims",
+      dependencies: ["llvmc"],
+      linkerSettings: customLinkerSettings),
+
+    // Tests.
     .testTarget(name: "LLVMTests", dependencies: ["LLVM"]),
 
     // LLVM's C API
     .systemLibrary(name: "llvmc", pkgConfig: "llvm"),
-  ])
+  ],
+  cxxLanguageStandard: .cxx20)

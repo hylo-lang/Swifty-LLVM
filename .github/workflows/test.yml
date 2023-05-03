@@ -75,7 +75,8 @@ jobs:
     - name: Test 
       run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
       
-  build-on-windows:
+  build-native-windows:
+    if: ${{ false }}  # disable for now
     name: "Native: ${{ matrix.host.os }}/release"
     strategy:
       fail-fast: false

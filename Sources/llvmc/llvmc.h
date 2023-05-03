@@ -2,4 +2,4 @@
 #include <llvm-c/BitWriter.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/TargetMachine.h>
-#include <llvm-c/Transforms/PassManagerBuilder.h>
+#include <llvm-c/Transforms/PassBuilder.h>
