@@ -3,8 +3,9 @@ import PackageDescription
 
 let packageTarget: [Target]
 
+// Custom linker settings are required because Windows doesn't support pkg-config.
 #if os(Windows)
-let customLinkerSettings: [LinkerSetting]? = [.linkedLibrary("LLVM-C")]
+let customLinkerSettings: [LinkerSetting]? = [.linkedLibrary("LLVM-C"), .linkedLibrary("LLVM-15")]
 #else
 let customLinkerSettings: [LinkerSetting]? = nil
 #endif
