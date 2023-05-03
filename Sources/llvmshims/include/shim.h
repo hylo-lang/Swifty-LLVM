@@ -1,8 +1,8 @@
 #ifndef SWIFTYLLVM_LLVMSHIMS_H
 #define SWIFTYLLVM_LLVMSHIMS_H
 
-#include "llvm-c/Core.h"
+#include "llvm-c/Transforms/PassBuilder.h"
 
-void LLVMSetAllocaAlignment(LLVMValueRef a);
+void SwiftyLLVMRunDefaultModulePasses(LLVMModuleRef m);
 
 #endif
