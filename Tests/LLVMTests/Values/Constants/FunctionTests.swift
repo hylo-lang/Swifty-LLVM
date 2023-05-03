@@ -81,6 +81,8 @@ final class FunctionTests: XCTestCase {
     XCTAssert(f.attributes.contains(a))
     XCTAssert(f.attributes.contains(b))
 
+    XCTAssertEqual(m.addAttribute(named: .alwaysinline, to: f), a)
+
     m.removeAttribute(a, from: f)
     XCTAssertEqual(f.attributes, [b])
   }
@@ -97,6 +99,8 @@ final class FunctionTests: XCTestCase {
     XCTAssertEqual(r.attributes.count, 2)
     XCTAssert(r.attributes.contains(a))
     XCTAssert(r.attributes.contains(b))
+
+    XCTAssertEqual(m.addAttribute(named: .noalias, to: r), a)
 
     m.removeAttribute(a, from: r)
     XCTAssertEqual(r.attributes, [b])

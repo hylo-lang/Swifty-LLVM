@@ -203,15 +203,45 @@ public struct Module {
     LLVMAddAttributeAtIndex(f.llvm, i, a.llvm)
   }
 
-  /// Adds attribute `a` to the return value of `r`.
+  /// Adds the attribute named `n` to `f` and returns it.
+  @discardableResult
+  public mutating func addAttribute(
+    named n: Function.AttributeName, to f: Function
+  ) -> Function.Attribute {
+    let a = Function.Attribute(n, in: &self)
+    addAttribute(a, to: f)
+    return a
+  }
+
+  /// Adds attribute `a` to the return value of `f`.
   public mutating func addAttribute(_ a: Function.Return.Attribute, to r: Function.Return) {
     LLVMAddAttributeAtIndex(r.parent.llvm, 0, a.llvm)
+  }
+
+  /// Adds the attribute named `n` to the return value of `f` and returns it.
+  @discardableResult
+  public mutating func addAttribute(
+    named n: Function.Return.AttributeName, to r: Function.Return
+  ) -> Function.Return.Attribute {
+    let a = Function.Return.Attribute(n, in: &self)
+    addAttribute(a, to: r)
+    return a
   }
 
   /// Adds attribute `a` to `p`.
   public mutating func addAttribute(_ a: Parameter.Attribute, to p: Parameter) {
     let i = UInt32(p.index + 1)
     LLVMAddAttributeAtIndex(p.parent.llvm, i, a.llvm)
+  }
+
+  /// Adds the attribute named `n` to `p` and returns it.
+  @discardableResult
+  public mutating func addAttribute(
+    named n: Parameter.AttributeName, to p: Parameter
+  ) -> Parameter.Attribute {
+    let a = Parameter.Attribute(n, in: &self)
+    addAttribute(a, to: p)
+    return a
   }
 
   /// Removes `a` from `f`.
