@@ -366,8 +366,14 @@
 
 - [ ] LLVMGetGlobalParent
 - [ ] LLVMIsDeclaration
-- [ ] LLVMGetLinkage
-- [ ] LLVMSetLinkage
+- [x] LLVMGetLinkage
+
+  `Global.linkage`
+
+- [x] LLVMSetLinkage
+
+  `Module.setLinkage(_:for:)`
+
 - [ ] LLVMGetSection
 - [ ] LLVMSetSection
 - [ ] LLVMGetVisibility

@@ -19,6 +19,13 @@ final class GlobalVariableTests: XCTestCase {
     XCTAssert(g.isExternallyInitialized)
   }
 
+  func testLinkage() {
+    var m = Module("foo")
+    let g = m.declareGlobalVariable("gl", PointerType(in: &m))
+    m.setLinkage(.private, for: g)
+    XCTAssertEqual(g.linkage, .private)
+  }
+
   func testInitializer() {
     var m = Module("foo")
     let i8 = IntegerType(8, in: &m)

@@ -12,4 +12,9 @@ extension Global {
     AnyType(LLVMGlobalGetValueType(llvm))
   }
 
+  /// The linkage of this global.
+  public var linkage: Linkage {
+    .init(llvm: LLVMGetLinkage(llvm))
+  }
+
 }

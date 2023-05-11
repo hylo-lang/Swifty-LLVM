@@ -335,6 +335,11 @@ public struct Module {
     n.withCString({ LLVMSetValueName2(v.llvm, $0, n.utf8.count) })
   }
 
+  /// Sets the linkage of `g` to `l`.
+  public mutating func setLinkage(_ l: Linkage, for g: Global) {
+    LLVMSetLinkage(g.llvm, l.llvm)
+  }
+
   /// Configures whether `g` is a global constant.
   public mutating func setGlobalConstant(_ newValue: Bool, for g: GlobalVariable) {
     LLVMSetGlobalConstant(g.llvm, newValue ? 1 : 0)
