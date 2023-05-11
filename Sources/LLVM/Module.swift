@@ -187,6 +187,18 @@ public struct Module {
     intrinsic(named: name.value, for: parameters)
   }
 
+  /// Creates and returns a global variable with given `name` and `type`.
+  ///
+  /// A unique name is generated if `name` is empty or if `self` already contains a global with
+  /// the same name.
+  public mutating func addGlobalVariable(
+    _ name: String = "",
+    _ type: IRType,
+    inAddressSpace s: AddressSpace = .default
+  ) -> GlobalVariable {
+    .init(LLVMAddGlobalInAddressSpace(llvm, type.llvm, name, s.llvm))
+  }
+
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
   public mutating func declareGlobalVariable(
     _ name: String,

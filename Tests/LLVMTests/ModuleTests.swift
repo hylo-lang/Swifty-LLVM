@@ -34,6 +34,13 @@ final class ModuleTests: XCTestCase {
     XCTAssertNil(m.type(named: "gn"))
   }
 
+  func testAddGlobalVariable() {
+    var m = Module("foo")
+    let x = m.addGlobalVariable("g", PointerType(in: &m))
+    let y = m.addGlobalVariable("g", PointerType(in: &m))
+    XCTAssert(x != y)
+  }
+
   func testVerify() {
     var m = Module("foo")
     XCTAssertNoThrow(try m.verify())
