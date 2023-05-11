@@ -28,7 +28,7 @@ public enum Linkage {
   /// function into callers because it doesn’t know if this definition of the function is the
   /// definitive definition within the program or whether it will be overridden by a stronger
   /// definition. To enable inlining and other optimizations, use `linkonce_odr` linkage.
-  case linkOnceAny
+  case linkOnce
 
   /// The name is merged with other globals of the same name when linkage occurs.
   ///
@@ -79,7 +79,7 @@ public enum Linkage {
     case LLVMAvailableExternallyLinkage:
       self = .availableExternally
     case LLVMLinkOnceAnyLinkage:
-      self = .linkOnceAny
+      self = .linkOnce
     case LLVMLinkOnceODRLinkage:
       self = .linkOnceODR
     case LLVMWeakAnyLinkage:
@@ -106,7 +106,7 @@ public enum Linkage {
       return LLVMExternalLinkage
     case .availableExternally:
       return LLVMAvailableExternallyLinkage
-    case .linkOnceAny:
+    case .linkOnce:
       return LLVMLinkOnceAnyLinkage
     case .linkOnceODR:
       return LLVMLinkOnceODRLinkage
