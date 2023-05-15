@@ -590,6 +590,21 @@ public struct Module {
     .init(LLVMBuildZExt(p.llvm, source.llvm, target.llvm, ""))
   }
 
+  public mutating func insertIntToPtr(
+    _ source: IRValue, to target: IRType? = nil,
+    at p: Instruction
+  ) -> Instruction {
+    let t = target ?? PointerType(in: &self)
+    return .init(LLVMBuildIntToPtr(p.llvm, source.llvm, t.llvm, ""))
+  }
+
+  public func insertPtrToInt(
+    _ source: IRValue, to target: IRType,
+    at p: Instruction
+  ) -> Instruction {
+    .init(LLVMBuildPtrToInt(p.llvm, source.llvm, target.llvm, ""))
+  }
+
   public mutating func insertFPTrunc(
     _ source: IRValue, to target: IRType,
     at p: InsertionPoint

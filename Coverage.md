@@ -971,8 +971,14 @@
 
   `Module.insertFPExt(_:to:at:)`
 
-- [ ] LLVMBuildPtrToInt
-- [ ] LLVMBuildIntToPtr
+- [x] LLVMBuildPtrToInt
+
+  `Module.insertPtrToInt(_:to:at:)`
+
+- [x] LLVMBuildIntToPtr
+
+  `Module.insertIntToPtr(_:to:at:)`
+
 - [ ] LLVMBuildBitCast
 - [ ] LLVMBuildAddrSpaceCast
 - [ ] LLVMBuildZExtOrBitCast
