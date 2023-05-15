@@ -578,21 +578,21 @@ public struct Module {
 
   public mutating func insertSignExtend(
     _ source: IRValue, to target: IRType,
-    at p: Instruction
+    at p: InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildSExt(p.llvm, source.llvm, target.llvm, ""))
   }
 
   public mutating func insertZeroExtend(
     _ source: IRValue, to target: IRType,
-    at p: Instruction
+    at p: InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildZExt(p.llvm, source.llvm, target.llvm, ""))
   }
 
   public mutating func insertIntToPtr(
     _ source: IRValue, to target: IRType? = nil,
-    at p: Instruction
+    at p: InsertionPoint
   ) -> Instruction {
     let t = target ?? PointerType(in: &self)
     return .init(LLVMBuildIntToPtr(p.llvm, source.llvm, t.llvm, ""))
@@ -600,7 +600,7 @@ public struct Module {
 
   public func insertPtrToInt(
     _ source: IRValue, to target: IRType,
-    at p: Instruction
+    at p: InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildPtrToInt(p.llvm, source.llvm, target.llvm, ""))
   }
