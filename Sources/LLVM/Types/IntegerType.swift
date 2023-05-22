@@ -19,6 +19,11 @@ public struct IntegerType: IRType, Hashable {
     self.llvm = t.llvm
   }
 
+  /// Creates an instance wrapping `llvm`.
+  internal init(_ llvm: LLVMTypeRef) {
+    self.llvm = llvm
+  }
+
   /// The number of bits in the representation of the type's instances.
   public var bitWidth: Int { Int(LLVMGetIntTypeWidth(llvm)) }
 

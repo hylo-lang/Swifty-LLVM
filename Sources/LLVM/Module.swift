@@ -362,6 +362,44 @@ public struct Module {
     LLVMSetAlignment(v.llvm, UInt32(a))
   }
 
+  // MARK: Basic type instances
+
+  /// The `void` type.
+  public private(set) lazy var void: VoidType = .init(in: &self)
+
+  /// The `ptr` type in the default address space.
+  public private(set) lazy var ptr: PointerType = .init(inAddressSpace: .default, in: &self)
+
+  /// The `half` type.
+  public private(set) lazy var half: FloatingPointType = .half(in: &self)
+
+  /// The `float` type.
+  public private(set) lazy var float: FloatingPointType = .float(in: &self)
+
+  /// The `double` type.
+  public private(set) lazy var double: FloatingPointType = .double(in: &self)
+
+  /// The `fp128` type.
+  public private(set) lazy var fp128: FloatingPointType = .fp128(in: &self)
+
+  /// The 1-bit integer type.
+  public private(set) lazy var i1: IntegerType = .init(LLVMInt1TypeInContext(context))
+
+  /// The 8-bit integer type.
+  public private(set) lazy var i8: IntegerType = .init(LLVMInt8TypeInContext(context))
+
+  /// The 16-bit integer type.
+  public private(set) lazy var i16: IntegerType = .init(LLVMInt16TypeInContext(context))
+
+  /// The 32-bit integer type.
+  public private(set) lazy var i32: IntegerType = .init(LLVMInt32TypeInContext(context))
+
+  /// The 64-bit integer type.
+  public private(set) lazy var i64: IntegerType = .init(LLVMInt64TypeInContext(context))
+
+  /// The 128-bit integer type.
+  public private(set) lazy var i128: IntegerType = .init(LLVMInt128TypeInContext(context))
+
   // MARK: Arithmetics
 
   public mutating func insertAdd(

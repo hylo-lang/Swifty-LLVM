@@ -577,12 +577,30 @@
 
 #### Integer Types
 
-- [ ] LLVMInt1TypeInContext
-- [ ] LLVMInt8TypeInContext
-- [ ] LLVMInt16TypeInContext
-- [ ] LLVMInt32TypeInContext
-- [ ] LLVMInt64TypeInContext
-- [ ] LLVMInt128TypeInContext
+- [x] LLVMInt1TypeInContext
+
+  `Module.i1`
+
+- [x] LLVMInt8TypeInContext
+
+    `Module.i8`
+
+- [x] LLVMInt16TypeInContext
+
+  `Module.i16`
+
+- [x] LLVMInt32TypeInContext
+
+  `Module.i32`
+
+- [x] LLVMInt64TypeInContext
+
+  `Module.i64`
+
+- [x] LLVMInt128TypeInContext
+
+  `Module.i128`
+
 - [x] LLVMIntTypeInContext
 
   `IntegerType.init(_:in:)`
