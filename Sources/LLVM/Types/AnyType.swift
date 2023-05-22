@@ -7,8 +7,6 @@ internal struct AnyType: IRType, Hashable {
   public let llvm: LLVMTypeRef
 
   /// Creates an instance wrapping `llvm`.
-  ///
-  /// - Requires: `bitWidth` is greater than 0.
   internal init(_ llvm: LLVMTypeRef) {
     self.llvm = llvm
   }
