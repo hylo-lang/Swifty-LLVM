@@ -18,6 +18,12 @@ final class FloatingPointTypeTests: XCTestCase {
     XCTAssertNil(FloatingPointType(u))
   }
 
+  func testCallSyntax() {
+    var m = Module("foo")
+    let double = FloatingPointType.double(in: &m)
+    XCTAssertEqual(double(1).value.value, 1, accuracy: .ulpOfOne)
+  }
+
   func testEquality() {
     var m = Module("foo")
     let t = FloatingPointType.double(in: &m)

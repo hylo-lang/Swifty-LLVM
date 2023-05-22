@@ -31,6 +31,14 @@ public struct IntegerType: IRType, Hashable {
   /// iff `sext` is `true`.
   ///
   /// - Requires: `v` must be representable in `self.`
+  public func callAsFunction(_ v: UInt64, extendingSign sext: Bool = false) -> IntegerConstant {
+    constant(v, extendingSign: sext)
+  }
+
+  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, sign extended
+  /// iff `sext` is `true`.
+  ///
+  /// - Requires: `v` must be representable in `self.`
   public func constant(_ v: UInt64, extendingSign sext: Bool = false) -> IntegerConstant {
     .init(LLVMConstInt(llvm, v, sext ? 1 : 0))
   }
@@ -39,7 +47,7 @@ public struct IntegerType: IRType, Hashable {
   /// iff `sext` is `true`.
   ///
   /// - Requires: `v` must be representable in `self.`
-  func constant<T: BinaryInteger>(
+  public func constant<T: BinaryInteger>(
     truncatingIfNeeded i: T, extendingSign sext: Bool = false
   ) -> LLVM.IntegerConstant {
     constant(.init(truncatingIfNeeded: i), extendingSign: sext)

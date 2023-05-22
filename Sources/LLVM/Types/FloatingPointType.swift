@@ -42,6 +42,11 @@ public struct FloatingPointType: IRType, Hashable {
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`.
+  public func callAsFunction(_ v: Double) -> FloatingPointConstant {
+    constant(v)
+  }
+
+  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`.
   public func constant(_ v: Double) -> FloatingPointConstant {
     .init(LLVMConstReal(llvm, v))
   }

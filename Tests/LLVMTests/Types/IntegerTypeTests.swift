@@ -9,6 +9,12 @@ final class IntegerTypeTests: XCTestCase {
     XCTAssertEqual(IntegerType(32, in: &m).bitWidth, 32)
   }
 
+  func testCallSyntax() {
+    var m = Module("foo")
+    let i64 = IntegerType(64, in: &m)
+    XCTAssertEqual(i64(1).sext, 1)
+  }
+
   func testConversion() {
     var m = Module("foo")
     let t: IRType = IntegerType(64, in: &m)
