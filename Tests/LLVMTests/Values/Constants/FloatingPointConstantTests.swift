@@ -6,19 +6,19 @@ final class FloatingPointConstantTests: XCTestCase {
   func testZero() {
     var m = Module("foo")
     let x = FloatingPointType.double(in: &m).zero
-    XCTAssertEqual(x.value().value, 0.0, accuracy: .ulpOfOne)
+    XCTAssertEqual(x.value.value, 0.0, accuracy: .ulpOfOne)
   }
 
   func testInitWithDouble() {
     var m = Module("foo")
     let x = FloatingPointType.double(in: &m).constant(4.2)
-    XCTAssertEqual(x.value().value, 4.2, accuracy: .ulpOfOne)
+    XCTAssertEqual(x.value.value, 4.2, accuracy: .ulpOfOne)
   }
 
   func testInitWithText() {
     var m = Module("foo")
     let x = FloatingPointType.double(in: &m).constant(parsing: "4.2")
-    XCTAssertEqual(x.value().value, 4.2, accuracy: .ulpOfOne)
+    XCTAssertEqual(x.value.value, 4.2, accuracy: .ulpOfOne)
   }
 
   func testConversion() {

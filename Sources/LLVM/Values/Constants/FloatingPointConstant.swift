@@ -20,9 +20,9 @@ public struct FloatingPointConstant: IRValue, Hashable {
     }
   }
 
-  /// Returns a pair `(v, l)` where `v` is the value of this constant and `l` is `true` iff
+  /// A pair `(v, l)` where `v` is the value of this constant and `l` is `true` iff
   /// precision was lost in the conversion.
-  public func value() -> (value: Double, lostPrecision: Bool) {
+  public var value: (value: Double, lostPrecision: Bool) {
     var l: Int32 = 0
     let v = LLVMConstRealGetDouble(llvm, &l)
     return (v, l != 0)
