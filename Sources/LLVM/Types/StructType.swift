@@ -53,6 +53,13 @@ public struct StructType: IRType, Hashable {
   /// The fields of the struct.
   public var fields: Fields { .init(of: self) }
 
+  /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `parts`.
+  public func constant<S: Sequence>(
+    aggregating elements: S, in module: inout Module
+  ) -> StructConstant where S.Element == IRValue {
+    .init(of: self, aggregating: elements, in: &module)
+  }
+
 }
 
 extension StructType {

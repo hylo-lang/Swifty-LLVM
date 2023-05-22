@@ -26,5 +26,12 @@ public struct ArrayType: IRType, Hashable {
 
   /// The number of elements in instances of this type.
   public var count: Int { Int(LLVMGetArrayLength(llvm)) }
+
+  /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `elements`.
+  public func constant<S: Sequence>(
+    contentsOf elements: S, in module: inout Module
+  ) -> ArrayConstant where S.Element == IRValue {
+    .init(of: self, containing: elements, in: &module)
+  }
   
 }
