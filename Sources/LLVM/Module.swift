@@ -541,6 +541,13 @@ public struct Module {
     .init(LLVMBuildAShr(p.llvm, lhs.llvm, rhs.llvm, ""))
   }
 
+  public mutating func insertBitwiseAnd(
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildAnd(p.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
   // MARK: Memory
 
   public mutating func insertAlloca(_ type: IRType, at p: InsertionPoint) -> Alloca {

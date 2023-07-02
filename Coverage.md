@@ -933,7 +933,10 @@
 
   `Module.insertAShr(_:_:at:)`
 
-- [ ] LLVMBuildAnd
+- [x] LLVMBuildAnd
+
+  `Module.insertBitwiseAnd(_:_:at:)`
+
 - [ ] LLVMBuildOr
 - [ ] LLVMBuildXor
 - [ ] LLVMBuildBinOp
