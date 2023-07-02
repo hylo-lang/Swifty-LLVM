@@ -909,9 +909,18 @@
 
   `Module.insertFDiv(_:_:at:)`
 
-- [ ] LLVMBuildURem
-- [ ] LLVMBuildSRem
-- [ ] LLVMBuildFRem
+- [x] LLVMBuildURem
+
+  `Module.insertUnsignedRem(_:_:at:)`
+
+- [x] LLVMBuildSRem
+
+  `Module.insertSignedRem(_:_:at:)`
+
+- [x] LLVMBuildFRem
+
+  `Module.insertFRem(_:_:at:)`
+
 - [ ] LLVMBuildShl
 - [ ] LLVMBuildLShr
 - [ ] LLVMBuildAShr

@@ -499,6 +499,27 @@ public struct Module {
      .init(LLVMBuildFDiv(p.llvm, lhs.llvm, rhs.llvm, ""))
   }
 
+  public mutating func insertUnsignedRem(
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildURem(p.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
+  public mutating func insertSignedRem(
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildSRem(p.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
+  public mutating func insertFRem(
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildFRem(p.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
   // MARK: Memory
 
   public mutating func insertAlloca(_ type: IRType, at p: InsertionPoint) -> Alloca {
