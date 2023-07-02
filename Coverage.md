@@ -925,8 +925,14 @@
 
   `Module.insertShl(_:_:at:)`
 
-- [ ] LLVMBuildLShr
-- [ ] LLVMBuildAShr
+- [x] LLVMBuildLShr
+
+  `Module.insertLShr(_:_:at:)`
+
+- [x] LLVMBuildAShr
+
+  `Module.insertAShr(_:_:at:)`
+
 - [ ] LLVMBuildAnd
 - [ ] LLVMBuildOr
 - [ ] LLVMBuildXor

@@ -527,6 +527,20 @@ public struct Module {
     .init(LLVMBuildShl(p.llvm, lhs.llvm, rhs.llvm, ""))
   }
 
+  public mutating func insertLShr(
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildLShr(p.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
+  public mutating func insertAShr(
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildAShr(p.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
   // MARK: Memory
 
   public mutating func insertAlloca(_ type: IRType, at p: InsertionPoint) -> Alloca {
