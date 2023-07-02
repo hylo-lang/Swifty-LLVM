@@ -921,7 +921,10 @@
 
   `Module.insertFRem(_:_:at:)`
 
-- [ ] LLVMBuildShl
+- [x] LLVMBuildShl
+
+  `Module.insertShl(_:_:at:)`
+
 - [ ] LLVMBuildLShr
 - [ ] LLVMBuildAShr
 - [ ] LLVMBuildAnd
