@@ -555,6 +555,13 @@ public struct Module {
     .init(LLVMBuildOr(p.llvm, lhs.llvm, rhs.llvm, ""))
   }
 
+  public mutating func insertBitwiseXor(
+    _ lhs: IRValue, _ rhs: IRValue,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildXor(p.llvm, lhs.llvm, rhs.llvm, ""))
+  }
+
   // MARK: Memory
 
   public mutating func insertAlloca(_ type: IRType, at p: InsertionPoint) -> Alloca {
