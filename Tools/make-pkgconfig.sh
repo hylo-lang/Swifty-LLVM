@@ -1,4 +1,6 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+set -x
+set -e
 
 version=$(llvm-config --version)
 filename=$1
