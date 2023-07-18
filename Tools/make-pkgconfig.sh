@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 set -e
 
 version=$(llvm-config --version)
