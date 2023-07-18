@@ -22,21 +22,37 @@ port install llvm-15 llvm_select
 port select llvm mp-llvm-15
 ```
 
-Then, make sure `llvm-config` is in your path.
+or, using [homebrew](https://brew.sh):
+
+```bash
+brew install llvm
+```
+
+Now make sure `llvm-config` is in your path (homebrew doesn't do that automatically; you'd need export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH").
 The command below should print the LLVM version installed on your system. 
 
 ```bash
 llvm-config --version
 ```
 
-Next, you need to create a `pkgconfig` file specific to your installation.
-
-You can run the script `Tools/make-pkgconfig.sh`.
-It will create a file `/usr/local/lib/pkgconfig/llvm.pc`:
+Next, you need to create a `pkgconfig` file specific to your installation and make it visible to your build tools.
 
 ```bash
-./Tools/make-pkgconfig.sh
+./Tools/make-pkgconfig.sh ./llvm.pc
 ``` 
+
+The above command generates the `pkgconfig` file `./llvm.pc`.  You can either add its directory to your `PKG_CONFIG_PATH`
+for use with command-line tools:
+
+```bash
+export PKG_CONFIG_PATH=$PWD
+```
+
+or you can put it somewhere that `pkg_config` already searches (needed for use with Xcode):
+
+```bash
+sudo mkdir -p /usr/local/lib/pkgconfig && sudo mv llvm.pc /usr/local/lib/pkgconfig/
+```
 
 ### Build
 
