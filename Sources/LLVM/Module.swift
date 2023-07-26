@@ -635,6 +635,17 @@ public struct Module {
   }
 
   @discardableResult
+  public mutating func insertSwitch<C: Collection<(IRValue, BasicBlock)>>(
+    on value: IRValue, cases: C, default defaultCase: BasicBlock, at p: InsertionPoint
+  ) -> Instruction {
+    let s = LLVMBuildSwitch(p.llvm, value.llvm, defaultCase.llvm, UInt32(cases.count))
+    for (value, destination) in cases {
+      LLVMAddCase(s, value.llvm, destination.llvm)
+    }
+    return .init(s!)
+  }
+
+  @discardableResult
   public mutating func insertReturn(at p: InsertionPoint) -> Instruction {
     .init(LLVMBuildRetVoid(p.llvm))
   }

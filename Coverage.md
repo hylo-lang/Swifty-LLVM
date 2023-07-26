@@ -813,7 +813,10 @@
 
   `Module.insertConBr(if:then:else:at:)`
 
-- [ ] LLVMBuildSwitch
+- [x] LLVMBuildSwitch
+
+  `Module.insertSwitch(on:cases:default:at:)`
+
 - [ ] LLVMBuildIndirectBr
 - [ ] LLVMBuildInvoke2
 - [x] LLVMBuildUnreachable
@@ -827,7 +830,10 @@
 - [ ] LLVMBuildCatchPad
 - [ ] LLVMBuildCleanupPad
 - [ ] LLVMBuildCatchSwitch
-- [ ] LLVMAddCase
+- [x] LLVMAddCase
+
+  `Module.insertSwitch(on:cases:default:at:)`
+
 - [ ] LLVMAddDestination
 - [ ] LLVMGetNumClauses
 - [ ] LLVMGetClause
