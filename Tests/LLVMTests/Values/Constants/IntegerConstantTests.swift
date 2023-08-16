@@ -17,9 +17,9 @@ final class IntegerConstantTests: XCTestCase {
     XCTAssertEqual(x.zext, 255)
   }
 
-  func testInitWithSignExtendedBitPattern() {
+  func testInitWithSignedValue() {
     var m = Module("foo")
-    let x = IntegerType(8, in: &m).constant(128, extendingSign: true)
+    let x = IntegerType(8, in: &m).constant(-128)
     XCTAssertEqual(x.sext, -128)
     XCTAssertEqual(x.zext, 128)
   }

@@ -408,7 +408,7 @@
 
 - [x] LLVMConstInt 
 
-  `IntegerType.constant(_:extendingSign:)`
+  `IntegerType.constant(_:)`
  
 - [x] LLVMConstIntOfArbitraryPrecision
 
