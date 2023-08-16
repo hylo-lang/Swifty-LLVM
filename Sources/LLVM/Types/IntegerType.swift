@@ -27,30 +27,18 @@ public struct IntegerType: IRType, Hashable {
   /// The number of bits in the representation of the type's instances.
   public var bitWidth: Int { Int(LLVMGetIntTypeWidth(llvm)) }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, sign extended
-  /// iff `sext` is `true`.
+  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
+  /// sign-extending if needed to fit `self.bitWidth`.
   ///
   /// - Requires: `v` must be representable in `self.`
-  public func callAsFunction(_ v: UInt64, extendingSign sext: Bool = false) -> IntegerConstant {
-    constant(v, extendingSign: sext)
+  public func callAsFunction(_ v: Int) -> IntegerConstant {
+    constant(v)
   }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, sign extended
-  /// iff `sext` is `true`.
-  ///
-  /// - Requires: `v` must be representable in `self.`
-  public func constant(_ v: UInt64, extendingSign sext: Bool = false) -> IntegerConstant {
-    .init(LLVMConstInt(llvm, v, sext ? 1 : 0))
-  }
-
-  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, sign extended
-  /// iff `sext` is `true`.
-  ///
-  /// - Requires: `v` must be representable in `self.`
-  public func constant<T: BinaryInteger>(
-    truncatingIfNeeded i: T, extendingSign sext: Bool = false
-  ) -> LLVM.IntegerConstant {
-    constant(.init(truncatingIfNeeded: i), extendingSign: sext)
+  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
+  /// sign-extending if needed to fit `self.bitWidth`.
+  public func constant<T: BinaryInteger>(_ v: T) -> LLVM.IntegerConstant {
+    .init(LLVMConstInt(llvm, UInt64(truncatingIfNeeded: v), 0))
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is parsed from `text` with
