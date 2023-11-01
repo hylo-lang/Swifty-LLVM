@@ -97,6 +97,10 @@ let customLinkerSettings: [LinkerSetting]? = [
 let customLinkerSettings: [LinkerSetting]? = nil
 #endif
 
+let swiftSettings: [SwiftSetting] = [
+  .unsafeFlags(["-warnings-as-errors", "-strict-concurrency=complete", "-warn-concurrency"]),
+]
+
 let package = Package(
   name: "Swifty-LLVM",
   products: [
@@ -107,10 +111,12 @@ let package = Package(
     .target(
       name: "LLVM",
       dependencies: ["llvmc", "llvmshims"],
+      swiftSettings: swiftSettings,
       linkerSettings: customLinkerSettings),
     .target(
       name: "llvmshims",
       dependencies: ["llvmc"],
+      swiftSettings: swiftSettings,
       linkerSettings: customLinkerSettings),
 
     // Tests.
