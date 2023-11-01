@@ -24,7 +24,7 @@ extension AttributeNameProtocol {
 }
 
 /// An attribute on a function, return value, or parameter in LLVM IR.
-public enum Attribute<T: AttributeHolder>: Hashable {
+public enum Attribute<T: AttributeHolder>: Hashable, Sendable {
 
   /// A target-independent attribute.
   case targetIndependent(llvm: LLVMAttributeRef)

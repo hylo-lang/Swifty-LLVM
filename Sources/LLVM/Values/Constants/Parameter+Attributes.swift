@@ -6,7 +6,7 @@ extension Parameter: AttributeHolder {
   public typealias Attribute = LLVM.Attribute<Parameter>
 
   /// The name of an attribute on a parameter in LLVM IR.
-  public enum AttributeName: String, AttributeNameProtocol {
+  public enum AttributeName: String, AttributeNameProtocol, Sendable {
 
     /// Indicates to the code generator that the parameter or return value should be sign-extended
     /// to the extent required by the target’s ABI (which is usually 32-bits) by the caller (for a

@@ -1,7 +1,7 @@
 import llvmc
 
 /// The kind of result produced by code generation.
-public enum CodeGenerationResultType: Hashable {
+public enum CodeGenerationResultType: Hashable, Sendable {
 
   /// Assembly.
   case assembly

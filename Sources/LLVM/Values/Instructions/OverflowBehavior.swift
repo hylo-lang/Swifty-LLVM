@@ -1,5 +1,5 @@
 /// The behavior that should occur on overflow during mathematical operations.
-public enum OverflowBehavior {
+public enum OverflowBehavior : Sendable {
 
   /// Overflow is ignored.
   case ignore

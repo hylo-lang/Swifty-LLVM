@@ -4,7 +4,7 @@ import llvmc
 ///
 /// - Note: It is illegal for a global variable or function declaration to have any linkage type
 ///   other than `external` or `extern_weak`.
-public enum Linkage {
+public enum Linkage : Sendable {
 
   /// The name is externally visible; it participates in linkage and can be used to resolve
   /// external symbol references.

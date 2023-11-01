@@ -4,7 +4,7 @@ import llvmc
 ///
 /// - Note: Ordered means that neither operand is a QNAN while unordered means that either operand
 ///   may be a QNAN.
-public enum FloatingPointPredicate: String, Hashable {
+public enum FloatingPointPredicate: String, Hashable, Sendable {
 
   /// No comparison; always false.
   case alwaysFalse = "false"
