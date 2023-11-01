@@ -10,6 +10,6 @@ public struct AddressSpace: Hashable {
   }
 
   /// The default address space.
-  public static var `default` = AddressSpace(0)
+  public static let `default` = AddressSpace(0)
 
 }

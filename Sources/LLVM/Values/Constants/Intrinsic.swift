@@ -55,6 +55,6 @@ extension Intrinsic {
   }
 
   /// The prefix of all intrinsics.
-  public static var llvm = Name("llvm")
+  public static let llvm = Name("llvm")
 
 }
