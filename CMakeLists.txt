@@ -18,6 +18,7 @@ if(POLICY CMP0157)
 endif()
 
 project(Swifty-LLVM LANGUAGES C CXX Swift)
+enable_testing()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_Swift_LANGUAGE_VERSION 5)
@@ -32,25 +33,20 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
 set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
-find_package(XCTest QUIET)
 
+#
+# Dependencies
+#
+
+# LLVM (mostly boilplate from https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project)
 find_package(LLVM 17.0 REQUIRED CONFIG)
-
 include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
-function(dump_cmake_variables)
-    get_cmake_property(_variableNames VARIABLES)
-    list (SORT _variableNames)
-    foreach (_variableName ${_variableNames})
-        if ((NOT DEFINED ARGV0) OR _variableName MATCHES ${ARGV0})
-            message(STATUS "${_variableName}=${${_variableName}}")
-        endif()
-    endforeach()
-endfunction()
-
-#dump_cmake_variables([lL][lL][vV][mM])
+#
+# Local targets
+#
 
 add_library(llvmc INTERFACE)
 target_include_directories(llvmc INTERFACE
@@ -62,4 +58,15 @@ target_link_libraries(llvmshims PRIVATE llvmc)
 
 file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Sources/LLVM/*.swift)
 add_library(SwiftyLLVM ${files})
-target_link_libraries(SwiftyLLVM PRIVATE llvmshims llvmc)
+target_link_libraries(SwiftyLLVM
+  # TODO: does this really need to be public?!
+  PUBLIC llvmshims llvmc)
+target_compile_options(SwiftyLLVM
+  PUBLIC $<$<BOOL:${ENABLE_TESTING}>:-enable-testing>)
+
+if(ENABLE_TESTING)
+  include(FindXCTest)
+  file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
+  xctest_add_bundle(SwiftyLLVMTests SwiftyLLVM ${files})
+  xctest_add_test(XCTest.SwiftyLLVMTests SwiftyLLVMTests)
+endif()
