@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import LLVM
+@testable import SwiftyLLVM
 
 final class StringTests: XCTestCase {
 

@@ -1,4 +1,4 @@
-import LLVM
+import SwiftyLLVM
 import XCTest
 
 final class ParameterTests: XCTestCase {
