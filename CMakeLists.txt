@@ -55,10 +55,7 @@ endfunction()
 add_library(llvmc INTERFACE)
 target_include_directories(llvmc INTERFACE
   Sources/llvmc
-#  ${LLVM_INCLUDE_DIRS}
 )
-
-
 add_library(llvmshims Sources/llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC Sources/llvmshims/include)
 target_link_libraries(llvmshims PRIVATE llvmc)
