@@ -44,6 +44,7 @@ include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
+
 #
 # Local targets
 #
@@ -52,6 +53,10 @@ add_library(llvmc INTERFACE)
 target_include_directories(llvmc INTERFACE
   Sources/llvmc
 )
+# Not sure if this is exactly the right list, but it's enough.
+llvm_map_components_to_libnames(llvm_libs mcjit bitwriter linker passes X86 ARM AArch64)
+target_link_libraries(llvmc INTERFACE ${llvm_libs})
+
 add_library(llvmshims Sources/llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC Sources/llvmshims/include)
 target_link_libraries(llvmshims PRIVATE llvmc)
@@ -59,14 +64,26 @@ target_link_libraries(llvmshims PRIVATE llvmc)
 file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Sources/LLVM/*.swift)
 add_library(SwiftyLLVM ${files})
 target_link_libraries(SwiftyLLVM
-  # TODO: does this really need to be public?!
+  # TODO: does this really need to be public? Otherwise, I'm getting
+  # DataLayoutTests.swift:1:8: error: missing required modules: 'llvmc', 'llvmshims'
   PUBLIC llvmshims llvmc)
 target_compile_options(SwiftyLLVM
-  PUBLIC $<$<BOOL:${ENABLE_TESTING}>:-enable-testing>)
+  PRIVATE $<$<BOOL:${ENABLE_TESTING}>:-enable-testing>)
 
 if(ENABLE_TESTING)
+
   include(FindXCTest)
+  if(APPLE)
+    add_library(XCTest SHARED IMPORTED)
+    target_include_directories(XCTest INTERFACE
+      /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/)
+    set_target_properties(XCTest PROPERTIES
+      IMPORTED_LOCATION /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib)
+  endif()
+
   file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
   xctest_add_bundle(SwiftyLLVMTests SwiftyLLVM ${files})
+  target_link_libraries(SwiftyLLVMTests PRIVATE XCTest)
   xctest_add_test(XCTest.SwiftyLLVMTests SwiftyLLVMTests)
+
 endif()
