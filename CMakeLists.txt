@@ -1,6 +1,10 @@
 # Testing with:
-# mkdir -p ~/src/Swifty-LLVM/.cmake-build && cd ~/src/Swifty-LLVM/.cmake-build && cmake -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake -GNinja -S .. && cmake --build .
-
+#
+# Mac:
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake -GNinja -S .. && cmake --build .
+#
+# Linux:
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S .. && cmake --build .
 cmake_minimum_required(VERSION 3.28.2)
 
 if(POLICY CMP0077)
@@ -28,8 +32,6 @@ set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
 set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
