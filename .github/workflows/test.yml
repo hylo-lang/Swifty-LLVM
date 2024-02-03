@@ -74,30 +74,25 @@ jobs:
 
     - name: Test 
       run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
-
+      
   build-native-windows:
-    name: "Native: ${{ matrix.host.os }}/release"
+    name: "Native: windows-latest/debug"
     strategy:
       fail-fast: false
-      matrix:
-        host: [
-          { type: windows, os: windows-latest },
-        ]
-        swift: [
-          { windows-branch: "swift-5.8.1-release", windows-tag: "5.8.1-RELEASE" }
-        ]
-    runs-on: ${{ matrix.host.os }}
+    runs-on: windows-latest
     steps:
     - name: Setup swift
-      uses: compnerd/gha-setup-swift@main
-      if: matrix.host.type == 'windows'
+      uses: compnerd/gha-setup-swift@v0.2.1
       with:
-        branch: ${{ matrix.swift.windows-branch }}
-        tag: ${{ matrix.swift.windows-tag }}
+        github-repo: thebrowsercompany/swift-build
+        release-asset-name: installer-amd64.exe
+        release-tag-name: 20231130.2
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - run: |
-        git config --global core.autocrlf input
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+        show-progress: false
 
     - name: Swift version
       run: swift --version
@@ -106,34 +101,23 @@ jobs:
       run: |
         curl.exe -L -O -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"https://github.com/c3lang/win-llvm/releases/download/llvm_15_0_6/llvm-15.0.6-windows-x86-msvc17-msvcrt.7z
         7z x llvm-15.0.6-windows-x86-msvc17-msvcrt.7z -oC:\
+        Add-Content $env:GITHUB_PATH 'C:\llvm-15.0.6-windows-x86-msvc17-msvcrt\bin'
         
-    - name: Copy include in LLVM folder
-      run: xcopy c:\llvm-15.0.6-windows-x86-msvc17-msvcrt\include\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.35.32215\include\ /s /h
+    - run: llvm-config --version
 
-    - name: Copy lib in LLVM folder
-      run: xcopy c:\llvm-15.0.6-windows-x86-msvc17-msvcrt\lib\*.* c:\program" "files\microsoft" "visual" "studio\2022\enterprise\vc\tools\msvc\14.35.32215\lib\x64\ /s /h
-
-    - name: Add LLVM to Path
-      run: Add-Content $env:GITHUB_PATH 'C:\llvm-15.0.6-windows-x86-msvc17-msvcrt\bin'
+    - name: Generate LLVM pkgconfig file
+      run: |
+        swift package resolve
+        & "C:\Program Files\Git\bin\bash.exe" Tools/make-pkgconfig.sh llvm.pc
+        type llvm.pc
 
     - run: llvm-config --version
 
-    - name: Build (Release)
-      id: first-build
-      continue-on-error: true
-      run: swift build -v -c release
-
-    - name: Retry again on failure
-      continue-on-error: false
-      if: steps.first-build.outcome != 'success'
-      run: swift build -v -c release
-
-    - name: Test (Release)
-      id: first-test
-      continue-on-error: true
-      run: swift test -c release -Xswiftc -enable-testing ${{matrix.host.test-options}}
-
-    - name: Retry again on failure
-      continue-on-error: false
-      if: steps.first-test.outcome != 'success'
-      run: swift test -c release -Xswiftc -enable-testing ${{matrix.host.test-options}}
+    - name: Prevent reentrant builds for speed
+      run: echo 'SPM_BUILD_TOOL_SUPPORT_NO_REENTRANT_BUILD=1' >> $env:GITHUB_ENV
+      
+    - name: Build (Debug)
+      run: swift build --explicit-target-dependency-import-check error --build-tests --pkg-config-path . 
+      
+    - name: Test (Debug)
+      run: swift test --parallel --skip-build --pkg-config-path . 
