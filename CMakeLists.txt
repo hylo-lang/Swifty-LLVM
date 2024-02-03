@@ -75,10 +75,23 @@ if(ENABLE_TESTING)
   include(FindXCTest)
   if(APPLE)
     add_library(XCTest SHARED IMPORTED)
-    target_include_directories(XCTest INTERFACE
-      /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/)
+
+    # Determine the .../<Platform>.platform/Developer directory prefix where XCTest can be found.
+    # TODO: the directories derived from this should probably have a CMakeCache entry.
+    set(platform_developer "")
+    foreach(d ${CMAKE_Swift_IMPLICIT_INCLUDE_DIRECTORIES})
+      if(${d} MATCHES "^(.*[.]platform/Developer)/SDKs/.*")
+	string(REGEX REPLACE "^(.*[.]platform/Developer)/SDKs/.*" "\\1" platform_developer ${d})
+	break()
+      endif()
+    endforeach()
+    if(${platform_developer} STREQUAL "")
+      message(FATAL_ERROR "failed to find platform developer directory in ${CMAKE_Swift_IMPLICIT_INCLUDE_DIRECTORIES}")
+    endif()
+
+    target_include_directories(XCTest INTERFACE ${platform_developer}/usr/lib/)
     set_target_properties(XCTest PROPERTIES
-      IMPORTED_LOCATION /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib)
+      IMPORTED_LOCATION ${platform_developer}/usr/lib/libXCTestSwiftSupport.dylib)
   endif()
 
   file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
