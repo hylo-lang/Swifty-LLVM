@@ -74,8 +74,8 @@ target_compile_options(SwiftyLLVM
 
 if(ENABLE_TESTING)
 
-  include(FindXCTest)
   if(APPLE)
+    include(FindXCTest)
     add_library(XCTest SHARED IMPORTED)
 
     # Determine the .../<Platform>.platform/Developer directory prefix where XCTest can be found.
@@ -94,11 +94,25 @@ if(ENABLE_TESTING)
     target_include_directories(XCTest INTERFACE ${platform_developer}/usr/lib/)
     set_target_properties(XCTest PROPERTIES
       IMPORTED_LOCATION ${platform_developer}/usr/lib/libXCTestSwiftSupport.dylib)
+  else()
+    find_package(XCTest CONFIG QUIET)
   endif()
 
-  file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
-  xctest_add_bundle(SwiftyLLVMTests SwiftyLLVM ${files})
-  target_link_libraries(SwiftyLLVMTests PRIVATE XCTest)
-  xctest_add_test(XCTest.SwiftyLLVMTests SwiftyLLVMTests)
+  file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
+
+  if (APPLE)
+    xctest_add_bundle(SwiftyLLVMTests SwiftyLLVM ${test_files})
+    target_link_libraries(SwiftyLLVMTests PRIVATE XCTest)
+    xctest_add_test(XCTest.SwiftyLLVMTests SwiftyLLVMTests)
+  else()
+    add_executable(SwiftyLLVMTestRunner
+      LinuxMain.swift)
+    target_link_libraries(SwiftyLLVMTestRunner PRIVATE
+      SwiftyLLVM
+      XCTest)
+
+    add_test(NAME SwiftyLLVMTests
+      COMMAND SwiftyLLVMTestRunner)
+  endif()
 
 endif()
