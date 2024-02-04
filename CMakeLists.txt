@@ -46,6 +46,15 @@ include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
+if(ENABLE_TESTING AND NOT APPLE)
+  include(FetchContent)
+  FetchContent_Declare(XCTestDiscovery
+    GIT_REPOSITORY https://github.com/hylo-lang/XCTestDiscovery.git
+    GIT_TAG        main
+    FIND_PACKAGE_ARGS CONFIG
+  )
+  FetchContent_MakeAvailable(XCTestDiscovery)
+endif()
 
 #
 # Local targets
@@ -105,8 +114,15 @@ if(ENABLE_TESTING)
     target_link_libraries(SwiftyLLVMTests PRIVATE XCTest)
     xctest_add_test(XCTest.SwiftyLLVMTests SwiftyLLVMTests)
   else()
+    add_custom_command(
+      OUTPUT ${PROJECT_BINARY_DIR}/main.swift
+      COMMAND generate-xctest-main -o ${PROJECT_BINARY_DIR}/main.swift ${test_files}
+      DEPENDS ${test_files} generate-xctest-main
+      COMMENT "Generate test runner.")
+
     add_executable(SwiftyLLVMTestRunner
-      LinuxMain.swift)
+      ${PROJECT_BINARY_DIR}/main.swift ${test_files})
+
     target_link_libraries(SwiftyLLVMTestRunner PRIVATE
       SwiftyLLVM
       XCTest)
