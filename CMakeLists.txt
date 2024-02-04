@@ -1,10 +1,10 @@
 # Testing with:
 #
 # Mac:
-#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake -GNinja -S .. && cmake --build .
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
 #
 # Linux:
-#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S .. && cmake --build .
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
 cmake_minimum_required(VERSION 3.28.2)
 
 if(POLICY CMP0077)
@@ -83,6 +83,8 @@ target_compile_options(SwiftyLLVM
 
 if(ENABLE_TESTING)
 
+  file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
+
   if(APPLE)
     include(FindXCTest)
     add_library(XCTest SHARED IMPORTED)
@@ -103,17 +105,13 @@ if(ENABLE_TESTING)
     target_include_directories(XCTest INTERFACE ${platform_developer}/usr/lib/)
     set_target_properties(XCTest PROPERTIES
       IMPORTED_LOCATION ${platform_developer}/usr/lib/libXCTestSwiftSupport.dylib)
-  else()
-    find_package(XCTest CONFIG QUIET)
-  endif()
 
-  file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
-
-  if (APPLE)
     xctest_add_bundle(SwiftyLLVMTests SwiftyLLVM ${test_files})
     target_link_libraries(SwiftyLLVMTests PRIVATE XCTest)
     xctest_add_test(XCTest.SwiftyLLVMTests SwiftyLLVMTests)
   else()
+    find_package(XCTest CONFIG QUIET)
+
     add_custom_command(
       OUTPUT ${PROJECT_BINARY_DIR}/main.swift
       COMMAND generate-xctest-main -o ${PROJECT_BINARY_DIR}/main.swift ${test_files}
