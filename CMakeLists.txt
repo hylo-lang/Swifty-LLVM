@@ -48,6 +48,17 @@ include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
+# Work around LLVM link options incompatible with the swift linker.
+# See https://github.com/llvm/llvm-project/pull/65634
+get_target_property(interface_libs LLVMSupport INTERFACE_LINK_LIBRARIES)
+if(-ldelayimp.lib IN_LIST interface_libs)
+  list(REMOVE_ITEM interface_libs
+    -ldelayimp.lib  -delayload:shell32.dll  -delayload:ole32.dll)
+  set_target_properties(LLVMSupport
+    PROPERTIES INTERFACE_LINK_LIBRARIES "${interface_libs}"
+    $<$<NOT:$<LINK_LANGUAGE:Swift>>:delayimp -delayload:shell32.dll -delayload:ole32.dll>)
+endif()
+
 if(ENABLE_TESTING AND NOT APPLE)
   include(FetchContent)
   FetchContent_Declare(XCTestDiscovery
