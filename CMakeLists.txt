@@ -1,12 +1,14 @@
 # Testing with:
 #
 # Mac:
-#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DENABLE_TESTING=YES -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
 #
 # Linux:
-#   mkdir -p .cmake-build && cd .cmake-build && cmake -DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DENABLE_TESTING=YES -DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
 cmake_minimum_required(VERSION 3.28.2)
-
+#
+# Windows:
+#  call "c:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"  && cmake -DENABLE_TESTING=YES -DLLVM_DIR=s:\llvm-17.0.6-windows-amd64-msvc17-msvcrt\lib\cmake\llvm\ -GNinja -S . -B s:\build\Swifty-LLVM && cmake --build s:\build\Swifty-LLVM && ctest -V s:\build\Swifty-LLVM
 if(POLICY CMP0077)
   cmake_policy(SET CMP0077 NEW)
 endif()
