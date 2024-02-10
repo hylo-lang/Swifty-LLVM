@@ -1,10 +1,10 @@
 # Testing with:
 #
 # Mac:
-#   mkdir -p .cmake-build && cd .cmake-build && cmake -DENABLE_TESTING=YES -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DENABLE_TESTING=YES -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V
 #
 # Linux:
-#   mkdir -p .cmake-build && cd .cmake-build && cmake -DENABLE_TESTING=YES -DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V .
+#   mkdir -p .cmake-build && cd .cmake-build && cmake -DENABLE_TESTING=YES -DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S .. && cmake --build . && ctest -V
 cmake_minimum_required(VERSION 3.28.2)
 #
 # Windows:
@@ -62,7 +62,7 @@ if(-delayload:shell32.dll IN_LIST interface_libs)
     PROPERTIES INTERFACE_LINK_LIBRARIES "${interface_libs}")
 endif()
 
-if(ENABLE_TESTING AND NOT APPLE)
+if(ENABLE_TESTING)
   include(FetchContent)
   FetchContent_Declare(XCTestDiscovery
     GIT_REPOSITORY https://github.com/hylo-lang/XCTestDiscovery.git
@@ -90,6 +90,10 @@ target_link_libraries(llvmshims PRIVATE llvmc)
 
 file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Sources/LLVM/*.swift)
 add_library(SwiftyLLVM ${files})
+
+# This is required in order to be a testee.
+set_target_properties(SwiftyLLVM PROPERTIES FRAMEWORK TRUE)
+
 target_link_libraries(SwiftyLLVM
   # TODO: does this really need to be public? Otherwise, I'm getting
   # DataLayoutTests.swift:1:8: error: missing required modules: 'llvmc', 'llvmshims'
@@ -99,50 +103,8 @@ target_compile_options(SwiftyLLVM
 
 if(ENABLE_TESTING)
 
+  include(${xctestdiscovery_SOURCE_DIR}/cmake/SwiftXCTestCTestBridge.cmake)
   file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
-
-  if(APPLE)
-    include(FindXCTest)
-    add_library(XCTest SHARED IMPORTED)
-
-    # Determine the .../<Platform>.platform/Developer directory prefix where XCTest can be found.
-    # TODO: the directories derived from this should probably have a CMakeCache entry.
-    set(platform_developer "")
-    foreach(d ${CMAKE_Swift_IMPLICIT_INCLUDE_DIRECTORIES})
-      if(${d} MATCHES "^(.*[.]platform/Developer)/SDKs/.*")
-	string(REGEX REPLACE "^(.*[.]platform/Developer)/SDKs/.*" "\\1" platform_developer ${d})
-	break()
-      endif()
-    endforeach()
-    if(${platform_developer} STREQUAL "")
-      message(FATAL_ERROR "failed to find platform developer directory in ${CMAKE_Swift_IMPLICIT_INCLUDE_DIRECTORIES}")
-    endif()
-
-    target_include_directories(XCTest INTERFACE ${platform_developer}/usr/lib/)
-    set_target_properties(XCTest PROPERTIES
-      IMPORTED_LOCATION ${platform_developer}/usr/lib/libXCTestSwiftSupport.dylib)
-
-    xctest_add_bundle(SwiftyLLVMTests SwiftyLLVM ${test_files})
-    target_link_libraries(SwiftyLLVMTests PRIVATE XCTest)
-    xctest_add_test(XCTest.SwiftyLLVMTests SwiftyLLVMTests)
-  else()
-    find_package(XCTest CONFIG QUIET)
-
-    add_custom_command(
-      OUTPUT ${PROJECT_BINARY_DIR}/main.swift
-      COMMAND generate-xctest-main -o ${PROJECT_BINARY_DIR}/main.swift ${test_files}
-      DEPENDS ${test_files} generate-xctest-main
-      COMMENT "Generate test runner.")
-
-    add_executable(SwiftyLLVMTestRunner
-      ${PROJECT_BINARY_DIR}/main.swift ${test_files})
-
-    target_link_libraries(SwiftyLLVMTestRunner PRIVATE
-      SwiftyLLVM
-      XCTest)
-
-    add_test(NAME SwiftyLLVMTests
-      COMMAND SwiftyLLVMTestRunner)
-  endif()
+  add_swift_xctest(SwiftyLLVMTests SwiftyLLVM ${test_files})
 
 endif()
