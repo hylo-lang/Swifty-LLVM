@@ -84,9 +84,12 @@ add_library(llvmc INTERFACE)
 target_include_directories(llvmc INTERFACE
   Sources/llvmc
 )
+
 # Not sure if this is exactly the right list, but it's enough.
 llvm_map_components_to_libnames(llvm_libs mcjit bitwriter linker passes X86 ARM AArch64)
 target_link_libraries(llvmc INTERFACE ${llvm_libs})
+# @compnerd, this really shouldn't be needed, should it?
+target_link_directories(llvmc INTERFACE ${LLVM_LIBRARY_DIRS})
 
 add_library(llvmshims Sources/llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC Sources/llvmshims/include)
