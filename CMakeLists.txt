@@ -71,7 +71,9 @@ if(ENABLE_TESTING)
     GIT_TAG        main
     FIND_PACKAGE_ARGS CONFIG
   )
+  set(ENABLE_TESTING OFF)
   FetchContent_MakeAvailable(XCTestDiscovery)
+  set(ENABLE_TESTING ON)
 endif()
 
 #
