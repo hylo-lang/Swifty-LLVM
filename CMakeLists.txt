@@ -8,7 +8,7 @@
 cmake_minimum_required(VERSION 3.28.2)
 #
 # Windows:
-#  call "c:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"  && cmake -DENABLE_TESTING=YES -DLLVM_DIR=s:\llvm-17.0.6-windows-amd64-msvc17-msvcrt\lib\cmake\llvm\ -GNinja -S . -B s:\build\Swifty-LLVM && cmake --build s:\build\Swifty-LLVM && ctest -V s:\build\Swifty-LLVM
+#  vcvarsarm64.bat  && cmake -DENABLE_TESTING=YES -DLLVM_DIR=s:/build/llvm/BuildRoot/llvm-17.0.6-arm64-msvc17-release/lib/cmake/llvm -GNinja -S s:\src\Swifty-LLVM -B s:\build\Swifty-LLVM && cmake --build s:\build\Swifty-LLVM && ctest --dir s:\build\Swifty-LLVM -V
 if(POLICY CMP0077)
   cmake_policy(SET CMP0077 NEW)
 endif()
@@ -88,10 +88,8 @@ target_include_directories(llvmc INTERFACE
 # Not sure if this is exactly the right list, but it's enough.
 llvm_map_components_to_libnames(llvm_libs mcjit bitwriter linker passes X86 ARM AArch64)
 target_link_libraries(llvmc INTERFACE ${llvm_libs})
-# @compnerd, this really shouldn't be needed, should it?
-target_link_directories(llvmc INTERFACE ${LLVM_LIBRARY_DIRS})
 
-add_library(llvmshims Sources/llvmshims/src/shim.cc)
+add_library(llvmshims STATIC Sources/llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC Sources/llvmshims/include)
 target_link_libraries(llvmshims PRIVATE llvmc)
 
