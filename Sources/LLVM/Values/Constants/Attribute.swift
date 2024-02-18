@@ -40,7 +40,7 @@ public enum Attribute<T: AttributeHolder>: Hashable {
 
   /// Creates a target-independent attribute with given `name` and optional `value` in `module`.
   public init(_ name: T.AttributeName, _ value: UInt64 = 0, in module: inout Module) {
-    self = .targetIndependent(llvm: LLVMCreateEnumAttribute(module.context, name.id, value)!)
+    self = .targetIndependent(llvm: LLVMCreateEnumAttribute(module.context.raw, name.id, value)!)
   }
 
   /// The value of the attribute if it is target-independent.

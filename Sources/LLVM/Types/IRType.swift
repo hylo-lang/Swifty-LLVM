@@ -1,7 +1,7 @@
 import llvmc
 
 /// The type of a value in LLVM IR.
-public protocol IRType: CustomStringConvertible {
+public protocol IRType: CustomStringConvertible, Contextual {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: LLVMTypeRef { get }
@@ -12,16 +12,22 @@ extension IRType {
 
   /// A string representation of the type.
   public var description: String {
-    guard let s = LLVMPrintTypeToString(llvm) else { return "" }
-    defer { LLVMDisposeMessage(s) }
-    return String(cString: s)
+    inContext {
+      guard let s = LLVMPrintTypeToString(llvm) else { return "" }
+      defer { LLVMDisposeMessage(s) }
+      return String(cString: s)
+    }
   }
 
   /// `true` if the size of the type is known.
-  public var isSized: Bool { LLVMTypeIsSized(llvm) != 0 }
+  public var isSized: Bool {
+    inContext { LLVMTypeIsSized(llvm) != 0 }
+  }
 
   /// The `null` instance of this type (e.g., the zero of `i32`).
-  public var null: IRValue { AnyValue(LLVMConstNull(llvm)) }
+  public var null: IRValue {
+    inContext { AnyValue(LLVMConstNull(llvm), in: context) }
+  }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.
   public static func == <R: IRType>(lhs: Self, rhs: R) -> Bool {

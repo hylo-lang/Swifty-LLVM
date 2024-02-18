@@ -1,7 +1,7 @@
 import llvmc
 
 /// A value in LLVM IR.
-public protocol IRValue: CustomStringConvertible {
+public protocol IRValue: CustomStringConvertible, Contextual {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: LLVMValueRef { get }
@@ -18,7 +18,7 @@ extension IRValue {
   }
 
   /// The LLVM IR type of this value.
-  public var type: IRType { AnyType(LLVMTypeOf(llvm)) }
+  public var type: IRType { AnyType(LLVMTypeOf(llvm), in: context) }
 
   /// The name of this value.
   public var name: String { String(from: llvm, readingWith: LLVMGetValueName2(_:_:)) ?? "" }

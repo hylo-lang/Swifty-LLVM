@@ -9,6 +9,8 @@ public struct ArrayConstant: Hashable {
   /// The number of elements in the array.
   public let count: Int
 
+  public let context: ContextHandle
+
   /// Creates a constant array of `type` in `module`, filled with the contents of `elements`.
   ///
   /// - Requires: The type of each element in `contents` is `type`.
@@ -16,7 +18,8 @@ public struct ArrayConstant: Hashable {
     of type: IRType, containing elements: S, in module: inout Module
   ) where S.Element == IRValue {
     var values = elements.map({ $0.llvm as Optional })
-    self.llvm = LLVMConstArray(type.llvm, &values, UInt32(values.count))
+    self.llvm = module.inContext { LLVMConstArray(type.llvm, &values, UInt32(values.count)) }
+    self.context = module.context
     self.count = values.count
   }
 

@@ -9,12 +9,14 @@ extension Global {
   ///
   /// This "value type" of a global differs from its formal type, which is always a pointer type.
   public var valueType: IRType {
-    AnyType(LLVMGlobalGetValueType(llvm))
+    AnyType(LLVMGlobalGetValueType(llvm), in: context)
   }
 
   /// The linkage of this global.
   public var linkage: Linkage {
-    .init(llvm: LLVMGetLinkage(llvm))
+    inContext {
+      .init(llvm: LLVMGetLinkage(llvm))
+    }
   }
 
 }

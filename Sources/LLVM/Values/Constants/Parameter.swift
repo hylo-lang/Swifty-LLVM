@@ -9,24 +9,28 @@ public struct Parameter: IRValue {
   /// The index of the parameter in its function.
   public let index: Int
 
+  public let context: ContextHandle
+
   /// Creates an instance wrapping `llvm`, which represents the `i`-th parameter of a function.
-  internal init(_ llvm: LLVMValueRef, _ i: Int) {
+  internal init(_ llvm: LLVMValueRef, _ i: Int, in context: ContextHandle) {
+    self.context = context
     self.llvm = llvm
     self.index = i
   }
 
   /// Creates an intance with `v`, failing iff `v` is not a parameter.
   public init?(_ v: IRValue) {
-    if let h = LLVMIsAArgument(v.llvm) {
+    if let h = (v.inContext { LLVMIsAArgument(v.llvm) }) {
       self.llvm = h
-      self.index = Function(LLVMGetParamParent(h)).parameters.firstIndex(where: { $0.llvm == h })!
+      self.context = v.context
+      self.index = Function(LLVMGetParamParent(h), in: v.context).parameters.firstIndex(where: { $0.llvm == h })!
     } else {
       return nil
     }
   }
 
   /// The function containing the parameter.
-  public var parent: Function { .init(LLVMGetParamParent(llvm)) }
+  public var parent: Function { inContext { .init(LLVMGetParamParent(llvm), in: context) } }
 
 }
 

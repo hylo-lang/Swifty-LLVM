@@ -26,7 +26,7 @@ extension AggregateConstant where Index == Int, Element == IRValue {
 
   public subscript(position: Int) -> IRValue {
     precondition(position >= 0 && position < count, "index is out of bounds")
-    return AnyValue(LLVMGetAggregateElement(llvm, UInt32(position)))
+    return inContext{ AnyValue(LLVMGetAggregateElement(llvm, UInt32(position)), in: context) }
   }
 
 }

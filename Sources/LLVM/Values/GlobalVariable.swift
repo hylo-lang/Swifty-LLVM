@@ -6,9 +6,12 @@ public struct GlobalVariable: Global {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: LLVMValueRef
 
+  public let context: ContextHandle
+
   /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
+  internal init(_ llvm: LLVMValueRef, in context: ContextHandle) {
     self.llvm = llvm
+    self.context = context
   }
 
   /// `true` if this value is constant.
@@ -24,6 +27,6 @@ public struct GlobalVariable: Global {
   public var isExternallyInitialized: Bool { LLVMIsExternallyInitialized(llvm) != 0 }
 
   /// The initial value of this global.
-  public var initializer: IRValue? { LLVMGetInitializer(llvm).map(AnyValue.init(_:)) }
+  public var initializer: IRValue? { LLVMGetInitializer(llvm).map { AnyValue($0, in: context) } }
 
 }

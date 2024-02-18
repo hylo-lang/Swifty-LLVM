@@ -9,6 +9,8 @@ public struct StructConstant: Hashable {
   /// The number of elements in the struct.
   public let count: Int
 
+  public let context: ContextHandle
+
   /// Creates a constant struct of `type` in `module` aggregating `elements`.
   ///
   /// - Requires: The type of `contents[i]` has the same type as the `i`-th element of `type`.
@@ -16,7 +18,8 @@ public struct StructConstant: Hashable {
     of type: StructType, aggregating elements: S, in module: inout Module
   ) where S.Element == IRValue {
     var values = elements.map({ $0.llvm as Optional })
-    self.llvm = LLVMConstNamedStruct(type.llvm, &values, UInt32(values.count))
+    self.context = type.context
+    self.llvm = type.inContext { LLVMConstNamedStruct(type.llvm, &values, UInt32(values.count)) }
     self.count = values.count
   }
 
@@ -26,8 +29,10 @@ public struct StructConstant: Hashable {
     aggregating elements: S, packed isPacked: Bool = false, in module: inout Module
   ) where S.Element == IRValue {
     var values = elements.map({ $0.llvm as Optional })
-    self.llvm = LLVMConstStructInContext(
-      module.context, &values, UInt32(values.count), isPacked ? 1 : 0)
+    self.context = module.context
+    self.llvm = module.inContext {
+      LLVMConstStructInContext(
+        module.context.raw, &values, UInt32(values.count), isPacked ? 1 : 0)}
     self.count = values.count
   }
 

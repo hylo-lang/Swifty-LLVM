@@ -6,22 +6,27 @@ public struct IntegerType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: LLVMTypeRef
 
+  public let context: ContextHandle
+
   /// Creates an instance with given `bitWidth` in `module`.
   ///
   /// - Requires: `bitWidth` is greater than 0.
   public init(_ bitWidth: Int, in module: inout Module) {
-    self.llvm = LLVMIntTypeInContext(module.context, UInt32(bitWidth))
+    self.context = module.context
+    self.llvm = module.inContext { LLVMIntTypeInContext(module.context.raw, UInt32(bitWidth)) }
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't an integer type.
   public init?(_ t: IRType) {
-    guard LLVMGetTypeKind(t.llvm) == LLVMIntegerTypeKind else { return nil }
+    guard (t.inContext { LLVMGetTypeKind(t.llvm) == LLVMIntegerTypeKind }) else { return nil }
+    self.context = t.context
     self.llvm = t.llvm
   }
 
   /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMTypeRef) {
+  internal init(_ llvm: LLVMTypeRef, in context: ContextHandle) {
     self.llvm = llvm
+    self.context = context
   }
 
   /// The number of bits in the representation of the type's instances.
@@ -38,7 +43,7 @@ public struct IntegerType: IRType, Hashable {
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
   /// sign-extending if needed to fit `self.bitWidth`.
   public func constant<T: BinaryInteger>(_ v: T) -> LLVM.IntegerConstant {
-    .init(LLVMConstInt(llvm, UInt64(truncatingIfNeeded: v), 0))
+    .init(LLVMConstInt(llvm, UInt64(truncatingIfNeeded: v), 0), in: context)
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is parsed from `text` with
@@ -51,19 +56,19 @@ public struct IntegerType: IRType, Hashable {
     let h = text.withCString { (s) in
       LLVMConstIntOfStringAndSize(llvm, s, UInt32(text.utf8.count), UInt8(radix))!
     }
-    return .init(h)
+    return .init(h, in: context)
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value's binary presentation is
   /// `words`, from least to most significant.
   public func constant<Words: Collection<UInt64>>(words: Words) -> IntegerConstant {
     let w = Array(words)
-    return .init(LLVMConstIntOfArbitraryPrecision(llvm, UInt32(w.count), w))
+    return .init(LLVMConstIntOfArbitraryPrecision(llvm, UInt32(w.count), w), in: context)
   }
 
   /// The zero value of this type.
   public var zero: IntegerConstant {
-    .init(LLVMConstNull(llvm))
+    .init(LLVMConstNull(llvm), in: context)
   }
 
 }

@@ -6,15 +6,19 @@ public struct Function: Global, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: LLVMValueRef
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
+  public let context: ContextHandle
+
+  /// Creates an instance wrapping `llvm` in `context`.
+  internal init(_ llvm: LLVMValueRef, in context: ContextHandle) {
     self.llvm = llvm
+    self.context = context
   }
 
   /// Creates an instance with `v`, failing iff `v` isn't a function.
   public init?(_ v: IRValue) {
-    if let h = LLVMIsAFunction(v.llvm) {
+    if let h = (v.inContext { LLVMIsAFunction(v.llvm) }) {
       self.llvm = h
+      self.context = v.context
     } else {
       return nil
     }
@@ -25,21 +29,27 @@ public struct Function: Global, Hashable {
 
   /// The basic blocks of the function.
   public var basicBlocks: [BasicBlock] {
-    let n = LLVMCountBasicBlocks(llvm)
-    var handles: [LLVMBasicBlockRef?] = .init(repeating: nil, count: Int(n))
-    LLVMGetBasicBlocks(llvm, &handles)
-    return handles.map({ .init($0!) })
+    inContext{
+      let n = LLVMCountBasicBlocks(llvm)
+      var handles: [LLVMBasicBlockRef?] = .init(repeating: nil, count: Int(n))
+      LLVMGetBasicBlocks(llvm, &handles)
+      return handles.map({ .init($0!, in: context) })
+    }
   }
 
   /// The the function's entry, if any.
   public var entry: BasicBlock? {
-    guard LLVMCountBasicBlocks(llvm) > 0 else { return nil }
-    return .init(LLVMGetEntryBasicBlock(llvm))
+    inContext{
+      guard LLVMCountBasicBlocks(llvm) > 0 else { return nil }
+      return .init(LLVMGetEntryBasicBlock(llvm), in: context)
+    }
   }
 
   /// Returns `true` iff the IR in `self` is well formed.
   public func isWellFormed() -> Bool {
-    LLVMVerifyFunction(llvm, LLVMReturnStatusAction) == 0
+    inContext{
+      LLVMVerifyFunction(llvm, LLVMReturnStatusAction) == 0
+    }
   }
 
 }
@@ -103,7 +113,7 @@ extension Function {
 
     public subscript(position: Int) -> Parameter {
       precondition(position >= 0 && position < count, "index is out of bounds")
-      return .init(LLVMGetParam(parent.llvm, UInt32(position)), position)
+      return .init(LLVMGetParam(parent.llvm, UInt32(position)), position, in: parent.context)
     }
 
   }

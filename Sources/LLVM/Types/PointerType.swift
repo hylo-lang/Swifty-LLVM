@@ -6,15 +6,19 @@ public struct PointerType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: LLVMTypeRef
 
-  /// Creates an instance wrapping `llvm`.
-  private init(_ llvm: LLVMTypeRef) {
+  public let context: ContextHandle
+
+  /// Creates an instance wrapping `llvm` in `context`.
+  private init(_ llvm: LLVMTypeRef, in context: ContextHandle) {
     self.llvm = llvm
+    self.context = context
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
   public init?(_ t: IRType) {
-    if LLVMGetTypeKind(t.llvm) == LLVMPointerTypeKind {
+    if (t.inContext { LLVMGetTypeKind(t.llvm) == LLVMPointerTypeKind }) {
       self.llvm = t.llvm
+      self.context = t.context
     } else {
       return nil
     }
@@ -22,7 +26,9 @@ public struct PointerType: IRType, Hashable {
 
   /// Creates an opaque pointer type in address space `s` in `module`.
   public init(inAddressSpace s: AddressSpace = .default, in module: inout Module) {
-    self.init(LLVMPointerTypeInContext(module.context, s.llvm))
+    self = module.inContext {
+      .init(LLVMPointerTypeInContext(module.context.raw, s.llvm), in: module.context)
+    }
   }
 
   /// The address space of the pointer.
