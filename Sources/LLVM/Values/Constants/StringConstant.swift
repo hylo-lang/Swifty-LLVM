@@ -16,7 +16,7 @@ public struct StringConstant: IRValue, Hashable {
 
   /// Creates an instance with `v`, failing iff `v` is not a constant string value.
   public init?(_ v: IRValue) {
-    if LLVMIsConstantString(v.llvm) != 0 {
+    if LLVMIsAConstantDataSequential(v.llvm) != nil && LLVMIsConstantString(v.llvm) != 0 {
       self.llvm = v.llvm
     } else {
       return nil
