@@ -351,8 +351,11 @@ public struct Module {
   }
 
   /// Sets the initializer of `g` to `v`.
-  public mutating func setInitializer(_ newValue: IRValue?, for g: GlobalVariable) {
-    LLVMSetInitializer(g.llvm, newValue?.llvm)
+  ///
+  /// - Precondition: if `g` has type pointer-to-`T`, the `newValue`
+  ///   must have type `T`.
+  public mutating func setInitializer(_ newValue: IRValue, for g: GlobalVariable) {
+    LLVMSetInitializer(g.llvm, newValue.llvm)
   }
 
   /// Sets the preferred alignment of `v` to `a`.
