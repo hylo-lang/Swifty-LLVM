@@ -100,12 +100,12 @@ let customLinkerSettings: [LinkerSetting]? = nil
 let package = Package(
   name: "Swifty-LLVM",
   products: [
-    .library(name: "LLVM", targets: ["LLVM"]),
+    .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"]),
   ],
   targets: [
     // LLVM API Wrappers.
     .target(
-      name: "LLVM",
+      name: "SwiftyLLVM",
       dependencies: ["llvmc", "llvmshims"],
       linkerSettings: customLinkerSettings),
     .target(
@@ -114,7 +114,7 @@ let package = Package(
       linkerSettings: customLinkerSettings),
 
     // Tests.
-    .testTarget(name: "LLVMTests", dependencies: ["LLVM"]),
+    .testTarget(name: "LLVMTests", dependencies: ["SwiftyLLVM"]),
 
     // LLVM's C API
     .systemLibrary(name: "llvmc", pkgConfig: "llvm"),
