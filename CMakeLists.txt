@@ -67,15 +67,19 @@ if(TARGET LLVMSupport)
 endif()
 
 if(ENABLE_TESTING)
-  include(FetchContent)
-  FetchContent_Declare(XCTestDiscovery
-    GIT_REPOSITORY https://github.com/hylo-lang/XCTestDiscovery.git
-    GIT_TAG        main
-    FIND_PACKAGE_ARGS CONFIG
-  )
-  set(ENABLE_TESTING OFF)
-  FetchContent_MakeAvailable(XCTestDiscovery)
-  set(ENABLE_TESTING ON)
+  include(FindXCTest)
+  block()
+    set(ENABLE_TESTING OFF)
+    include(FetchContent)
+    FetchContent_Declare(SwiftCMakeXCTesting
+      GIT_REPOSITORY https://github.com/hylo-lang/SwiftCMakeXCTesting.git
+      GIT_TAG        main
+    )
+    FetchContent_MakeAvailable(SwiftCMakeXCTesting)
+    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
+    include(SwiftCMakeXCTesting_FetchDependencies)
+    include(SwiftCMakeXCTesting)
+  endblock()
 endif()
 
 #
@@ -95,7 +99,7 @@ add_library(llvmshims STATIC Sources/llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC Sources/llvmshims/include)
 target_link_libraries(llvmshims PRIVATE llvmc)
 
-file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Sources/LLVM/*.swift)
+file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Sources/SwiftyLLVM/*.swift)
 add_library(SwiftyLLVM ${files})
 
 # This is required in order to be a testee.
@@ -109,8 +113,6 @@ target_compile_options(SwiftyLLVM
   PRIVATE $<$<BOOL:${ENABLE_TESTING}>:-enable-testing>)
 
 if(ENABLE_TESTING)
-
-  include(${xctestdiscovery_SOURCE_DIR}/cmake/SwiftXCTestCTestBridge.cmake)
   file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
   add_swift_xctest(SwiftyLLVMTests SwiftyLLVM ${test_files})
 
