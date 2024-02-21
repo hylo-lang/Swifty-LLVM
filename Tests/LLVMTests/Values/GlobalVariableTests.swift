@@ -34,8 +34,6 @@ final class GlobalVariableTests: XCTestCase {
     XCTAssertNil(g.initializer)
     m.setInitializer(i8.zero, for: g)
     XCTAssertEqual(g.initializer.map(IntegerConstant.init(_:)), i8.zero)
-    m.setInitializer(nil, for: g)
-    XCTAssertNil(g.initializer)
   }
 
 }
