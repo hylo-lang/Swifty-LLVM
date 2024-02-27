@@ -70,9 +70,10 @@ jobs:
       run: sudo ./Tools/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc
 
     - name: Test
-      run: |
-        swift test --enable-code-coverage -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
-        xcrun llvm-cov export -format="lcov" -instr-profile $(swift test --show-codecov-path | xargs dirname)/default.profdata .build/${{ matrix.configuration }}/*.build/**/*.o > info.lcov
+      run: swift test --enable-code-coverage -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
+
+    - name: Export Coverage
+      run: xcrun llvm-cov export -format="lcov" -instr-profile $(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)/default.profdata .build/${{ matrix.configuration }}/*.build/**/*.o > info.lcov
 
     - name: Compute refname
       shell: bash
