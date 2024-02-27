@@ -41,7 +41,7 @@ jobs:
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        slug: hylo-lang/Swifty-LLVM
+        slug: hylo-lang/Swifty-LLVM/${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}/${{ matrix.configuration }}
 
   build-native:
     name: "Native: ${{ matrix.host.os }}/${{ matrix.configuration }}"
