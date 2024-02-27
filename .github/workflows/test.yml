@@ -70,10 +70,10 @@ jobs:
       run: sudo ./Tools/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc
 
     - name: Build
-      run: swift build -v -c ${{ matrix.configuration }} --enable-code-coverage
+      run: swift build --build-tests -v -c ${{ matrix.configuration }} -Xswiftc -enable-testing
 
     - name: Test 
-      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }} --enable-code-coverage
+      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }} --enable-code-coverage --show-codecov-path
       
     - name: Compute refname
       shell: bash
