@@ -35,7 +35,7 @@ jobs:
     - name: Build and run devcontainer task
       uses: devcontainers/ci@v0.3
       with:
-        runCmd: swift test --parallel -v -c --enable-code-coverage ${{ matrix.configuration }} ${{ matrix.host.test-options }}
+        runCmd: swift test --parallel -v --enable-code-coverage -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
