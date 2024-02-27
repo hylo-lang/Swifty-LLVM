@@ -69,12 +69,11 @@ jobs:
     - name: Configure pkgconfig
       run: sudo ./Tools/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc
 
-    - name: Build
-      run: swift build --build-tests -v -c ${{ matrix.configuration }} -Xswiftc -enable-testing
+    - name: Test
+      run: |
+        swift test --enable-code-coverage -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
+        xcrun llvm-cov export -format="lcov" -instr-profile $(swift test --show-codecov-path | xargs dirname)/default.profdata .build/${{ matrix.configuration }}/*.build/**/*.o > info.lcov
 
-    - name: Test 
-      run: swift test --enable-code-coverage -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
-      
     - name: Compute refname
       shell: bash
       run: echo "refname=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
