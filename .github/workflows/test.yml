@@ -73,7 +73,7 @@ jobs:
       run: swift build --build-tests -v -c ${{ matrix.configuration }} -Xswiftc -enable-testing
 
     - name: Test 
-      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }} --enable-code-coverage --show-codecov-path
+      run: swift test --enable-code-coverage --show-codecov-path -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
       
     - name: Compute refname
       shell: bash
