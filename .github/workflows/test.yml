@@ -84,7 +84,7 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
-        slug: hylo-lang/Swifty-LLVM/${{ env.refname }}/${{ matrix.host.os }}/${{ matrix.configuration }}
+        name: ${{ env.refname }}/${{ matrix.host.os }}/${{ matrix.configuration }}
 
 
   build-native-windows:
