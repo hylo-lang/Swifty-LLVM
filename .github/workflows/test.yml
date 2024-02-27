@@ -35,18 +35,7 @@ jobs:
     - name: Build and run devcontainer task
       uses: devcontainers/ci@v0.3
       with:
-        runCmd: swift test --parallel -v --enable-code-coverage -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
-
-    - name: Compute refname
-      shell: bash
-      run: echo "refname=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4.0.1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
-        slug: hylo-lang/Swifty-LLVM/${{ env.refname }}/${{ matrix.configuration }}
+        runCmd: swift test --parallel -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
   build-native:
     name: "Native: ${{ matrix.host.os }}/${{ matrix.configuration }}"
@@ -81,11 +70,23 @@ jobs:
       run: sudo ./Tools/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc
 
     - name: Build
-      run: swift build -v -c ${{ matrix.configuration }}
+      run: swift build -v -c ${{ matrix.configuration }} --enable-code-coverage
 
     - name: Test 
-      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
+      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }} --enable-code-coverage
       
+    - name: Compute refname
+      shell: bash
+      run: echo "refname=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+        slug: hylo-lang/Swifty-LLVM/${{ env.refname }}/${{ matrix.host.os }}/${{ matrix.configuration }}
+
+
   build-native-windows:
     name: "Native: windows-latest/debug"
     strategy:
