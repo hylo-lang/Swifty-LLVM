@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 set -e
 set -o pipefail
-set -x
+
 # Work around https://github.com/hylo-lang/llvm-build/issues/8
-zstd_dash_L="$(pkg-config --libs-only-L libzstd)"
-export DYLD_LIBRARY_PATH="${zstd_dash_L#-L}:$DYLD_LIBRARY_PATH"
+#
+# We need to be resilient to no libzstd being found by pkg-config, as it is apparently not on linux.
+zstd_dash_L="$(pkg-config --silence-errors --libs-only-L libzstd || true)"
+if ! (llvm-config > /dev/null 2>&1); then
+  if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "cygwin" || "$OSTYPE" == "freebsd"* ]]; then
+    export LD_LIBRARY_PATH="${zstd_dash_L#-L}:$LD_LIBRARY_PATH"
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    export DYLD_LIBRARY_PATH="${zstd_dash_L#-L}:$DYLD_LIBRARY_PATH"
+  elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    export PATH="${zstd_dash_L#-L}:$PATH"
+  fi
+fi
 
 version=$(llvm-config --version)
 filename=$1
