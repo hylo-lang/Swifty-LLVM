@@ -73,7 +73,13 @@ jobs:
       run: swift test --enable-code-coverage -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
     - name: Export Coverage
-      run: llvm-cov export -format="lcov" -instr-profile $(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)/default.profdata .build/${{ matrix.configuration }}/*.build/**/*.o > info.lcov
+      run: |
+        os=(.build/${{ matrix.configuration }}/*.build/**/*.o)
+        options=("${os[0]}")
+        for o in "${os[@]:1}"; do
+          options+=("-object" "${o}")
+        done
+        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${options[@]}" > info.lcov
 
     - name: Compute refname
       shell: bash
