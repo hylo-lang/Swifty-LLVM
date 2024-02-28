@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 set -o pipefail
-
+set -x
 # Work around https://github.com/hylo-lang/llvm-build/issues/8
 zstd_dash_L="$(pkg-config --libs-only-L libzstd)"
 export DYLD_LIBRARY_PATH="${zstd_dash_L#-L}:$DYLD_LIBRARY_PATH"
