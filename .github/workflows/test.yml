@@ -81,16 +81,12 @@ jobs:
         done
         llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
-    - name: Compute refname
-      shell: bash
-      run: echo "refname=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
-
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
-        name: ${{ env.refname }}/${{ matrix.host.os }}/${{ matrix.configuration }}
+        flags: ${{ matrix.host.os }},${{ matrix.configuration }}
 
 
   build-native-windows:
