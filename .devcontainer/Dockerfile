@@ -1,9 +1,27 @@
-ARG SWIFT_VERSION
+ARG SWIFT_VERSION=5.9
 
 FROM swift:${SWIFT_VERSION}
 
-RUN apt-get update && \
-    apt-get install -y \
-        libllvm15 llvm-15 llvm-15-dev llvm-15-doc llvm-15-examples llvm-15-runtime
+ARG HYLO_LLVM_BUILD_RELEASE=2024-02-22-r1
+ARG LLVM_VERSION=17.0.6
 
-RUN ln -s /usr/bin/llvm-config-15 /usr/bin/llvm-config
+ENV HYLO_LLVM_DOWNLOAD_URL="https://github.com/hylo-lang/llvm-build/releases/download"
+
+RUN apt-get clean
+RUN apt-get update
+RUN apt-get install -y tar zstd
+
+ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-Debug.tar.zst /opt
+RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-Debug.tar.zst -C /opt
+
+ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-MinSizeRel.tar.zst /opt
+RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-MinSizeRel.tar.zst -C /opt
+
+ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-Debug.tar.zst /opt
+RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-Debug.tar.zst -C /opt
+
+ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-MinSizeRel.tar.zst /opt
+RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-MinSizeRel.tar.zst -C /opt
+
+RUN rm /opt/llvm-*.tar.zst
+ENV PATH="/opt/llvm-MinSizeRel/bin:$PATH"
