@@ -74,12 +74,12 @@ jobs:
 
     - name: Export Coverage
       run: |
-        os=(.build/${{ matrix.configuration }}/*.build/**/*.o)
-        options=("${os[0]}")
-        for o in "${os[@]:1}"; do
-          options+=("-object" "${o}")
+        dot_os=(.build/${{ matrix.configuration }}/*.build/**/*.o)
+        bin_params=("${dot_os[0]}")
+        for o in "${dot_os[@]:1}"; do
+          bin_params+=("-object" "${o}")
         done
-        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${options[@]}" > info.lcov
+        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
     - name: Compute refname
       shell: bash
