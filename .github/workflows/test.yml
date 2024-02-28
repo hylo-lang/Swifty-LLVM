@@ -35,7 +35,7 @@ jobs:
     - name: Build and run devcontainer task
       uses: devcontainers/ci@v0.3
       with:
-        runCmd: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
+        runCmd: swift test --parallel -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
   build-native:
     name: "Native: ${{ matrix.host.os }}/${{ matrix.configuration }}"
@@ -69,12 +69,26 @@ jobs:
     - name: Configure pkgconfig
       run: sudo ./Tools/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc
 
-    - name: Build
-      run: swift build -v -c ${{ matrix.configuration }}
+    - name: Test
+      run: swift test --enable-code-coverage -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
 
-    - name: Test 
-      run: swift test -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
-      
+    - name: Export Coverage
+      run: |
+        dot_os=(.build/${{ matrix.configuration }}/*.build/**/*.o)
+        bin_params=("${dot_os[0]}")
+        for o in "${dot_os[@]:1}"; do
+          bin_params+=("-object" "${o}")
+        done
+        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+        flags: ${{ matrix.host.os }},${{ matrix.configuration }}
+
+
   build-native-windows:
     name: "Native: windows-latest/debug"
     strategy:
