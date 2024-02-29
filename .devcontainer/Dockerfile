@@ -9,7 +9,7 @@ ENV HYLO_LLVM_DOWNLOAD_URL="https://github.com/hylo-lang/llvm-build/releases/dow
 
 RUN apt-get clean
 RUN apt-get update
-RUN apt-get install -y tar zstd
+RUN apt-get install -y tar zstd libzstd1 libzstd-dev
 
 ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-Debug.tar.zst /opt
 RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-Debug.tar.zst -C /opt
