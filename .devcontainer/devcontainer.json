@@ -46,7 +46,7 @@
     "remoteEnv": {
         "PATH": "/opt/llvm-${containerEnv:HYLO_LLVM_BUILD_TYPE}/bin:${containerEnv:PATH}"
     },
-    "postCreateCommand": "sudo PATH=/opt/llvm-${localEnv:HYLO_LLVM_BUILD_TYPE:MinSizeRel}/bin:\"$PATH\" .devcontainer/postCreateCommand.sh",
+    "postCreateCommand": "sudo ./.devcontainer/postCreateCommand.sh",
     // Set `remoteUser` to `root` to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
     "remoteUser": "vscode"
 }
