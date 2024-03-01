@@ -41,7 +41,7 @@
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],
     "containerEnv": {
-        "HYLO_LLVM_BUILD_TYPE": "${localEnv:HYLO_LLVM_BUILD_TYPE:MinSizeRel}",
+        "HYLO_LLVM_BUILD_TYPE": "${localEnv:HYLO_LLVM_BUILD_TYPE:MinSizeRel}"
     },
     "remoteEnv": {
         "PATH": "/opt/llvm-${containerEnv:HYLO_LLVM_BUILD_TYPE}/bin:${containerEnv:PATH}"
