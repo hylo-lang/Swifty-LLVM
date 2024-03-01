@@ -1,8 +1,9 @@
+---
 name: Test
 
 on:
   push:
-    branches: [ main, rewrite ]
+    branches: [ main ]
     paths-ignore:
       - "**.md"
       - "LICENSE"
@@ -15,22 +16,24 @@ on:
       - ".gitignore"
 
 jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        configuration: [Debug, Release]
+
   build-devcontainer:
-    name: "Devcontainer: ${{ matrix.host.os }}/${{ matrix.configuration }}"
+    name: "Devcontainer: ${{ matrix.configuration }}"
     strategy: 
       fail-fast: false
       matrix: 
-        host: [
-          { type: linux, os: ubuntu-latest, test-options: --enable-code-coverage, }
-        ]
-        configuration: [ "debug", "release" ]
+        configuration: [ "Debug", "Release" ]
 
-    runs-on: ${{ matrix.host.os }}
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout (GitHub)
-      uses: actions/checkout@v3
-
-    - run: git config --global core.autocrlf input
+      uses: actions/checkout@v4
 
     - name: Build and run devcontainer task
       uses: devcontainers/ci@v0.3
@@ -44,15 +47,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        host: [
-          { type: macos, os: macos-latest}
-        ]
-        configuration: [ "debug", "release" ]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        configuration: [Debug, Release]
 
     runs-on: ${{ matrix.host.os }}
     steps:
     - name: Checkout (GitHub)
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - run: git config --global core.autocrlf input
 
