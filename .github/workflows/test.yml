@@ -36,6 +36,8 @@ jobs:
       uses: devcontainers/ci@v0.3
       with:
         runCmd: swift test --parallel -v -c ${{ matrix.configuration }} ${{ matrix.host.test-options }}
+        env:
+          HYLO_LLVM_BUILD_TYPE: ${{ matrix.configuration == 'debug' && 'Debug' || 'MinSizeRel' }}
 
   build-native:
     name: "Native: ${{ matrix.host.os }}/${{ matrix.configuration }}"

@@ -24,4 +24,3 @@ ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-aa
 RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-MinSizeRel.tar.zst -C /opt
 
 RUN rm /opt/llvm-*.tar.zst
-ENV PATH="/opt/llvm-MinSizeRel/bin:$PATH"
