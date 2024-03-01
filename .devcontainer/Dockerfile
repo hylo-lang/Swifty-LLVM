@@ -9,18 +9,17 @@ ENV HYLO_LLVM_DOWNLOAD_URL="https://github.com/hylo-lang/llvm-build/releases/dow
 
 RUN apt-get clean
 RUN apt-get update
-RUN apt-get install -y tar zstd libzstd1 libzstd-dev
+RUN apt-get install -y tar zstd libzstd1 libzstd-dev curl
 
-ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-Debug.tar.zst /opt
-RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-Debug.tar.zst -C /opt
+RUN <<EOT bash
+set -e
+set -o pipefail
 
-ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-MinSizeRel.tar.zst /opt
-RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-x86_64-unknown-linux-gnu-MinSizeRel.tar.zst -C /opt
+file_prefix="llvm-\${LLVM_VERSION}-\$(uname -m)-unknown-linux-gnu"
+url_prefix="\${HYLO_LLVM_DOWNLOAD_URL}/\${HYLO_LLVM_BUILD_RELEASE}/\$file_prefix"
 
-ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-Debug.tar.zst /opt
-RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-Debug.tar.zst -C /opt
-
-ADD ${HYLO_LLVM_DOWNLOAD_URL}/${HYLO_LLVM_BUILD_RELEASE}/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-MinSizeRel.tar.zst /opt
-RUN tar -x --zstd -f /opt/llvm-${LLVM_VERSION}-aarch64-unknown-linux-gnu-MinSizeRel.tar.zst -C /opt
-
-RUN rm /opt/llvm-*.tar.zst
+for build_type in Debug MinSizeRel; do
+  curl -L "\${url_prefix}-\${build_type}.tar.zst" | tar -x --zstd -C /opt
+  ln -s /opt/\${file_prefix}-\${build_type} /opt/llvm-\${build_type}
+done
+EOT
