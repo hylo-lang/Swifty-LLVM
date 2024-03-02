@@ -14,7 +14,7 @@ import Foundation
 
 
 /// The text used to separate elements of the PATH environment variable.
-let pathSeparator = osIsWindows ? ";" : ":"
+let pathSeparator: Character = osIsWindows ? ";" : ":"
 
 /// Returns the first capture group text for regular expression
 /// matches to `pattern` in the `Libs:` line of `package`'s pkg-config
