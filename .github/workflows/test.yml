@@ -105,17 +105,15 @@ jobs:
       with:
         path: Swifty-LLVM
 
-    # on Windows PKG_CONFIG_PATH seems to be ignored and llvm.pc is
-    # only found if it's in the CWD when we invoke `swift test`.
     - name: Create LLVM pkgconfig file
-      run: PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh Swifty-LLVM/llvm.pc
+      run: PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh llvm.pc
       shell: bash
 
     - name: Test
       run: swift test ${{ matrix.swift_test_options }} -c ${{ matrix.configuration }}
       working-directory: Swifty-LLVM
       env:
-        PKG_CONFIG_PATH: ${{ github.workspace }}/Swifty-LLVM
+        PKG_CONFIG_PATH: ${{ github.workspace }}
 
     - name: Export Coverage
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
