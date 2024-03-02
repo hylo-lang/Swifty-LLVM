@@ -90,9 +90,12 @@ jobs:
         swift-version: '5.9'
 
     - name: Install LLVM
-      run: >-
-        curl --no-progress-meter -L -O
-        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
+      run: |
+        # 7z doesn't support decompressing from a stream or we'd do
+        # this all as one statement. Maybe we should find a way to use
+        # zstd on windows.
+        curl --no-progress-meter -L -O \
+        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
         ${{ env.url_prefix }}/${{ env.package_basename }}${{ matrix.package_suffix }}
 
         ${{ matrix.unpackage_command }} ${{ env.package_basename }}${{ matrix.package_suffix }}
