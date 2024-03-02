@@ -129,3 +129,6 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
+        directory: ${{ github.workspace }}/Swifty-LLVM
+        working-directory: ${{ github.workspace }}/Swifty-LLVM
+        root_dir: ${{ github.workspace }}/Swifty-LLVM
