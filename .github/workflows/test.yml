@@ -63,7 +63,7 @@ jobs:
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
           - os: windows-latest
-            unpackage_command: 7z x -t7z
+            unpackage_command: 7z x -t7z -si
             package_suffix: .7z
             triple_suffix: unknown-windows-msvc17
 
