@@ -53,7 +53,7 @@ jobs:
           - HYLO_LLVM_BUILD_RELEASE: 2024-02-29-r2
           - HYLO_LLVM_VERSION: 17.0.6
           - swift_test_options:
-          - unpackage_command: tar -x --zstd
+          - unpackage_command: tar -x --zstd -f
           - package_suffix: .tar.zst
 
           - configuration: debug
@@ -63,7 +63,7 @@ jobs:
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
           - os: windows-latest
-            unpackage_command: 7z x -t7z -si
+            unpackage_command: 7z x -t7z
             package_suffix: .7z
             triple_suffix: unknown-windows-msvc17
 
@@ -91,10 +91,11 @@ jobs:
 
     - name: Install LLVM
       run: >-
-        curl --no-progress-meter -L
+        curl --no-progress-meter -L -O
         -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
         ${{ env.url_prefix }}/${{ env.package_basename }}${{ matrix.package_suffix }}
-        | ${{ matrix.unpackage_command }}
+
+        ${{ matrix.unpackage_command }} ${{ env.package_basename }}${{ matrix.package_suffix }}
 
     - name: Checkout (GitHub)
       uses: actions/checkout@v4
