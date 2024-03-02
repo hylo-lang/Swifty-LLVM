@@ -106,8 +106,10 @@ jobs:
         path: Swifty-LLVM
 
     - name: Create LLVM pkgconfig file
-      run: PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh llvm.pc
-      shell: bash -e
+      run: |
+        set -ex -o pipefail
+        PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh llvm.pc
+      shell: bash
 
     - name: Test
       run: swift test ${{ matrix.swift_test_options }} -c ${{ matrix.configuration }}
