@@ -40,7 +40,7 @@ func pkgCongigLibsMatches(package: String, pattern: String) -> [Substring] {
 }
 
 let customLinkerSettings: [LinkerSetting]
-  = osIsWindows ? pkgCongigLibsMatches(
+  = osIsWindows && false ? pkgCongigLibsMatches(
     package: "llvm", pattern: #"(LLVM[^\/. "+"\t" +#"]+.lib)(\s|"|$)"#)
   .map {.linkedLibrary(String($0))} : []
 
