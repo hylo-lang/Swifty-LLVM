@@ -36,7 +36,7 @@ echo Description: Low-level Virtual Machine compiler framework >> $filename
 echo Version: $(echo ${version} | sed 's/\([0-9.]\+\).*/\1/') >> $filename
 echo URL: http://www.llvm.org/ >> $filename
 echo Libs: -L$(llvm-config --libdir) ${zstd_dash_L} ${libs} $(llvm-config --system-libs --libs analysis bitwriter core native passes target) >> $filename
-echo Cflags: -I$(llvm-config --includedir) >> $filename
+echo Cflags: -I$(llvm-config --cxxflags) >> $filename
 
 echo "$filename written:"
 cat $filename
