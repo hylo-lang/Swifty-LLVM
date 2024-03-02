@@ -46,11 +46,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
+        configuration: [debug, release]
+
         include:
           - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
           - HYLO_LLVM_BUILD_RELEASE: 2024-02-29-r2
           - HYLO_LLVM_VERSION: 17.0.6
           - swift_test_options:
+          - unpackage_command: tar -x --zstd
+          - package_suffix: .tar.zst
 
           - configuration: debug
             HYLO_LLVM_BUILD_TYPE: Debug
@@ -58,14 +62,9 @@ jobs:
           - configuration: release
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
-          - unpackage_command: tar -x --zstd
-          - package_suffix: .tar.zst
-
           - os: windows-latest
             unpackage_command: 7z x -t7z
             package_suffix: .7z
-
-          - os: windows-latest
             triple_suffix: unknown-windows-msvc17
 
           - os: ubuntu-latest
@@ -76,6 +75,7 @@ jobs:
 
           - os: ubuntu-latest
             configuration: release
+
             swift_test_options: --enable-code-coverage
 
     runs-on: ${{ matrix.os }}
@@ -85,7 +85,7 @@ jobs:
 
     steps:
     - name: Setup Swift
-      uses: swift-actions/setup-swift@v1
+      uses: SwiftyLab/setup-swift@latest
       with:
         swift-version: '5.9'
 
