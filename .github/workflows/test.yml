@@ -91,9 +91,9 @@ jobs:
 
     - name: Install LLVM
       run: >-
-        curl --no-progress-meter
+        curl --no-progress-meter -L
         -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-        -L ${{ env.url_prefix }}/${{ env.package_basename }}${{ matrix.package_suffix }}
+        ${{ env.url_prefix }}/${{ env.package_basename }}${{ matrix.package_suffix }}
         | ${{ matrix.unpackage_command }}
 
     - name: Checkout (GitHub)
