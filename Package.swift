@@ -16,9 +16,10 @@ import Foundation
 /// The text used to separate elements of the PATH environment variable.
 let pathSeparator = osIsWindows ? ";" : ":"
 
-/// Returns the names of libraries listed in the `Libs:` line of
-/// `package`'s pkg-config file.
-func linkedLibraries(_ package: String) -> [Substring] {
+/// Returns the first capture group text for regular expression
+/// matches to `pattern` in the `Libs:` line of `package`'s pkg-config
+/// file.
+func pkgCongigLibsMatches(package: String, pattern: String) -> [Substring] {
   guard let pcp = ProcessInfo.processInfo.environment["PKG_CONFIG_PATH"],
         let llvm_pc_text = pcp.split(separator: pathSeparator).lazy
           .compactMap({ try? String(contentsOfFile: "\($0)/\(package).pc") }).first,
@@ -29,7 +30,7 @@ func linkedLibraries(_ package: String) -> [Substring] {
   // Swift.Regex is not available in Package.swift, so must use
   // NSRegularExpression, which makes this code uglier than necessary
 
-  let libName = try! NSRegularExpression(pattern: #"(?<!\w)-l([^ ]+)"#)
+  let libName = try! NSRegularExpression(pattern: pattern)
 
   let libs = String(libs_line)
   return libName.matches(
@@ -39,7 +40,10 @@ func linkedLibraries(_ package: String) -> [Substring] {
 }
 
 let customLinkerSettings: [LinkerSetting]
-  = osIsWindows ? linkedLibraries("llvm").map {.linkedLibrary(String($0))} : []
+  = osIsWindows ? pkgCongigLibsMatches(
+    package: "llvm", pattern: #"(LLVM[^\/. "+"\t" +#"]+.lib)(\s|"|$)"#)
+  .map {.linkedLibrary(String($0))} : []
+
 // END: Poor person's pkg-config processing, since SPM doesn't
 // understand pkg-config files on Windows.
 
