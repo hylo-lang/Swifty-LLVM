@@ -73,7 +73,7 @@ jobs:
           - os: macos-latest
             triple_suffix: apple-darwin23.3.0
 
-          - os: macos-latest
+          - os: ubuntu-latest
             configuration: release
 
             swift_test_options: --enable-code-coverage
