@@ -101,7 +101,8 @@ func windowsSettings() -> (linker: [LinkerSetting], cxx: [CXXSetting]) {
   }
   let linkLibraries = libs.lazy.filter { $0.starts(with: "-l") || $0.first != "-" }.map {
     let rest = $0.dropFirst($0.first == "-" ? 2 : 0)
-    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" }) ?? rest.startIndex
+    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
+      .map { rest.index(after: $0) } ?? rest.startIndex
     return rest[afterSlashes...]
   }
   let llvmLibNames = linkLibraries
