@@ -3,7 +3,7 @@ import PackageDescription
 
 
 // BEGIN: Poor person's pkg-config processing, since SPM doesn't
-// understand pkg-config files on Windows.
+// fully understand pkg-config files on Windows.
 import Foundation
 
 #if os(Windows)
@@ -91,6 +91,9 @@ extension String {
 
 }
 
+// END: Poor person's pkg-config processing.  Used to implement
+// `windowsSettings()` below.
+
 /// Returns the linker and c++ settings needed for building on Windows.
 func windowsSettings() -> (linker: [LinkerSetting], cxx: [CXXSetting]) {
   guard let t = pseudoPkgConfigText("llvm") else { return ([], []) }
@@ -113,9 +116,6 @@ func windowsSettings() -> (linker: [LinkerSetting], cxx: [CXXSetting]) {
 }
 
 let llvmClientSettings = osIsWindows ? windowsSettings() : (linker: [], cxx: [])
-
-// END: Poor person's pkg-config processing, since SPM doesn't
-// understand pkg-config files on Windows.
 
 let package = Package(
   name: "Swifty-LLVM",
