@@ -1,5 +1,6 @@
 ignore:
   - Tests
+  - Package.swift
 
 coverage:
   status:
