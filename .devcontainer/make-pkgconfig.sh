@@ -42,7 +42,7 @@ done
 
 # See https://github.com/llvm/llvm-project/issues/83697
 if  [[ ( "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ) && $(llvm-config --build-mode) == Debug ]]; then
-    cflags+=("-D_DEBUG=1")
+    cflags+=("-D_DEBUG")
 fi
 
 echo Name: LLVM > $filename

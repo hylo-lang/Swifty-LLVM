@@ -50,7 +50,7 @@ jobs:
 
         include:
           - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
-          - HYLO_LLVM_BUILD_RELEASE: 2024-02-29-r2
+          - HYLO_LLVM_BUILD_RELEASE: 2024-03-02-r1
           - HYLO_LLVM_VERSION: 17.0.6
           - swift_test_options:
           - unpackage_command: tar -x --zstd -f
