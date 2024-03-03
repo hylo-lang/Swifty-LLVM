@@ -112,7 +112,7 @@ jobs:
       shell: bash
 
     - name: Test
-      run: swift test ${{ matrix.swift_test_options }} -c ${{ matrix.configuration }}
+      run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.configuration }}
       working-directory: Swifty-LLVM
       env:
         PKG_CONFIG_PATH: ${{ github.workspace }}
