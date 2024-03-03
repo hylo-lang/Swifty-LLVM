@@ -106,6 +106,7 @@ jobs:
         path: Swifty-LLVM
 
     - name: Create LLVM pkgconfig file
+      if: ${{ matrix.os != 'windows-latest' }}
       run: |
         set -ex -o pipefail
         PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh llvm.pc
