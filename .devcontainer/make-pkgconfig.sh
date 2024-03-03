@@ -40,11 +40,6 @@ for x in $(llvm-config --cxxflags); do
     cflags+=($(printf '%q' "$x"))
 done
 
-# See https://github.com/llvm/llvm-project/issues/83697
-if  [[ ( "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ) && $(llvm-config --build-mode) == Debug ]]; then
-    cflags+=("-D_DEBUG")
-fi
-
 echo Name: LLVM > $filename
 echo Description: Low-level Virtual Machine compiler framework >> $filename
 echo Version: $(echo ${version} | sed 's/\([0-9.]\+\).*/\1/') >> $filename
