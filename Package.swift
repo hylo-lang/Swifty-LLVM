@@ -12,37 +12,103 @@ import Foundation
   let osIsWindows = false
 #endif
 
-
 /// The text used to separate elements of the PATH environment variable.
 let pathSeparator: Character = osIsWindows ? ";" : ":"
 
-/// Returns the first capture group text for regular expression
-/// matches to `pattern` in the `Libs:` line of `package`'s pkg-config
-/// file.
-func pkgCongigLibsMatches(package: String, pattern: String) -> [Substring] {
-  guard let pcp = ProcessInfo.processInfo.environment["PKG_CONFIG_PATH"],
-        let llvm_pc_text = pcp.split(separator: pathSeparator).lazy
-          .compactMap({ try? String(contentsOfFile: "\($0)/\(package).pc") }).first,
-        let libs_line = llvm_pc_text.split(whereSeparator: { $0.isNewline })
-          .first(where: { $0.starts(with: "Libs: ") })
-  else { return [] }
+/// Returns the contents of the pkg-config file for `package` if they
+/// can be found in `PKG_CONFIG_PATH`.
+///
+/// N.B. Does not search the standard locations for the file as
+/// pkg-config would.
+func pseudoPkgConfigText(_ package: String) -> String? {
+  guard let pcp = ProcessInfo.processInfo.environment["PKG_CONFIG_PATH"] else { return nil }
 
-  // Swift.Regex is not available in Package.swift, so must use
-  // NSRegularExpression, which makes this code uglier than necessary
-
-  let libName = try! NSRegularExpression(pattern: pattern)
-
-  let libs = String(libs_line)
-  return libName.matches(
-    in: libs,
-    range: NSRange(libs.startIndex..<libs.endIndex, in: libs)
-  ).map { libs[ Range($0.range(at: 1), in: libs)! ] }
+  return pcp.split(separator: pathSeparator)
+    .lazy.compactMap({ try? String(contentsOfFile: "\($0)/\(package).pc") }).first
 }
 
-let customLinkerSettings: [LinkerSetting]
-  = osIsWindows && false ? pkgCongigLibsMatches(
-    package: "llvm", pattern: #"(LLVM[^\/. "+"\t" +#"]+.lib)(\s|"|$)"#)
-  .map {.linkedLibrary(String($0))} : []
+/// Returns the un-quoted, un-escaped elements in the remainder of the
+/// any (logical) lines beginning with `"\(key): "` in pcFileText, the contents
+/// of a pkg-config file.
+func pkgConfigValues(in pcFileText: String, for key: String) -> [String] {
+  let keyPattern = NSRegularExpression.escapedPattern(for: key)
+  let lineHeaders = pcFileText.matches(
+    forRegex: #"(?m)(?<!\\[\r]?[\n])^[ \t]*"# + keyPattern
+      + #"[ \t]*:[ \t]*"#).joined().compactMap { $0 }
+
+  var r: [String] = []
+
+  for h in lineHeaders {
+    var input = pcFileText[h.endIndex...]
+    var open = false
+    func add(_ c: Character) {
+      if !open { r.append("") }
+      r[r.count - 1].append(c)
+      open = true
+    }
+
+    header:
+      while let c = input.popFirst(), !c.isNewline {
+      switch c {
+      case "'", "\"":
+        let quote = c
+        quoting:
+          while let c1 = input.popFirst() {
+          switch c1 {
+          case "\\":
+            if let c2 = input.popFirst() { add(c2) }
+          case quote:
+            break quoting
+          default: add(c1)
+          }
+        }
+      case "\\": if let c1 = input.popFirst() { add(c1) }
+      case _ where c.isNewline: break header
+      case _ where c.isWhitespace: open = false
+      case _: add(c)
+      }
+    }
+  }
+  return r
+}
+
+extension String {
+
+  /// Returns, for each match of the valid regular expression
+  /// `pattern`, the given match `groups` in the same order in which
+  /// they were passed.
+  func matches(forRegex pattern: String, groups: [Int] = [0]) -> [[Substring?]] {
+    let r = try! NSRegularExpression(pattern: pattern)
+    return r.matches(
+      in: self,
+      range: NSRange(startIndex..<endIndex, in: self)
+    ).map { m in
+      groups.map { g in
+        Range(m.range(at: g), in: self).map { self[ $0 ] }
+      }
+    }
+  }
+
+}
+
+/// Returns the linker and c++ settings needed for building on Windows.
+func windowsSettings() -> (linker: [LinkerSetting], cxx: [CXXSetting]) {
+  guard let t = pseudoPkgConfigText("llvm") else { return ([], []) }
+  let libs = pkgConfigValues(in: t, for: "Libs")
+  let cFlags = pkgConfigValues(in: t, for: "Cflags")
+  let linkLibraries = libs.lazy.filter { $0.starts(with: "-l") || $0.first != "-" }.map {
+    let rest = $0.dropFirst($0.first == "-" ? 2 : 0)
+    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" }) ?? rest.startIndex
+    return rest[afterSlashes...]
+  }
+  let llvmLibNames = linkLibraries
+    .filter { $0.hasPrefix("LLVM") && $0.hasSuffix(".lib") }
+    .map { LinkerSetting.linkedLibrary(String($0.dropLast(4))) }
+
+  return (Array(llvmLibNames), [CXXSetting.unsafeFlags(cFlags)])
+}
+
+let llvmClientSettings = osIsWindows ? windowsSettings() : (linker: [], cxx: [])
 
 // END: Poor person's pkg-config processing, since SPM doesn't
 // understand pkg-config files on Windows.
@@ -57,11 +123,12 @@ let package = Package(
     .target(
       name: "LLVM",
       dependencies: ["llvmc", "llvmshims"],
-      linkerSettings: customLinkerSettings),
+      linkerSettings: llvmClientSettings.linker),
     .target(
       name: "llvmshims",
       dependencies: ["llvmc"],
-      linkerSettings: customLinkerSettings),
+      cxxSettings: llvmClientSettings.cxx,
+      linkerSettings: llvmClientSettings.linker),
 
     // Tests.
     .testTarget(name: "LLVMTests", dependencies: ["LLVM"]),
