@@ -94,28 +94,25 @@ extension String {
 // END: Poor person's pkg-config processing.  Used to implement
 // `windowsSettings()` below.
 
-/// Returns the linker and c++ settings needed for building on Windows.
-func windowsSettings() -> (linker: [LinkerSetting], cxx: [CXXSetting]) {
-  guard let t = pseudoPkgConfigText("llvm") else { return ([], []) }
+/// Returns the linker needed for building on Windows.
+func windowsLinkerSettings() -> [LinkerSetting] {
+  guard let t = pseudoPkgConfigText("llvm") else { return [] }
+
   let libs = pkgConfigValues(in: t, for: "Libs")
-  let cFlags = pkgConfigValues(in: t, for: "Cflags").filter {
-    // These options not recognized by clang.
-    !["-std:c++17", "/EHs-c-", "/GR-"].contains($0)
-  }
   let linkLibraries = libs.lazy.filter { $0.starts(with: "-l") || $0.first != "-" }.map {
     let rest = $0.dropFirst($0.first == "-" ? 2 : 0)
     let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
       .map { rest.index(after: $0) } ?? rest.startIndex
     return rest[afterSlashes...]
   }
-  let llvmLibNames = linkLibraries
-    .filter { $0.hasPrefix("LLVM") && $0.hasSuffix(".lib") }
-    .map { LinkerSetting.linkedLibrary(String($0.dropLast(4))) }
 
-  return (Array(llvmLibNames), [CXXSetting.unsafeFlags(cFlags)])
+  return Array(
+    linkLibraries
+      .filter { $0.hasPrefix("LLVM") && $0.hasSuffix(".lib") }
+      .map { LinkerSetting.linkedLibrary(String($0.dropLast(4))) })
 }
 
-let llvmClientSettings = osIsWindows ? windowsSettings() : (linker: [], cxx: [])
+let llvmLinkerSettings = osIsWindows ? windowsLinkerSettings() : []
 
 let package = Package(
   name: "Swifty-LLVM",
@@ -127,12 +124,11 @@ let package = Package(
     .target(
       name: "LLVM",
       dependencies: ["llvmc", "llvmshims"],
-      linkerSettings: llvmClientSettings.linker),
+      linkerSettings: llvmLinkerSettings),
     .target(
       name: "llvmshims",
       dependencies: ["llvmc"],
-      cxxSettings: llvmClientSettings.cxx,
-      linkerSettings: llvmClientSettings.linker),
+      linkerSettings: llvmLinkerSettings),
 
     // Tests.
     .testTarget(name: "LLVMTests", dependencies: ["LLVM"]),
