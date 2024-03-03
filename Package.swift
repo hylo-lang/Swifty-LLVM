@@ -95,7 +95,10 @@ extension String {
 func windowsSettings() -> (linker: [LinkerSetting], cxx: [CXXSetting]) {
   guard let t = pseudoPkgConfigText("llvm") else { return ([], []) }
   let libs = pkgConfigValues(in: t, for: "Libs")
-  let cFlags = pkgConfigValues(in: t, for: "Cflags")
+  let cFlags = pkgConfigValues(in: t, for: "Cflags").filter {
+    // These options not recognized by clang.
+    !["-std:c++17", "/EHs-c-", "/GR-"].contains($0)
+  }
   let linkLibraries = libs.lazy.filter { $0.starts(with: "-l") || $0.first != "-" }.map {
     let rest = $0.dropFirst($0.first == "-" ? 2 : 0)
     let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" }) ?? rest.startIndex
