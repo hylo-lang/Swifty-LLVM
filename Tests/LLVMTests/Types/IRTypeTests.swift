@@ -23,4 +23,10 @@ final class IRTypeTests: XCTestCase {
     XCTAssert((t as IRType) != (u as IRType))
   }
 
+  func testStringConvertible() {
+    var m = Module("foo")
+    let t = IntegerType(64, in: &m)
+    XCTAssertEqual("\(t)", "\(t)", "Unstable string representation!")
+  }
+
 }
