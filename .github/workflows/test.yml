@@ -32,6 +32,9 @@ jobs:
     steps:
     - name: Checkout (GitHub)
       uses: actions/checkout@v4
+      with:
+        submodules: true
+        show-progress: false
 
     - name: Build and run devcontainer task
       uses: devcontainers/ci@v0.3
@@ -103,6 +106,8 @@ jobs:
     - name: Checkout (GitHub)
       uses: actions/checkout@v4
       with:
+        submodules: true
+        show-progress: false
         path: Swifty-LLVM
 
     - name: Create LLVM pkgconfig file and make it findable
