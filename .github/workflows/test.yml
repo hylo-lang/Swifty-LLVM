@@ -45,6 +45,7 @@ jobs:
         HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
       with:
         runCmd: swift test --parallel -c ${{ matrix.configuration }}
+        push: never
 
   native:
     name: "Native: ${{ matrix.os }}/${{ matrix.configuration }}"
