@@ -130,7 +130,7 @@ jobs:
         PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH"
         Swifty-LLVM/Tools/make-pkgconfig.sh pkg-config/llvm.pc
 
-        echo "PKG_CONFIG_PATH=${GITHUB_WORKSPACE//\\//}/pkg-config" >> $GITHUB_ENV
+        echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> $GITHUB_ENV
       shell: bash
 
     - name: Test
