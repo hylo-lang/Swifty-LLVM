@@ -105,11 +105,12 @@ jobs:
       with:
         path: Swifty-LLVM
 
-    - name: Create LLVM pkgconfig file
+    - name: Create LLVM pkgconfig file and make it findable
       run: |
         set -ex -o pipefail
-        PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh llvm.pc
-        echo 'PKG_CONFIG_PATH=${{ github.workspace }}' >> $GITHUB_ENV
+        mkdir pkg-config
+        PATH="${GITHUB_WORKSPACE//\\//}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh pkg-config/llvm.pc
+        echo "PKG_CONFIG_PATH=${GITHUB_WORKSPACE//\\//}/pkg-config" >> $GITHUB_ENV
       shell: bash
 
     - name: Test
