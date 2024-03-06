@@ -109,13 +109,12 @@ jobs:
       run: |
         set -ex -o pipefail
         PATH="${{ github.workspace }}/${{ env.package_basename }}/bin:$PATH" Swifty-LLVM/Tools/make-pkgconfig.sh llvm.pc
+        echo 'PKG_CONFIG_PATH=${{ github.workspace }}' >> $GITHUB_ENV
       shell: bash
 
     - name: Test
       run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.configuration }}
       working-directory: Swifty-LLVM
-      env:
-        PKG_CONFIG_PATH: ${{ github.workspace }}
 
     - name: Export Coverage
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
