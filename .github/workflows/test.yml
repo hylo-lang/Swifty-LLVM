@@ -15,6 +15,9 @@ on:
       - "LICENSE"
       - ".gitignore"
 
+env:
+  swift-version: '5.9'
+
 jobs:
   dev-container:
     name: "Dev container: ${{ matrix.configuration }}"
@@ -87,10 +90,18 @@ jobs:
       package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-x86_64-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
 
     steps:
-    - name: Setup Swift
-      uses: SwiftyLab/setup-swift@latest
+    - name: 'Set up swift (*nix)'
+      if: ${{ matrix.os != 'windows-latest' }}
+      uses: swift-actions/setup-swift@v1
       with:
-        swift-version: '5.9'
+        swift-version: ${{ env.swift-version }}
+
+    - name: Set up swift (Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: compnerd/gha-setup-swift@v0.2.1
+      with:
+        branch: swift-${{ env.swift-version }}-release
+        tag: ${{ env.swift-version }}-RELEASE
 
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
