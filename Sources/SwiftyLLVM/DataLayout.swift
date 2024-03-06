@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// How data are represented in memory for a particular target machine.
 public struct DataLayout {
@@ -22,12 +22,12 @@ public struct DataLayout {
 
   /// Returns the number of bits in the representation of `type`'s instances.
   public func bitWidth(of type: IRType) -> Int {
-    Int(LLVMSizeOfTypeInBits(llvm, type.llvm))
+    Int(LLVMSizeOfTypeInBits(llvm, type.llvm.raw))
   }
 
   /// Returns the storage size of the representation of `type`'s instances in bytes.
   public func storageSize(of type: IRType) -> Int {
-    Int(LLVMStoreSizeOfType(llvm, type.llvm))
+    Int(LLVMStoreSizeOfType(llvm, type.llvm.raw))
   }
 
   /// Returns the number of bytes from one instance of `type` to the next when stored in contiguous
@@ -40,26 +40,26 @@ public struct DataLayout {
 
   /// The alignment of `type`'s instances in bytes.
   public func preferredAlignment(of type: IRType) -> Int {
-    Int(LLVMPreferredAlignmentOfType(llvm, type.llvm))
+    Int(LLVMPreferredAlignmentOfType(llvm, type.llvm.raw))
   }
 
   /// The ABI alignment of `type`'s instances in bytes.
   public func abiAlignment(of type: IRType) -> Int {
-    Int(LLVMABIAlignmentOfType(llvm, type.llvm))
+    Int(LLVMABIAlignmentOfType(llvm, type.llvm.raw))
   }
 
   /// Returns the offset in bytes of the element at given `index`.
   ///
   /// - Requires: `index` is a valid element index in `type`.
   public func offset(of index: Int, in type: StructType) -> Int {
-    Int(LLVMOffsetOfElement(llvm, type.llvm, UInt32(index)))
+    Int(LLVMOffsetOfElement(llvm, type.llvm.raw, UInt32(index)))
   }
 
   /// Returns the index of the element containing the byte at given `offset`.
   ///
   /// - Requires: `offset` is a valid byte offset in `type`.
   public func index(at offset: Int, in type: StructType) -> Int {
-    Int(LLVMElementAtOffset(llvm, type.llvm, UInt64(offset)))
+    Int(LLVMElementAtOffset(llvm, type.llvm.raw, UInt64(offset)))
   }
 
 }

@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// The specification of a platform on which code runs.
 public struct Target {

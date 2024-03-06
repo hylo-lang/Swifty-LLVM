@@ -1,5 +1,7 @@
 # Swifty-LLVM
 
+[![codecov](https://codecov.io/gh/hylo-lang/Swifty-LLVM/graph/badge.svg?token=M80FBR8JX8)](https://codecov.io/gh/hylo-lang/Swifty-LLVM)
+
 **Swifty-LLVM** is a Swifty interface for the [LLVM](https://llvm.org) compiler infrastructure, currently wrapping LLVM's C API.
 
 See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)

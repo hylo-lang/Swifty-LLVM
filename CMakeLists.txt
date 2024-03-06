@@ -76,9 +76,9 @@ if(ENABLE_TESTING)
       GIT_TAG        main
     )
     FetchContent_MakeAvailable(SwiftCMakeXCTesting)
-    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
+    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR} ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
     include(SwiftCMakeXCTesting_FetchDependencies)
-    include(SwiftCMakeXCTesting)
+    include(FindSwiftXCTest)
   endblock()
 endif()
 
@@ -103,14 +103,16 @@ file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS
 add_library(SwiftyLLVM ${files})
 
 # This is required in order to be a testee.
-set_target_properties(SwiftyLLVM PROPERTIES FRAMEWORK TRUE)
+set_target_properties(SwiftyLLVM
+  PROPERTIES FRAMEWORK TRUE
+)
 
 target_link_libraries(SwiftyLLVM
   # TODO: does this really need to be public? Otherwise, I'm getting
   # DataLayoutTests.swift:1:8: error: missing required modules: 'llvmc', 'llvmshims'
   PUBLIC llvmshims llvmc)
 target_compile_options(SwiftyLLVM
-  PRIVATE $<$<BOOL:${ENABLE_TESTING}>:-enable-testing>)
+  PRIVATE $<$<BOOL:${ENABLE_TESTING}>:-enable-testing> -enable-experimental-feature AccessLevelOnImport)
 
 if(ENABLE_TESTING)
   file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)

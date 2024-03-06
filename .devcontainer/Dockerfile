@@ -1,9 +1,40 @@
-ARG SWIFT_VERSION
-
+ARG SWIFT_VERSION=5.9
+# Other ARG declarations must follow FROM
 FROM swift:${SWIFT_VERSION}
 
+ARG HYLO_LLVM_BUILD_TYPE=MinSizeRel
+ARG HYLO_LLVM_BUILD_RELEASE=20240303-215025
+ARG HYLO_LLVM_VERSION=17.0.6
+
+ENV HYLO_LLVM_DOWNLOAD_URL="https://github.com/hylo-lang/llvm-build/releases/download"
+
+RUN apt clean
 RUN apt update
-RUN apt install -y make wget ninja-build lsb-release software-properties-common gnupg
+RUN apt install -y curl gnupg libzstd-dev libzstd1 lsb-release make ninja-build software-properties-common tar wget zstd
+
+RUN <<EOT bash -ex -o pipefail
+
+    file_prefix="llvm-\${HYLO_LLVM_VERSION}-\$(uname -m)-unknown-linux-gnu"
+    url_prefix="\${HYLO_LLVM_DOWNLOAD_URL}/\${HYLO_LLVM_BUILD_RELEASE}/\$file_prefix"
+
+    for build_type in Debug MinSizeRel; do
+        curl --no-progress-meter -L "\${url_prefix}-\${build_type}.tar.zst" | tar -x --zstd -C /opt
+        ln -s /opt/\${file_prefix}-\${build_type} /opt/llvm-\${build_type}
+    done
+
+EOT
+
+
+ADD make-pkgconfig.sh /tmp
+RUN <<EOT bash -ex -o pipefail
+
+    export PATH="/opt/llvm-${HYLO_LLVM_BUILD_TYPE}/bin:\$PATH"
+    /tmp/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc > /dev/null
+    rm /tmp/make-pkgconfig.sh
+
+EOT
+
+RUN rm /opt/llvm-*.tar.zst
 
 #
 # Get a recent cmake (https://askubuntu.com/a/865294)
@@ -36,26 +67,3 @@ RUN apt install -y cmake
 # devcontainer feature installation such as common-utils (see
 # devcontainer.json).  Now that we have cmake installed we can drop it.
 RUN apt-add-repository --remove "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-
-# Install zstd from source.  There is no -dev package available in
-# this ubuntu's repository.  We could also put it in the build via
-# https://github.com/facebook/zstd/blob/dev/build/cmake/README.md#how-to-use-it-with-cmake-fetchcontent
-# which would reduce installation prerequisites for Linux users, but
-# would slow down clean builds.
-
-RUN wget https://github.com/facebook/zstd/archive/refs/tags/v1.5.5.tar.gz -O zstd-1.5.5.tar.gz
-RUN tar xzf zstd-1.5.5.tar.gz
-RUN mkdir .zstd-build
-RUN cmake -Wno-dev -GNinja -S /zstd-1.5.5/build/cmake -B .zstd-build -DZSTD_BUILD_SHARED=1 -DZSTD_BUILD_STATIC=1
-RUN cmake --build .zstd-build
-RUN cmake --install .zstd-build
-
-#
-# Install LLVM
-#
-
-RUN wget https://apt.llvm.org/llvm.sh
-RUN chmod +x llvm.sh
-RUN ./llvm.sh 17
-
-RUN ln -s /usr/bin/llvm-config-17 /usr/bin/llvm-config

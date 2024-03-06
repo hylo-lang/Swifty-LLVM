@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// A read-only access to a block of memory.
 public struct MemoryBuffer {

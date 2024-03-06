@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 extension Function: AttributeHolder {
 
@@ -48,9 +48,9 @@ extension Function: AttributeHolder {
   /// The attributes of the function.
   public var attributes: [Attribute] {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    let n = LLVMGetAttributeCountAtIndex(llvm, i)
+    let n = LLVMGetAttributeCountAtIndex(llvm.raw, i)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
-    LLVMGetAttributesAtIndex(llvm, i, &handles)
+    LLVMGetAttributesAtIndex(llvm.raw, i, &handles)
     return handles.map(Attribute.init(_:))
   }
 
@@ -66,9 +66,9 @@ extension Function.Return: AttributeHolder {
 
   /// The attributes of the return value.
   public var attributes: [Attribute] {
-    let n = LLVMGetAttributeCountAtIndex(parent.llvm, 0)
+    let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, 0)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
-    LLVMGetAttributesAtIndex(parent.llvm, 0, &handles)
+    LLVMGetAttributesAtIndex(parent.llvm.raw, 0, &handles)
     return handles.map(Attribute.init(_:))
   }
 

@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// The level of optimization used during code generation.
 public enum OptimitzationLevel: Hashable {

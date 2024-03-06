@@ -1,101 +1,118 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 import PackageDescription
 
-// Custom linker settings are required because Windows doesn't support pkg-config.
+
+// BEGIN: Poor person's pkg-config processing, since SPM doesn't
+// fully understand pkg-config files on Windows.
+import Foundation
+
 #if os(Windows)
-let customLinkerSettings: [LinkerSetting]? = [
-.linkedLibrary("LLVM-C"), .linkedLibrary("lldCOFF"), .linkedLibrary("lldCommon"),
-.linkedLibrary("lldELF"), .linkedLibrary("lldMachO"), .linkedLibrary("lldMinGW"),
-.linkedLibrary("lldWasm"), .linkedLibrary("LLVMAArch64AsmParser"),
-.linkedLibrary("LLVMAArch64CodeGen"), .linkedLibrary("LLVMAArch64Desc"),
-.linkedLibrary("LLVMAArch64Disassembler"), .linkedLibrary("LLVMAArch64Info"),
-.linkedLibrary("LLVMAArch64Utils"), .linkedLibrary("LLVMAggressiveInstCombine"),
-.linkedLibrary("LLVMAMDGPUAsmParser"), .linkedLibrary("LLVMAMDGPUCodeGen"),
-.linkedLibrary("LLVMAMDGPUDesc"), .linkedLibrary("LLVMAMDGPUDisassembler"),
-.linkedLibrary("LLVMAMDGPUInfo"), .linkedLibrary("LLVMAMDGPUTargetMCA"),
-.linkedLibrary("LLVMAMDGPUUtils"), .linkedLibrary("LLVMAnalysis"),
-.linkedLibrary("LLVMARMAsmParser"), .linkedLibrary("LLVMARMCodeGen"),
-.linkedLibrary("LLVMARMDesc"), .linkedLibrary("LLVMARMDisassembler"),
-.linkedLibrary("LLVMARMInfo"), .linkedLibrary("LLVMARMUtils"),
-.linkedLibrary("LLVMAsmParser"), .linkedLibrary("LLVMAsmPrinter"),
-.linkedLibrary("LLVMAVRAsmParser"), .linkedLibrary("LLVMAVRCodeGen"),
-.linkedLibrary("LLVMAVRDesc"), .linkedLibrary("LLVMAVRDisassembler"),
-.linkedLibrary("LLVMAVRInfo"), .linkedLibrary("LLVMBinaryFormat"),
-.linkedLibrary("LLVMBitReader"), .linkedLibrary("LLVMBitstreamReader"),
-.linkedLibrary("LLVMBitWriter"), .linkedLibrary("LLVMBPFAsmParser"),
-.linkedLibrary("LLVMBPFCodeGen"), .linkedLibrary("LLVMBPFDesc"),
-.linkedLibrary("LLVMBPFDisassembler"), .linkedLibrary("LLVMBPFInfo"),
-.linkedLibrary("LLVMCFGuard"), .linkedLibrary("LLVMCFIVerify"),
-.linkedLibrary("LLVMCodeGen"), .linkedLibrary("LLVMCore"),
-.linkedLibrary("LLVMCoroutines"), .linkedLibrary("LLVMCoverage"),
-.linkedLibrary("LLVMDebugInfoCodeView"), .linkedLibrary("LLVMDebuginfod"),
-.linkedLibrary("LLVMDebugInfoDWARF"), .linkedLibrary("LLVMDebugInfoGSYM"),
-.linkedLibrary("LLVMDebugInfoMSF"), .linkedLibrary("LLVMDebugInfoPDB"),
-.linkedLibrary("LLVMDemangle"), .linkedLibrary("LLVMDiff"),
-.linkedLibrary("LLVMDlltoolDriver"), .linkedLibrary("LLVMDWARFLinker"),
-.linkedLibrary("LLVMDWP"), .linkedLibrary("LLVMExecutionEngine"),
-.linkedLibrary("LLVMExegesis"), .linkedLibrary("LLVMExegesisAArch64"),
-.linkedLibrary("LLVMExegesisMips"), .linkedLibrary("LLVMExegesisPowerPC"),
-.linkedLibrary("LLVMExegesisX86"), .linkedLibrary("LLVMExtensions"),
-.linkedLibrary("LLVMFileCheck"), .linkedLibrary("LLVMFrontendOpenACC"),
-.linkedLibrary("LLVMFrontendOpenMP"), .linkedLibrary("LLVMFuzzerCLI"),
-.linkedLibrary("LLVMFuzzMutate"), .linkedLibrary("LLVMGlobalISel"),
-.linkedLibrary("LLVMHexagonAsmParser"), .linkedLibrary("LLVMHexagonCodeGen"),
-.linkedLibrary("LLVMHexagonDesc"), .linkedLibrary("LLVMHexagonDisassembler"),
-.linkedLibrary("LLVMHexagonInfo"), .linkedLibrary("LLVMInstCombine"),
-.linkedLibrary("LLVMInstrumentation"), .linkedLibrary("LLVMInterfaceStub"),
-.linkedLibrary("LLVMInterpreter"), .linkedLibrary("LLVMipo"),
-.linkedLibrary("LLVMIRReader"), .linkedLibrary("LLVMJITLink"),
-.linkedLibrary("LLVMLanaiAsmParser"), .linkedLibrary("LLVMLanaiCodeGen"),
-.linkedLibrary("LLVMLanaiDesc"), .linkedLibrary("LLVMLanaiDisassembler"),
-.linkedLibrary("LLVMLanaiInfo"), .linkedLibrary("LLVMLibDriver"),
-.linkedLibrary("LLVMLineEditor"), .linkedLibrary("LLVMLinker"),
-.linkedLibrary("LLVMLTO"), .linkedLibrary("LLVMMC"), .linkedLibrary("LLVMMCA"),
-.linkedLibrary("LLVMMCDisassembler"), .linkedLibrary("LLVMMCJIT"),
-.linkedLibrary("LLVMMCParser"), .linkedLibrary("LLVMMipsAsmParser"),
-.linkedLibrary("LLVMMipsCodeGen"), .linkedLibrary("LLVMMipsDesc"),
-.linkedLibrary("LLVMMipsDisassembler"), .linkedLibrary("LLVMMipsInfo"),
-.linkedLibrary("LLVMMIRParser"), .linkedLibrary("LLVMMSP430AsmParser"),
-.linkedLibrary("LLVMMSP430CodeGen"), .linkedLibrary("LLVMMSP430Desc"),
-.linkedLibrary("LLVMMSP430Disassembler"), .linkedLibrary("LLVMMSP430Info"),
-.linkedLibrary("LLVMNVPTXCodeGen"), .linkedLibrary("LLVMNVPTXDesc"),
-.linkedLibrary("LLVMNVPTXInfo"), .linkedLibrary("LLVMObjCARCOpts"),
-.linkedLibrary("LLVMObjCopy"), .linkedLibrary("LLVMObject"),
-.linkedLibrary("LLVMObjectYAML"), .linkedLibrary("LLVMOption"),
-.linkedLibrary("LLVMOrcJIT"), .linkedLibrary("LLVMOrcShared"),
-.linkedLibrary("LLVMOrcTargetProcess"), .linkedLibrary("LLVMPasses"),
-.linkedLibrary("LLVMPowerPCAsmParser"), .linkedLibrary("LLVMPowerPCCodeGen"),
-.linkedLibrary("LLVMPowerPCDesc"), .linkedLibrary("LLVMPowerPCDisassembler"),
-.linkedLibrary("LLVMPowerPCInfo"), .linkedLibrary("LLVMProfileData"),
-.linkedLibrary("LLVMRemarks"), .linkedLibrary("LLVMRISCVAsmParser"),
-.linkedLibrary("LLVMRISCVCodeGen"), .linkedLibrary("LLVMRISCVDesc"),
-.linkedLibrary("LLVMRISCVDisassembler"), .linkedLibrary("LLVMRISCVInfo"),
-.linkedLibrary("LLVMRuntimeDyld"), .linkedLibrary("LLVMScalarOpts"),
-.linkedLibrary("LLVMSelectionDAG"), .linkedLibrary("LLVMSparcAsmParser"),
-.linkedLibrary("LLVMSparcCodeGen"), .linkedLibrary("LLVMSparcDesc"),
-.linkedLibrary("LLVMSparcDisassembler"), .linkedLibrary("LLVMSparcInfo"),
-.linkedLibrary("LLVMSupport"), .linkedLibrary("LLVMSymbolize"),
-.linkedLibrary("LLVMSystemZAsmParser"), .linkedLibrary("LLVMSystemZCodeGen"),
-.linkedLibrary("LLVMSystemZDesc"), .linkedLibrary("LLVMSystemZDisassembler"),
-.linkedLibrary("LLVMSystemZInfo"), .linkedLibrary("LLVMTableGen"),
-.linkedLibrary("LLVMTableGenGlobalISel"), .linkedLibrary("LLVMTarget"),
-.linkedLibrary("LLVMTextAPI"), .linkedLibrary("LLVMTransformUtils"),
-.linkedLibrary("LLVMVEAsmParser"), .linkedLibrary("LLVMVECodeGen"),
-.linkedLibrary("LLVMVectorize"), .linkedLibrary("LLVMVEDesc"),
-.linkedLibrary("LLVMVEDisassembler"), .linkedLibrary("LLVMVEInfo"),
-.linkedLibrary("LLVMWebAssemblyAsmParser"), .linkedLibrary("LLVMWebAssemblyCodeGen"),
-.linkedLibrary("LLVMWebAssemblyDesc"), .linkedLibrary("LLVMWebAssemblyDisassembler"),
-.linkedLibrary("LLVMWebAssemblyInfo"), .linkedLibrary("LLVMWebAssemblyUtils"),
-.linkedLibrary("LLVMWindowsDriver"), .linkedLibrary("LLVMWindowsManifest"),
-.linkedLibrary("LLVMX86AsmParser"), .linkedLibrary("LLVMX86CodeGen"),
-.linkedLibrary("LLVMX86Desc"), .linkedLibrary("LLVMX86Disassembler"),
-.linkedLibrary("LLVMX86Info"), .linkedLibrary("LLVMX86TargetMCA"),
-.linkedLibrary("LLVMXCoreCodeGen"), .linkedLibrary("LLVMXCoreDesc"),
-.linkedLibrary("LLVMXCoreDisassembler"), .linkedLibrary("LLVMXCoreInfo"),
-.linkedLibrary("LLVMXRay"), .linkedLibrary("LTO"), .linkedLibrary("Remarks")]
+  let osIsWindows = true
 #else
-let customLinkerSettings: [LinkerSetting]? = nil
+  let osIsWindows = false
 #endif
+
+/// The text used to separate elements of the PATH environment variable.
+let pathSeparator: Character = osIsWindows ? ";" : ":"
+
+/// Returns the contents of the pkg-config file for `package` if they
+/// can be found in `PKG_CONFIG_PATH`.
+///
+/// N.B. Does not search the standard locations for the file as
+/// pkg-config would.
+func pseudoPkgConfigText(_ package: String) -> String? {
+  guard let pcp = ProcessInfo.processInfo.environment["PKG_CONFIG_PATH"] else { return nil }
+
+  return pcp.split(separator: pathSeparator)
+    .lazy.compactMap({ try? String(contentsOfFile: "\($0)/\(package).pc") }).first
+}
+
+/// Returns the un-quoted, un-escaped elements in the remainder of the
+/// any (logical) lines beginning with `"\(key): "` in pcFileText, the contents
+/// of a pkg-config file.
+func pkgConfigValues(in pcFileText: String, for key: String) -> [String] {
+  let keyPattern = NSRegularExpression.escapedPattern(for: key)
+  let lineHeaders = pcFileText.matches(
+    forRegex: #"(?m)(?<!\\[\r]?[\n])^[ \t]*"# + keyPattern
+      + #"[ \t]*:[ \t]*"#).joined().compactMap { $0 }
+
+  var r: [String] = []
+
+  for h in lineHeaders {
+    var input = pcFileText[h.endIndex...]
+    var open = false
+    func add(_ c: Character) {
+      if !open { r.append("") }
+      r[r.count - 1].append(c)
+      open = true
+    }
+
+    header:
+      while let c = input.popFirst(), !c.isNewline {
+      switch c {
+      case "'", "\"":
+        let quote = c
+        quoting:
+          while let c1 = input.popFirst() {
+          switch c1 {
+          case "\\":
+            if let c2 = input.popFirst() { add(c2) }
+          case quote:
+            break quoting
+          default: add(c1)
+          }
+        }
+      case "\\": if let c1 = input.popFirst() { add(c1) }
+      case _ where c.isNewline: break header
+      case _ where c.isWhitespace: open = false
+      case _: add(c)
+      }
+    }
+  }
+  return r
+}
+
+extension String {
+
+  /// Returns, for each match of the valid regular expression
+  /// `pattern`, the given match `groups` in the same order in which
+  /// they were passed.
+  func matches(forRegex pattern: String, groups: [Int] = [0]) -> [[Substring?]] {
+    let r = try! NSRegularExpression(pattern: pattern)
+    return r.matches(
+      in: self,
+      range: NSRange(startIndex..<endIndex, in: self)
+    ).map { m in
+      groups.map { g in
+        Range(m.range(at: g), in: self).map { self[ $0 ] }
+      }
+    }
+  }
+
+}
+
+// END: Poor person's pkg-config processing.  Used to implement
+// `windowsSettings()` below.
+
+/// Returns the linker needed for building on Windows.
+func windowsLinkerSettings() -> [LinkerSetting] {
+  guard let t = pseudoPkgConfigText("llvm") else { return [] }
+
+  let libs = pkgConfigValues(in: t, for: "Libs")
+  let linkLibraries = libs.lazy.filter { $0.starts(with: "-l") || $0.first != "-" }.map {
+    let rest = $0.dropFirst($0.first == "-" ? 2 : 0)
+    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
+      .map { rest.index(after: $0) } ?? rest.startIndex
+    return rest[afterSlashes...]
+  }
+
+  return Array(
+    linkLibraries
+      .filter { $0.hasPrefix("LLVM") && $0.hasSuffix(".lib") }
+      .map { LinkerSetting.linkedLibrary(String($0.dropLast(4))) })
+}
+
+let llvmLinkerSettings = osIsWindows ? windowsLinkerSettings() : []
 
 let package = Package(
   name: "Swifty-LLVM",
@@ -107,11 +124,12 @@ let package = Package(
     .target(
       name: "SwiftyLLVM",
       dependencies: ["llvmc", "llvmshims"],
-      linkerSettings: customLinkerSettings),
+      swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
+      linkerSettings: llvmLinkerSettings),
     .target(
       name: "llvmshims",
       dependencies: ["llvmc"],
-      linkerSettings: customLinkerSettings),
+      linkerSettings: llvmLinkerSettings),
 
     // Tests.
     .testTarget(name: "LLVMTests", dependencies: ["SwiftyLLVM"]),

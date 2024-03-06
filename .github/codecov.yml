@@ -1,0 +1,17 @@
+ignore:
+  - Tests
+  - Package.swift
+
+coverage:
+  status:
+
+    project:
+      default:
+        threshold: 0%
+
+    patch:
+      default:
+        # basic
+        target: auto
+        threshold: 0%
+        base: auto

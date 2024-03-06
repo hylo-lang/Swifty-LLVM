@@ -1,10 +1,10 @@
-import llvmc
+internal import llvmc
 
 /// The type of a value in LLVM IR.
 public protocol IRType: CustomStringConvertible {
 
   /// A handle to the LLVM object wrapped by this instance.
-  var llvm: LLVMTypeRef { get }
+  var llvm: TypeRef { get }
 
 }
 
@@ -12,16 +12,16 @@ extension IRType {
 
   /// A string representation of the type.
   public var description: String {
-    guard let s = LLVMPrintTypeToString(llvm) else { return "" }
+    guard let s = LLVMPrintTypeToString(llvm.raw) else { return "" }
     defer { LLVMDisposeMessage(s) }
     return String(cString: s)
   }
 
   /// `true` if the size of the type is known.
-  public var isSized: Bool { LLVMTypeIsSized(llvm) != 0 }
+  public var isSized: Bool { LLVMTypeIsSized(llvm.raw) != 0 }
 
   /// The `null` instance of this type (e.g., the zero of `i32`).
-  public var null: IRValue { AnyValue(LLVMConstNull(llvm)) }
+  public var null: IRValue { AnyValue(LLVMConstNull(llvm.raw)) }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.
   public static func == <R: IRType>(lhs: Self, rhs: R) -> Bool {
@@ -66,7 +66,7 @@ extension Array where Element == IRType {
     let p = UnsafeMutablePointer<LLVMTypeRef?>.allocate(capacity: count)
     defer { p.deallocate() }
     for (i, t) in enumerated() {
-      p.advanced(by: i).initialize(to: t.llvm)
+      p.advanced(by: i).initialize(to: t.llvm.raw)
     }
     return action(.init(start: p, count: count))
   }

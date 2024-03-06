@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// The predicate of an integer comparison.
 public enum IntegerPredicate: String, Hashable {

@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 import Foundation
 
 /// An intrinsic function known to LLVM.
@@ -9,16 +9,16 @@ import Foundation
 public struct Intrinsic: Global, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: LLVMValueRef
+  public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMValueRef) {
-    self.llvm = llvm
+    self.llvm = .init(llvm)
   }
 
   /// The intrinsic's identifier.
   public var identifier: UInt32 {
-    LLVMGetIntrinsicID(llvm)
+    LLVMGetIntrinsicID(llvm.raw)
   }
 
   /// `true` iff the intrinsic is overloaded.

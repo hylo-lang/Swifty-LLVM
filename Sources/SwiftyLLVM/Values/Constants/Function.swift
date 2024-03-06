@@ -1,20 +1,20 @@
-import llvmc
+internal import llvmc
 
 /// A function in LLVM IR.
 public struct Function: Global, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: LLVMValueRef
+  public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMValueRef) {
-    self.llvm = llvm
+    self.llvm = .init(llvm)
   }
 
   /// Creates an instance with `v`, failing iff `v` isn't a function.
   public init?(_ v: IRValue) {
-    if let h = LLVMIsAFunction(v.llvm) {
-      self.llvm = h
+    if let h = LLVMIsAFunction(v.llvm.raw) {
+      self.llvm = .init(h)
     } else {
       return nil
     }
@@ -25,21 +25,21 @@ public struct Function: Global, Hashable {
 
   /// The basic blocks of the function.
   public var basicBlocks: [BasicBlock] {
-    let n = LLVMCountBasicBlocks(llvm)
+    let n = LLVMCountBasicBlocks(llvm.raw)
     var handles: [LLVMBasicBlockRef?] = .init(repeating: nil, count: Int(n))
-    LLVMGetBasicBlocks(llvm, &handles)
+    LLVMGetBasicBlocks(llvm.raw, &handles)
     return handles.map({ .init($0!) })
   }
 
   /// The the function's entry, if any.
   public var entry: BasicBlock? {
-    guard LLVMCountBasicBlocks(llvm) > 0 else { return nil }
-    return .init(LLVMGetEntryBasicBlock(llvm))
+    guard LLVMCountBasicBlocks(llvm.raw) > 0 else { return nil }
+    return .init(LLVMGetEntryBasicBlock(llvm.raw))
   }
 
   /// Returns `true` iff the IR in `self` is well formed.
   public func isWellFormed() -> Bool {
-    LLVMVerifyFunction(llvm, LLVMReturnStatusAction) == 0
+    LLVMVerifyFunction(llvm.raw, LLVMReturnStatusAction) == 0
   }
 
 }
@@ -84,7 +84,7 @@ extension Function {
 
     /// The number of parameters in the collection.
     public var count: Int {
-      Int(LLVMCountParams(parent.llvm))
+      Int(LLVMCountParams(parent.llvm.raw))
     }
 
     public var startIndex: Int { 0 }
@@ -103,7 +103,7 @@ extension Function {
 
     public subscript(position: Int) -> Parameter {
       precondition(position >= 0 && position < count, "index is out of bounds")
-      return .init(LLVMGetParam(parent.llvm, UInt32(position)), position)
+      return .init(LLVMGetParam(parent.llvm.raw, UInt32(position)), position)
     }
 
   }
