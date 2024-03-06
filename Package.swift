@@ -124,6 +124,7 @@ let package = Package(
     .target(
       name: "LLVM",
       dependencies: ["llvmc", "llvmshims"],
+      swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
       linkerSettings: llvmLinkerSettings),
     .target(
       name: "llvmshims",

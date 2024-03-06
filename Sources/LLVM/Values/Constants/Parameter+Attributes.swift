@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 extension Parameter: AttributeHolder {
 
@@ -90,9 +90,9 @@ extension Parameter: AttributeHolder {
   /// The attributes of the parameter.
   public var attributes: [Attribute] {
     let i = UInt32(index + 1)
-    let n = LLVMGetAttributeCountAtIndex(parent.llvm, i)
+    let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, i)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
-    LLVMGetAttributesAtIndex(parent.llvm, i, &handles)
+    LLVMGetAttributesAtIndex(parent.llvm.raw, i, &handles)
     return handles.map(Attribute.init(_:))
   }
 

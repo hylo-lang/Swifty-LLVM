@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// A constant aggregate (e.g., a constant array) in LLVM IR.
 public protocol AggregateConstant: IRValue, BidirectionalCollection {
@@ -26,7 +26,7 @@ extension AggregateConstant where Index == Int, Element == IRValue {
 
   public subscript(position: Int) -> IRValue {
     precondition(position >= 0 && position < count, "index is out of bounds")
-    return AnyValue(LLVMGetAggregateElement(llvm, UInt32(position)))
+    return AnyValue(LLVMGetAggregateElement(llvm.raw, UInt32(position)))
   }
 
 }

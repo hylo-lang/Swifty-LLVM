@@ -1,14 +1,14 @@
-import llvmc
+internal import llvmc
 
 /// A basic block in LLVM IR.
 public struct BasicBlock: Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: LLVMBasicBlockRef
+  public let llvm: BasicBlockRef
 
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMBasicBlockRef) {
-    self.llvm = llvm
+    self.llvm = .init(llvm)
   }
 
 }
@@ -16,7 +16,7 @@ public struct BasicBlock: Hashable {
 extension BasicBlock: CustomStringConvertible {
 
   public var description: String {
-    guard let s = LLVMGetBasicBlockName(llvm) else { return "" }
+    guard let s = LLVMGetBasicBlockName(llvm.raw) else { return "" }
     return String(cString: s)
   }
 

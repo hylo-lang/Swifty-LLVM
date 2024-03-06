@@ -1,10 +1,10 @@
-import llvmc
+internal import llvmc
 
 /// A constant array in LLVM IR.
 public struct ArrayConstant: Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: LLVMValueRef
+  public let llvm: ValueRef
 
   /// The number of elements in the array.
   public let count: Int
@@ -15,8 +15,8 @@ public struct ArrayConstant: Hashable {
   public init<S: Sequence>(
     of type: IRType, containing elements: S, in module: inout Module
   ) where S.Element == IRValue {
-    var values = elements.map({ $0.llvm as Optional })
-    self.llvm = LLVMConstArray(type.llvm, &values, UInt32(values.count))
+    var values = elements.map({ $0.llvm.raw as Optional })
+    self.llvm = .init(LLVMConstArray(type.llvm.raw, &values, UInt32(values.count)))
     self.count = values.count
   }
 
