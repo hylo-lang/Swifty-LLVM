@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// A global value in LLVM IR.
 public protocol Global: IRValue {}
@@ -9,12 +9,12 @@ extension Global {
   ///
   /// This "value type" of a global differs from its formal type, which is always a pointer type.
   public var valueType: IRType {
-    AnyType(LLVMGlobalGetValueType(llvm))
+    AnyType(LLVMGlobalGetValueType(llvm.raw))
   }
 
   /// The linkage of this global.
   public var linkage: Linkage {
-    .init(llvm: LLVMGetLinkage(llvm))
+    .init(llvm: LLVMGetLinkage(llvm.raw))
   }
 
 }

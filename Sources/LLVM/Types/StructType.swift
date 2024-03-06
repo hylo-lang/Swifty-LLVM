@@ -1,15 +1,15 @@
-import llvmc
+internal import llvmc
 
 /// A struct type in LLVM IR.
 public struct StructType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: LLVMTypeRef
+  public let llvm: TypeRef
 
   /// Creates an instance with given `fields` in `module`, packed iff `packed` is `true`.
   public init(_ fields: [IRType], packed: Bool = false, in module: inout Module) {
     self.llvm = fields.withHandles { (f) in
-      LLVMStructTypeInContext(module.context, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
+      .init(LLVMStructTypeInContext(module.context, f.baseAddress, UInt32(f.count), packed ? 1 : 0))
     }
   }
 
@@ -20,15 +20,15 @@ public struct StructType: IRType, Hashable {
   public init(
     named name: String, _ fields: [IRType], packed: Bool = false, in module: inout Module
   ) {
-    self.llvm = LLVMStructCreateNamed(module.context, name)
+    self.llvm = .init(LLVMStructCreateNamed(module.context, name))
     fields.withHandles { (f) in
-      LLVMStructSetBody(self.llvm, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
+      LLVMStructSetBody(self.llvm.raw, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
     }
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a struct type.
   public init?(_ t: IRType) {
-    if LLVMGetTypeKind(t.llvm) == LLVMStructTypeKind {
+    if LLVMGetTypeKind(t.llvm.raw) == LLVMStructTypeKind {
       self.llvm = t.llvm
     } else {
       return nil
@@ -37,18 +37,18 @@ public struct StructType: IRType, Hashable {
 
   /// The name of the struct.
   public var name: String? {
-    guard let s = LLVMGetStructName(llvm) else { return nil }
+    guard let s = LLVMGetStructName(llvm.raw) else { return nil }
     return String(cString: s)
   }
 
   /// `true` iff the fields of the struct are packed.
-  public var isPacked: Bool { LLVMIsPackedStruct(llvm) != 0 }
+  public var isPacked: Bool { LLVMIsPackedStruct(llvm.raw) != 0 }
 
   /// `true` iff the struct is opaque.
-  public var isOpaque: Bool { LLVMIsOpaqueStruct(llvm) != 0 }
+  public var isOpaque: Bool { LLVMIsOpaqueStruct(llvm.raw) != 0 }
 
   /// `true` iff the struct is literal.
-  public var isLiteral: Bool { LLVMIsLiteralStruct(llvm) != 0 }
+  public var isLiteral: Bool { LLVMIsLiteralStruct(llvm.raw) != 0 }
 
   /// The fields of the struct.
   public var fields: Fields { .init(of: self) }
@@ -81,7 +81,7 @@ extension StructType {
 
     /// The number of fields in the collection.
     public var count: Int {
-      Int(LLVMCountStructElementTypes(parent.llvm))
+      Int(LLVMCountStructElementTypes(parent.llvm.raw))
     }
 
     public var startIndex: Int { 0 }
@@ -100,7 +100,7 @@ extension StructType {
 
     public subscript(position: Int) -> IRType {
       precondition(position >= 0 && position < count, "index is out of bounds")
-      return AnyType(LLVMStructGetTypeAtIndex(parent.llvm, UInt32(position)))
+      return AnyType(LLVMStructGetTypeAtIndex(parent.llvm.raw, UInt32(position)))
     }
 
   }

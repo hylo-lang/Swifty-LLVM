@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// How names can or cannot be referred to.
 ///

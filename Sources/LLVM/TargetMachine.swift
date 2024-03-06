@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// The settings necessary for code generation, including target information and compiler options.
 public struct TargetMachine {

@@ -1,19 +1,19 @@
-import llvmc
+internal import llvmc
 
 /// An pointer type in LLVM IR.
 public struct PointerType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: LLVMTypeRef
+  public let llvm: TypeRef
 
   /// Creates an instance wrapping `llvm`.
   private init(_ llvm: LLVMTypeRef) {
-    self.llvm = llvm
+    self.llvm = .init(llvm)
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
   public init?(_ t: IRType) {
-    if LLVMGetTypeKind(t.llvm) == LLVMPointerTypeKind {
+    if LLVMGetTypeKind(t.llvm.raw) == LLVMPointerTypeKind {
       self.llvm = t.llvm
     } else {
       return nil
@@ -26,6 +26,6 @@ public struct PointerType: IRType, Hashable {
   }
 
   /// The address space of the pointer.
-  public var addressSpace: AddressSpace { .init(LLVMGetPointerAddressSpace(llvm)) }
+  public var addressSpace: AddressSpace { .init(LLVMGetPointerAddressSpace(llvm.raw)) }
 
 }

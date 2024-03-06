@@ -1,10 +1,10 @@
-import llvmc
+internal import llvmc
 
 /// A constant struct in LLVM IR.
 public struct StructConstant: Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: LLVMValueRef
+  public let llvm: ValueRef
 
   /// The number of elements in the struct.
   public let count: Int
@@ -15,8 +15,8 @@ public struct StructConstant: Hashable {
   public init<S: Sequence>(
     of type: StructType, aggregating elements: S, in module: inout Module
   ) where S.Element == IRValue {
-    var values = elements.map({ $0.llvm as Optional })
-    self.llvm = LLVMConstNamedStruct(type.llvm, &values, UInt32(values.count))
+    var values = elements.map({ $0.llvm.raw as Optional })
+    self.llvm = .init(LLVMConstNamedStruct(type.llvm.raw, &values, UInt32(values.count)))
     self.count = values.count
   }
 
@@ -25,9 +25,9 @@ public struct StructConstant: Hashable {
   public init<S: Sequence>(
     aggregating elements: S, packed isPacked: Bool = false, in module: inout Module
   ) where S.Element == IRValue {
-    var values = elements.map({ $0.llvm as Optional })
-    self.llvm = LLVMConstStructInContext(
-      module.context, &values, UInt32(values.count), isPacked ? 1 : 0)
+    var values = elements.map({ $0.llvm.raw as Optional })
+    self.llvm = .init(LLVMConstStructInContext(
+      module.context, &values, UInt32(values.count), isPacked ? 1 : 0))
     self.count = values.count
   }
 

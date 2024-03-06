@@ -1,4 +1,4 @@
-import llvmc
+internal import llvmc
 
 /// Constraints on address ranges that the program and its symbols may use.
 public enum CodeModel: Hashable {
