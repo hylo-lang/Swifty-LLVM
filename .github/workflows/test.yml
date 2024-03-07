@@ -113,6 +113,14 @@ jobs:
       package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-x86_64-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
 
     steps:
+    - name: Prerequisites (macOS)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: brew install zstd
+
+    - name: Prerequisites (Linux)
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: apt install -y ninja-build
+
     - name: 'Set up swift (*nix)'
       if: ${{ matrix.os != 'windows-latest' }}
       uses: swift-actions/setup-swift@v1
