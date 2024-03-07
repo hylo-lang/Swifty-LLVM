@@ -34,8 +34,6 @@ RUN <<EOT bash -ex -o pipefail
 
 EOT
 
-RUN rm /opt/llvm-*.tar.zst
-
 #
 # Get a recent cmake (https://askubuntu.com/a/865294)
 #
