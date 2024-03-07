@@ -185,7 +185,7 @@ jobs:
         cmake -GNinja -S . -B .cmake-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DENABLE_TESTING=YES
-        -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
+        -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
 
         cmake --build .cmake-build
 
