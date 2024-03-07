@@ -51,11 +51,8 @@ jobs:
         runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
         push: never
 
-    # GitHub's runner sets up the path in a weird order that causes
-    - uses: compnerd/gha-setup-vsdevenv@main
-      with:
-        toolset_version: 14.37.32822
-        components: 'Microsoft.VisualStudio.Component.VC.14.37.17.7.x86.x64;Microsoft.VisualStudio.Component.VC.14.37.17.7.ARM64'
+    - name: Fix PATH on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
 
     - name: Build and run via CMake
       uses: devcontainers/ci@v0.3
@@ -135,7 +132,7 @@ jobs:
 
     - name: Set up swift (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
-      uses: compnerd/gha-setup-swift@v0.2.1
+      uses: dabrahams/gha-setup-swift@main
       with:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
