@@ -191,7 +191,7 @@ jobs:
 
         cmake --build .cmake-build
 
-        ctest -V --test-dir .cmake-build
+        ctest -VV --test-dir .cmake-build
       working-directory: Swifty-LLVM
 
     - name: Upload coverage reports to Codecov
