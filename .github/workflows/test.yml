@@ -181,8 +181,8 @@ jobs:
         llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
     - name: Build and Test via CMake
+      # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
       run: >-
-        # Explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         cmake -GNinja -S . -B .cmake-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DENABLE_TESTING=YES
