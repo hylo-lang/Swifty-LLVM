@@ -180,7 +180,7 @@ jobs:
         # Note: on mac this command might require a leading xcrun.
         llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
-    - name: Build and Test via CMake
+    - name: Configure (CMake)
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
       run: >-
         cmake -GNinja -S . -B .cmake-build
@@ -188,11 +188,13 @@ jobs:
         -DENABLE_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
         -DCMAKE_Swift_COMPILER=swiftc
-
-        cmake --build .cmake-build
-
-        ctest -VV --test-dir .cmake-build
       working-directory: Swifty-LLVM
+
+    - name: Build (CMake)
+      run: cmake --build Swifty-LLVM/.cmake-build
+
+    - name: Test (CMake)
+      run: ctest -V --test-dir Swifty-LLVM/.cmake-build
 
     - name: Upload coverage reports to Codecov
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
