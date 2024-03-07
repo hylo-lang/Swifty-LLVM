@@ -182,10 +182,12 @@ jobs:
 
     - name: Build and Test via CMake
       run: >-
+        # Explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         cmake -GNinja -S . -B .cmake-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DENABLE_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
+        -DCMAKE_Swift_COMPILER=swiftc
 
         cmake --build .cmake-build
 
