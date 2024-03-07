@@ -115,7 +115,7 @@ jobs:
     steps:
     - name: Prerequisites (macOS)
       if: ${{ matrix.os == 'macos-latest' }}
-      run: brew install zstd ninja-build
+      run: brew install zstd ninja
 
     - name: Prerequisites (Linux)
       if: ${{ matrix.os == 'ubuntu-latest' }}
