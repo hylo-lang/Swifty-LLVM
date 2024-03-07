@@ -44,44 +44,77 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 # Dependencies
 #
 
-# LLVM (mostly boilplate from https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project)
-find_package(LLVM 17.0 REQUIRED CONFIG)
-include_directories(${LLVM_INCLUDE_DIRS})
-separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
-add_definitions(${LLVM_DEFINITIONS_LIST})
+if (PROJECT_IS_TOP_LEVEL)
+  include(FetchContent)
 
-# Work around LLVM link options incompatible with the swift linker.
-# See https://github.com/llvm/llvm-project/pull/65634
-if(TARGET LLVMSupport)
-  get_target_property(interface_libs LLVMSupport INTERFACE_LINK_LIBRARIES)
-  if(-delayload:shell32.dll IN_LIST interface_libs)
-    # the delayimp argument shows up as -ldelayimp.lib in shared library builds for
-    # some reason.
-    list(REMOVE_ITEM interface_libs
-      delayimp -ldelayimp.lib  -delayload:shell32.dll -delayload:ole32.dll)
-    list(APPEND interface_libs
-      $<$<NOT:$<LINK_LANGUAGE:Swift>>:delayimp -delayload:shell32.dll -delayload:ole32.dll>)
-    set_target_properties(LLVMSupport
-      PROPERTIES INTERFACE_LINK_LIBRARIES "${interface_libs}")
+  # LLVM (mostly boilplate from https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project)
+  find_package(LLVM 17.0 REQUIRED CONFIG)
+  include_directories(${LLVM_INCLUDE_DIRS})
+  separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
+  add_definitions(${LLVM_DEFINITIONS_LIST})
+
+  # Work around LLVM link options incompatible with the swift linker.
+  # See https://github.com/llvm/llvm-project/pull/65634
+  if(TARGET LLVMSupport)
+    get_target_property(interface_libs LLVMSupport INTERFACE_LINK_LIBRARIES)
+    if(-delayload:shell32.dll IN_LIST interface_libs)
+      # the delayimp argument shows up as -ldelayimp.lib in shared library builds for
+      # some reason.
+      list(REMOVE_ITEM interface_libs
+        delayimp -ldelayimp.lib  -delayload:shell32.dll -delayload:ole32.dll)
+      list(APPEND interface_libs
+        $<$<NOT:$<LINK_LANGUAGE:Swift>>:delayimp -delayload:shell32.dll -delayload:ole32.dll>)
+      set_target_properties(LLVMSupport
+        PROPERTIES INTERFACE_LINK_LIBRARIES "${interface_libs}")
+    endif()
   endif()
-endif()
 
-if(ENABLE_TESTING)
-  include(FindXCTest)
-  block()
-    set(ENABLE_TESTING OFF)
-    include(FetchContent)
+
+  if(ENABLE_TESTING)
+
+    set(fetch_projects SwiftCMakeXCTesting)
+
+    set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE NEVER)
     FetchContent_Declare(SwiftCMakeXCTesting
       GIT_REPOSITORY https://github.com/hylo-lang/SwiftCMakeXCTesting.git
       GIT_TAG        main
     )
-    FetchContent_MakeAvailable(SwiftCMakeXCTesting)
-    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR} ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
-    include(SwiftCMakeXCTesting_FetchDependencies)
-    include(FindSwiftXCTest)
-  endblock()
-endif()
 
+    if(NOT APPLE)
+      # SwiftCMakeXCTesting dependency
+      list(APPEND fetch_projects SwiftSyntax)
+      FetchContent_Declare(SwiftSyntax
+        GIT_REPOSITORY https://github.com/apple/swift-syntax.git
+        GIT_TAG        main
+        OVERRIDE_FIND_PACKAGE
+      )
+      # See https://github.com/apple/swift-syntax/pull/2454, which will hopefully make this clause
+      # unnecessary.  Without it CMake will fatal error when loading SwiftSyntax on some platforms.
+      if("${SWIFT_HOST_MODULE_TRIPLE}" STREQUAL "")
+        execute_process(COMMAND ${CMAKE_Swift_COMPILER}
+          -print-target-info OUTPUT_VARIABLE target-info)
+        string(JSON SWIFT_HOST_MODULE_TRIPLE GET ${target-info} target moduleTriple)
+      endif()
+
+      # SwiftCMakeXCTesting dependency
+      list(APPEND fetch_projects ArgumentParser)
+      FetchContent_Declare(ArgumentParser
+        GIT_REPOSITORY https://github.com/apple/swift-argument-parser.git
+        GIT_TAG        1.3.0
+        OVERRIDE_FIND_PACKAGE
+      )
+    endif()
+
+
+    set(ENABLE_TESTING NO)
+    FetchContent_MakeAvailable(${fetch_projects})
+    set(ENABLE_TESTING YES)
+
+    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
+    include(FindSwiftXCTest)
+  endif()
+
+endif()
 #
 # Local targets
 #
@@ -95,7 +128,7 @@ target_include_directories(llvmc INTERFACE
 
 # Our LLVM builds currently only vend support for one target architecture.
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" target_processor)
-if(target_processor STREQUAL "arm64")
+if(target_processor STREQUAL "arm64" OR target_processor STREQUAL "aarch64")
   set(target_component AArch64)
 else()
   set(target_component X86)

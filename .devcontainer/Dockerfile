@@ -8,31 +8,9 @@ ARG HYLO_LLVM_VERSION=17.0.6
 
 ENV HYLO_LLVM_DOWNLOAD_URL="https://github.com/hylo-lang/llvm-build/releases/download"
 
-RUN apt clean
+RUN apt install -y gnupg
 RUN apt update
-RUN apt install -y curl gnupg libzstd-dev libzstd1 lsb-release make ninja-build software-properties-common tar wget zstd
-
-RUN <<EOT bash -ex -o pipefail
-
-    file_prefix="llvm-\${HYLO_LLVM_VERSION}-\$(uname -m)-unknown-linux-gnu"
-    url_prefix="\${HYLO_LLVM_DOWNLOAD_URL}/\${HYLO_LLVM_BUILD_RELEASE}/\$file_prefix"
-
-    for build_type in Debug MinSizeRel; do
-        curl --no-progress-meter -L "\${url_prefix}-\${build_type}.tar.zst" | tar -x --zstd -C /opt
-        ln -s /opt/\${file_prefix}-\${build_type} /opt/llvm-\${build_type}
-    done
-
-EOT
-
-
-ADD make-pkgconfig.sh /tmp
-RUN <<EOT bash -ex -o pipefail
-
-    export PATH="/opt/llvm-${HYLO_LLVM_BUILD_TYPE}/bin:\$PATH"
-    /tmp/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc > /dev/null
-    rm /tmp/make-pkgconfig.sh
-
-EOT
+RUN apt install -y curl libzstd-dev libzstd1 lsb-release make ninja-build tar wget zstd software-properties-common
 
 #
 # Get a recent cmake (https://askubuntu.com/a/865294)
@@ -65,3 +43,26 @@ RUN apt install -y cmake
 # devcontainer feature installation such as common-utils (see
 # devcontainer.json).  Now that we have cmake installed we can drop it.
 RUN apt-add-repository --remove "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+
+# Get the LLVM builds for the host architecture
+RUN <<EOT bash -ex -o pipefail
+
+    file_prefix="llvm-\${HYLO_LLVM_VERSION}-\$(uname -m)-unknown-linux-gnu"
+    url_prefix="\${HYLO_LLVM_DOWNLOAD_URL}/\${HYLO_LLVM_BUILD_RELEASE}/\$file_prefix"
+
+    for build_type in Debug MinSizeRel; do
+        curl --no-progress-meter -L "\${url_prefix}-\${build_type}.tar.zst" | tar -x --zstd -C /opt
+        ln -s /opt/\${file_prefix}-\${build_type} /opt/llvm-\${build_type}
+    done
+
+EOT
+
+# Make and install the llvm.pc file.
+ADD make-pkgconfig.sh /tmp
+RUN <<EOT bash -ex -o pipefail
+
+    export PATH="/opt/llvm-${HYLO_LLVM_BUILD_TYPE}/bin:\$PATH"
+    /tmp/make-pkgconfig.sh /usr/local/lib/pkgconfig/llvm.pc > /dev/null
+    rm /tmp/make-pkgconfig.sh
+
+EOT
