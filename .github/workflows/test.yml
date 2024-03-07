@@ -12,8 +12,8 @@ on:
     branches: [ "**" ]
     paths-ignore:
       - "**.md"
-      - "LICENSE"
       - ".gitignore"
+      - "LICENSE"
 
 env:
   swift-version: '5.9'
