@@ -2,6 +2,9 @@ ignore:
   - Tests
   - Package.swift
 
+comment:
+  require_changes: true
+
 coverage:
   status:
 
