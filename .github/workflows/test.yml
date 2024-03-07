@@ -20,15 +20,19 @@ env:
 
 jobs:
   dev-container:
-    name: "Dev container: ${{ matrix.configuration }}"
+    name: "Dev container: ${{ matrix.cmake_build_type }}"
     strategy: 
       fail-fast: false
-      matrix: 
+      matrix:
+        cmake_build_type: [Debug, Release]
+
         include:
-          - configuration: debug
+          - cmake_build_type: Debug
+            spm_configuration: debug
             HYLO_LLVM_BUILD_TYPE: Debug
 
-          - configuration: release
+          - cmake_build_type: Release
+            spm_configuration: release
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
     runs-on: ubuntu-latest
@@ -39,21 +43,37 @@ jobs:
         submodules: true
         show-progress: false
 
-    - name: Build and run devcontainer task
+    - name: Build and run via SPM
       uses: devcontainers/ci@v0.3
       env:
         HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
       with:
-        runCmd: swift test --parallel -c ${{ matrix.configuration }}
+        runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
+        push: never
+
+    - name: Build and run via CMake
+      uses: devcontainers/ci@v0.3
+      env:
+        HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
+      with:
+        runCmd: >-
+          cmake -GNinja -S . -B .cmake-build
+          -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
+          -DENABLE_TESTING=YES
+          -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
+
+          cmake --build .cmake-build
+
+          ctest -V --test-dir .cmake-build
         push: never
 
   native:
-    name: "Native: ${{ matrix.os }}/${{ matrix.configuration }}"
+    name: "Native: ${{ matrix.os }}/${{ matrix.spm_configuration }}"
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        configuration: [debug, release]
+        spm_configuration: [debug, release]
 
         include:
           - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
@@ -63,10 +83,12 @@ jobs:
           - unpackage_command: tar -x --zstd -f
           - package_suffix: .tar.zst
 
-          - configuration: debug
+          - spm_configuration: debug
+            cmake_build_type: Debug
             HYLO_LLVM_BUILD_TYPE: Debug
 
-          - configuration: release
+          - spm_configuration: release
+            cmake_build_type: Release
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
           - os: windows-latest
@@ -81,7 +103,7 @@ jobs:
             triple_suffix: apple-darwin23.3.0
 
           - os: ubuntu-latest
-            configuration: release
+            spm_configuration: release
 
             swift_test_options: --enable-code-coverage
 
@@ -134,21 +156,33 @@ jobs:
         echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> $GITHUB_ENV
       shell: bash
 
-    - name: Test
-      run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.configuration }}
+    - name: Build and Test via SPM
+      run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
       working-directory: Swifty-LLVM
 
     - name: Export Coverage
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
       working-directory: Swifty-LLVM
       run: |
-        dot_os=(.build/${{ matrix.configuration }}/*.build/**/*.o)
+        dot_os=(.build/${{ matrix.spm_configuration }}/*.build/**/*.o)
         bin_params=("${dot_os[0]}")
         for o in "${dot_os[@]:1}"; do
           bin_params+=("-object" "${o}")
         done
         # Note: on mac this command might require a leading xcrun.
-        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
+        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
+
+    - name: Build and Test via CMake
+      run: >-
+        cmake -GNinja -S . -B .cmake-build
+        -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
+        -DENABLE_TESTING=YES
+        -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
+
+        cmake --build .cmake-build
+
+        ctest -V --test-dir .cmake-build
+      working-directory: Swifty-LLVM
 
     - name: Upload coverage reports to Codecov
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
