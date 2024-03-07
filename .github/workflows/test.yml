@@ -51,6 +51,12 @@ jobs:
         runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
         push: never
 
+    # GitHub's runner sets up the path in a weird order that causes
+    - uses: compnerd/gha-setup-vsdevenv@main
+      with:
+        toolset_version: 14.37.32822
+        components: 'Microsoft.VisualStudio.Component.VC.14.37.17.7.x86.x64;Microsoft.VisualStudio.Component.VC.14.37.17.7.ARM64'
+
     - name: Build and run via CMake
       uses: devcontainers/ci@v0.3
       env:
