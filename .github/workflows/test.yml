@@ -51,9 +51,6 @@ jobs:
         runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
         push: never
 
-    - name: Fix PATH on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-
     - name: Build and run via CMake
       uses: devcontainers/ci@v0.3
       env:
