@@ -86,19 +86,31 @@ endif()
 # Local targets
 #
 
+#---------------------------------------------------------------------------------------------------
+# The target that exposes the LLVM C API.
 add_library(llvmc INTERFACE)
 target_include_directories(llvmc INTERFACE
   Sources/llvmc
 )
 
-# Not sure if this is exactly the right list, but it's enough.
-llvm_map_components_to_libnames(llvm_libs mcjit bitwriter linker passes X86 ARM AArch64)
+# Our LLVM builds currently only vend support for one target architecture.
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" target_processor)
+if(target_processor STREQUAL "arm64")
+  set(target_component AArch64)
+else()
+  set(target_component X86)
+endif()
+llvm_map_components_to_libnames(llvm_libs bitwriter linker passes ${target_component})
 target_link_libraries(llvmc INTERFACE ${llvm_libs})
 
+#---------------------------------------------------------------------------------------------------
+# A small library that exposes a few parts of the LLVM C++ API as C.
 add_library(llvmshims STATIC Sources/llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC Sources/llvmshims/include)
 target_link_libraries(llvmshims PRIVATE llvmc)
 
+#---------------------------------------------------------------------------------------------------
+# The Swift module our clients depend on.
 file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Sources/SwiftyLLVM/*.swift)
 add_library(SwiftyLLVM ${files})
 
@@ -111,10 +123,12 @@ target_link_libraries(SwiftyLLVM
   # TODO: does this really need to be public? Otherwise, I'm getting
   # DataLayoutTests.swift:1:8: error: missing required modules: 'llvmc', 'llvmshims'
   PUBLIC llvmshims llvmc)
+
 target_compile_options(SwiftyLLVM
   PRIVATE $<$<BOOL:${ENABLE_TESTING}>:-enable-testing> -enable-experimental-feature AccessLevelOnImport)
 
 if(ENABLE_TESTING)
+
   file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
   add_swift_xctest(SwiftyLLVMTests SwiftyLLVM ${test_files})
 
