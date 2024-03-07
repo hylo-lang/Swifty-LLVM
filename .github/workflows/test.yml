@@ -127,6 +127,11 @@ jobs:
       with:
         swift-version: ${{ env.swift-version }}
 
+    - name: Find out the initial Path
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        echo "  Path: $env:Path"
+
     - name: Set up swift (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       uses: dabrahams/gha-setup-swift@main
