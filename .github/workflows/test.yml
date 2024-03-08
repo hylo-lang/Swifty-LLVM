@@ -71,6 +71,14 @@ jobs:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
 
+    - name: Check location of link.exe
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        $fullPath = (Get-Command "link").Path
+        Write-Host "Full path to link: $fullPath"
+        link --help
+        if ($errorOccurred) { Exit 1 }
+
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
       # this all as one statement. Maybe we should find a way to use
@@ -101,9 +109,25 @@ jobs:
         echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> $GITHUB_ENV
       shell: bash
 
+    - name: Check location of link.exe
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        $fullPath = (Get-Command "link").Path
+        Write-Host "Full path to link: $fullPath"
+        link --help
+        if ($errorOccurred) { Exit 1 }
+
     - name: Build and Test via SPM
       run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
       working-directory: Swifty-LLVM
+
+    - name: Check location of link.exe
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        $fullPath = (Get-Command "link").Path
+        Write-Host "Full path to link: $fullPath"
+        link --help
+        if ($errorOccurred) { Exit 1 }
 
     - name: Export Coverage
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
