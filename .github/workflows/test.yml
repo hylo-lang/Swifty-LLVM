@@ -144,6 +144,8 @@ jobs:
         $newPath = ($matchingDirs -join ";") + ";" + $newPath
         echo "$newPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
 
+        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch "^Path=" } | Set-Content -Path $env:GITHUB_ENV
+
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
       # this all as one statement. Maybe we should find a way to use
