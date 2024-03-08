@@ -21,7 +21,7 @@ env:
 jobs:
   dev-container:
     name: "Dev container: ${{ matrix.cmake_build_type }}"
-    strategy:
+    strategy: 
       fail-fast: false
       matrix:
         cmake_build_type: [Debug, Release]
@@ -82,8 +82,6 @@ jobs:
           - swift_test_options:
           - unpackage_command: tar -x --zstd -f
           - llvm_package_suffix: .tar.zst
-          - cmake_executable: cmake
-          - ctest_executable: ctest
 
           - spm_configuration: debug
             cmake_build_type: Debug
@@ -98,8 +96,6 @@ jobs:
             unpackage_command: 7z x -t7z
             llvm_package_suffix: .7z
             triple_suffix: unknown-windows-msvc17
-            cmake_executable: '& "C:\Program Files\CMake\bin\cmake.exe"'
-            ctest_executable: '& "C:\Program Files\CMake\bin\ctest.exe"'
 
           - os: ubuntu-latest
             triple_suffix: unknown-linux-gnu
@@ -122,10 +118,6 @@ jobs:
       if: ${{ matrix.os == 'macos-latest' }}
       run: brew install zstd ninja
 
-    - name: Prerequisites (Linux)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: sudo apt update && sudo apt install -y ninja-build
-
     - name: 'Set up swift (*nix)'
       if: ${{ matrix.os != 'windows-latest' }}
       uses: swift-actions/setup-swift@v1
@@ -138,6 +130,14 @@ jobs:
       with:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
+
+    # Setup the build machine with the most recent versions of CMake and Ninja. Both are cached if
+    # not already: on subsequent runs both will be quickly restored from GitHub cache service.
+    - uses: lukka/get-cmake@latest
+
+    # On Windows runners, let's ensure to have the Developer Command Prompt environment setup correctly.
+    # As used here the Developer Command Prompt created is targeting x64 and using the default the Windows SDK.
+    - uses: ilammy/msvc-dev-cmd@v1
 
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
@@ -172,7 +172,7 @@ jobs:
     - name: Configure (CMake)
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
       run: >-
-        ${{ matrix.cmake_executable }} -GNinja -S . -B .cmake-build
+        cmake -GNinja -S . -B .cmake-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DENABLE_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
@@ -180,10 +180,10 @@ jobs:
       working-directory: Swifty-LLVM
 
     - name: Build (CMake)
-      run: ${{ matrix.cmake_executable }} --build Swifty-LLVM/.cmake-build
+      run: cmake --build Swifty-LLVM/.cmake-build
 
     - name: Test (CMake)
-      run:  ${{ matrix.ctest_executable }} -V --test-dir Swifty-LLVM/.cmake-build
+      run: ctest -V --test-dir Swifty-LLVM/.cmake-build
 
     - name: Build and Test via SPM
       run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
