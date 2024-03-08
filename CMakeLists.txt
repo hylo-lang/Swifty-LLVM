@@ -170,3 +170,5 @@ if(ENABLE_TESTING)
   add_swift_xctest(SwiftyLLVMTests SwiftyLLVM ${test_files})
 
 endif()
+
+message("Swift link executable is: ${CMAKE_Swift_LINK_EXECUTABLE}")
