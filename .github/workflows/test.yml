@@ -43,6 +43,9 @@ jobs:
         $newPath = $newPathHead + $newPathTail
         $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
 
+        # Clear the user path variable from the registry.
+        [Environment]::SetEnvironmentVariable("Path", $null, "User")
+
         Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch '^' } | Set-Content -Path $env:GITHUB_ENV
 
         Write-Host "--------------------- GITHUB_PATH file ------------------------"
