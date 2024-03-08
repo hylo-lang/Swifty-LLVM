@@ -141,26 +141,6 @@ jobs:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
 
-    - name: Fix PATH on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        $currentPath = $env:Path -split ';'
-        $prefixes = @('C:\Program Files\Git\', 'C:\mingw64\')
-        $pattern = '^(' + (($prefixes | ForEach-Object { [regex]::escape($_) }) -join '|') + ').*'
-        $newPathHead = $currentPath | Where-Object { $_ -notmatch $pattern }
-        $newPathTail = $currentPath | Where-Object { $_ -match $pattern }
-        $newPath = $newPathHead + $newPathTail
-        $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
-
-        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch '^' } | Set-Content -Path $env:GITHUB_ENV
-
-    - name: Check that the path fix was sufficient.
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        Write-Host "Full path to link: $((Get-Command "link").Path)"
-        link /?
-        if ($errorOccurred) { Exit 1 }
-
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
       # this all as one statement. Maybe we should find a way to use
