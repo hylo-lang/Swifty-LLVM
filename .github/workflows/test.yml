@@ -27,42 +27,16 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - uses: compnerd/gha-setup-vsdevenv@main
+
     - name: Set up swift (Windows)
       uses: compnerd/gha-setup-swift@v0.2.1
       with:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
 
-    - name: Fix PATH on Windows
-      run: |
-        $currentPath = $env:Path -split ';'
-        $prefixes = @('C:\Program Files\Git\', 'C:\mingw64\')
-        $pattern = '^(' + (($prefixes | ForEach-Object { [regex]::escape($_) }) -join '|') + ').*'
-        $newPathHead = $currentPath | Where-Object { $_ -notmatch $pattern }
-        $newPathTail = $currentPath | Where-Object { $_ -match $pattern }
-        $newPath = $newPathHead + $newPathTail
-
-        $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
-
-        $systemPath =
-        Write-Host "--------------------- OLD SYSTEM PATH ------------------------"
-        (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path -split ';'
-        Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value ($newPath -join ';')
-        Write-Host "--------------------- NEW SYSTEM PATH ------------------------"
-        (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path -split ';'
-        Write-Host "--------------------- GITHUB_PATH file ------------------------"
-        type $env:GITHUB_PATH
-        Write-Host "--------------------------------------------------------------"
-
-
     - name: Check that the path fix was sufficient.
       run: |
-        Write-Host "--------------------- SYSTEM PATH ------------------------"
-        (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path -split ';'
-        Write-Host "--------------------- CURRENT_PATH ---------------------------"
-        $env:Path -split ';'
-        Write-Host "--------------------------------------------------------------"
-
         Write-Host "Full path to link: $((Get-Command "link").Path)"
         link /?
         if ($errorOccurred) { Exit 1 }
