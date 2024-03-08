@@ -69,20 +69,26 @@ if (PROJECT_IS_TOP_LEVEL)
     endif()
   endif()
 
-
+  # Fetch testing dependencies.
   if(ENABLE_TESTING)
-
-    set(fetch_projects SwiftCMakeXCTesting)
+    set(ENABLE_TESTING NO)
 
     set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE NEVER)
+
+    # ArgumentParser relies on XCTest even in its non-test code and it seems not to have the
+    # necessary target properties to find it, at least in some contexts.  FindSwiftXCTest adds
+    # those to XCTest.
     FetchContent_Declare(SwiftCMakeXCTesting
       GIT_REPOSITORY https://github.com/hylo-lang/SwiftCMakeXCTesting.git
       GIT_TAG        main
     )
+    FetchContent_MakeAvailable(SwiftCMakeXCTesting)
+    include(FindSwiftXCTest)
+
+    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
 
     if(NOT APPLE)
       # SwiftCMakeXCTesting dependency
-      list(APPEND fetch_projects SwiftSyntax)
       FetchContent_Declare(SwiftSyntax
         GIT_REPOSITORY https://github.com/apple/swift-syntax.git
         GIT_TAG        main
@@ -97,21 +103,16 @@ if (PROJECT_IS_TOP_LEVEL)
       endif()
 
       # SwiftCMakeXCTesting dependency
-      list(APPEND fetch_projects ArgumentParser)
       FetchContent_Declare(ArgumentParser
         GIT_REPOSITORY https://github.com/apple/swift-argument-parser.git
         GIT_TAG        1.3.0
         OVERRIDE_FIND_PACKAGE
       )
+
+      FetchContent_MakeAvailable(SwiftSyntax ArgumentParser)
     endif()
 
-
-    set(ENABLE_TESTING NO)
-    FetchContent_MakeAvailable(${fetch_projects})
     set(ENABLE_TESTING YES)
-
-    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
-    include(FindSwiftXCTest)
   endif()
 
 endif()
