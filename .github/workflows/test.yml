@@ -21,7 +21,7 @@ env:
 jobs:
   dev-container:
     name: "Dev container: ${{ matrix.cmake_build_type }}"
-    strategy: 
+    strategy:
       fail-fast: false
       matrix:
         cmake_build_type: [Debug, Release]
@@ -127,17 +127,21 @@ jobs:
       with:
         swift-version: ${{ env.swift-version }}
 
-    - name: Find out the initial Path
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        echo "  Path: $env:Path"
-
     - name: Set up swift (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
-      uses: dabrahams/gha-setup-swift@main
+      uses: compnerd/gha-setup-swift@v0.2.1
       with:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
+
+    - name: Fix PATH on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        $currentPath = $env:Path
+        $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "$env:DEVELOPER_DIR" }
+        $newPath = $currentPath -replace "(?i)${prefix}[^;]*;?", ""
+        $newPath = ($matchingDirs -join ";") + ";" + $newPath
+        echo "$newPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
 
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
