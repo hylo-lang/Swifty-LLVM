@@ -164,30 +164,14 @@ jobs:
         echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> $GITHUB_ENV
       shell: bash
 
-    - name: Build and Test via SPM
-      run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
-      working-directory: Swifty-LLVM
-
-    - name: Export Coverage
-      if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
-      working-directory: Swifty-LLVM
-      run: |
-        dot_os=(.build/${{ matrix.spm_configuration }}/*.build/**/*.o)
-        bin_params=("${dot_os[0]}")
-        for o in "${dot_os[@]:1}"; do
-          bin_params+=("-object" "${o}")
-        done
-        # Note: on mac this command might require a leading xcrun.
-        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
-
     - name: Fix PATH on Windows
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         $currentPath = $env:Path
-        $prefix = "C:\Program Files\Microsoft Visual Studio\"
+        $prefix = "C:\Program Files\Git\"
         $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "${prefix}*" }
         $newPath = $currentPath -replace "(?i)$([regex]::escape($prefix))[^;]*;?", ""
-        $newPath = ($matchingDirs -join ";") + ";" + $newPath
+        $newPath =  $newPath + ";" + ($matchingDirs -join ";")
         $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
 
         Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch "^" } | Set-Content -Path $env:GITHUB_ENV
@@ -207,6 +191,22 @@ jobs:
 
     - name: Test (CMake)
       run: ctest -V --test-dir Swifty-LLVM/.cmake-build
+
+    - name: Build and Test via SPM
+      run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
+      working-directory: Swifty-LLVM
+
+    - name: Export Coverage
+      if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
+      working-directory: Swifty-LLVM
+      run: |
+        dot_os=(.build/${{ matrix.spm_configuration }}/*.build/**/*.o)
+        bin_params=("${dot_os[0]}")
+        for o in "${dot_os[@]:1}"; do
+          bin_params+=("-object" "${o}")
+        done
+        # Note: on mac this command might require a leading xcrun.
+        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
     - name: Upload coverage reports to Codecov
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
