@@ -33,9 +33,31 @@ jobs:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
 
-    - name: Check location of link.exe
+    - name: Fix PATH on Windows
       run: |
-        $fullPath = (Get-Command "link").Path
-        Write-Host "Full path to link: $fullPath"
+        $currentPath = $env:Path -split ';'
+        $prefixes = @('C:\Program Files\Git\', 'C:\mingw64\')
+        $pattern = '^(' + (($prefixes | ForEach-Object { [regex]::escape($_) }) -join '|') + ').*'
+        $newPathHead = $currentPath | Where-Object { $_ -notmatch $pattern }
+        $newPathTail = $currentPath | Where-Object { $_ -match $pattern }
+        $newPath = $newPathHead + $newPathTail
+        $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
+
+        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch '^' } | Set-Content -Path $env:GITHUB_ENV
+
+        Write-Host "--------------------- GITHUB_PATH file ------------------------"
+        type $env:GITHUB_PATH
+        Write-Host "--------------------- GITHUB_ENV file ------------------------"
+        type $env:GITHUB_ENV
+        Write-Host "--------------------------------------------------------------"
+
+    - name: Check that the path fix was sufficient.
+      run: |
+        Write-Host "--------------------- GITHUB_PATH file ------------------------"
+        type $env:GITHUB_PATH
+        Write-Host "--------------------- GITHUB_ENV file ------------------------"
+        type $env:GITHUB_ENV
+        Write-Host "--------------------------------------------------------------"
+        Write-Host "Full path to link: $((Get-Command "link").Path)"
         link /?
         if ($errorOccurred) { Exit 1 }
