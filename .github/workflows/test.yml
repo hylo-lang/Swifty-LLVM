@@ -180,13 +180,6 @@ jobs:
         # Note: on mac this command might require a leading xcrun.
         llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
-    - name: Diagnose location of link.exe
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        $fullPath = (Get-Command "link").Path
-        Write-Host "Full path to link: $fullPath"
-        link
-
     - name: Configure (CMake)
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
       run: >-
@@ -195,6 +188,7 @@ jobs:
         -DENABLE_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
         -DCMAKE_Swift_COMPILER=swiftc
+        ${{ matrix.os == 'windows-latest' && '-DCMAKE_Swift_FLAGS=-use-ld=lld' || '' }}
       working-directory: Swifty-LLVM
 
     - name: Build (CMake)
