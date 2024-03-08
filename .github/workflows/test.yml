@@ -131,13 +131,20 @@ jobs:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
 
+    - name: Fix PATH on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        $currentPath = $env:Path -split ';'
+        $prefixes = @('C:\Program Files\Git\', 'C:\mingw64\')
+        $pattern = '^(' + (($prefixes | ForEach-Object { [regex]::escape($_) }) -join '|') + ').*'
+        $newPathHead = $currentPath | Where-Object { $_ -notmatch $pattern }
+        $newPathTail = $currentPath | Where-Object { $_ -match $pattern }
+        $newPath = $newPathHead + $newPathTail
+        $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
+
     # Setup the build machine with the most recent versions of CMake and Ninja. Both are cached if
     # not already: on subsequent runs both will be quickly restored from GitHub cache service.
     - uses: lukka/get-cmake@latest
-
-    # On Windows runners, let's ensure to have the Developer Command Prompt environment setup correctly.
-    # As used here the Developer Command Prompt created is targeting x64 and using the default the Windows SDK.
-    - uses: ilammy/msvc-dev-cmd@v1
 
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
