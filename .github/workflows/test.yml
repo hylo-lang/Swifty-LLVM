@@ -180,17 +180,12 @@ jobs:
         # Note: on mac this command might require a leading xcrun.
         llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
-    - name: Fix PATH on Windows
+    - name: Diagnose location of link.exe
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        $currentPath = $env:Path
-        $prefix = "C:\Program Files\Microsoft Visual Studio\"
-        $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "${prefix}*" }
-        $newPath = $currentPath -replace "(?i)$([regex]::escape($prefix))[^;]*;?", ""
-        $newPath = ($matchingDirs -join ";") + ";" + $newPath
-        $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
-
-        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch "^" } | Set-Content -Path $env:GITHUB_ENV
+        $fullPath = (Get-Command "link").Path
+        Write-Host "Full path to link: $fullPath"
+        link
 
     - name: Configure (CMake)
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
