@@ -137,9 +137,10 @@ jobs:
     - name: Fix PATH on Windows
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        $currentPath = $env:Path
-        $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "$env:DEVELOPER_DIR" }
-        $newPath = $currentPath -replace "(?i)${prefix}[^;]*;?", ""
+        $currentPath = "$env:Path"
+        $developer_dir = "$env:DEVELOPER_DIR"
+        $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "${developer_dir"}*" }
+        $newPath = $currentPath -replace "(?i)${developer_dir}[^;]*;?", ""
         $newPath = ($matchingDirs -join ";") + ";" + $newPath
         echo "$newPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
 
