@@ -169,7 +169,7 @@ jobs:
       run: |
         $currentPath = $env:Path -split ";"
         $prefixes = @("C:\Program Files\Git\", "C:\mingw64\")
-        $pattern = "^(' + (($prefixes | ForEach-Object { [regex]::escape($_) }) -join '|') + ').*'
+        $pattern = '^(' + (($prefixes | ForEach-Object { [regex]::escape($_) }) -join '|') + ').*'
         $newPathHead = $currentPath | Where-Object { $_ -notmatch $pattern }
         $newPathTail = $currentPath | Where-Object { $_ -match $pattern }
         $newPath = $newPathHead + $newPathTail
