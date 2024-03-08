@@ -45,9 +45,6 @@ jobs:
             triple_suffix: unknown-windows-msvc17
 
     runs-on: ${{ matrix.os }}
-    env:
-      url_prefix: ${{ matrix.HYLO_LLVM_DOWNLOAD_URL }}/${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
-      llvm_package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-x86_64-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
 
     steps:
     - name: Prerequisites (macOS)
@@ -76,7 +73,7 @@ jobs:
       run: |
         $fullPath = (Get-Command "link").Path
         Write-Host "Full path to link: $fullPath"
-        link --help
+        link /?
         if ($errorOccurred) { Exit 1 }
 
     - name: Install LLVM
@@ -114,7 +111,7 @@ jobs:
       run: |
         $fullPath = (Get-Command "link").Path
         Write-Host "Full path to link: $fullPath"
-        link --help
+        link /?
         if ($errorOccurred) { Exit 1 }
 
     - name: Build and Test via SPM
@@ -126,7 +123,7 @@ jobs:
       run: |
         $fullPath = (Get-Command "link").Path
         Write-Host "Full path to link: $fullPath"
-        link --help
+        link /?
         if ($errorOccurred) { Exit 1 }
 
     - name: Export Coverage
