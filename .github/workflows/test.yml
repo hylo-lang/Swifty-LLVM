@@ -134,17 +134,6 @@ jobs:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
 
-    - name: Fix PATH on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        $currentPath = $env:Path
-        $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "${env:DEVELOPER_DIR}*" }
-        $newPath = $currentPath -replace "(?i)$([regex]::escape($env:DEVELOPER_DIR))[^;]*;?", ""
-        $newPath = ($matchingDirs -join ";") + ";" + $newPath
-        $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
-
-        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch "^" } | Set-Content -Path $env:GITHUB_ENV
-
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
       # this all as one statement. Maybe we should find a way to use
@@ -175,10 +164,6 @@ jobs:
         echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> $GITHUB_ENV
       shell: bash
 
-    - name: Check PATH on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: echo "******* $env:Path"
-
     - name: Build and Test via SPM
       run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
       working-directory: Swifty-LLVM
@@ -195,9 +180,17 @@ jobs:
         # Note: on mac this command might require a leading xcrun.
         llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
-    - name: Check PATH on Windows
+    - name: Fix PATH on Windows
       if: ${{ matrix.os == 'windows-latest' }}
-      run: echo "******* $env:Path"
+      run: |
+        $currentPath = $env:Path
+        $prefix = "C:\Program Files\Microsoft Visual Studio\"
+        $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "${prefix}*" }
+        $newPath = $currentPath -replace "(?i)$([regex]::escape($prefix))[^;]*;?", ""
+        $newPath = ($matchingDirs -join ";") + ";" + $newPath
+        $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
+
+        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch "^" } | Set-Content -Path $env:GITHUB_ENV
 
     - name: Configure (CMake)
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
