@@ -118,10 +118,18 @@ jobs:
       if: ${{ matrix.os == 'macos-latest' }}
       run: brew install zstd ninja
 
-    - name: Set up swift
-      uses: SwiftyLab/setup-swift@latest
+    - name: 'Set up swift (*nix)'
+      if: ${{ matrix.os != 'windows-latest' }}
+      uses: swift-actions/setup-swift@v1
       with:
         swift-version: ${{ env.swift-version }}
+
+    - name: Set up swift (Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: compnerd/gha-setup-swift@v0.2.1
+      with:
+        branch: swift-${{ env.swift-version }}-release
+        tag: ${{ env.swift-version }}-RELEASE
 
     # Setup the build machine with the most recent versions of CMake and Ninja. Both are cached if
     # not already: on subsequent runs both will be quickly restored from GitHub cache service.
