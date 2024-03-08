@@ -200,7 +200,6 @@ jobs:
         -DENABLE_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
         -DCMAKE_Swift_COMPILER=swiftc
-        ${{ matrix.os == 'windows-latest' && '--trace-expand' || ''}}
       working-directory: Swifty-LLVM
 
     - name: Build (CMake)
