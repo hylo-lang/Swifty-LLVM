@@ -19,48 +19,14 @@ env:
   swift-version: '5.9'
 
 jobs:
-  native:
-    name: "Native: ${{ matrix.os }}/${{ matrix.spm_configuration }}"
+  demo:
+    name: 'See, gha-setup-swift is going wrong'
     strategy:
       fail-fast: false
-      matrix:
-        os: [windows-latest]
-        spm_configuration: [release]
 
-        include:
-          - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
-          - HYLO_LLVM_BUILD_RELEASE: 20240303-215025
-          - HYLO_LLVM_VERSION: 17.0.6
-          - swift_test_options:
-          - unpackage_command: tar -x --zstd -f
-          - llvm_package_suffix: .tar.zst
-
-          - spm_configuration: release
-            cmake_build_type: Release
-            HYLO_LLVM_BUILD_TYPE: MinSizeRel
-
-          - os: windows-latest
-            unpackage_command: 7z x -t7z
-            llvm_package_suffix: .7z
-            triple_suffix: unknown-windows-msvc17
-
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     steps:
-    - name: Prerequisites (macOS)
-      if: ${{ matrix.os == 'macos-latest' }}
-      run: brew install zstd ninja
-
-    - name: Prerequisites (Linux)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: sudo apt update && sudo apt install -y ninja-build
-
-    - name: 'Set up swift (*nix)'
-      if: ${{ matrix.os != 'windows-latest' }}
-      uses: swift-actions/setup-swift@v1
-      with:
-        swift-version: ${{ env.swift-version }}
-
     - name: Set up swift (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       uses: compnerd/gha-setup-swift@v0.2.1
@@ -75,91 +41,3 @@ jobs:
         Write-Host "Full path to link: $fullPath"
         link /?
         if ($errorOccurred) { Exit 1 }
-
-    - name: Install LLVM
-      # 7z doesn't support decompressing from a stream or we'd do
-      # this all as one statement. Maybe we should find a way to use
-      # zstd on windows.
-      run: >-
-        curl --no-progress-meter -L -O
-        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-        ${{ env.url_prefix }}/${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
-
-        ${{ matrix.unpackage_command }} ${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
-
-    - name: Checkout (GitHub)
-      uses: actions/checkout@v4
-      with:
-        submodules: true
-        show-progress: false
-        path: Swifty-LLVM
-
-    - name: Create LLVM pkgconfig file and make it findable
-      run: >-
-        set -ex -o pipefail
-
-        mkdir pkg-config
-
-        PATH="${{ github.workspace }}/${{ env.llvm_package_basename }}/bin:$PATH"
-        Swifty-LLVM/Tools/make-pkgconfig.sh pkg-config/llvm.pc
-
-        echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> $GITHUB_ENV
-      shell: bash
-
-    - name: Check location of link.exe
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        $fullPath = (Get-Command "link").Path
-        Write-Host "Full path to link: $fullPath"
-        link /?
-        if ($errorOccurred) { Exit 1 }
-
-    - name: Build and Test via SPM
-      run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
-      working-directory: Swifty-LLVM
-
-    - name: Check location of link.exe
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        $fullPath = (Get-Command "link").Path
-        Write-Host "Full path to link: $fullPath"
-        link /?
-        if ($errorOccurred) { Exit 1 }
-
-    - name: Export Coverage
-      if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
-      working-directory: Swifty-LLVM
-      run: |
-        dot_os=(.build/${{ matrix.spm_configuration }}/*.build/**/*.o)
-        bin_params=("${dot_os[0]}")
-        for o in "${dot_os[@]:1}"; do
-          bin_params+=("-object" "${o}")
-        done
-        # Note: on mac this command might require a leading xcrun.
-        llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
-
-    - name: Configure (CMake)
-      # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
-      run: >-
-        cmake -GNinja -S . -B .cmake-build
-        -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
-        -DENABLE_TESTING=YES
-        -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        -DCMAKE_Swift_COMPILER=swiftc
-      working-directory: Swifty-LLVM
-
-    - name: Build (CMake)
-      run: cmake --build Swifty-LLVM/.cmake-build
-
-    - name: Test (CMake)
-      run: ctest -V --test-dir Swifty-LLVM/.cmake-build
-
-    - name: Upload coverage reports to Codecov
-      if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
-      uses: codecov/codecov-action@v4
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
-        directory: ${{ github.workspace }}/Swifty-LLVM
-        working-directory: ${{ github.workspace }}/Swifty-LLVM
-        root_dir: ${{ github.workspace }}/Swifty-LLVM
