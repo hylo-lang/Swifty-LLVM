@@ -148,6 +148,7 @@ jobs:
         Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch '^' } | Set-Content -Path $env:GITHUB_ENV
 
     - name: Check that the path fix was sufficient.
+      if: ${{ matrix.os == 'windows-latest' }}
       run: |
         Write-Host "Full path to link: $((Get-Command "link").Path)"
         link /?
