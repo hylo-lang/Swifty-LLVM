@@ -43,12 +43,11 @@ jobs:
         $newPath = $newPathHead + $newPathTail
 
         # $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
-        echo "$newPath" | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
+        echo '' | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
 
         # Clear the user path variable from the registry.
         [Environment]::SetEnvironmentVariable("Path", $null, "User")
-        Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newPath
-        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch '^' } | Set-Content -Path $env:GITHUB_ENV
+        Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value ($newPath -join ';')
 
         Write-Host "--------------------- GITHUB_PATH file ------------------------"
         type $env:GITHUB_PATH
