@@ -53,10 +53,8 @@ jobs:
 
     - name: Check that the path fix was sufficient.
       run: |
-        Write-Host "--------------------- GITHUB_PATH file ------------------------"
-        type $env:GITHUB_PATH
-        Write-Host "--------------------- GITHUB_ENV file ------------------------"
-        type $env:GITHUB_ENV
+        Write-Host "--------------------- CURRENT_PATH ---------------------------"
+        $env:Path -split ';'
         Write-Host "--------------------------------------------------------------"
         Write-Host "Full path to link: $((Get-Command "link").Path)"
         link /?
