@@ -99,9 +99,9 @@ jobs:
             llvm_package_suffix: .7z
             triple_suffix: unknown-windows-msvc17
             cmake_executable: |
-              C:\Program Files\CMake\bin\cmake
+              "C:\Program Files\CMake\bin\cmake"
           - ctest_executable: |
-              C:\Program Files\CMake\bin\ctest
+              "C:\Program Files\CMake\bin\ctest"
 
           - os: ubuntu-latest
             triple_suffix: unknown-linux-gnu
