@@ -167,11 +167,12 @@ jobs:
     - name: Fix PATH on Windows
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        $currentPath = $env:Path
-        $prefix = "C:\Program Files\Git\"
-        $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "${prefix}*" }
-        $newPath = $currentPath -replace "(?i)$([regex]::escape($prefix))[^;]*;?", ""
-        $newPath =  $newPath + ";" + ($matchingDirs -join ";")
+        $currentPath = $env:Path -split ";"
+        $prefixes = @("C:\Program Files\Git\", "C:\mingw64\")
+        $pattern = "^(' + (($prefixes | ForEach-Object { [regex]::escape($_) }) -join '|') + ').*'
+        $newPathHead = $currentPath | Where-Object { $_ -notmatch $pattern }
+        $newPathTail = $currentPath | Where-Object { $_ -match $pattern }
+        $newPath = $newPathHead + $newPathTail
         $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
 
         Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch "^" } | Set-Content -Path $env:GITHUB_ENV
