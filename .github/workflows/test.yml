@@ -139,7 +139,7 @@ jobs:
       run: |
         $currentPath = $env:Path
         $matchingDirs = $currentPath -split ";" | Where-Object { $_ -like "${env:DEVELOPER_DIR}*" }
-        $newPath = $currentPath -replace "(?i)${env:DEVELOPER_DIR}[^;]*;?", ""
+        $newPath = $currentPath -replace "(?i)$([regex]::escape($env:DEVELOPER_DIR))[^;]*;?", ""
         $newPath = ($matchingDirs -join ";") + ";" + $newPath
         $newPath | Set-Content -Path $env:GITHUB_PATH -Encoding utf8
 
