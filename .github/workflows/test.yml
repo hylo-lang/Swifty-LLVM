@@ -28,14 +28,12 @@ jobs:
 
     steps:
     - name: Set up swift (Windows)
-      if: ${{ matrix.os == 'windows-latest' }}
       uses: compnerd/gha-setup-swift@v0.2.1
       with:
         branch: swift-${{ env.swift-version }}-release
         tag: ${{ env.swift-version }}-RELEASE
 
     - name: Check location of link.exe
-      if: ${{ matrix.os == 'windows-latest' }}
       run: |
         $fullPath = (Get-Command "link").Path
         Write-Host "Full path to link: $fullPath"
