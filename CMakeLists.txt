@@ -1,13 +1,13 @@
 # Testing with:
 #
 # Mac:
-#   cmake -DENABLE_TESTING=YES -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake/llvm/ -GNinja -S . -B .cmake-build && cmake --build .cmake-build && ctest -V --test-dir .cmake-build
+#   cmake -DBUILD_TESTING=YES -DLLVM_DIR=$(brew --prefix --installed llvm)/lib/cmake/llvm/ -GNinja -S . -B .cmake-build && cmake --build .cmake-build && ctest -V --test-dir .cmake-build
 #
 # Linux:
-#   cmake -DENABLE_TESTING=YES -DLLVM_DIR=-DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S . -B .cmake-build && cmake --build .cmake-build && ctest -V --test-dir .cmake-build
+#   cmake -DBUILD_TESTING=YES -DLLVM_DIR=-DLLVM_DIR=$(llvm-config --libdir)/cmake/llvm/ -GNinja -S . -B .cmake-build && cmake --build .cmake-build && ctest -V --test-dir .cmake-build
 #
 # Windows:
-#  vcvarsarm64.bat  && cmake -DENABLE_TESTING=YES -DLLVM_DIR=s:/build/llvm/BuildRoot/llvm-17.0.6-arm64-msvc17-release/lib/cmake/llvm -GNinja -S s:\src\Swifty-LLVM -B s:\build\Swifty-LLVM && cmake --build s:\build\Swifty-LLVM && ctest --test-dir s:\build\Swifty-LLVM -V
+#  vcvarsarm64.bat  && cmake -DBUILD_TESTING=YES -DLLVM_DIR=s:/build/llvm/BuildRoot/llvm-17.0.6-arm64-msvc17-release/lib/cmake/llvm -GNinja -S s:\src\Swifty-LLVM -B s:\build\Swifty-LLVM && cmake --build s:\build\Swifty-LLVM && ctest --test-dir s:\build\Swifty-LLVM -V
 
 cmake_minimum_required(VERSION 3.28.2)
 
@@ -70,8 +70,8 @@ if (PROJECT_IS_TOP_LEVEL)
   endif()
 
   # Fetch testing dependencies.
-  if(ENABLE_TESTING)
-    set(ENABLE_TESTING NO)
+  if(BUILD_TESTING)
+    set(BUILD_TESTING NO)
 
     set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE NEVER)
 
@@ -112,7 +112,7 @@ if (PROJECT_IS_TOP_LEVEL)
       FetchContent_MakeAvailable(SwiftSyntax ArgumentParser)
     endif()
 
-    set(ENABLE_TESTING YES)
+    set(BUILD_TESTING YES)
   endif()
 
 endif()
@@ -163,9 +163,9 @@ target_link_libraries(SwiftyLLVM
   PUBLIC llvmshims llvmc)
 
 target_compile_options(SwiftyLLVM
-  PRIVATE $<$<BOOL:${ENABLE_TESTING}>:-enable-testing> -enable-experimental-feature AccessLevelOnImport)
+  PRIVATE $<$<BOOL:${BUILD_TESTING}>:-enable-testing> -enable-experimental-feature AccessLevelOnImport)
 
-if(ENABLE_TESTING)
+if(BUILD_TESTING)
 
   file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS Tests/LLVMTests/*.swift)
   add_swift_xctest(SwiftyLLVMTests SwiftyLLVM ${test_files})

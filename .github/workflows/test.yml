@@ -59,7 +59,7 @@ jobs:
         runCmd: >-
           cmake -GNinja -S . -B .cmake-build
           -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
-          -DENABLE_TESTING=YES
+          -DBUILD_TESTING=YES
           -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
 
           cmake --build .cmake-build
@@ -160,7 +160,7 @@ jobs:
       run: >-
         cmake -GNinja -S . -B .cmake-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
-        -DENABLE_TESTING=YES
+        -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
         ${{ matrix.os == 'macos-latest' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
         ${{ matrix.os == 'windows-latest' && matrix.cmake_build_type == 'Release' && '--trace-expand' || '' }}
