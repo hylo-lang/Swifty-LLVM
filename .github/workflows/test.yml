@@ -72,7 +72,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        # macos-latest is apparently not the latest.
+        os: [macos-13, ubuntu-latest, windows-latest]
         spm_configuration: [debug, release]
 
         include:
@@ -100,7 +101,7 @@ jobs:
           - os: ubuntu-latest
             triple_suffix: unknown-linux-gnu
 
-          - os: macos-latest
+          - os: macos-13
             triple_suffix: apple-darwin23.3.0
 
           - os: ubuntu-latest
@@ -115,13 +116,11 @@ jobs:
 
     steps:
     - name: Prerequisites (macOS)
-      if: ${{ matrix.os == 'macos-latest' }}
-      run: brew install zstd ninja
-
-    - uses: maxim-lobanov/setup-xcode@v1
-      if: ${{ matrix.os == 'macos-latest' }}
-      with:
-        xcode-version: 15
+      if: ${{ matrix.os == 'macos-13' }}
+      run:
+        brew install zstd ninja
+        xcrun xcodebuild -version
+        xcrun swift --version
 
     - name: 'Set up swift (Linux)'
       if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -139,7 +138,7 @@ jobs:
         tag: ${{ env.swift-version }}-RELEASE
 
     - name: Verify swift version
-      run: ${{ matrix.os == 'macos-latest' && 'xcrun' || '' }} swift --version
+      run: ${{ matrix.os == 'macos-13' && 'xcrun' || '' }} swift --version
 
     # Setup the build machine with the most recent versions of CMake and Ninja. Both are cached if
     # not already: on subsequent runs both will be quickly restored from GitHub cache service.
@@ -170,7 +169,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        ${{ matrix.os == 'macos-latest' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
+        ${{ matrix.os == 'macos-13' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
       working-directory: Swifty-LLVM
 
     - name: Build (CMake)
@@ -192,14 +191,14 @@ jobs:
       shell: bash
 
     - name: CMake => Xcode
-      if: ${{ matrix.os == 'macos-latest' }}
+      if: ${{ matrix.os == 'macos-13' }}
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
       run: >-
         cmake -GXcode -S . -B .xcode-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        ${{ matrix.os == 'macos-latest' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
+        ${{ matrix.os == 'macos-13' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
 
         cd .xcode-build
 
