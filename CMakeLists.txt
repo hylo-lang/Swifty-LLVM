@@ -71,48 +71,49 @@ if (PROJECT_IS_TOP_LEVEL)
 
   # Fetch testing dependencies.
   if(BUILD_TESTING)
-    set(BUILD_TESTING NO)
 
+    set(saved_FETCHCONTENT_TRY_FIND_PACKAGE_MODE ${FETCHCONTENT_TRY_FIND_PACKAGE_MODE})
     set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE NEVER)
 
-    # ArgumentParser relies on XCTest even in its non-test code and it seems not to have the
-    # necessary target properties to find it, at least in some contexts.  FindSwiftXCTest adds
-    # those to XCTest.
     FetchContent_Declare(SwiftCMakeXCTesting
       GIT_REPOSITORY https://github.com/hylo-lang/SwiftCMakeXCTesting.git
       GIT_TAG        main
     )
-    FetchContent_MakeAvailable(SwiftCMakeXCTesting)
-    include(FindSwiftXCTest)
-
-    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR}/cmake/modules)
 
     if(NOT APPLE)
-      # SwiftCMakeXCTesting dependency
-      FetchContent_Declare(SwiftSyntax
-        GIT_REPOSITORY https://github.com/apple/swift-syntax.git
+      FetchContent_Declare(GenerateSwiftXCTestMain
+        GIT_REPOSITORY https://github.com/hylo-lang/GenerateSwiftXCTestMain.git
         GIT_TAG        main
-        OVERRIDE_FIND_PACKAGE
-      )
-      # See https://github.com/apple/swift-syntax/pull/2454, which will hopefully make this clause
-      # unnecessary.  Without it CMake will fatal error when loading SwiftSyntax on some platforms.
-      if("${SWIFT_HOST_MODULE_TRIPLE}" STREQUAL "")
-        execute_process(COMMAND ${CMAKE_Swift_COMPILER}
-          -print-target-info OUTPUT_VARIABLE target-info)
-        string(JSON SWIFT_HOST_MODULE_TRIPLE GET ${target-info} target moduleTriple)
-      endif()
-
-      # SwiftCMakeXCTesting dependency
-      FetchContent_Declare(ArgumentParser
-        GIT_REPOSITORY https://github.com/apple/swift-argument-parser.git
-        GIT_TAG        1.3.0
-        OVERRIDE_FIND_PACKAGE
       )
 
-      FetchContent_MakeAvailable(SwiftSyntax ArgumentParser)
+      FetchContent_Populate(GenerateSwiftXCTestMain)
+      list(PREPEND CMAKE_MODULE_PATH ${generateswiftxctestmain_SOURCE_DIR}/cmake/modules)
+      include(GenerateSwiftXCTestMain_FetchDependencies)
+    else()
+      FetchContent_Populate(SwiftCMakeXCTesting)
     endif()
 
-    set(BUILD_TESTING YES)
+    set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE ${saved_FETCHCONTENT_TRY_FIND_PACKAGE_MODE})
+
+    list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR})
+    find_package(SwiftXCTest)
+
+    # Not using block() here because FetchContent_MakeAvailable typically causes dependency-specific
+    # global variables to be set, and I'm not sure to what extent they may be needed
+    if(NOT APPLE)
+      set(saved_BUILD_EXAMPLES ${BUILD_EXAMPLES})
+      set(saved_BUILD_TESTING ${BUILD_TESTING})
+
+      set(BUILD_EXAMPLES NO)
+      set(BUILD_TESTING NO)
+
+      FetchContent_MakeAvailable(GenerateSwiftXCTestMain)
+      add_subdirectory(${generateswiftxctestmain_SOURCE_DIR})
+
+      set(BUILD_EXAMPLES ${saved_BUILD_EXAMPLES})
+      set(BUILD_TESTING ${saved_BUILD_TESTING})
+    endif()
+
   endif()
 
 endif()
