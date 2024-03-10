@@ -117,7 +117,7 @@ jobs:
     steps:
     - name: Prerequisites (macOS)
       if: ${{ matrix.os == 'macos-13' }}
-      run:
+      run: |
         brew install zstd ninja
         xcrun xcodebuild -version
         xcrun swift --version
