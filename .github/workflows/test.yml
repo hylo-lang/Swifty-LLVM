@@ -182,7 +182,7 @@ jobs:
         Swifty-LLVM/Tools/make-pkgconfig.sh pkg-config/llvm.pc
 
         echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> $GITHUB_ENV
-      shell: bash -e
+      shell: bash
 
     - name: Build and Test via SPM
       run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
