@@ -118,6 +118,10 @@ jobs:
       if: ${{ matrix.os == 'macos-latest' }}
       run: brew install zstd ninja
 
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+
     - name: 'Set up swift (*nix)'
       if: ${{ matrix.os != 'windows-latest' }}
       uses: swift-actions/setup-swift@v1
