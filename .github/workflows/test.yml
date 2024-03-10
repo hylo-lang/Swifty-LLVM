@@ -187,7 +187,7 @@ jobs:
       if: ${{ matrix.os == 'macos-latest' }}
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
       run: >-
-        cmake -GNinja -S . -B .xcode-build
+        cmake -GXcode -S . -B .xcode-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
