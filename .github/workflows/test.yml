@@ -115,12 +115,17 @@ jobs:
       llvm_package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-x86_64-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
 
     steps:
+    - uses: maxim-lobanov/setup-xcode@v1
+      if: ${{ matrix.os == 'macos-13' }}
+      with:
+        xcode-version: latest-stable
+
     - name: Prerequisites (macOS)
       if: ${{ matrix.os == 'macos-13' }}
       run: |
         brew install zstd ninja
         xcrun xcodebuild -version
-        xcrun swift --version
+        xcrun swift -version
 
     - name: 'Set up swift (Linux)'
       if: ${{ matrix.os == 'ubuntu-latest' }}
