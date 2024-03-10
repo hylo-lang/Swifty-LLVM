@@ -41,6 +41,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 #
 
 if (PROJECT_IS_TOP_LEVEL)
+  set(CMAKE_XCODE_GENERATE_SCHEME YES)
   include(FetchContent)
 
   # LLVM (mostly boilplate from https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project)

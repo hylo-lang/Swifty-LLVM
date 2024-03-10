@@ -195,7 +195,7 @@ jobs:
 
         cd .xcode-build
 
-        xcrun xcodebuild -configuration ${{ matrix.spm_configuration }} -scheme DummyTestee -destination 'platform=macOS' test
+        xcrun xcodebuild -configuration ${{ matrix.spm_configuration }} -scheme SwiftyLLVM -destination 'platform=macOS' test
       working-directory: Swifty-LLVM
 
     - name: Build and Test via SPM
