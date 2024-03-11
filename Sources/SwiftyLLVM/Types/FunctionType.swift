@@ -6,11 +6,11 @@ public struct FunctionType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Creates an instance with given `parameters` and `returnType` in `module`.
+  /// Creates an instance with given `parameters` and `returnType` in `context`.
   ///
   /// The return type is `void` if `returnType` is passed `nil`.
-  public init(from parameters: [IRType], to returnType: IRType? = nil, in module: inout Module) {
-    let r = returnType ?? VoidType(in: &module)
+  public init(from parameters: [IRType], to returnType: IRType? = nil, in context: inout Context) {
+    let r = returnType ?? VoidType(in: &context)
     self.llvm = parameters.withHandles { (p) in
       .init(LLVMFunctionType(r.llvm.raw, p.baseAddress, UInt32(p.count), 0))
     }

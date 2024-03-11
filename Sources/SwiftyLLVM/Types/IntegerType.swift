@@ -6,11 +6,11 @@ public struct IntegerType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Creates an instance with given `bitWidth` in `module`.
+  /// Creates an instance with given `bitWidth` in `context`.
   ///
   /// - Requires: `bitWidth` is greater than 0.
-  public init(_ bitWidth: Int, in module: inout Module) {
-    self.llvm = .init(LLVMIntTypeInContext(module.context, UInt32(bitWidth)))
+  public init(_ bitWidth: Int, in context: inout Context) {
+    self.llvm = .init(LLVMIntTypeInContext(context.llvm, UInt32(bitWidth)))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't an integer type.
