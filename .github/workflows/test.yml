@@ -127,8 +127,8 @@ jobs:
         xcrun xcodebuild -version
         xcrun swift -version
 
-    - name: 'Set up swift (Linux)'
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+    - name: 'Set up swift (*nix)'
+      if: ${{ matrix.os != 'windows-latest' }}
       uses: swift-actions/setup-swift@v1
       with:
         swift-version: ${{ env.swift-version }}
