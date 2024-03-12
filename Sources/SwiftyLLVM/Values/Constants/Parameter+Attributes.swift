@@ -3,7 +3,7 @@ internal import llvmc
 extension Parameter: AttributeHolder {
 
   /// An attribute on a parameter in LLVM IR.
-  public typealias Attribute = LLVM.Attribute<Parameter>
+  public typealias Attribute = SwiftyLLVM.Attribute<Parameter>
 
   /// The name of an attribute on a parameter in LLVM IR.
   public enum AttributeName: String, AttributeNameProtocol {

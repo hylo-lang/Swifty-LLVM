@@ -117,12 +117,12 @@ let llvmLinkerSettings = osIsWindows ? windowsLinkerSettings() : []
 let package = Package(
   name: "Swifty-LLVM",
   products: [
-    .library(name: "LLVM", targets: ["LLVM"]),
+    .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"]),
   ],
   targets: [
     // LLVM API Wrappers.
     .target(
-      name: "LLVM",
+      name: "SwiftyLLVM",
       dependencies: ["llvmc", "llvmshims"],
       swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
       linkerSettings: llvmLinkerSettings),
@@ -132,7 +132,7 @@ let package = Package(
       linkerSettings: llvmLinkerSettings),
 
     // Tests.
-    .testTarget(name: "LLVMTests", dependencies: ["LLVM"]),
+    .testTarget(name: "LLVMTests", dependencies: ["SwiftyLLVM"]),
 
     // LLVM's C API
     .systemLibrary(name: "llvmc", pkgConfig: "llvm"),

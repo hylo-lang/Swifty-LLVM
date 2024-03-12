@@ -37,7 +37,7 @@ public struct IntegerType: IRType, Hashable {
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
   /// sign-extending if needed to fit `self.bitWidth`.
-  public func constant<T: BinaryInteger>(_ v: T) -> LLVM.IntegerConstant {
+  public func constant<T: BinaryInteger>(_ v: T) -> SwiftyLLVM.IntegerConstant {
     .init(LLVMConstInt(llvm.raw, UInt64(truncatingIfNeeded: v), 0))
   }
 

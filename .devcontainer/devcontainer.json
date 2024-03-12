@@ -5,7 +5,7 @@
         "args": {
             "SWIFT_VERSION" : "5.9",
             "HYLO_LLVM_BUILD_TYPE": "${localEnv:HYLO_LLVM_BUILD_TYPE:MinSizeRel}"
-        }
+	}
     },
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {

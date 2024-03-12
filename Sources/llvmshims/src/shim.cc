@@ -1,8 +1,21 @@
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4624 4244)
+#endif
+
 #include "llvm-c/TargetMachine.h"
 #include "llvm-c/Transforms/PassBuilder.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/StandardInstrumentations.h"
 #include "shim.h"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+// Used to create a fatal error in this file. Must follow all other #includes
+#undef NDEBUG
+#include <cassert>
+// Used to create a fatal error in this file. Must follow all other #includes
 
 using namespace llvm;
 
@@ -25,6 +38,9 @@ llvm::OptimizationLevel as_llvm(SwiftyLLVMPassOptimizationLevel x) {
     return llvm::OptimizationLevel::Os;
   case SwiftyLLVMPassOptimizationLevelOz:
     return llvm::OptimizationLevel::Oz;
+  default:
+    assert(!"fatal error: unhandled optimization level");
+    return llvm::OptimizationLevel::O0;
   }
 }
 

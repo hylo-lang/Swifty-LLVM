@@ -3,7 +3,7 @@ internal import llvmc
 extension Function: AttributeHolder {
 
   /// An attribute on a function in LLVM IR.
-  public typealias Attribute = LLVM.Attribute<Function>
+  public typealias Attribute = SwiftyLLVM.Attribute<Function>
 
   /// The name of an attribute on a function in LLVM IR.
   public enum AttributeName: String, AttributeNameProtocol {
@@ -59,7 +59,7 @@ extension Function: AttributeHolder {
 extension Function.Return: AttributeHolder {
 
   /// An attribute on a function in LLVM IR.
-  public typealias Attribute = LLVM.Attribute<Parameter>
+  public typealias Attribute = SwiftyLLVM.Attribute<Parameter>
 
   /// The name of an attribute on a return value in LLVM IR.
   public typealias AttributeName = Parameter.AttributeName

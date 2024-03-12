@@ -1,5 +1,6 @@
 # Swift Package Manager
 /.build
+/.cmake-build
 /Packages
 
 # IDEs

@@ -8,64 +8,118 @@ See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)
 
 ## Insallation:
 
-### Setting the Environment
+### Development/Use Requirements
 
-On Windows, the official version of llvm does not include `llvm-config.exe`, so you need to compile LLVM by yourself or use third-party versions of LLVM.
+### Swift
 
-For details about how to configure the environment in Windows, see Windows CI.
+This package requires Swift 5.9
 
-On MacOS and Linux:
+### LLVM
 
-First, install LLVM 15.0+ on your system using your favorite package manager and make sure `llvm-config` is in your path.
-For example, using [MacPorts](https://www.macports.org) on macOS:
+This package requires LLVM 17.  Major versions of LLVM are not
+interchangeable or backward-compatible.
 
-```bash
-port install llvm-15 llvm_select
-port select llvm mp-llvm-15
-```
+If you are using this package for development we strongly recommend
+the use of an LLVM with assertions enabled such as
+[these](https://github.com/hylo-lang/llvm-build); otherwise it's much
+too easy to violate LLVM's preconditions without knowing it.
 
-or, using [homebrew](https://brew.sh):
+*If* you want to build with the Swift Package Manager you'll need an
+installation of LLVM with an `llvm-config` executable, which we will
+use to create an `pkg-config` file for LLVM.
 
-```bash
-brew install llvm
-```
+## Building with CMake and Ninja
 
-Now make sure `llvm-config` is in your path (homebrew doesn't do that automatically; you'd need export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH").
-The command below should print the LLVM version installed on your system. 
+1. **Configure**: choose a *build-directory* and a CMake `build-type`
+   (usually `Debug` or `Release`) and then, where <LLVM> is the path
+   to the root directory of your LLVM installation,
 
-```bash
-llvm-config --version
-```
+	```
+	cmake -D CMAKE_BUILD_TYPE=<build-type> \
+	  -D LLVM_DIR=<LLVM>/lib/cmake/llvm   \
+	  -G Ninja -S . -B <build-directory>
+	```
 
-Next, you need to create a `pkgconfig` file specific to your installation and make it visible to your build tools.
+	(on Windows substitute your shell's line continuation character
+    for `\` or just remove the line breaks and backslashes).
+	
+	If you want to run tests, add `-D BUILD_TESTING`.  
+	
+	If this command fails it could be because you have an LLVM without
+    CMake support installed; we suggest you try one of
+    [these](https://github.com/hylo-lang/llvm-build) packages instead.
+
+2.  **Build**: 
+
+	```
+	cmake --build <build-directory>
+	```
+
+3. **Test** (requires `-D BUILD_TESTING` in step 1):
+
+   ```
+   ctest --test-dir <build-directory>
+   ```
+
+## Building with CMake and Xcode
+
+1. **Generate Xcode project**: choose a *build-directory* and then,
+   where <LLVM> is the path to the root directory of your LLVM
+   installation,
+
+	```
+	cmake -D LLVM_DIR=<LLVM>/lib/cmake/llvm \
+	  -G Xcode -S . -B <build-directory>
+	```
+
+	If you want to run tests, add `-D BUILD_TESTING`.
+
+2. **Profit**: open the `.xcodeproj` file in the *build-directory* and
+   use Xcode's UI to build.
+
+## Building with Swift Package Manager
+
+First, you need to create a `pkgconfig` file specific to your
+installation and make it visible to your build tools.  We use a `bash`
+script as follows in the top-level directory of this project:
 
 ```bash
 ./Tools/make-pkgconfig.sh ./llvm.pc
 ``` 
 
-The above command generates the `pkgconfig` file `./llvm.pc`.  You can either add its directory to your `PKG_CONFIG_PATH`
-for use with command-line tools:
+if you are on Windows, your `git` installation (which is required for
+Swift) contains a `bash` executable so you can do something like:
+
+```bash
+C:\Program Files\Git\bin\bash ./Tools/make-pkgconfig.sh ./llvm.pc
+``` 
+
+The command above generates `llvm.pc` in the current directory and
+prints its contents to the terminal.  You can either add its directory
+to your `PKG_CONFIG_PATH` environtment variable for use with
+command-line tools:
 
 ```bash
 export PKG_CONFIG_PATH=$PWD
 ```
 
-or you can put it somewhere that `pkg_config` already searches (needed for use with Xcode):
+or you can put it somewhere that `pkg_config` already searches (needed
+for use with Xcode):
 
 ```bash
 sudo mkdir -p /usr/local/lib/pkgconfig && sudo mv llvm.pc /usr/local/lib/pkgconfig/
 ```
 
-### Build
-
-You should be able to build this project using Swift package manager:
+Once `llvm.pc` is set up, you should be able to **build this project**
+using Swift package manager:
 
 ```bash
 swift build -c release
 ```
 
-> Note to macOS users: Add `platforms: [.macOS("xxx")]` to `Package.swift` where `xxx` is your macOS version to address the warning complaining that an "object file was built for newer macOS version than being linked".
+### Notes to macOS users:
 
-### Troubleshooting:
-
-On macOS, you may need to add the path to `zstd` library in `llvm.pc`.
+1. Add `platforms: [.macOS("xxx")]` to `Package.swift` where `xxx` is
+   your macOS version to address the warning complaining that an
+   "object file was built for newer macOS version than being linked".
+2. You may need to add the path to `zstd` library in `llvm.pc`.
