@@ -43,7 +43,7 @@ use to create an `pkg-config` file for LLVM.
 	(on Windows substitute your shell's line continuation character
     for `\` or just remove the line breaks and backslashes).
 	
-	If you want to run tests, add `-D BUILD_TESTING`.  
+	If you want to run tests, add `-DBUILD_TESTING=1`.
 	
 	If this command fails it could be because you have an LLVM without
     CMake support installed; we suggest you try one of
@@ -55,7 +55,7 @@ use to create an `pkg-config` file for LLVM.
 	cmake --build <build-directory>
 	```
 
-3. **Test** (requires `-D BUILD_TESTING` in step 1):
+3. **Test** (requires `-DBUILD_TESTING=1` in step 1):
 
    ```
    ctest --test-dir <build-directory>
@@ -72,7 +72,7 @@ use to create an `pkg-config` file for LLVM.
 	  -G Xcode -S . -B <build-directory>
 	```
 
-	If you want to run tests, add `-D BUILD_TESTING`.
+	If you want to run tests, add `-DBUILD_TESTING=1`.
 
 2. **Profit**: open the `.xcodeproj` file in the *build-directory* and
    use Xcode's UI to build.
