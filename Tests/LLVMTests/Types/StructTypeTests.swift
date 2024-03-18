@@ -75,4 +75,12 @@ final class StructTypeTests: XCTestCase {
     }
   }
 
+  func testInstantiate() {
+    Context.withNew { (llvm) in
+      let t = StructType([llvm.i64, llvm.i32], in: &llvm)
+      let a = t.constant(aggregating: [llvm.i64(1), llvm.i32(2)], in: &llvm)
+      XCTAssertEqual(IntegerConstant(a[1]), llvm.i32(2))
+    }
+  }
+
 }
