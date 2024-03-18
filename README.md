@@ -6,7 +6,7 @@
 
 See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)
 
-## Insallation:
+## Installation:
 
 ### Development/Use Requirements
 
