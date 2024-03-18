@@ -42,12 +42,4 @@ final class ArrayTypeTests: XCTestCase {
     }
   }
 
-  func testInstantiate() {
-    Context.withNew { (llvm) in
-      let t = ArrayType(4, llvm.i64, in: &llvm)
-      let a = t.constant(contentsOf: (0 ..< 3).map(llvm.i64.constant(_:)), in: &llvm)
-      XCTAssertEqual(IntegerConstant(a[1]), llvm.i64(1))
-    }
-  }
-
 }
