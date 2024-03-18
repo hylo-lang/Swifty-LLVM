@@ -64,7 +64,7 @@ use to create an `pkg-config` file for LLVM.
 ## Building with CMake and Xcode
 
 1. **Generate Xcode project**: choose a *build-directory* and then,
-   where <LLVM> is the path to the root directory of your LLVM
+   where `<LLVM>` is the path to the root directory of your LLVM
    installation,
 
 	```
