@@ -27,8 +27,8 @@ if(BUILD_TESTING)
   set(saved_FETCHCONTENT_TRY_FIND_PACKAGE_MODE ${FETCHCONTENT_TRY_FIND_PACKAGE_MODE})
   set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE OPT_IN)
 
-  FetchContent_Declare(SwiftCMakeXCTesting
-    GIT_REPOSITORY https://github.com/hylo-lang/SwiftCMakeXCTesting.git
+  FetchContent_Declare(Hylo-CMakeModules
+    GIT_REPOSITORY https://github.com/hylo-lang/CMakeModules.git
     GIT_TAG        main
   )
 
@@ -42,12 +42,12 @@ if(BUILD_TESTING)
     list(PREPEND CMAKE_MODULE_PATH ${generateswiftxctestmain_SOURCE_DIR}/cmake/modules)
     include(GenerateSwiftXCTestMain_FetchDependencies)
   else()
-    FetchContent_Populate(SwiftCMakeXCTesting)
+    FetchContent_Populate(Hylo-CMakeModules)
   endif()
 
   set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE ${saved_FETCHCONTENT_TRY_FIND_PACKAGE_MODE})
 
-  list(PREPEND CMAKE_MODULE_PATH ${swiftcmakexctesting_SOURCE_DIR})
+  list(PREPEND CMAKE_MODULE_PATH ${hylo-cmakemodules_SOURCE_DIR})
   find_package(SwiftXCTest)
 
   # Not using block() here because FetchContent_MakeAvailable typically causes dependency-specific
