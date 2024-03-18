@@ -4,36 +4,42 @@ import XCTest
 final class ArrayTypeTests: XCTestCase {
 
   func testCount() {
-    var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
-    XCTAssertEqual(ArrayType(8, i16, in: &m).count, 8)
+    Context.withNew { (llvm) in
+      let i16 = IntegerType(16, in: &llvm)
+      XCTAssertEqual(ArrayType(8, i16, in: &llvm).count, 8)
+    }
   }
 
   func testElement() {
-    var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
-    XCTAssertEqual(IntegerType(ArrayType(8, i16, in: &m).element), i16)
+    Context.withNew { (llvm) in
+      let i16 = IntegerType(16, in: &llvm)
+      XCTAssertEqual(IntegerType(ArrayType(8, i16, in: &llvm).element), i16)
+    }
   }
 
   func testConversion() {
-    var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
-    let t: IRType = ArrayType(8, i16, in: &m)
-    XCTAssertNotNil(ArrayType(t))
-    let u: IRType = IntegerType(64, in: &m)
-    XCTAssertNil(ArrayType(u))
+    Context.withNew { (llvm) in
+      let i16 = IntegerType(16, in: &llvm)
+      
+      let t: IRType = ArrayType(8, i16, in: &llvm)
+      XCTAssertNotNil(ArrayType(t))
+      
+      let u: IRType = IntegerType(64, in: &llvm)
+      XCTAssertNil(ArrayType(u))
+    }
   }
 
   func testEquality() {
-    var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
+    Context.withNew { (llvm) in
+      let i16 = IntegerType(16, in: &llvm)
 
-    let t = ArrayType(8, i16, in: &m)
-    let u = ArrayType(8, i16, in: &m)
-    XCTAssertEqual(t, u)
+      let t = ArrayType(8, i16, in: &llvm)
+      let u = ArrayType(8, i16, in: &llvm)
+      XCTAssertEqual(t, u)
 
-    let v = ArrayType(16, i16, in: &m)
-    XCTAssertNotEqual(t, v)
+      let v = ArrayType(16, i16, in: &llvm)
+      XCTAssertNotEqual(t, v)
+    }
   }
 
 }

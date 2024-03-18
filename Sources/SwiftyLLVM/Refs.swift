@@ -34,6 +34,17 @@ public struct BasicBlockRef: Hashable {
 
 }
 
+/// An LLVM context reference.
+public struct ContextRef: Hashable {
+
+  /// The underlying LLVM value; not exposed to avoid rexporting llvmc
+  let raw: llvmc.LLVMContextRef
+
+  /// An instance whose underlying value is `raw`.
+  init(_ raw: llvmc.LLVMContextRef) { self.raw = raw }
+
+}
+
 /// An LLVM module reference.
 public struct ModuleRef: Hashable {
 

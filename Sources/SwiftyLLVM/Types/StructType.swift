@@ -6,21 +6,22 @@ public struct StructType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Creates an instance with given `fields` in `module`, packed iff `packed` is `true`.
-  public init(_ fields: [IRType], packed: Bool = false, in module: inout Module) {
+  /// Creates an instance with given `fields` in `context`, packed iff `packed` is `true`.
+  public init(_ fields: [IRType], packed: Bool = false, in context: inout Context) {
     self.llvm = fields.withHandles { (f) in
-      .init(LLVMStructTypeInContext(module.context, f.baseAddress, UInt32(f.count), packed ? 1 : 0))
+      let h = LLVMStructTypeInContext(context.llvm, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
+      return .init(h!)
     }
   }
 
-  /// Creates a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
+  /// Creates a struct with given `name` and `fields` in `context`, packed iff `packed` is `true`.
   ///
-  /// A unique name is generated if `name` is empty or if `module` already contains a struct with
+  /// A unique name is generated if `name` is empty or if `context` already contains a struct with
   /// the same name.
   public init(
-    named name: String, _ fields: [IRType], packed: Bool = false, in module: inout Module
+    named name: String, _ fields: [IRType], packed: Bool = false, in context: inout Context
   ) {
-    self.llvm = .init(LLVMStructCreateNamed(module.context, name))
+    self.llvm = .init(LLVMStructCreateNamed(context.llvm, name))
     fields.withHandles { (f) in
       LLVMStructSetBody(self.llvm.raw, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
     }
@@ -55,9 +56,9 @@ public struct StructType: IRType, Hashable {
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `parts`.
   public func constant<S: Sequence>(
-    aggregating elements: S, in module: inout Module
+    aggregating elements: S, in context: inout Context
   ) -> StructConstant where S.Element == IRValue {
-    .init(of: self, aggregating: elements, in: &module)
+    .init(of: self, aggregating: elements, in: &context)
   }
 
 }

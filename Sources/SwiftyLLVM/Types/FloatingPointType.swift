@@ -21,24 +21,24 @@ public struct FloatingPointType: IRType, Hashable {
     }
   }
 
-  /// Returns the type `half` in `module`
-  public static func half(in module: inout Module) -> Self {
-    .init(LLVMHalfTypeInContext(module.context))
+  /// Returns the type `half` in `context`
+  public static func half(in context: inout Context) -> Self {
+    .init(LLVMHalfTypeInContext(context.llvm))
   }
 
-  /// Returns the type `float` in `module`.
-  public static func float(in module: inout Module) -> Self {
-    .init(LLVMFloatTypeInContext(module.context))
+  /// Returns the type `float` in `context`.
+  public static func float(in context: inout Context) -> Self {
+    .init(LLVMFloatTypeInContext(context.llvm))
   }
 
-  /// Returns the type `double` in `module`
-  public static func double(in module: inout Module) -> Self {
-    .init(LLVMDoubleTypeInContext(module.context))
+  /// Returns the type `double` in `context`
+  public static func double(in context: inout Context) -> Self {
+    .init(LLVMDoubleTypeInContext(context.llvm))
   }
 
-  /// Returns the type `fp128` in `module`
-  public static func fp128(in module: inout Module) -> Self {
-    .init(LLVMFP128TypeInContext(module.context))
+  /// Returns the type `fp128` in `context`
+  public static func fp128(in context: inout Context) -> Self {
+    .init(LLVMFP128TypeInContext(context.llvm))
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`.

@@ -20,9 +20,9 @@ public struct PointerType: IRType, Hashable {
     }
   }
 
-  /// Creates an opaque pointer type in address space `s` in `module`.
-  public init(inAddressSpace s: AddressSpace = .default, in module: inout Module) {
-    self.init(LLVMPointerTypeInContext(module.context, s.llvm))
+  /// Creates an opaque pointer type in address space `s` in `context`.
+  public init(inAddressSpace s: AddressSpace = .default, in context: inout Context) {
+    self.init(LLVMPointerTypeInContext(context.llvm, s.llvm))
   }
 
   /// The address space of the pointer.

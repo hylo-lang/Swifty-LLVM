@@ -6,9 +6,9 @@ public struct VoidType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Creates an instance in `module`.
-  public init(in module: inout Module) {
-    self.llvm = .init(LLVMVoidTypeInContext(module.context))
+  /// Creates an instance in `context`.
+  public init(in context: inout Context) {
+    self.llvm = .init(LLVMVoidTypeInContext(context.llvm))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a void type.

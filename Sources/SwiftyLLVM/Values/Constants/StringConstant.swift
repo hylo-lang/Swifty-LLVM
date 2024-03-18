@@ -6,11 +6,13 @@ public struct StringConstant: IRValue, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
+  /// Creates an instance with `text` in `context`, appending a null terminator to the string iff
   /// `nullTerminated` is `true`.
-  public init(_ text: String, nullTerminated: Bool = true, in module: inout Module) {
+  public init(_ text: String, nullTerminated: Bool = true, in context: inout Context) {
     self.llvm = text.withCString { (s) in
-      .init(LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1))
+      let h = LLVMConstStringInContext(
+        context.llvm, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1)
+      return .init(h!)
     }
   }
 

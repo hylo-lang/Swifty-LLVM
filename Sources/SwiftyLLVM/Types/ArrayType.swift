@@ -6,9 +6,9 @@ public struct ArrayType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Creates an instance representing arrays of `count` `element`s in `module`.
-  public init(_ count: Int, _ element: IRType, in module: inout Module) {
-    precondition(LLVMGetTypeContext(element.llvm.raw) == module.context)
+  /// Creates an instance representing arrays of `count` `element`s in `context`.
+  public init(_ count: Int, _ element: IRType, in context: inout Context) {
+    precondition(LLVMGetTypeContext(element.llvm.raw) == context.llvm)
     self.llvm = .init(LLVMArrayType(element.llvm.raw, UInt32(count)))
   }
 
@@ -29,9 +29,9 @@ public struct ArrayType: IRType, Hashable {
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `elements`.
   public func constant<S: Sequence>(
-    contentsOf elements: S, in module: inout Module
+    contentsOf elements: S, in context: inout Context
   ) -> ArrayConstant where S.Element == IRValue {
-    .init(of: self, containing: elements, in: &module)
+    .init(of: self, containing: elements, in: &context)
   }
   
 }

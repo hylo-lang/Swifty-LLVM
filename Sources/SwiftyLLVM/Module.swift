@@ -4,44 +4,28 @@ import llvmshims
 /// The top-level structure in an LLVM program.
 public struct Module {
 
-  /// The resources wrapped by an instance of `Module`.
-  private final class Handles {
-
-    /// The context owning the contents of the LLVM module.
-    let context: LLVMContextRef
-
-    /// The LLVM module.
-    let module: LLVMModuleRef
-
-    /// Creates an instance with given properties.
-    init(context: LLVMContextRef, module: LLVMModuleRef) {
-      self.context = context
-      self.module = module
-    }
-
-    /// Dispose of the managed resources.
-    deinit {
-      LLVMDisposeModule(module)
-      LLVMContextDispose(context)
-    }
-
-  }
-
-  /// Handles to the resources wrapped by this instance.
-  private let handles: Handles
-
-  /// Creates an instance with given `name`.
-  public init(_ name: String) {
-    let c = LLVMContextCreate()!
-    let m = LLVMModuleCreateWithNameInContext(name, c)!
-    self.handles = .init(context: c, module: m)
-  }
-
   /// A handle to the LLVM object wrapped by this instance.
-  public var llvm: ModuleRef { .init(handles.module) }
+  public let llvm: ModuleRef
 
-  /// A handle to the LLVM context associated with this module.
-  internal var context: LLVMContextRef { handles.context }
+  /// Creates an instance with given `name` in `context`.
+  ///
+  /// The lifetime of the created instance is bound to that of `context`.
+  init(_ name: String, in context: Context) {
+    self.llvm = .init(LLVMModuleCreateWithNameInContext(name, context.llvm)!)
+  }
+
+  /// Destroys the underlying LLVM object wrapped by this instance.
+  ///
+  /// Calling this method is a consuming operation. Any use of the instance's property after
+  /// `dispose` has been called is undefined behavior.
+  func dispose() {
+    LLVMDisposeModule(llvm.raw)
+  }
+
+  /// The context in which this instance has been created.
+  private var context: LLVMContextRef {
+    LLVMGetModuleContext(llvm.raw)
+  }
 
   /// The name of the module.
   public var name: String {
@@ -152,11 +136,6 @@ public struct Module {
     return .init(output!, owned: true)
   }
 
-  /// Returns the type with given `name`, or `nil` if no such type exists.
-  public func type(named name: String) -> IRType? {
-    LLVMGetTypeByName2(context, name).map(AnyType.init(_:))
-  }
-
   /// Returns the function with given `name`, or `nil` if no such function exists.
   public func function(named name: String) -> Function? {
     LLVMGetNamedFunction(llvm.raw, name).map(Function.init(_:))
@@ -229,45 +208,15 @@ public struct Module {
     LLVMAddAttributeAtIndex(f.llvm.raw, i, a.llvm)
   }
 
-  /// Adds the attribute named `n` to `f` and returns it.
-  @discardableResult
-  public mutating func addAttribute(
-    named n: Function.AttributeName, to f: Function
-  ) -> Function.Attribute {
-    let a = Function.Attribute(n, in: &self)
-    addAttribute(a, to: f)
-    return a
-  }
-
   /// Adds attribute `a` to the return value of `f`.
   public mutating func addAttribute(_ a: Function.Return.Attribute, to r: Function.Return) {
     LLVMAddAttributeAtIndex(r.parent.llvm.raw, 0, a.llvm)
-  }
-
-  /// Adds the attribute named `n` to the return value of `f` and returns it.
-  @discardableResult
-  public mutating func addAttribute(
-    named n: Function.Return.AttributeName, to r: Function.Return
-  ) -> Function.Return.Attribute {
-    let a = Function.Return.Attribute(n, in: &self)
-    addAttribute(a, to: r)
-    return a
   }
 
   /// Adds attribute `a` to `p`.
   public mutating func addAttribute(_ a: Parameter.Attribute, to p: Parameter) {
     let i = UInt32(p.index + 1)
     LLVMAddAttributeAtIndex(p.parent.llvm.raw, i, a.llvm)
-  }
-
-  /// Adds the attribute named `n` to `p` and returns it.
-  @discardableResult
-  public mutating func addAttribute(
-    named n: Parameter.AttributeName, to p: Parameter
-  ) -> Parameter.Attribute {
-    let a = Parameter.Attribute(n, in: &self)
-    addAttribute(a, to: p)
-    return a
   }
 
   /// Removes `a` from `f`.
@@ -364,44 +313,6 @@ public struct Module {
   public mutating func setAlignment(_ a: Int, for v: Alloca) {
     LLVMSetAlignment(v.llvm.raw, UInt32(a))
   }
-
-  // MARK: Basic type instances
-
-  /// The `void` type.
-  public private(set) lazy var void: VoidType = .init(in: &self)
-
-  /// The `ptr` type in the default address space.
-  public private(set) lazy var ptr: PointerType = .init(inAddressSpace: .default, in: &self)
-
-  /// The `half` type.
-  public private(set) lazy var half: FloatingPointType = .half(in: &self)
-
-  /// The `float` type.
-  public private(set) lazy var float: FloatingPointType = .float(in: &self)
-
-  /// The `double` type.
-  public private(set) lazy var double: FloatingPointType = .double(in: &self)
-
-  /// The `fp128` type.
-  public private(set) lazy var fp128: FloatingPointType = .fp128(in: &self)
-
-  /// The 1-bit integer type.
-  public private(set) lazy var i1: IntegerType = .init(LLVMInt1TypeInContext(context))
-
-  /// The 8-bit integer type.
-  public private(set) lazy var i8: IntegerType = .init(LLVMInt8TypeInContext(context))
-
-  /// The 16-bit integer type.
-  public private(set) lazy var i16: IntegerType = .init(LLVMInt16TypeInContext(context))
-
-  /// The 32-bit integer type.
-  public private(set) lazy var i32: IntegerType = .init(LLVMInt32TypeInContext(context))
-
-  /// The 64-bit integer type.
-  public private(set) lazy var i64: IntegerType = .init(LLVMInt64TypeInContext(context))
-
-  /// The 128-bit integer type.
-  public private(set) lazy var i128: IntegerType = .init(LLVMInt128TypeInContext(context))
 
   // MARK: Arithmetics
 
@@ -709,7 +620,7 @@ public struct Module {
     _ source: IRValue, to target: IRType? = nil,
     at p: InsertionPoint
   ) -> Instruction {
-    let t = target ?? PointerType(in: &self)
+    let t = target ?? AnyType(LLVMPointerTypeInContext(context, 0))
     return .init(LLVMBuildIntToPtr(p.llvm, source.llvm.raw, t.llvm.raw, ""))
   }
 
