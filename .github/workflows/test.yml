@@ -85,6 +85,22 @@ jobs:
         show-progress: false
         path: Swifty-LLVM
 
+    - name: Configure (CMake)
+      # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
+      run: >-
+        cmake -GNinja -S . -B .cmake-build
+        -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
+        -DBUILD_TESTING=YES
+        -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
+        ${{ matrix.os == 'macos-13' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
+      working-directory: Swifty-LLVM
+
+    - name: Build (CMake)
+      run: cmake --build Swifty-LLVM/.cmake-build
+
+    - name: Test (CMake)
+      run: ctest -V --test-dir Swifty-LLVM/.cmake-build
+
     - name: Create LLVM pkgconfig file and make it findable
       run: >-
         set -ex -o pipefail
