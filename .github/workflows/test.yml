@@ -120,8 +120,6 @@ jobs:
       with:
         xcode-version: latest-stable
 
-    - uses: compnerd/gha-setup-vsdevenv@main
-
     - name: 'Set up swift'
       uses: SwiftyLab/setup-swift@latest
       with:
