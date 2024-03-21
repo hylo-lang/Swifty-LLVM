@@ -165,8 +165,8 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        ${{ runner.os == 'Windows' && '-D CMAKE_C_COMPILER=clang-cl' || '' }}
-        ${{ runner.os == 'Windows' && '-D CMAKE_CXX_COMPILER=clang-cl' || '' }}
+        ${{ runner.os == 'Windows' && '-D CMAKE_C_COMPILER=cl' || '' }}
+        ${{ runner.os == 'Windows' && '-D CMAKE_CXX_COMPILER=cl' || '' }}
         ${{ matrix.os == 'macos-13' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
       working-directory: Swifty-LLVM
 
