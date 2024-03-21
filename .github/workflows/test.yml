@@ -125,6 +125,8 @@ jobs:
       with:
         swift-version: ${{ env.swift-version }}
 
+    - uses: compnerd/gha-setup-vsdevenv@main
+
     - name: Verify swift version
       run: swift --version && swift --version | grep -q ${{ env.swift-version }}
       shell: bash
