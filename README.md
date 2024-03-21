@@ -37,23 +37,33 @@ use to create an `pkg-config` file for LLVM.
 	```
 	cmake -D CMAKE_BUILD_TYPE=<build-type> \
 	  -D LLVM_DIR=<LLVM>/lib/cmake/llvm   \
-	  -G Ninja -S . -B <build-directory>
-	```
+      -G Ninja -S . -B <build-directory>
+    ```
 
-	(on Windows substitute your shell's line continuation character
+    (on Windows substitute your shell's line continuation character
     for `\` or just remove the line breaks and backslashes).
-	
-	If you want to run tests, add `-DBUILD_TESTING=1`.
-	
-	If this command fails it could be because you have an LLVM without
+    
+    **Note:** this may not affect your local machine, but on GitHub
+    runners we've found the need to add:
+    
+    - `-D CMAKE_Swift_COMPILER=swiftc` on macOS to prevent CMake from
+      finding the `swift` in Xcode even when a different one is in
+      `TOOLCHAINS`.
+    - `-D CMAKE_C_COMPILER=clang-cl -D CMAKE_CXX_COMPILER=clang-cl` on
+      Windows because that compiler will ignore the `-fPIC` flag that
+      CMake, for unknown reasons, passes to `clang` otherwise.
+    
+    If you want to run tests, add `-DBUILD_TESTING=1`.
+    
+    If this command fails it could be because you have an LLVM without
     CMake support installed; we suggest you try one of
     [these](https://github.com/hylo-lang/llvm-build) packages instead.
 
 2.  **Build**: 
 
-	```
-	cmake --build <build-directory>
-	```
+    ```
+    cmake --build <build-directory>
+    ```
 
 3. **Test** (requires `-DBUILD_TESTING=1` in step 1):
 
@@ -67,12 +77,12 @@ use to create an `pkg-config` file for LLVM.
    where `<LLVM>` is the path to the root directory of your LLVM
    installation,
 
-	```
-	cmake -D LLVM_DIR=<LLVM>/lib/cmake/llvm \
-	  -G Xcode -S . -B <build-directory>
-	```
+    ```
+    cmake -D LLVM_DIR=<LLVM>/lib/cmake/llvm \
+      -G Xcode -S . -B <build-directory>
+    ```
 
-	If you want to run tests, add `-DBUILD_TESTING=1`.
+    If you want to run tests, add `-DBUILD_TESTING=1`.
 
 2. **Profit**: open the `.xcodeproj` file in the *build-directory* and
    use Xcode's UI to build.
