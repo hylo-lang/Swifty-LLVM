@@ -19,54 +19,6 @@ env:
   swift-version: '5.9'
 
 jobs:
-  dev-container:
-    name: "Dev container: ${{ matrix.cmake_build_type }}"
-    strategy: 
-      fail-fast: false
-      matrix:
-        cmake_build_type: [Debug, Release]
-
-        include:
-          - cmake_build_type: Debug
-            spm_configuration: debug
-            HYLO_LLVM_BUILD_TYPE: Debug
-
-          - cmake_build_type: Release
-            spm_configuration: release
-            HYLO_LLVM_BUILD_TYPE: MinSizeRel
-
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout (GitHub)
-      uses: actions/checkout@v4
-      with:
-        submodules: true
-        show-progress: false
-
-    - name: Build and run via SPM
-      uses: devcontainers/ci@v0.3
-      env:
-        HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
-      with:
-        runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
-        push: never
-
-    - name: Build and run via CMake
-      uses: devcontainers/ci@v0.3
-      env:
-        HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
-      with:
-        runCmd: >-
-          cmake -GNinja -S . -B .cmake-build
-          -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
-          -DBUILD_TESTING=YES
-          -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
-
-          cmake --build .cmake-build
-
-          ctest -V --test-dir .cmake-build
-        push: never
-
   native:
     name: "Native: ${{ matrix.os }}/${{ matrix.spm_configuration }}"
     strategy:
