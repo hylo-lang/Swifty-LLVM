@@ -120,30 +120,21 @@ jobs:
       with:
         xcode-version: latest-stable
 
+    - name: 'Set up swift'
+      uses: SwiftyLab/setup-swift@latest
+      with:
+        swift-version: ${{ env.swift-version }}
+
+    - name: Verify swift version
+      run: swift --version && swift --version | grep -q ${{ env.swift-version }}
+      shell: bash
+
     - name: Prerequisites (macOS)
       if: ${{ matrix.os == 'macos-13' }}
       run: |
         brew install zstd ninja
         xcrun xcodebuild -version
         xcrun swift -version
-
-    - name: 'Set up swift (*nix)'
-      if: ${{ matrix.os != 'windows-latest' }}
-      uses: swift-actions/setup-swift@v1
-      with:
-        swift-version: ${{ env.swift-version }}
-
-    - uses: compnerd/gha-setup-vsdevenv@main
-
-    - name: Set up swift (Windows)
-      if: ${{ matrix.os == 'windows-latest' }}
-      uses: compnerd/gha-setup-swift@v0.2.1
-      with:
-        branch: swift-${{ env.swift-version }}-release
-        tag: ${{ env.swift-version }}-RELEASE
-
-    - name: Verify swift version
-      run: ${{ matrix.os == 'macos-13' && 'xcrun' || '' }} swift --version
 
     # Setup the build machine with the most recent versions of CMake and Ninja. Both are cached if
     # not already: on subsequent runs both will be quickly restored from GitHub cache service.
