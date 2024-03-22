@@ -1,3 +1,5 @@
+find_package(HyloLLVM)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_Swift_LANGUAGE_VERSION 5) # Needed? Useful?
 
