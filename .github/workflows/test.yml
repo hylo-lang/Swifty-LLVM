@@ -8,12 +8,14 @@ on:
       - "**.md"
       - "LICENSE"
       - ".gitignore"
+      - ".editorconfig"
   pull_request:
     branches: [ "**" ]
     paths-ignore:
       - "**.md"
       - "LICENSE"
       - ".gitignore"
+      - ".editorconfig"
 
 env:
   swift-version: '5.9'
