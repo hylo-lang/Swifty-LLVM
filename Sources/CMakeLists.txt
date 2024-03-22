@@ -30,10 +30,13 @@ target_link_libraries(llvmc INTERFACE ${llvm_libs})
 add_library(llvmshims STATIC llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC llvmshims/include)
 target_link_libraries(llvmshims PRIVATE llvmc)
-# Ubuntu github runner demands this option: /usr/bin/ld.gold: error: lib/libllvmshims.a(shim.cc.o):
-# requires dynamic R_X86_64_PC32 reloc against '_ZN4llvm17OptimizationLevel2O0E' which may overflow
-# at runtime; recompile with -fPIC
-target_compile_options(llvmshims PRIVATE -fPIC)
+# The Ubuntu GitHub runner demands this option: /usr/bin/ld.gold: error:
+# lib/libllvmshims.a(shim.cc.o): requires dynamic R_X86_64_PC32 reloc against
+# '_ZN4llvm17OptimizationLevel2O0E' which may overflow at runtime; recompile with -fPIC.  We don't
+# use -fPIC directly because it clang on Windows rejects it.
+set_target_properties(llvmshims
+  PROPERTIES
+  POSITION_INDEPENDENT_CODE True)
 
 #
 # The Swift module our clients depend on.

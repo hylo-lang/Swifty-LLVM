@@ -37,23 +37,28 @@ use to create an `pkg-config` file for LLVM.
 	```
 	cmake -D CMAKE_BUILD_TYPE=<build-type> \
 	  -D LLVM_DIR=<LLVM>/lib/cmake/llvm   \
-	  -G Ninja -S . -B <build-directory>
-	```
+      -G Ninja -S . -B <build-directory>
+    ```
 
-	(on Windows substitute your shell's line continuation character
+    (on Windows substitute your shell's line continuation character
     for `\` or just remove the line breaks and backslashes).
-	
-	If you want to run tests, add `-DBUILD_TESTING=1`.
-	
-	If this command fails it could be because you have an LLVM without
+    
+    If you want to run tests, add `-DBUILD_TESTING=1`.
+    
+    **Note:** on macOS, if you are not using your Xcode's default
+    toolchain, [you may need `-D
+    CMAKE_Swift_COMPILER=swiftc`](https://gitlab.kitware.com/cmake/cmake/-/issues/25750)
+    to prevent CMake from using Xcode's default `swift`.
+    
+    If this command fails it could be because you have an LLVM without
     CMake support installed; we suggest you try one of
     [these](https://github.com/hylo-lang/llvm-build) packages instead.
 
 2.  **Build**: 
 
-	```
-	cmake --build <build-directory>
-	```
+    ```
+    cmake --build <build-directory>
+    ```
 
 3. **Test** (requires `-DBUILD_TESTING=1` in step 1):
 
@@ -67,12 +72,12 @@ use to create an `pkg-config` file for LLVM.
    where `<LLVM>` is the path to the root directory of your LLVM
    installation,
 
-	```
-	cmake -D LLVM_DIR=<LLVM>/lib/cmake/llvm \
-	  -G Xcode -S . -B <build-directory>
-	```
+    ```
+    cmake -D LLVM_DIR=<LLVM>/lib/cmake/llvm \
+      -G Xcode -S . -B <build-directory>
+    ```
 
-	If you want to run tests, add `-DBUILD_TESTING=1`.
+    If you want to run tests, add `-DBUILD_TESTING=1`.
 
 2. **Profit**: open the `.xcodeproj` file in the *build-directory* and
    use Xcode's UI to build.
