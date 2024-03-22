@@ -43,17 +43,12 @@ use to create an `pkg-config` file for LLVM.
     (on Windows substitute your shell's line continuation character
     for `\` or just remove the line breaks and backslashes).
     
-    **Note:** this may not affect your local machine, but on GitHub
-    runners we've found the need to add:
-    
-    - `-D CMAKE_Swift_COMPILER=swiftc` on macOS to prevent CMake from
-      finding the `swift` in Xcode even when a different one is in
-      `TOOLCHAINS`.
-    - `-D CMAKE_C_COMPILER=clang-cl -D CMAKE_CXX_COMPILER=clang-cl` on
-      Windows because that compiler will ignore the `-fPIC` flag that
-      CMake, for unknown reasons, passes to `clang` otherwise.
-    
     If you want to run tests, add `-DBUILD_TESTING=1`.
+    
+    **Note:** on macOS, if you are not using your Xcode's default
+    toolchain, [you may need `-D
+    CMAKE_Swift_COMPILER=swiftc`](https://gitlab.kitware.com/cmake/cmake/-/issues/25750)
+    to prevent CMake from using Xcode's default `swift`.
     
     If this command fails it could be because you have an LLVM without
     CMake support installed; we suggest you try one of
