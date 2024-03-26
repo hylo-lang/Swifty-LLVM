@@ -1,4 +1,7 @@
-find_package(GenerateSwiftXCTestMain)
+if(NOT APPLE)
+  find_package(GenerateSwiftXCTestMain)
+endif()
+
 find_package(SwiftXCTest)
 
 file(GLOB_RECURSE test_files
