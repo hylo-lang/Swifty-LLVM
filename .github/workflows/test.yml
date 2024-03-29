@@ -211,6 +211,7 @@ jobs:
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
       working-directory: Swifty-LLVM
       run: |
+        shopt -s nullglob
         dot_os=(.build/${{ matrix.spm_configuration }}/*.build/*.o .build/${{ matrix.spm_configuration }}/*.build/**/*.o)
         bin_params=("${dot_os[0]}")
         for o in "${dot_os[@]:1}"; do
