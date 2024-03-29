@@ -59,6 +59,7 @@ jobs:
     - name: diagnostic
       run: |
         set -x
+        touch baz
         foobar=(*)
         set | grep foobar
 
