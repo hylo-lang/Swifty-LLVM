@@ -30,7 +30,7 @@ use to create an `pkg-config` file for LLVM.
 
 ## Building with CMake and Ninja
 
-1. **Configure**: choose a *build-directory* and a CMake `build-type`
+1. **Configure**: choose a *build-directory* and a CMake *build-type*
    (usually `Debug` or `Release`) and then, where `<LLVM>` is the path
    to the root directory of your LLVM installation,
 
