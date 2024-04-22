@@ -49,7 +49,6 @@ public struct Target {
   /// The name of the target.
   public var name: String {
     guard let s = LLVMGetTargetName(llvm) else { return "" }
-    defer { LLVMDisposeMessage(UnsafeMutablePointer(mutating: s)) }
     return .init(cString: s)
   }
 
