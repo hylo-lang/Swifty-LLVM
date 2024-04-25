@@ -59,14 +59,14 @@ jobs:
         HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
       with:
         runCmd: >-
-          cmake -GNinja -S . -B .cmake-build
+          cmake -GNinja -S . -B .ninja-build
           -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
           -DBUILD_TESTING=YES
           -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
 
-          cmake --build .cmake-build
+          cmake --build .ninja-build
 
-          ctest -V --test-dir .cmake-build
+          ctest --parallel --test-dir .ninja-build
         push: never
 
   native:
@@ -79,12 +79,12 @@ jobs:
         spm_configuration: [debug, release]
 
         include:
-          - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
           - HYLO_LLVM_BUILD_RELEASE: 20240303-215025
+          - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
           - HYLO_LLVM_VERSION: 17.0.6
+          - llvm_package_suffix: .tar.zst
           - swift_test_options:
           - unpackage_command: tar -x --zstd -f
-          - llvm_package_suffix: .tar.zst
 
           - spm_configuration: debug
             cmake_build_type: Debug
@@ -113,7 +113,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      url_prefix: ${{ matrix.HYLO_LLVM_DOWNLOAD_URL }}/${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
+      llvm_url_prefix: ${{ matrix.HYLO_LLVM_DOWNLOAD_URL }}/${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
       llvm_package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-x86_64-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
 
     steps:
@@ -135,13 +135,12 @@ jobs:
       uses: lukka/get-cmake@latest
 
     - name: Install LLVM
-      # 7z doesn't support decompressing from a stream or we'd do
-      # this all as one statement. Maybe we should find a way to use
-      # zstd on windows.
+      # 7z doesn't support decompressing from a stream or we'd do this all as one statement. Maybe
+      # we should find a way to use zstd on windows.
       run: >-
         curl --no-progress-meter -L -O
         -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-        ${{ env.url_prefix }}/${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
+        ${{ env.llvm_url_prefix }}/${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
 
         ${{ matrix.unpackage_command }} ${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
 
