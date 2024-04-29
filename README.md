@@ -67,7 +67,7 @@ file for LLVM.
 3. **Test** (requires `-DBUILD_TESTING=1` in step 1):
 
    ```
-   ctest --test-dir <build-directory>
+   ctest --parallel --test-dir <build-directory>
    ```
 
 ## Building with CMake and Xcode
