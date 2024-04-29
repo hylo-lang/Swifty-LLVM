@@ -23,7 +23,7 @@ env:
 jobs:
   dev-container:
     name: "Dev container: ${{ matrix.cmake_build_type }}"
-    strategy: 
+    strategy:
       fail-fast: false
       matrix:
         cmake_build_type: [Debug, Release]
@@ -118,14 +118,23 @@ jobs:
 
     steps:
     - uses: maxim-lobanov/setup-xcode@v1
-      if: ${{ matrix.os == 'macos-13' }}
+      if: ${{ runner.os == 'macOS' }}
       with:
         xcode-version: latest-stable
 
-    - name: 'Set up swift'
+    - name: 'Set up swift (non-Windows)'
+      if: ${{ runner.os != 'Windows' }}
       uses: SwiftyLab/setup-swift@latest
       with:
         swift-version: ${{ env.swift-version }}
+
+    - uses: compnerd/gha-setup-vsdevenv@main
+    - name: Set up swift (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      uses: compnerd/gha-setup-swift@v0.2.1
+      with:
+        branch: swift-${{ env.swift-version }}-release
+        tag: ${{ env.swift-version }}-RELEASE
 
     - name: Verify swift version
       run: swift --version && swift --version | grep -q ${{ env.swift-version }}
@@ -158,7 +167,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        ${{ matrix.os == 'macos-13' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
+        ${{ runner.os == 'macOS' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
       working-directory: Swifty-LLVM
 
     - name: Build (CMake)
@@ -180,14 +189,14 @@ jobs:
       shell: bash
 
     - name: CMake => Xcode
-      if: ${{ matrix.os == 'macos-13' }}
+      if: ${{ runner.os == 'macOS' }}
       # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
       run: >-
         cmake -GXcode -S . -B .xcode-build
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        ${{ matrix.os == 'macos-13' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
+        ${{ runner.os == 'macOS' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
 
         cd .xcode-build
 
