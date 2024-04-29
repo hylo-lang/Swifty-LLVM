@@ -107,7 +107,7 @@ jobs:
             triple_suffix: apple-darwin23.3.0
 
           - os: ubuntu-latest
-            spm_configuration: release
+            spm_configuration: debug
 
             swift_test_options: --enable-code-coverage
 
