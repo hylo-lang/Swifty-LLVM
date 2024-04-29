@@ -79,6 +79,12 @@ use to create an `pkg-config` file for LLVM.
 
 ## Building with Swift Package Manager
 
+**Note:** Windows support with Swift Package Manager is not guaranteed
+due to the instability of continuous integration (see [issue
+252](https://github.com/hylo-lang/hylo/issues/252) and
+[Swifty-LLVM/issue
+24](https://github.com/hylo-lang/Swifty-LLVM/issues/24)).
+
 First, you need to create a `pkgconfig` file specific to your
 installation and make it visible to your build tools.  We use a `bash`
 script as follows in the top-level directory of this project:
