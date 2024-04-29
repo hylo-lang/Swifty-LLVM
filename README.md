@@ -6,7 +6,7 @@
 
 See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)
 
-## Insallation:
+## Installation:
 
 ### Development/Use Requirements
 
@@ -22,40 +22,49 @@ interchangeable or backward-compatible.
 If you are using this package for development we strongly recommend
 the use of an LLVM with assertions enabled such as
 [these](https://github.com/hylo-lang/llvm-build); otherwise it's much
-too easy to violate LLVM's preconditions without knowing it.
+too easy to violate LLVM's preconditions without knowing it.  This
+package's devcontainer (in the `.devcontainer` subdirectory) has
+assert-enabled LLVM builds preinstalled in `/opt/llvm-Debug` and
+`/opt/llvm-MinSizeRel`.
 
-*If* you want to build with the Swift Package Manager you'll need an
-installation of LLVM with an `llvm-config` executable, which we will
-use to create an `pkg-config` file for LLVM.
+*If* you want to build with the Swift Package Manager and you choose
+to get LLVM some other way, you'll need an installation with an
+`llvm-config` executable, which we will use to create a `pkg-config`
+file for LLVM.
 
 ## Building with CMake and Ninja
 
 1. **Configure**: choose a *build-directory* and a CMake `build-type`
-   (usually `Debug` or `Release`) and then, where <LLVM> is the path
+   (usually `Debug` or `Release`) and then, where `<LLVM>` is the path
    to the root directory of your LLVM installation,
 
 	```
 	cmake -D CMAKE_BUILD_TYPE=<build-type> \
 	  -D LLVM_DIR=<LLVM>/lib/cmake/llvm   \
-	  -G Ninja -S . -B <build-directory>
-	```
+      -G Ninja -S . -B <build-directory>
+    ```
 
-	(on Windows substitute your shell's line continuation character
+    (on Windows substitute your shell's line continuation character
     for `\` or just remove the line breaks and backslashes).
-	
-	If you want to run tests, add `-D BUILD_TESTING`.  
-	
-	If this command fails it could be because you have an LLVM without
+    
+    If you want to run tests, add `-DBUILD_TESTING=1`.
+    
+    **Note:** on macOS, if you are not using your Xcode's default
+    toolchain, [you may need `-D
+    CMAKE_Swift_COMPILER=swiftc`](https://gitlab.kitware.com/cmake/cmake/-/issues/25750)
+    to prevent CMake from using Xcode's default `swift`.
+    
+    If this command fails it could be because you have an LLVM without
     CMake support installed; we suggest you try one of
     [these](https://github.com/hylo-lang/llvm-build) packages instead.
 
 2.  **Build**: 
 
-	```
-	cmake --build <build-directory>
-	```
+    ```
+    cmake --build <build-directory>
+    ```
 
-3. **Test** (requires `-D BUILD_TESTING` in step 1):
+3. **Test** (requires `-DBUILD_TESTING=1` in step 1):
 
    ```
    ctest --test-dir <build-directory>
@@ -64,15 +73,15 @@ use to create an `pkg-config` file for LLVM.
 ## Building with CMake and Xcode
 
 1. **Generate Xcode project**: choose a *build-directory* and then,
-   where <LLVM> is the path to the root directory of your LLVM
+   where `<LLVM>` is the path to the root directory of your LLVM
    installation,
 
-	```
-	cmake -D LLVM_DIR=<LLVM>/lib/cmake/llvm \
-	  -G Xcode -S . -B <build-directory>
-	```
+    ```
+    cmake -D LLVM_DIR=<LLVM>/lib/cmake/llvm \
+      -G Xcode -S . -B <build-directory>
+    ```
 
-	If you want to run tests, add `-D BUILD_TESTING`.
+    If you want to run tests, add `-DBUILD_TESTING=1`.
 
 2. **Profit**: open the `.xcodeproj` file in the *build-directory* and
    use Xcode's UI to build.
@@ -115,6 +124,14 @@ using Swift package manager:
 
 ```bash
 swift build -c release
+```
+
+### Running the tests
+
+To test your compiler,
+
+```bash
+swift test -c release --parallel
 ```
 
 ### Notes to macOS users:
