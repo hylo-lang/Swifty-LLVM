@@ -58,7 +58,7 @@ use to create an `pkg-config` file for LLVM.
 3. **Test** (requires `-D BUILD_TESTING` in step 1):
 
    ```
-   ctest --test-dir <build-directory>
+   ctest --parallel --test-dir <build-directory>
    ```
 
 ## Building with CMake and Xcode
