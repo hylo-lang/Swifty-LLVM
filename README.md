@@ -22,11 +22,15 @@ interchangeable or backward-compatible.
 If you are using this package for development we strongly recommend
 the use of an LLVM with assertions enabled such as
 [these](https://github.com/hylo-lang/llvm-build); otherwise it's much
-too easy to violate LLVM's preconditions without knowing it.
+too easy to violate LLVM's preconditions without knowing it.  This
+package's devcontainer (in the `.devcontainer` subdirectory) has
+assert-enabled LLVM builds preinstalled in `/opt/llvm-Debug` and
+`/opt/llvm-MinSizeRel`.
 
-*If* you want to build with the Swift Package Manager you'll need an
-installation of LLVM with an `llvm-config` executable, which we will
-use to create an `pkg-config` file for LLVM.
+*If* you want to build with the Swift Package Manager and you choose
+to get LLVM some other way, you'll need an installation with an
+`llvm-config` executable, which we will use to create a `pkg-config`
+file for LLVM.
 
 ## Building with CMake and Ninja
 
@@ -120,6 +124,14 @@ using Swift package manager:
 
 ```bash
 swift build -c release
+```
+
+### Running the tests
+
+To test your compiler,
+
+```bash
+swift test -c release --parallel
 ```
 
 ### Notes to macOS users:
