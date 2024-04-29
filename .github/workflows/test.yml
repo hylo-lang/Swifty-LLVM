@@ -23,7 +23,7 @@ env:
 jobs:
   dev-container:
     name: "Dev container: ${{ matrix.cmake_build_type }}"
-    strategy: 
+    strategy:
       fail-fast: false
       matrix:
         cmake_build_type: [Debug, Release]
@@ -140,16 +140,8 @@ jobs:
       run: swift --version && swift --version | grep -q ${{ env.swift-version }}
       shell: bash
 
-    - name: Prerequisites (macOS)
-      if: ${{ runner.os == 'macOS' }}
-      run: |
-        brew install zstd ninja
-        xcrun xcodebuild -version
-        xcrun swift -version
-
-    # Setup the build machine with the most recent versions of CMake and Ninja. Both are cached if
-    # not already: on subsequent runs both will be quickly restored from GitHub cache service.
-    - uses: lukka/get-cmake@latest
+    - name: Set up latest CMake and Ninja
+      uses: lukka/get-cmake@latest
 
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do
