@@ -1,4 +1,5 @@
 find_package(HyloLLVM)
+include(HyloUtilities)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_Swift_LANGUAGE_VERSION 5) # Needed? Useful?
@@ -43,7 +44,7 @@ set_target_properties(llvmshims
 #
 # The Swift module our clients depend on.
 #
-file(GLOB_RECURSE files FOLLOW_SYMLINKS LIST_DIRECTORIES false CONFIGURE_DEPENDS SwiftyLLVM/*.swift)
+set_recursive_file_glob(files SwiftyLLVM/*.swift)
 add_library(SwiftyLLVM ${files})
 
 # This is required in order to be a testee.
