@@ -6,9 +6,7 @@
 
 See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)
 
-## Installation:
-
-### Development/Use Requirements
+## Development/Use Requirements
 
 ### Swift
 
@@ -34,7 +32,7 @@ file for LLVM.
 
 ## Building with CMake and Ninja
 
-1. **Configure**: choose a *build-directory* and a CMake *build-type*
+1. **Configure**: choose a *build-directory* and a CMake *build type*
    (usually `Debug` or `Release`) and then, where `<LLVM>` is the path
    to the root directory of your LLVM installation,
 
@@ -84,7 +82,7 @@ file for LLVM.
     If you want to run tests, add `-DBUILD_TESTING=1`.
 
 2. **Profit**: open the `.xcodeproj` file in the *build-directory* and
-   use Xcode's UI to build.
+   use Xcode's UI to build and test.
 
 ## Building with Swift Package Manager
 
@@ -105,7 +103,7 @@ C:\Program Files\Git\bin\bash ./Tools/make-pkgconfig.sh ./llvm.pc
 
 The command above generates `llvm.pc` in the current directory and
 prints its contents to the terminal.  You can either add its directory
-to your `PKG_CONFIG_PATH` environtment variable for use with
+to your `PKG_CONFIG_PATH` environment variable for use with
 command-line tools:
 
 ```bash
@@ -126,15 +124,13 @@ using Swift package manager:
 swift build -c release
 ```
 
-### Running the tests
-
 To test your compiler,
 
 ```bash
 swift test -c release --parallel
 ```
 
-### Notes to macOS users:
+## Notes to macOS users:
 
 1. Add `platforms: [.macOS("xxx")]` to `Package.swift` where `xxx` is
    your macOS version to address the warning complaining that an
