@@ -4,8 +4,8 @@
 cmake_minimum_required(VERSION 3.26)
 project(Swifty-LLVM
   VERSION 0.1.0
-  DESCRIPTION "A tool that finds XCTestCases and their testXXX methods and generates a main.swift to run them."
-  HOMEPAGE_URL "https://github.com/hylo-lang/GenerateSwiftXCTestMain"
+  DESCRIPTION "A Swifty interface for the LLVM compiler infrastructure, currently wrapping LLVM's C API."
+  HOMEPAGE_URL "https://github.com/hylo-lang/Swifty-LLVM"
   LANGUAGES C CXX Swift
 )
 enable_testing()
