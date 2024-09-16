@@ -86,6 +86,9 @@ file for LLVM.
 
 ## Building with Swift Package Manager
 
+**Note:** SPM builds are not supported on Windows at least until Swift
+6.0 is released.
+
 First, you need to create a `pkgconfig` file specific to your
 installation and make it visible to your build tools.  We use a `bash`
 script as follows in the top-level directory of this project:
