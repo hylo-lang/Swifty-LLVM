@@ -18,7 +18,7 @@ on:
       - ".editorconfig"
 
 env:
-  swift-version: '5.9'
+  swift-version: '5.10'
 
 jobs:
   dev-container:
