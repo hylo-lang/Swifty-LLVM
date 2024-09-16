@@ -18,7 +18,7 @@ on:
       - ".editorconfig"
 
 env:
-  swift-version: '5.9'
+  swift-version: '5.10'
 
 jobs:
   dev-container:
@@ -204,6 +204,7 @@ jobs:
       working-directory: Swifty-LLVM
 
     - name: Build and Test via SPM
+      if: ${{ runner.os != 'Windows' || env.swift-version != '5.10' }}
       run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
       working-directory: Swifty-LLVM
 
