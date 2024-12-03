@@ -622,6 +622,10 @@ public struct Module {
     .init(LLVMBuildStore(p.llvm, value.llvm.raw, location.llvm.raw))
   }
 
+  public mutating func setOrdering(_ ordering: AtomicOrdering, for i: Instruction) {
+    LLVMSetOrdering(i.llvm.raw, ordering.llvm)
+  }
+
   // MARK: Terminators
 
   @discardableResult

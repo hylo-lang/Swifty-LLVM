@@ -995,7 +995,7 @@
 - [ ] LLVMGetWeak
 - [ ] LLVMSetWeak
 - [ ] LLVMGetOrdering
-- [ ] LLVMSetOrdering
+- [x] LLVMSetOrdering
 - [ ] LLVMGetAtomicRMWBinOp
 - [ ] LLVMSetAtomicRMWBinOp
 - [x] LLVMBuildTrunc
