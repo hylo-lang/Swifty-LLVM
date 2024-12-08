@@ -55,9 +55,12 @@ extension Module {
   ///     }
   ///
   /// `self` is expected to be empty.
+  ///
+  /// In addition to these functions, we also emit a function that test atomics operations.
   fileprivate mutating func emitTest() {
     let r2d = emitProjectDegrees()
     _ = emitMain(projectingDegreesWith: r2d)
+    _ = emitTestAtomics()
   }
 
   /// Defines a function `main` that calls the coroutine created by `emitProjectDegrees`.
@@ -183,6 +186,44 @@ extension Module {
 
     // unreachable
     insertUnreachable(at: endOf(b0))
+
+    return f
+  }
+
+  private mutating func emitTestAtomics() -> Function {
+    let s = FunctionType(from: [], in: &self)
+    let f = declareFunction("testAtomics", s)
+
+    let b0 = appendBlock(named: "b0", to: f)
+
+    // %0 = alloca [16 x i8], align 8
+    // %1 = alloca double, align 8
+    let x0 = insertAlloca(ArrayType(16, i8, in: &self), at: endOf(b0))
+    setAlignment(8, for: x0)
+    let x1 = insertAlloca(double, at: endOf(b0))
+
+    // store atomic double 0x400921FB54442D18, ptr %1 monotonic, align 8
+    let s1 = insertStore(double(.pi), to: x1, at: endOf(b0))
+    setOrdering(.monotonic, for: s1)
+    // store atomic double 0x400921FB54442D18, ptr %1 release, align 8
+    let s2 = insertStore(double(.pi), to: x1, at: endOf(b0))
+    setOrdering(.release, for: s2)
+    // store atomic double 0x400921FB54442D18, ptr %1 seq_cst, align 8
+    let s3 = insertStore(double(.pi), to: x1, at: endOf(b0))
+    setOrdering(.sequentiallyConsistent, for: s3)
+
+    // %2 = load atomic double, ptr %1 monotonic, align 8
+    let x2 = insertLoad(double, from: x1, at: endOf(b0))
+    setOrdering(.monotonic, for: x2)
+    // %3 = load atomic double, ptr %1 acquire, align 8
+    let x3 = insertLoad(double, from: x1, at: endOf(b0))
+    setOrdering(.acquire, for: x3)
+    // %4 = load atomic double, ptr %1 seq_cst, align 8
+    let x4 = insertLoad(double, from: x1, at: endOf(b0))
+    setOrdering(.sequentiallyConsistent, for: x4)
+
+    // ret void
+    insertReturn(at: endOf(b0))
 
     return f
   }
