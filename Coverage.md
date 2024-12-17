@@ -995,9 +995,9 @@
 - [ ] LLVMGetWeak
 - [ ] LLVMSetWeak
 - [ ] LLVMGetOrdering
-- [ ] LLVMSetOrdering
+- [x] LLVMSetOrdering
 - [ ] LLVMGetAtomicRMWBinOp
-- [ ] LLVMSetAtomicRMWBinOp
+- [x] LLVMSetAtomicRMWBinOp
 - [x] LLVMBuildTrunc
 
   `Module.insertTrunc(_:to:at:)`
@@ -1072,18 +1072,18 @@
 - [ ] LLVMBuildIsNull
 - [ ] LLVMBuildIsNotNull
 - [ ] LLVMBuildPtrDiff2
-- [ ] LLVMBuildFence
-- [ ] LLVMBuildAtomicRMW
-- [ ] LLVMBuildAtomicCmpXchg
+- [x] LLVMBuildFence
+- [x] LLVMBuildAtomicRMW
+- [x] LLVMBuildAtomicCmpXchg
 - [ ] LLVMGetNumMaskElements
 - [ ] LLVMGetUndefMaskElem
 - [ ] LLVMGetMaskValue
 - [ ] LLVMIsAtomicSingleThread
-- [ ] LLVMSetAtomicSingleThread
+- [x] LLVMSetAtomicSingleThread
 - [ ] LLVMGetCmpXchgSuccessOrdering
-- [ ] LLVMSetCmpXchgSuccessOrdering
+- [x] LLVMSetCmpXchgSuccessOrdering
 - [ ] LLVMGetCmpXchgFailureOrdering
-- [ ] LLVMSetCmpXchgFailureOrdering
+- [x] LLVMSetCmpXchgFailureOrdering
 
 ## Memory Buffers
 

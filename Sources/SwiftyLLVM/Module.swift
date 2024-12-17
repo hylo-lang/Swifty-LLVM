@@ -622,6 +622,61 @@ public struct Module {
     .init(LLVMBuildStore(p.llvm, value.llvm.raw, location.llvm.raw))
   }
 
+  // MARK: Atomics
+
+  public mutating func setOrdering(_ ordering: AtomicOrdering, for i: Instruction) {
+    LLVMSetOrdering(i.llvm.raw, ordering.llvm)
+  }
+
+  public mutating func setCmpXchgSuccessOrdering(_ ordering: AtomicOrdering, for i: Instruction) {
+    LLVMSetCmpXchgSuccessOrdering(i.llvm.raw, ordering.llvm)
+  }
+
+  public mutating func setCmpXchgFailureOrdering(_ ordering: AtomicOrdering, for i: Instruction) {
+    LLVMSetCmpXchgFailureOrdering(i.llvm.raw, ordering.llvm)
+  }
+
+  public mutating func setAtomicRMWBinOp(_ binOp: AtomicRMWBinOp, for i: Instruction) {
+    LLVMSetAtomicRMWBinOp(i.llvm.raw, binOp.llvm)
+  }
+
+  public mutating func setAtomicSingleThread(for i: Instruction) {
+    LLVMSetAtomicSingleThread(i.llvm.raw, 1)
+  }
+
+  public mutating func insertAtomicCmpXchg(
+    _ atomic: IRValue,
+    old: IRValue,
+    new: IRValue,
+    successOrdering: AtomicOrdering,
+    failureOrdering: AtomicOrdering,
+    weak: Bool,
+    singleThread: Bool,
+    at p: InsertionPoint
+  ) -> Instruction {
+    let i = Instruction(LLVMBuildAtomicCmpXchg(p.llvm, atomic.llvm.raw, old.llvm.raw, new.llvm.raw, successOrdering.llvm, failureOrdering.llvm, singleThread ? 1 : 0))
+    if weak {
+      LLVMSetWeak(i.llvm.raw, 1)
+    }
+    return i
+  }
+
+  public mutating func insertAtomicRMW(
+    _ atomic: IRValue,
+    operation: AtomicRMWBinOp,
+    value: IRValue,
+    ordering: AtomicOrdering,
+    singleThread: Bool,
+    at p: InsertionPoint
+  ) -> Instruction {
+    .init(LLVMBuildAtomicRMW(p.llvm, operation.llvm, atomic.llvm.raw, value.llvm.raw, ordering.llvm, singleThread ? 1 : 0))
+  }
+
+  @discardableResult
+  public mutating func insertFence(_ ordering: AtomicOrdering, singleThread: Bool, at p: InsertionPoint) -> Instruction {
+    .init(LLVMBuildFence(p.llvm, ordering.llvm, singleThread ? 1 : 0, ""))
+  }
+
   // MARK: Terminators
 
   @discardableResult
