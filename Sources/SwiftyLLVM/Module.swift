@@ -619,7 +619,9 @@ public struct Module {
   public mutating func insertStore(
     _ value: IRValue, to location: IRValue, at p: InsertionPoint
   ) -> Instruction {
-    .init(LLVMBuildStore(p.llvm, value.llvm.raw, location.llvm.raw))
+    let r = LLVMBuildStore(p.llvm, value.llvm.raw, location.llvm.raw)
+    LLVMSetAlignment(r, UInt32(layout.preferredAlignment(of: value.type)))
+    return .init(r!)
   }
 
   // MARK: Atomics
