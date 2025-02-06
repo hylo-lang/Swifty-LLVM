@@ -1,4 +1,4 @@
-ARG SWIFT_VERSION=5.9
+ARG SWIFT_VERSION=6.0.3
 # Other ARG declarations must follow FROM
 FROM swift:${SWIFT_VERSION}
 
