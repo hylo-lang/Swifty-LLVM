@@ -10,6 +10,8 @@ project(Swifty-LLVM
 )
 enable_testing()
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+set(CMAKE_Swift_LANGUAGE_VERSION 6)
+
 if (PROJECT_IS_TOP_LEVEL)
   include(cmake/TopLevelDefaults.cmake)
 endif()
