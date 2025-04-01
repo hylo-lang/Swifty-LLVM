@@ -1,20 +1,21 @@
-ARG SWIFT_VERSION=5.9
+ARG SWIFT_VERSION=6.1
 # Other ARG declarations must follow FROM
 FROM swift:${SWIFT_VERSION}
 
 ARG HYLO_LLVM_BUILD_TYPE=MinSizeRel
 ARG HYLO_LLVM_BUILD_RELEASE=20250603-162600
 ARG HYLO_LLVM_VERSION=17.0.6
+ARG CMAKE_VERSION=3.29.1
 
 ENV HYLO_LLVM_DOWNLOAD_URL="https://github.com/hylo-lang/llvm-build/releases/download"
 
-RUN apt install -y gnupg
-RUN apt update
-RUN apt install -y curl libzstd-dev libzstd1 lsb-release make ninja-build tar wget zstd software-properties-common python3-pip
-
-# Get a recent cmake (https://www.kitware.com//cmake-python-wheels/)
-RUN if $(/usr/bin/which cmake) ; then apt purge --auto-remove cmake ; fi
-RUN pip3 install --upgrade cmake
+# Install the dependencies for the LLVM build.
+# Note that we do cleanup in the same layer to save disk space.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gnupg curl libzstd-dev libzstd1 lsb-release make \
+       ninja-build tar wget zstd software-properties-common python3-pip cmake && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Get the LLVM builds for the host architecture
 RUN <<EOT bash -ex -o pipefail

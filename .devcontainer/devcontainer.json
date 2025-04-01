@@ -3,16 +3,16 @@
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
-            "SWIFT_VERSION" : "5.9",
+            "SWIFT_VERSION" : "6.1",
             "HYLO_LLVM_BUILD_TYPE": "${localEnv:HYLO_LLVM_BUILD_TYPE:MinSizeRel}"
-	}
+        }
     },
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
             "installZsh": "false",
             "username": "vscode",
-            "userUid": "1000",
-            "userGid": "1000",
+            "userUid": "1001", // 1000 is already taken by the default user in the container
+            "userGid": "1001",
             "upgradePackages": "false"
         },
         "ghcr.io/devcontainers/features/git:1": {
