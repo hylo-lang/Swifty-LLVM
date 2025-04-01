@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The type of an atomic read-modify-write binary operation.
-public enum AtomicRMWBinOp {
+public enum AtomicRMWBinOp: Sendable {
 
   /// Set the new value and return the one old.
   case xchg

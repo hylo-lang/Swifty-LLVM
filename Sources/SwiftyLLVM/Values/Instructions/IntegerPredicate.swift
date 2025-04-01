@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The predicate of an integer comparison.
-public enum IntegerPredicate: String, Hashable {
+public enum IntegerPredicate: String, Hashable, Sendable {
 
   /// Values are equal.
   case eq

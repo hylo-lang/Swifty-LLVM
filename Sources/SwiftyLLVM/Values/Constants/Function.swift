@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A function in LLVM IR.
-public struct Function: Global, Hashable {
+public struct Function: Global, Hashable, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
@@ -48,7 +48,7 @@ extension Function {
 
 
   /// The return value of a LLVM IR function.
-  public struct Return: Hashable {
+  public struct Return: Hashable, Sendable {
 
     /// The function defining the return value.
     public let parent: Function
@@ -68,7 +68,7 @@ extension Function {
 extension Function {
 
   /// A collection containing the parameters of a LLVM IR function.
-  public struct Parameters: BidirectionalCollection {
+  public struct Parameters: BidirectionalCollection, Sendable {
 
     public typealias Index = Int
 

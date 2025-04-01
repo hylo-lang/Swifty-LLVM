@@ -1,10 +1,10 @@
 internal import llvmc
 
 /// A read-only access to a block of memory.
-public struct MemoryBuffer {
+public struct MemoryBuffer: Sendable {
 
   /// A handle to the LLVM object representing a memory buffer.
-  private final class Handle {
+  private final class Handle: @unchecked Sendable {
 
     /// A pointer to a LLVM memory buffer.
     let llvm: LLVMMemoryBufferRef

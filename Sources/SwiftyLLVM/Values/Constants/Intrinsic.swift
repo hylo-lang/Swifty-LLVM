@@ -6,7 +6,7 @@ import Foundation
 /// Intrinsic functions have well known names and semantics and are required to follow certain
 /// restrictions. Overall, these intrinsics represent an extension mechanism for the LLVM language
 /// that does not require changing all of the transformations in LLVM when adding to the language.
-public struct Intrinsic: Global, Hashable {
+public struct Intrinsic: Global, Hashable, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
@@ -37,7 +37,7 @@ extension Intrinsic {
 
   /// The name of an intrinsic.
   @dynamicMemberLookup
-  public struct Name {
+  public struct Name: Sendable {
 
     /// The value of this instance.
     public let value: String
@@ -55,6 +55,6 @@ extension Intrinsic {
   }
 
   /// The prefix of all intrinsics.
-  public static var llvm = Name("llvm")
+  public static let llvm = Name("llvm")
 
 }

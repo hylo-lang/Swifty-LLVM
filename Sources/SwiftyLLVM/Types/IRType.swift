@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The type of a value in LLVM IR.
-public protocol IRType: CustomStringConvertible {
+public protocol IRType: CustomStringConvertible, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: TypeRef { get }
