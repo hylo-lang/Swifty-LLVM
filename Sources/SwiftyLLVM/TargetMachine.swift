@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The settings necessary for code generation, including target information and compiler options.
-public struct TargetMachine {
+public struct TargetMachine: @unchecked Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   private let wrapped: ManagedPointer<LLVMTargetMachineRef>

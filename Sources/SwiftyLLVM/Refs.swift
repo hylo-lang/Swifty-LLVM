@@ -2,7 +2,7 @@ internal import llvmc
 import Foundation
 
 /// An LLVM type reference.
-public struct TypeRef: Hashable {
+public struct TypeRef: Hashable, @unchecked Sendable {
 
   /// The underlying LLVM value.
   let raw: llvmc.LLVMTypeRef
@@ -13,7 +13,7 @@ public struct TypeRef: Hashable {
 }
 
 /// An LLVM value reference.
-public struct ValueRef: Hashable {
+public struct ValueRef: Hashable, @unchecked Sendable {
 
   /// The underlying LLVM value; not exposed to avoid rexporting llvmc
   let raw: llvmc.LLVMValueRef
@@ -24,7 +24,7 @@ public struct ValueRef: Hashable {
 }
 
 /// An LLVM basic block reference.
-public struct BasicBlockRef: Hashable {
+public struct BasicBlockRef: Hashable, @unchecked Sendable {
 
   /// The underlying LLVM value; not exposed to avoid rexporting llvmc
   let raw: llvmc.LLVMBasicBlockRef
@@ -35,7 +35,7 @@ public struct BasicBlockRef: Hashable {
 }
 
 /// An LLVM module reference.
-public struct ModuleRef: Hashable {
+public struct ModuleRef: Hashable, @unchecked Sendable {
 
   /// The underlying LLVM value; not exposed to avoid rexporting llvmc
   let raw: llvmc.LLVMModuleRef
@@ -46,7 +46,7 @@ public struct ModuleRef: Hashable {
 }
 
 /// An LLVM attribute reference.
-public struct AttributeRef: Hashable {
+public struct AttributeRef: Hashable, @unchecked Sendable {
 
   /// The underlying LLVM value; not exposed to avoid rexporting llvmc
   let raw: llvmc.LLVMAttributeRef

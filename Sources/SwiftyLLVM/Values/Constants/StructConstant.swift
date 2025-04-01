@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A constant struct in LLVM IR.
-public struct StructConstant: Hashable {
+public struct StructConstant: Hashable, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef

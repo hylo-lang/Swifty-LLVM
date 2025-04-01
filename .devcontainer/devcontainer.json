@@ -3,16 +3,16 @@
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
-            "SWIFT_VERSION" : "5.9",
+            "SWIFT_VERSION" : "6.1",
             "HYLO_LLVM_BUILD_TYPE": "${localEnv:HYLO_LLVM_BUILD_TYPE:MinSizeRel}"
-	}
+        }
     },
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
             "installZsh": "false",
             "username": "vscode",
-            "userUid": "1000",
-            "userGid": "1000",
+            "userUid": "1001", // 1000 is already taken by the default user in the container
+            "userGid": "1001",
             "upgradePackages": "false"
         },
         "ghcr.io/devcontainers/features/git:1": {
@@ -46,7 +46,7 @@
         "HYLO_LLVM_BUILD_TYPE": "${localEnv:HYLO_LLVM_BUILD_TYPE:MinSizeRel}"
     },
     "remoteEnv": {
-        "PATH": "/opt/llvm-${containerEnv:HYLO_LLVM_BUILD_TYPE}/bin:${containerEnv:PATH}"
+        "PATH": "/python-venv/bin:/opt/llvm-${containerEnv:HYLO_LLVM_BUILD_TYPE}/bin:${containerEnv:PATH}"
     },
     // "postCreateCommand": "sudo ./.devcontainer/postCreateCommand.sh",
     // Set `remoteUser` to `root` to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.

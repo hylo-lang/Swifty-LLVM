@@ -65,7 +65,7 @@ public struct StructType: IRType, Hashable {
 extension StructType {
 
   /// A collection containing the fields of a struct type in LLVM IR.
-  public struct Fields: BidirectionalCollection {
+  public struct Fields: BidirectionalCollection, Sendable {
 
     public typealias Index = Int
 

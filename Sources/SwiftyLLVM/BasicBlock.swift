@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A basic block in LLVM IR.
-public struct BasicBlock: Hashable {
+public struct BasicBlock: Hashable, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: BasicBlockRef

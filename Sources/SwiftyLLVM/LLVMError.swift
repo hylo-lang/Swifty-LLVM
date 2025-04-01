@@ -1,5 +1,5 @@
 /// An error that occurred during a LLVM operation.
-public struct LLVMError: Error {
+public struct LLVMError: Error, Sendable {
 
   /// A description of the error.
   public let description: String

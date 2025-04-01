@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// How data are represented in memory for a particular target machine.
-public struct DataLayout {
+public struct DataLayout: @unchecked Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   private let wrapped: ManagedPointer<LLVMTargetDataRef>
