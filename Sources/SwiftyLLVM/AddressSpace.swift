@@ -1,5 +1,5 @@
 /// Properties of a pointer expressed through the data layout.
-public struct AddressSpace: Hashable {
+public struct AddressSpace: Hashable, Sendable {
 
   /// The LLVM representation of this instance.
   public let llvm: UInt32
@@ -10,6 +10,6 @@ public struct AddressSpace: Hashable {
   }
 
   /// The default address space.
-  public static var `default` = AddressSpace(0)
+  public static let `default` = AddressSpace(0)
 
 }

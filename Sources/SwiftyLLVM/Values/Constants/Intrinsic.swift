@@ -37,7 +37,7 @@ extension Intrinsic {
 
   /// The name of an intrinsic.
   @dynamicMemberLookup
-  public struct Name {
+  public struct Name : Sendable {
 
     /// The value of this instance.
     public let value: String
@@ -55,6 +55,6 @@ extension Intrinsic {
   }
 
   /// The prefix of all intrinsics.
-  public static var llvm = Name("llvm")
+  public static let llvm = Name("llvm")
 
 }

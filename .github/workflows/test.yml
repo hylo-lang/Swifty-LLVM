@@ -18,7 +18,7 @@ on:
       - ".editorconfig"
 
 env:
-  swift-version: '5.10'
+  swift-version: '6.1'
 
 jobs:
   dev-container:
@@ -122,12 +122,14 @@ jobs:
       with:
         xcode-version: latest-stable
 
+    - name: Import Swift GPG Key (Ubuntu Only) # until fix arrives for https://github.com/SwiftyLab/setup-swift/issues/388
+      if: runner.os == 'Linux'
+      run: gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys '52BB 7E3D E28A 71BE 22EC 05FF EF80 A866 B47A 981F'
     - name: 'Set up swift (non-Windows)'
       if: ${{ runner.os != 'Windows' }}
       uses: SwiftyLab/setup-swift@latest
       with:
         swift-version: ${{ env.swift-version }}
-        cache-snapshot: false # Workaround for https://github.com/SwiftyLab/setup-swift/issues/315
 
     - uses: compnerd/gha-setup-vsdevenv@main
     - name: Set up swift (Windows)
@@ -168,7 +170,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        ${{ runner.os == 'macOS' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
+        ${{ runner.os == 'macOS' && '-DCMAKE_Swift_COMPILER=swiftc -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)' || '' }}
       working-directory: Swifty-LLVM
 
     - name: Build (CMake)
@@ -197,7 +199,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
         -DBUILD_TESTING=YES
         -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-        ${{ runner.os == 'macOS' && '-D CMAKE_Swift_COMPILER=swiftc' || '' }}
+        ${{ runner.os == 'macOS' && '-DCMAKE_Swift_COMPILER=swiftc -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)' || '' }}
 
         cd .xcode-build
 
@@ -205,7 +207,6 @@ jobs:
       working-directory: Swifty-LLVM
 
     - name: Build and Test via SPM
-      if: ${{ runner.os != 'Windows' || env.swift-version != '5.10' }}
       run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
       working-directory: Swifty-LLVM
 
@@ -224,7 +225,7 @@ jobs:
 
     - name: Upload coverage reports to Codecov
       if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true

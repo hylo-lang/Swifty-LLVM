@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 import PackageDescription
 
 
@@ -24,7 +24,7 @@ func pseudoPkgConfigText(_ package: String) -> String? {
   guard let pcp = ProcessInfo.processInfo.environment["PKG_CONFIG_PATH"] else { return nil }
 
   return pcp.split(separator: pathSeparator)
-    .lazy.compactMap({ try? String(contentsOfFile: "\($0)/\(package).pc") }).first
+    .lazy.compactMap({ try? String(contentsOfFile: "\($0)/\(package).pc", encoding: String.Encoding.utf8) }).first
 }
 
 /// Returns the un-quoted, un-escaped elements in the remainder of the
