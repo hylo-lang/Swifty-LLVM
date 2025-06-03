@@ -36,8 +36,8 @@ jobs:
             more-spm-test-options: --enable-code-coverage
             HYLO_LLVM_BUILD_TYPE: Debug
 
-          - cmake_build_type: Release
-            spm_configuration: release
+          - spm_configuration: release
+            cmake_build_type: Release
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
     runs-on: ubuntu-latest
