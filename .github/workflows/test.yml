@@ -79,7 +79,7 @@ jobs:
         spm_configuration: [debug, release]
 
         include:
-          - HYLO_LLVM_BUILD_RELEASE: 20240303-215025
+          - HYLO_LLVM_BUILD_RELEASE: 20250603-162600
           - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
           - HYLO_LLVM_VERSION: 17.0.6
           - llvm_package_suffix: .tar.zst
