@@ -37,7 +37,7 @@ jobs:
             spm_configuration: release
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout (GitHub)
       uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
       fail-fast: false
       matrix:
         # macos-latest is apparently not the latest.
-        os: [macos-13, ubuntu-latest, windows-latest]
+        os: [macos-14, ubuntu-22.04, windows-2025]
         spm_configuration: [debug, release]
 
         include:
@@ -94,19 +94,19 @@ jobs:
             cmake_build_type: Release
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
-          - os: windows-latest
+          - os: windows-2025
 
             unpackage_command: 7z x -t7z
             llvm_package_suffix: .7z
             triple_suffix: unknown-windows-msvc17
 
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             triple_suffix: unknown-linux-gnu
 
-          - os: macos-13
-            triple_suffix: apple-darwin23.3.0
+          - os: macos-14
+            triple_suffix: apple-darwin24.1.0
 
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             spm_configuration: debug
 
             swift_test_options: --enable-code-coverage
