@@ -61,14 +61,14 @@ jobs:
         HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
       with:
         runCmd: >-
-          cmake -GNinja -S . -B .ninja-build
+          cmake -GNinja -S . -B .cmake-build
           -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
           -DBUILD_TESTING=YES
           -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
 
-          cmake --build .ninja-build
+          cmake --build .cmake-build
 
-          ctest --output-on-failure --parallel --test-dir .ninja-build
+          ctest --output-on-failure --parallel --test-dir .cmake-build
         push: never
 
   native:
@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         # macos-latest is apparently not the latest.
-        os: [macos-13, ubuntu-latest, windows-latest]
+        os: [macos-14, ubuntu-latest, windows-latest]
         spm_configuration: [debug, release]
         cmake_generator: [Ninja, Xcode]
 
@@ -178,7 +178,7 @@ jobs:
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         run: >-
-          cmake -G '${{ matrix.cmake_generator }}' -S . -B .ninja-build
+          cmake -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
           ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }}
           -DBUILD_TESTING=YES
           -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
