@@ -144,6 +144,10 @@ jobs:
     - name: Set up latest CMake and Ninja
       uses: lukka/get-cmake@latest
 
+    - name: Install prerequisites (macOS)
+      if: ${{ runner.os == 'macOS' }}
+      run: brew install zstd
+
     - name: Install LLVM
       # 7z doesn't support decompressing from a stream or we'd do this all as one statement. Maybe
       # we should find a way to use zstd on windows.
