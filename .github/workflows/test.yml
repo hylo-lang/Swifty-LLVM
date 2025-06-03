@@ -76,7 +76,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-latest is apparently not the latest.
         os: [macos-14, ubuntu-latest, windows-latest]
         spm_configuration: [debug, release]
         cmake_generator: [Ninja, Xcode]
@@ -94,6 +93,7 @@ jobs:
           - llvm_package_suffix: .tar.zst
           - unpackage_command: tar -x --zstd -f
           - use_spm: true
+          - triple_cpu: x86_64
 
           - os: windows-latest
             unpackage_command: 7z x -t7z
@@ -105,6 +105,7 @@ jobs:
 
           - os: macos-14
             triple_suffix: apple-darwin24.1.0
+            triple_cpu: arm64
 
           - os: ubuntu-latest
             triple_suffix: unknown-linux-gnu
@@ -123,7 +124,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       llvm_url_prefix: ${{ matrix.HYLO_LLVM_DOWNLOAD_URL }}/${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
-      llvm_package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-x86_64-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
+      llvm_package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-${{ matrix.triple_cpu }}-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
 
     steps:
       - name: Checkout
@@ -209,9 +210,9 @@ jobs:
         name: SPM cache setup
         with:
           path: hylo/.build
-          key: ${{ runner.os }}-${{ matrix.spm_configuration }}-spm-${{ hashFiles('hylo/**/Package.resolved') }}
+          key: ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-${{ hashFiles('hylo/**/Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.spm_configuration }}-spm-
+            ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
 
       - if: ${{ matrix.use_spm }}
         name: Build and Test via SPM
