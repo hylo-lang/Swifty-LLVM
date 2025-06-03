@@ -103,8 +103,8 @@ jobs:
           - os: windows-latest
             use_spm: false
 
-          - os: macos-13
-            triple_suffix: apple-darwin23.3.0
+          - os: macos-14
+            triple_suffix: apple-darwin24.1.0
 
           - os: ubuntu-latest
             triple_suffix: unknown-linux-gnu
