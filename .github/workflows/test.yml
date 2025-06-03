@@ -201,7 +201,8 @@ jobs:
         shell: bash
 
       - if: ${{ matrix.use_spm }}
-        uses: actions/cache@v4
+        # Workaround for https://github.com/actions/cache/issues/1541
+        uses: actions/cache@v4.2.2
         name: SPM cache setup
         with:
           path: hylo/.build
