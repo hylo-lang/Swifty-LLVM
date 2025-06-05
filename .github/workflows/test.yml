@@ -28,7 +28,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, ubuntu-22.04, windows-2025]
         cmake_build_type: [Debug, Release]
 
         include:
@@ -77,7 +76,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-
+        os: [macos-14, ubuntu-22.04, windows-2025]
         spm_configuration: [debug, release]
         cmake_generator: [Ninja, Xcode]
 
