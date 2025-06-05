@@ -28,6 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [macos-14, ubuntu-22.04, windows-2025]
         cmake_build_type: [Debug, Release]
 
         include:
@@ -81,9 +82,9 @@ jobs:
         cmake_generator: [Ninja, Xcode]
 
         exclude:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             cmake_generator: Xcode
-          - os: windows-latest
+          - os: windows-2025
             cmake_generator: Xcode
 
         include:
