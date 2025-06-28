@@ -174,7 +174,7 @@ jobs:
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         run: >-
-          dir /S "C:\Program Files (x86)\Windows Kits\10\bin\" &&
+          dir /s "C:\Program Files (x86)\Windows Kits\10\bin\" &&
           cmake --debug-trycompile -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
           ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }}
           -DBUILD_TESTING=YES
