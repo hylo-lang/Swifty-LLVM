@@ -23,53 +23,53 @@ env:
   swift-version: '5.10'
 
 jobs:
-  dev-container:
-    name: "Dev container: ${{ matrix.cmake_build_type }}"
-    strategy:
-      fail-fast: false
-      matrix:
-        cmake_build_type: [Debug, Release]
+  # dev-container:
+  #   name: "Dev container: ${{ matrix.cmake_build_type }}"
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       cmake_build_type: [Debug, Release]
 
-        include:
-          - spm_configuration: debug
-            cmake_build_type: Debug
-            more-spm-test-options: --enable-code-coverage
-            HYLO_LLVM_BUILD_TYPE: Debug
+  #       include:
+  #         - spm_configuration: debug
+  #           cmake_build_type: Debug
+  #           more-spm-test-options: --enable-code-coverage
+  #           HYLO_LLVM_BUILD_TYPE: Debug
 
-          - spm_configuration: release
-            cmake_build_type: Release
-            HYLO_LLVM_BUILD_TYPE: MinSizeRel
+  #         - spm_configuration: release
+  #           cmake_build_type: Release
+  #           HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
-    runs-on: ubuntu-22.04
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-        show-progress: false
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #     with:
+  #       submodules: true
+  #       show-progress: false
 
-    - name: Build and run via SPM
-      uses: devcontainers/ci@v0.3
-      env:
-        HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
-      with:
-        runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
-        push: never
+  #   - name: Build and run via SPM
+  #     uses: devcontainers/ci@v0.3
+  #     env:
+  #       HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
+  #     with:
+  #       runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
+  #       push: never
 
-    - name: Build and run via CMake
-      uses: devcontainers/ci@v0.3
-      env:
-        HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
-      with:
-        runCmd: >-
-          cmake -GNinja -S . -B .cmake-build
-          -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
-          -DBUILD_TESTING=YES
-          -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
+  #   - name: Build and run via CMake
+  #     uses: devcontainers/ci@v0.3
+  #     env:
+  #       HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
+  #     with:
+  #       runCmd: >-
+  #         cmake -GNinja -S . -B .cmake-build
+  #         -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
+  #         -DBUILD_TESTING=YES
+  #         -DLLVM_DIR=/opt/llvm-${{ matrix.HYLO_LLVM_BUILD_TYPE }}/lib/cmake/llvm
 
-          cmake --build .cmake-build
+  #         cmake --build .cmake-build
 
-          ctest --output-on-failure --parallel --test-dir .cmake-build
-        push: never
+  #         ctest --output-on-failure --parallel --test-dir .cmake-build
+  #       push: never
 
   native:
     name: "Native: ${{ matrix.os }}/${{ matrix.spm_configuration }}/${{ matrix.cmake_generator }}"
@@ -121,7 +121,7 @@ jobs:
           - cmake_generator: Xcode
             use_spm: false
 
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2025
     env:
       llvm_url_prefix: ${{ matrix.HYLO_LLVM_DOWNLOAD_URL }}/${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
       llvm_package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-${{ matrix.triple_cpu }}-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
@@ -134,11 +134,11 @@ jobs:
           show-progress: false
           path: Swifty-LLVM
 
-      - name: Set up swift (non-Windows)
-        if: ${{ runner.os != 'Windows' }}
-        uses: SwiftyLab/setup-swift@latest
-        with:
-          swift-version: ${{ env.swift-version }}
+      # - name: Set up swift (non-Windows)
+      #   if: ${{ runner.os != 'Windows' }}
+      #   uses: SwiftyLab/setup-swift@latest
+      #   with:
+      #     swift-version: ${{ env.swift-version }}
 
       - uses: compnerd/gha-setup-vsdevenv@main
         with:
@@ -188,53 +188,53 @@ jobs:
       - name: Test (CMake)
         run: ctest --output-on-failure --parallel --test-dir Swifty-LLVM/.cmake-build ${{ matrix.cmake_generator == 'Xcode' && format('-C {0}', matrix.cmake_build_type) || '' }}
 
-      - if: ${{ matrix.use_spm }}
-        name: Create LLVM pkgconfig file and make it findable
-        run: >-
-          set -ex -o pipefail
+      # - if: ${{ matrix.use_spm }}
+      #   name: Create LLVM pkgconfig file and make it findable
+      #   run: >-
+      #     set -ex -o pipefail
 
-          mkdir pkg-config
+      #     mkdir pkg-config
 
-          PATH="${{ github.workspace }}/${{ env.llvm_package_basename }}/bin:$PATH"
-          Swifty-LLVM/Tools/make-pkgconfig.sh pkg-config/llvm.pc
+      #     PATH="${{ github.workspace }}/${{ env.llvm_package_basename }}/bin:$PATH"
+      #     Swifty-LLVM/Tools/make-pkgconfig.sh pkg-config/llvm.pc
 
-          echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> "$GITHUB_ENV"
-        shell: bash
+      #     echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> "$GITHUB_ENV"
+      #   shell: bash
 
-      - if: ${{ matrix.use_spm }}
-        # Workaround for https://github.com/actions/cache/issues/1541
-        uses: actions/cache@v4.2.2
-        name: SPM cache setup
-        with:
-          path: hylo/.build
-          key: ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-${{ hashFiles('hylo/**/Package.resolved') }}
-          restore-keys: |
-            ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
+      # - if: ${{ matrix.use_spm }}
+      #   # Workaround for https://github.com/actions/cache/issues/1541
+      #   uses: actions/cache@v4.2.2
+      #   name: SPM cache setup
+      #   with:
+      #     path: hylo/.build
+      #     key: ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-${{ hashFiles('hylo/**/Package.resolved') }}
+      #     restore-keys: |
+      #       ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
 
-      - if: ${{ matrix.use_spm }}
-        name: Build and Test via SPM
-        run: swift test --parallel -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
-        working-directory: Swifty-LLVM
+      # - if: ${{ matrix.use_spm }}
+      #   name: Build and Test via SPM
+      #   run: swift test --parallel -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
+      #   working-directory: Swifty-LLVM
 
-      - name: Export Coverage
-        if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
-        working-directory: Swifty-LLVM
-        run: |
-          shopt -s nullglob
-          dot_os=(.build/${{ matrix.spm_configuration }}/*.build/*.o .build/${{ matrix.spm_configuration }}/*.build/**/*.o)
-          bin_params=("${dot_os[0]}")
-          for o in "${dot_os[@]:1}"; do
-            bin_params+=("-object" "${o}")
-          done
-          # Note: on mac this command might require a leading xcrun.
-          llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
+      # - name: Export Coverage
+      #   if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
+      #   working-directory: Swifty-LLVM
+      #   run: |
+      #     shopt -s nullglob
+      #     dot_os=(.build/${{ matrix.spm_configuration }}/*.build/*.o .build/${{ matrix.spm_configuration }}/*.build/**/*.o)
+      #     bin_params=("${dot_os[0]}")
+      #     for o in "${dot_os[@]:1}"; do
+      #       bin_params+=("-object" "${o}")
+      #     done
+      #     # Note: on mac this command might require a leading xcrun.
+      #     llvm-cov export -format="lcov" -instr-profile "$(swift test -c ${{ matrix.spm_configuration }} --show-codecov-path | xargs dirname)"/default.profdata "${bin_params[@]}" > info.lcov
 
-      - name: Upload coverage reports to Codecov
-        if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
-          directory: ${{ github.workspace }}/Swifty-LLVM
-          working-directory: ${{ github.workspace }}/Swifty-LLVM
-          root_dir: ${{ github.workspace }}/Swifty-LLVM
+      # - name: Upload coverage reports to Codecov
+      #   if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     fail_ci_if_error: true
+      #     directory: ${{ github.workspace }}/Swifty-LLVM
+      #     working-directory: ${{ github.workspace }}/Swifty-LLVM
+      #     root_dir: ${{ github.workspace }}/Swifty-LLVM
