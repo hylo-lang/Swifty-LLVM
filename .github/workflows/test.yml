@@ -174,7 +174,10 @@ jobs:
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         run: >-
-          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\vcvarsall.bat" &&
+          dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\" &&
+          dir "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/" &&
+          dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK" &&
+          dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\bin" &&
           cmake --debug-trycompile -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
           ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }}
           -DBUILD_TESTING=YES
