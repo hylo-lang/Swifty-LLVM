@@ -171,14 +171,15 @@ jobs:
 
           ${{ matrix.unpackage_command }} ${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
 
-      - name: Set PATH to include rc.exe (Windows only)
-        if: ${{ runner.os == 'Windows' }}
-        # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
-        run: set PATH=%PATH%;%UniversalCRTSdkDir%\bin\%UCRTVersion%\x64
+      # - name: Set PATH to include rc.exe (Windows only)
+      #   if: ${{ runner.os == 'Windows' }}
+      #   # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
+      #   run: set PATH=%PATH%;%UniversalCRTSdkDir%\bin\%UCRTVersion%\x64
 
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         run: >-
+          set PATH=%PATH%;%UniversalCRTSdkDir%\bin\%UCRTVersion%\x64 &&
           path &&
           rc.exe /? &&
           cmake --debug-trycompile -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
