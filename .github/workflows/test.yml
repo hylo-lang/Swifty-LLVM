@@ -174,7 +174,7 @@ jobs:
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         run: >-
-          cmake -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
+          cmake --debug-trycompile -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
           ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }}
           -DBUILD_TESTING=YES
           -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
