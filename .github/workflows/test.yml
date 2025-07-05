@@ -179,7 +179,7 @@ jobs:
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         run: >-
-          set PATH=$env:PATH;$env:UniversalCRTSdkDir\bin\$env:UCRTVersion\x64 &&
+          Add-Content $env:GITHUB_PATH "$env:UniversalCRTSdkDir\bin\$env:UCRTVersion\x64" &&
           path &&
           rc.exe /? &&
           cmake --debug-trycompile -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
