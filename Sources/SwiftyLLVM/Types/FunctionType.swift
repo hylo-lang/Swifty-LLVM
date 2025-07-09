@@ -32,6 +32,7 @@ public struct FunctionType: IRType, Hashable {
   public var parameters: [IRType] {
     let n = LLVMCountParamTypes(llvm.raw)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
+    // var handles: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetParamTypes(llvm.raw, &handles)
     return handles.map({ AnyType($0!) as IRType })
   }

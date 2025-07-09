@@ -176,6 +176,7 @@ public struct Module {
     let h = parameters.withHandles { (p) in
       LLVMGetIntrinsicDeclaration(llvm.raw, i, p.baseAddress, parameters.count)
     }
+
     return h.map(Intrinsic.init(_:))
   }
 
@@ -808,6 +809,22 @@ public struct Module {
     at p: InsertionPoint
   ) -> Instruction {
     var a = arguments.map({ $0.llvm.raw as Optional })
+    
+    // Debug: Print function type and arguments
+    if let funcType = FunctionType(calleeType) {
+      let functionName = Function(callee)?.name ?? "unknown"
+      print("DEBUG: Call to function: \(functionName)")
+      print("DEBUG: Expected params: \(funcType.parameters.count), Got args: \(arguments.count)")
+      
+      // Check if this is a problematic call
+      if funcType.parameters.count != arguments.count {
+        print("ERROR: Parameter count mismatch!")
+        print("Function: \(functionName)")
+        print("Expected: \(funcType.parameters.count) parameters")
+        print("Got: \(arguments.count) arguments")
+      }
+    }
+    
     return .init(LLVMBuildCall2(p.llvm, calleeType.llvm.raw, callee.llvm.raw, &a, UInt32(a.count), ""))
   }
 

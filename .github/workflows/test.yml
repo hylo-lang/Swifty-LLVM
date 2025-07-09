@@ -87,9 +87,9 @@ jobs:
             cmake_generator: Xcode
 
         include:
-          - HYLO_LLVM_BUILD_RELEASE: 20250603-162600
+          - HYLO_LLVM_BUILD_RELEASE: 20250617-222524
           - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
-          - HYLO_LLVM_VERSION: '17.0.6'
+          - HYLO_LLVM_VERSION: '20.1.6'
           - llvm_package_suffix: .tar.zst
           - unpackage_command: tar -x --zstd -f
           - use_spm: true

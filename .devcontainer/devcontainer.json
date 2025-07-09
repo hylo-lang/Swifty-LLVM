@@ -10,9 +10,9 @@
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
             "installZsh": "false",
-            "username": "vscode",
-            "userUid": "1001", // 1000 is already taken by the default user in the container
-            "userGid": "1001",
+            "username": "ubuntu",
+            "userUid": "automatic",
+            "userGid": "automatic",
             "upgradePackages": "false"
         },
         "ghcr.io/devcontainers/features/git:1": {
@@ -36,7 +36,7 @@
             },
             // Add the IDs of extensions you want installed when the container is created.
             "extensions": [
-                "sswg.swift-lang"
+                "swiftlang.swift-vscode"
             ]
         }
     },
@@ -50,5 +50,5 @@
     },
     // "postCreateCommand": "sudo ./.devcontainer/postCreateCommand.sh",
     // Set `remoteUser` to `root` to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-    "remoteUser": "vscode"
+    "remoteUser": "ubuntu"
 }
