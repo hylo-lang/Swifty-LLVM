@@ -31,9 +31,16 @@ public struct FunctionType: IRType, Hashable {
   /// The parameters of the function.
   public var parameters: [IRType] {
     let n = LLVMCountParamTypes(llvm.raw)
-    var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
+    var handles: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetParamTypes(llvm.raw, &handles)
     return handles.map({ AnyType($0!) as IRType })
+  }
+
+  /// Whether the function accepts a variable number of arguments
+  ///
+  /// E.g. a function like `declare i1 @llvm.coro.suspend.retcon(...)`
+  public var isVarArg: Bool {
+    LLVMIsFunctionVarArg(llvm.raw) != 0
   }
 
 }
