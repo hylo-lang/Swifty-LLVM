@@ -13,9 +13,15 @@ ENV HYLO_LLVM_DOWNLOAD_URL="https://github.com/hylo-lang/llvm-build/releases/dow
 # Note that we do cleanup in the same layer to save disk space.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gnupg curl libzstd-dev libzstd1 lsb-release make \
-       ninja-build tar wget zstd software-properties-common python3-pip cmake && \
+       ninja-build tar wget zstd software-properties-common python3-full python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Get a recent cmake (https://www.kitware.com/cmake-python-wheels/)
+# RUN if $(/usr/bin/which cmake) ; then apt purge --auto-remove cmake ; fi
+RUN python3 -m venv python-venv
+RUN python-venv/bin/pip install --upgrade cmake
+
 
 # Get the LLVM builds for the host architecture
 RUN <<EOT bash -ex -o pipefail
