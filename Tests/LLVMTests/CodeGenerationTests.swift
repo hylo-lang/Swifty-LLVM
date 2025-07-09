@@ -180,9 +180,13 @@ extension Module {
     let x6 = insertFDiv(x5, double(180), at: endOf(b0))
     insertStore(x6, to: r, at: endOf(b0))
 
-    // %12 = call i1 @llvm.coro.end(ptr %4, i1 false)
+    // %12 = call token @llvm.coro.end.results()
+    let results = intrinsic(named: Intrinsic.llvm.coro.end.results)!
+    let resultToken = insertCall(Function(results)!, on: [], at: endOf(b0))
+    
+    // %13 = call i1 @llvm.coro.end(ptr %4, i1 false, token %12)
     let end = intrinsic(named: Intrinsic.llvm.coro.end)!
-    _ = insertCall(Function(end)!, on: [coroutineHandle, i1(0)], at: endOf(b0))
+    _ = insertCall(Function(end)!, on: [coroutineHandle, i1(0), resultToken], at: endOf(b0))
 
     // unreachable
     insertUnreachable(at: endOf(b0))
