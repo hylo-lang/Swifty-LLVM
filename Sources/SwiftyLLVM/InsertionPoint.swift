@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A cursor specifying where IR instructions should be inserted.
-public struct InsertionPoint {
+public struct InsertionPoint: @unchecked Sendable {
 
   /// A pointer the object wrapped by this instance.
   private let wrapped: ManagedPointer<LLVMBuilderRef>

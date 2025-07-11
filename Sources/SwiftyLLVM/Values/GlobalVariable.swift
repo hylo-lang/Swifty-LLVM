@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A global value in LLVM IR.
-public struct GlobalVariable: Global {
+public struct GlobalVariable: Global, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef

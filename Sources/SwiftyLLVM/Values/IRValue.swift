@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A value in LLVM IR.
-public protocol IRValue: CustomStringConvertible {
+public protocol IRValue: CustomStringConvertible, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: ValueRef { get }

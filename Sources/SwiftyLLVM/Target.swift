@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The specification of a platform on which code runs.
-public struct Target {
+public struct Target: @unchecked Sendable {
 
   /// The triple of the target.
   ///

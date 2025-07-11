@@ -2,10 +2,10 @@ internal import llvmc
 import llvmshims
 
 /// The top-level structure in an LLVM program.
-public struct Module {
+public struct Module: Sendable {
 
   /// The resources wrapped by an instance of `Module`.
-  private final class Handles {
+  private final class Handles: @unchecked Sendable {
 
     /// The context owning the contents of the LLVM module.
     let context: LLVMContextRef
