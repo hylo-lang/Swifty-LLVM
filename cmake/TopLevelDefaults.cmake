@@ -13,8 +13,8 @@ block()
 
   set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE NEVER)
   FetchContent_Declare(Hylo-CMakeModules
-    GIT_REPOSITORY https://github.com/hylo-lang/CMakeModules.git
-    GIT_TAG        6577fca
+    GIT_REPOSITORY https://github.com/tothambrus11/CMakeModules.git
+    GIT_TAG        697fd80f4a78d4f5e479d17b0c778c5f5cae488f
     OVERRIDE_FIND_PACKAGE
   )
 
