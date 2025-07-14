@@ -37,5 +37,12 @@ public struct FunctionType: IRType, Hashable {
     return handles.map({ AnyType($0!) as IRType })
   }
 
+  /// Whether the function accepts a variable number of arguments
+  ///
+  /// E.g. a function like `declare i1 @llvm.coro.suspend.retcon(...)`
+  public var isVarArg: Bool {
+    LLVMIsFunctionVarArg(llvm.raw) != 0
+  }
+
 }
 

@@ -812,16 +812,13 @@ public struct Module: Sendable {
     
     // Debug: Print function type and arguments
     if let funcType = FunctionType(calleeType) {
-      let functionName = Function(callee)?.name ?? "unknown"
-      print("DEBUG: Call to function: \(functionName)")
-      print("DEBUG: Expected params: \(funcType.parameters.count), Got args: \(arguments.count)")
-      
-      // Check if this is a problematic call
-      if funcType.parameters.count != arguments.count {
-        print("ERROR: Parameter count mismatch!")
-        print("Function: \(functionName)")
-        print("Expected: \(funcType.parameters.count) parameters")
-        print("Got: \(arguments.count) arguments")
+      // Check if this is a problematic call (mismatched number of parameters when not vararg)
+      if funcType.parameters.count != arguments.count && !funcType.isVarArg {
+        let functionName = Function(callee)?.name ?? "unknown"
+        var debugInfo = "Parameter count mismatch on LLVM function call: \(functionName)\n"
+        debugInfo += "Expected parameters: \(funcType.parameters.count)\n"
+        debugInfo += "Provided arguments: \(arguments.count)\n"
+        preconditionFailure(debugInfo)
       }
     }
     
