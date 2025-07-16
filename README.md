@@ -14,7 +14,7 @@ This package requires Swift 6.1
 
 ### LLVM
 
-This package requires LLVM 17.  Major versions of LLVM are not
+This package requires LLVM 20.  Major versions of LLVM are not
 interchangeable or backward-compatible.
 
 If you are using this package for development we strongly recommend
