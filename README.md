@@ -10,7 +10,7 @@ See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)
 
 ### Swift
 
-This package requires Swift 5.9
+This package requires Swift 6.1
 
 ### LLVM
 
@@ -85,9 +85,6 @@ file for LLVM.
    use Xcode's UI to build and test.
 
 ## Building with Swift Package Manager
-
-**Note:** SPM builds are not supported on Windows at least until Swift
-6.0 is released.
 
 First, you need to create a `pkgconfig` file specific to your
 installation and make it visible to your build tools.  We use a `bash`
