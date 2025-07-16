@@ -106,10 +106,12 @@ func windowsLinkerSettings() -> [LinkerSetting] {
     return rest[afterSlashes...]
   }
 
-  return Array(
+  var libNames = Array(
     linkLibraries
       .filter { $0.hasPrefix("LLVM") && $0.hasSuffix(".lib") }
       .map { LinkerSetting.linkedLibrary(String($0.dropLast(4))) })
+  libNames.append(.linkedLibrary("ntdll"))
+  return libNames
 }
 
 let llvmLinkerSettings = osIsWindows ? windowsLinkerSettings() : []
