@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The level of optimization used during code generation.
-public enum OptimitzationLevel: Hashable, Sendable {
+public enum OptimizationLevel: Hashable, Sendable {
 
   /// No optimization (a.k.a. `O0`).
   case none
