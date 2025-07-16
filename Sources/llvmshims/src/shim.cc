@@ -2,14 +2,6 @@
 #pragma warning(push)
 #pragma warning(disable: 4624 4244)
 
-// According to compnerd, “a Microsoft update requires a newer clang
-// than what swift ships. That’s a second chance that they pushed that
-// breaks after working around this. The best option is to use a 6.0
-// pre release.”  We don't want to impose that on downstream clients,
-// so we use this workaround, which incidentally isn't compatible with
-// Swift/C++ interop.
-#define _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH 1
-
 #endif
 
 #include "llvm-c/TargetMachine.h"
@@ -24,10 +16,9 @@
 // Used to create a fatal error in this file. Must follow all other #includes
 #undef NDEBUG
 #include <cassert>
-    // Used to create a fatal error in this file. Must follow all other
-    // #includes
+// Used to create a fatal error in this file. Must follow all other #includes
 
-    using namespace llvm;
+using namespace llvm;
 
 template<typename T, typename U>
 T* unsafe_as(U* s) {
