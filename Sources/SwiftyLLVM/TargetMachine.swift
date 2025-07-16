@@ -19,13 +19,18 @@ public struct TargetMachine: @unchecked Sendable {
     for target: Target,
     cpu: String = "",
     features: String = "",
-    optimization: OptimitzationLevel = .none,
+    optimization: OptimizationLevel = .none,
     relocation: RelocationModel = .default,
     code: CodeModel = .default
   ) {
     let handle = LLVMCreateTargetMachine(
       target.llvm, target.triple, cpu, features, optimization.codegen, relocation.llvm, code.llvm)
-    self.wrapped = .init(handle!, dispose: LLVMDisposeTargetMachine(_:))
+
+    self.wrapped = .init(
+      handle!,
+      dispose: unsafeBitCast(
+        LLVMDisposeTargetMachine(_:), to: (@Sendable (LLVMBuilderRef?) -> Void).self))
+
   }
 
   /// The triple of the machine.

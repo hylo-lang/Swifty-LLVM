@@ -80,9 +80,11 @@ public struct Module: Sendable {
   public func verify() throws {
     var message: UnsafeMutablePointer<CChar>? = nil
     defer { LLVMDisposeMessage(message) }
-    let status = withUnsafeMutablePointer(to: &message, { (m) in
-      LLVMVerifyModule(llvm.raw, LLVMReturnStatusAction, m)
-    })
+    let status = withUnsafeMutablePointer(
+      to: &message,
+      { (m) in
+        LLVMVerifyModule(llvm.raw, LLVMReturnStatusAction, m)
+      })
 
     if status != 0 {
       throw LLVMError(.init(cString: message!))
@@ -91,7 +93,7 @@ public struct Module: Sendable {
 
   /// Runs standard optimization passes on `self` tuned for given `optimization` and `machine`.
   public mutating func runDefaultModulePasses(
-    optimization: OptimitzationLevel = .none,
+    optimization: OptimizationLevel = .none,
     for machine: TargetMachine? = nil
   ) {
     let o: SwiftyLLVMPassOptimizationLevel
@@ -123,7 +125,7 @@ public struct Module: Sendable {
   /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
   public func write(
     _ type: CodeGenerationResultType,
-    for machine:TargetMachine,
+    for machine: TargetMachine,
     to filepath: String
   ) throws {
     var error: UnsafeMutablePointer<CChar>? = nil
@@ -500,7 +502,7 @@ public struct Module: Sendable {
     _ lhs: IRValue, _ rhs: IRValue,
     at p: InsertionPoint
   ) -> Instruction {
-     .init(LLVMBuildFDiv(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
+    .init(LLVMBuildFDiv(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertUnsignedRem(
@@ -597,7 +599,8 @@ public struct Module: Sendable {
     at p: InsertionPoint
   ) -> Instruction {
     var i = indices.map({ $0.llvm.raw as Optional })
-    let h = LLVMBuildInBoundsGEP2(p.llvm, baseType.llvm.raw, base.llvm.raw, &i, UInt32(i.count), "")!
+    let h = LLVMBuildInBoundsGEP2(
+      p.llvm, baseType.llvm.raw, base.llvm.raw, &i, UInt32(i.count), "")!
     return .init(h)
   }
 
@@ -657,7 +660,10 @@ public struct Module: Sendable {
     singleThread: Bool,
     at p: InsertionPoint
   ) -> Instruction {
-    let i = Instruction(LLVMBuildAtomicCmpXchg(p.llvm, atomic.llvm.raw, old.llvm.raw, new.llvm.raw, successOrdering.llvm, failureOrdering.llvm, singleThread ? 1 : 0))
+    let i = Instruction(
+      LLVMBuildAtomicCmpXchg(
+        p.llvm, atomic.llvm.raw, old.llvm.raw, new.llvm.raw, successOrdering.llvm,
+        failureOrdering.llvm, singleThread ? 1 : 0))
     if weak {
       LLVMSetWeak(i.llvm.raw, 1)
     }
@@ -672,11 +678,16 @@ public struct Module: Sendable {
     singleThread: Bool,
     at p: InsertionPoint
   ) -> Instruction {
-    .init(LLVMBuildAtomicRMW(p.llvm, operation.llvm, atomic.llvm.raw, value.llvm.raw, ordering.llvm, singleThread ? 1 : 0))
+    .init(
+      LLVMBuildAtomicRMW(
+        p.llvm, operation.llvm, atomic.llvm.raw, value.llvm.raw, ordering.llvm, singleThread ? 1 : 0
+      ))
   }
 
   @discardableResult
-  public mutating func insertFence(_ ordering: AtomicOrdering, singleThread: Bool, at p: InsertionPoint) -> Instruction {
+  public mutating func insertFence(
+    _ ordering: AtomicOrdering, singleThread: Bool, at p: InsertionPoint
+  ) -> Instruction {
     .init(LLVMBuildFence(p.llvm, ordering.llvm, singleThread ? 1 : 0, ""))
   }
 
@@ -809,7 +820,7 @@ public struct Module: Sendable {
     at p: InsertionPoint
   ) -> Instruction {
     var a = arguments.map({ $0.llvm.raw as Optional })
-    
+
     // Debug: Print function type and arguments
     if let funcType = FunctionType(calleeType) {
       // Check if this is a problematic call (mismatched number of parameters when not vararg)
@@ -821,8 +832,9 @@ public struct Module: Sendable {
         preconditionFailure(debugInfo)
       }
     }
-    
-    return .init(LLVMBuildCall2(p.llvm, calleeType.llvm.raw, callee.llvm.raw, &a, UInt32(a.count), ""))
+
+    return .init(
+      LLVMBuildCall2(p.llvm, calleeType.llvm.raw, callee.llvm.raw, &a, UInt32(a.count), ""))
   }
 
   public mutating func insertIntegerComparison(
