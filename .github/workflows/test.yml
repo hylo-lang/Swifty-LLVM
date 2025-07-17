@@ -88,10 +88,7 @@ jobs:
 
         include:
           - HYLO_LLVM_BUILD_RELEASE: 20250617-222524
-          - HYLO_LLVM_DOWNLOAD_URL: https://github.com/hylo-lang/llvm-build/releases/download
           - HYLO_LLVM_VERSION: '20.1.6'
-          - llvm_package_suffix: .tar.zst
-          - unpackage_command: tar -x --zstd -f
           - triple_cpu: x86_64
 
           - os: windows-2025
@@ -115,9 +112,6 @@ jobs:
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
     runs-on: ${{ matrix.os }}
-    env:
-      llvm_url_prefix: ${{ matrix.HYLO_LLVM_DOWNLOAD_URL }}/${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
-      llvm_package_basename: llvm-${{ matrix.HYLO_LLVM_VERSION }}-${{ matrix.triple_cpu }}-${{ matrix.triple_suffix }}-${{ matrix.HYLO_LLVM_BUILD_TYPE }}
 
     steps:
       - name: Checkout
@@ -126,6 +120,15 @@ jobs:
           submodules: true
           show-progress: false
           path: Swifty-LLVM
+
+      - name: Set up LLVM
+        uses: hylo-lang/get-llvm@v0.1.1
+
+      - name: Set up latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latestrc
+
 
       - name: Set up swift
         uses: SwiftyLab/setup-swift@latest
@@ -138,33 +141,6 @@ jobs:
           winsdk: "10.0.22621.0" # Workaround for this: https://forums.swift.org/t/swiftpm-plugin-doesnt-work-with-the-latest-visual-studio-version/78183/14
           # TL;DR: The Windows SDK had a change in 10.0.26100.0 that the Swift compiler didn't account for.
           # The Swift compiler team is aware of the issue and they are going to release a fix some time.
-
-      - name: Set up latest CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: latestrc
-
-      - name: Install LLVM
-        # 7z doesn't support decompressing from a stream or we'd do this all as one statement. Maybe
-        # we should find a way to use zstd on windows.
-        run: >-
-          curl --no-progress-meter -L -O
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-          ${{ env.llvm_url_prefix }}/${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
-
-          ${{ matrix.unpackage_command }} ${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
-
-      - name: Create LLVM pkgconfig file and make it findable
-        run: >-
-          set -ex -o pipefail
-
-          mkdir pkg-config
-
-          PATH="${{ github.workspace }}/${{ env.llvm_package_basename }}/bin:$PATH"
-          Swifty-LLVM/Tools/make-pkgconfig.sh pkg-config/llvm.pc
-
-          echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> "$GITHUB_ENV"
-        shell: bash
 
       - name: SPM Cache Setup
         # Workaround for https://github.com/actions/cache/issues/1541
