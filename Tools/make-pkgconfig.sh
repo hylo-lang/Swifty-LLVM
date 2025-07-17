@@ -8,15 +8,6 @@ filename=$1
 mkdir -p `dirname $filename`
 touch $filename
 
-# REVISIT(nickpdemarco):
-# Why does macos need the standard library explicitly linked, while linux does not?
-# This does not feel like the correct place for this logic.
-machine="$(uname -s)"
-case "${machine}" in
-  Darwin*)  libs="-lc++";;
-  *)        libs=""
-esac
-
 libs=()
 for x in -L$(llvm-config --libdir) $(llvm-config --system-libs --libs analysis bitwriter core native passes target); do
     libs+=($(printf '%q' "$x"))
