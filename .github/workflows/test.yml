@@ -92,7 +92,6 @@ jobs:
           - HYLO_LLVM_VERSION: '20.1.6'
           - llvm_package_suffix: .tar.zst
           - unpackage_command: tar -x --zstd -f
-          - use_spm: true
           - triple_cpu: x86_64
 
           - os: windows-2025
@@ -133,15 +132,12 @@ jobs:
         with:
           swift-version: ${{ env.swift-version }}
 
-      - uses: compnerd/gha-setup-vsdevenv@main
+      - name: Set up the correct version of Visual Studio Toolchain (Windows)
+        uses: compnerd/gha-setup-vsdevenv@main
         with:
           winsdk: "10.0.22621.0" # Workaround for this: https://forums.swift.org/t/swiftpm-plugin-doesnt-work-with-the-latest-visual-studio-version/78183/14
           # TL;DR: The Windows SDK had a change in 10.0.26100.0 that the Swift compiler didn't account for.
           # The Swift compiler team is aware of the issue and they are going to release a fix some time.
-
-      - name: Verify swift version
-        run: swift --version && swift --version | grep -q ${{ env.swift-version }}
-        shell: bash
 
       - name: Set up latest CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -158,18 +154,7 @@ jobs:
 
           ${{ matrix.unpackage_command }} ${{ env.llvm_package_basename }}${{ matrix.llvm_package_suffix }}
 
-      - name: Configure (CMake)
-        # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
-        run: >-
-          cmake -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
-          ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }}
-          -DBUILD_TESTING=YES
-          -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
-          ${{ runner.os == 'macOS' && '-DCMAKE_Swift_COMPILER=swiftc -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)' || '' }}
-        working-directory: Swifty-LLVM
-
-      - if: ${{ matrix.use_spm }}
-        name: Create LLVM pkgconfig file and make it findable
+      - name: Create LLVM pkgconfig file and make it findable
         run: >-
           set -ex -o pipefail
 
@@ -181,19 +166,27 @@ jobs:
           echo 'PKG_CONFIG_PATH=${{ github.workspace }}/pkg-config' >> "$GITHUB_ENV"
         shell: bash
 
-      - if: ${{ matrix.use_spm }}
+      - name: SPM Cache Setup
         # Workaround for https://github.com/actions/cache/issues/1541
         uses: actions/cache@v4.2.2
-        name: SPM cache setup
         with:
           path: hylo/.build
           key: ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-${{ hashFiles('hylo/**/Package.resolved') }}
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
 
-      - if: ${{ matrix.use_spm }}
-        name: Build and Test via SPM
+      - name: Build and Test via SPM
         run: swift test --parallel -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
+        working-directory: Swifty-LLVM
+
+      - name: Configure (CMake)
+        # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
+        run: >-
+          cmake -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
+          ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }}
+          -DBUILD_TESTING=YES
+          -DLLVM_DIR=${{ github.workspace }}/${{ env.llvm_package_basename }}/lib/cmake/llvm
+          ${{ runner.os == 'macOS' && '-DCMAKE_Swift_COMPILER=swiftc -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)' || '' }}
         working-directory: Swifty-LLVM
 
       - name: Build (CMake)
