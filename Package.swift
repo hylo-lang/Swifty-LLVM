@@ -1,10 +1,8 @@
-// swift-tools-version: 6.1
-import PackageDescription
-
-
 // BEGIN: Poor person's pkg-config processing, since SPM doesn't
 // fully understand pkg-config files on Windows.
 import Foundation
+// swift-tools-version: 6.1
+import PackageDescription
 
 #if os(Windows)
   let osIsWindows = true
@@ -24,7 +22,9 @@ func pseudoPkgConfigText(_ package: String) -> String? {
   guard let pcp = ProcessInfo.processInfo.environment["PKG_CONFIG_PATH"] else { return nil }
 
   return pcp.split(separator: pathSeparator)
-    .lazy.compactMap({ try? String(contentsOfFile: "\($0)/\(package).pc", encoding: String.Encoding.utf8) }).first
+    .lazy.compactMap({
+      try? String(contentsOfFile: "\($0)/\(package).pc", encoding: String.Encoding.utf8)
+    }).first
 }
 
 /// Returns the un-quoted, un-escaped elements in the remainder of the
@@ -34,7 +34,8 @@ func pkgConfigValues(in pcFileText: String, for key: String) -> [String] {
   let keyPattern = NSRegularExpression.escapedPattern(for: key)
   let lineHeaders = pcFileText.matches(
     forRegex: #"(?m)(?<!\\[\r]?[\n])^[ \t]*"# + keyPattern
-      + #"[ \t]*:[ \t]*"#).joined().compactMap { $0 }
+      + #"[ \t]*:[ \t]*"#
+  ).joined().compactMap { $0 }
 
   var r: [String] = []
 
@@ -47,13 +48,11 @@ func pkgConfigValues(in pcFileText: String, for key: String) -> [String] {
       open = true
     }
 
-    header:
-      while let c = input.popFirst(), !c.isNewline {
+    header: while let c = input.popFirst(), !c.isNewline {
       switch c {
       case "'", "\"":
         let quote = c
-        quoting:
-          while let c1 = input.popFirst() {
+        quoting: while let c1 = input.popFirst() {
           switch c1 {
           case "\\":
             if let c2 = input.popFirst() { add(c2) }
@@ -84,7 +83,7 @@ extension String {
       range: NSRange(startIndex..<endIndex, in: self)
     ).map { m in
       groups.map { g in
-        Range(m.range(at: g), in: self).map { self[ $0 ] }
+        Range(m.range(at: g), in: self).map { self[$0] }
       }
     }
   }
@@ -101,7 +100,8 @@ func windowsLinkerSettings() -> [LinkerSetting] {
   let libs = pkgConfigValues(in: t, for: "Libs")
   let linkLibraries = libs.lazy.filter { $0.starts(with: "-l") || $0.first != "-" }.map {
     let rest = $0.dropFirst($0.first == "-" ? 2 : 0)
-    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
+    let afterSlashes =
+      rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
       .map { rest.index(after: $0) } ?? rest.startIndex
     return rest[afterSlashes...]
   }
@@ -114,12 +114,17 @@ func windowsLinkerSettings() -> [LinkerSetting] {
   return libNames
 }
 
-let llvmLinkerSettings = osIsWindows ? windowsLinkerSettings() : []
+let llvmLinkerSettings =
+  osIsWindows
+  ? windowsLinkerSettings()
+  : [
+    .unsafeFlags(["-L/opt/homebrew/lib"], .when(platforms: [.macOS]))
+  ]
 
 let package = Package(
   name: "Swifty-LLVM",
   products: [
-    .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"]),
+    .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"])
   ],
   targets: [
     // LLVM API Wrappers.
