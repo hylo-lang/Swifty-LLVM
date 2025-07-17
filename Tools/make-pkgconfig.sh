@@ -2,20 +2,6 @@
 set -e
 set -o pipefail
 
-# Work around https://github.com/hylo-lang/llvm-build/issues/8
-#
-# We need to be resilient to no libzstd being found by pkg-config, as it is apparently not on linux.
-zstd_dash_L="$(pkg-config --silence-errors --libs-only-L libzstd || true)"
-if ! (llvm-config > /dev/null 2>&1); then
-  if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "cygwin" || "$OSTYPE" == "freebsd"* ]]; then
-    export LD_LIBRARY_PATH="${zstd_dash_L#-L}:$LD_LIBRARY_PATH"
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    export DYLD_LIBRARY_PATH="${zstd_dash_L#-L}:$DYLD_LIBRARY_PATH"
-  elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    export PATH="${zstd_dash_L#-L}:$PATH"
-  fi
-fi
-
 version=$(llvm-config --version)
 filename=$1
 
@@ -32,7 +18,7 @@ case "${machine}" in
 esac
 
 libs=()
-for x in -L$(llvm-config --libdir) ${zstd_dash_L} $(llvm-config --system-libs --libs analysis bitwriter core native passes target); do
+for x in -L$(llvm-config --libdir) $(llvm-config --system-libs --libs analysis bitwriter core native passes target); do
     libs+=($(printf '%q' "$x"))
 done
 cflags=()
