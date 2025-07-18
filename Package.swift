@@ -124,7 +124,7 @@ let llvmLinkerSettings =
 let package = Package(
   name: "Swifty-LLVM",
   platforms: [
-    .macOS(.v14),
+    .macOS(.v14)
   ],
   products: [
     .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"])
@@ -132,13 +132,16 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/apple/swift-algorithms.git",
-      from: "1.2.0"),
+      from: "1.2.0")
   ],
   targets: [
     // LLVM API Wrappers.
     .target(
       name: "SwiftyLLVM",
-      dependencies: ["llvmc", "llvmshims"],
+      dependencies: [
+        "llvmc", "llvmshims",
+        .product(name: "Algorithms", package: "swift-algorithms"),
+      ],
       swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
       linkerSettings: llvmLinkerSettings),
     .target(
