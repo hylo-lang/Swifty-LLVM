@@ -1,1 +1,1 @@
-FROM ghcr.io/tothambrus11/hylo-compiler-dev-env:v1.0.1
+FROM ghcr.io/hylo-lang/hylo-dev-toolchain:v0.1.3
