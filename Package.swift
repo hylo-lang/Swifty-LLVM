@@ -129,6 +129,11 @@ let package = Package(
   products: [
     .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"])
   ],
+  dependencies: [
+    .package(
+      url: "https://github.com/apple/swift-algorithms.git",
+      from: "1.2.0"),
+  ],
   targets: [
     // LLVM API Wrappers.
     .target(
