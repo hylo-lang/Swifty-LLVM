@@ -1,7 +1,3 @@
-@preconcurrency import Algorithms
-
-public let usage  = Algorithms.chain([1], [2])
-
 /// Properties of a pointer expressed through the data layout.
 public struct AddressSpace: Hashable, Sendable {
 
