@@ -15,6 +15,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}) # Needed?
 add_library(llvmc INTERFACE)
 target_include_directories(llvmc INTERFACE
   llvmc
+  ${LLVM_INCLUDE_DIRS}
 )
 
 # Our LLVM builds currently only vend support for one target architecture.
