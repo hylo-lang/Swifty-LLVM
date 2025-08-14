@@ -2,7 +2,7 @@ find_package(HyloLLVM)
 include(HyloUtilities)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_Swift_LANGUAGE_VERSION 5) # Needed? Useful?
+set(CMAKE_Swift_LANGUAGE_VERSION 6) # Needed? Useful?
 
 # LLVM is built this way, and we must stay compatible with it.
 # TODO: Usage requirement?
