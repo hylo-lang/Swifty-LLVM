@@ -2,7 +2,7 @@
 
 ## Analysis
 
-- [x] LLVMVerifyModule
+- [x] LLVMVerifyModule 
 
   `Module.verify()`
 
