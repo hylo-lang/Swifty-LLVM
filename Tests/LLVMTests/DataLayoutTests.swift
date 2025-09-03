@@ -7,7 +7,7 @@ final class DataLayoutTests: XCTestCase {
     var m = Module("foo")
     let t = try TargetMachine(for: .host())
 
-    let i32 = IntegerType(32, in: &m)
+    let i32  = IntegerType(32, in: &m)
     XCTAssertEqual(t.layout.bitWidth(of: i32), 32)
   }
 
