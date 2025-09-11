@@ -1,7 +1,8 @@
+// swift-tools-version: 6.1
+
 // BEGIN: Poor person's pkg-config processing, since SPM doesn't
 // fully understand pkg-config files on Windows.
 import Foundation
-// swift-tools-version: 6.1
 import PackageDescription
 
 #if os(Windows)
