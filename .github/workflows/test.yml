@@ -87,7 +87,7 @@ jobs:
             cmake_generator: Xcode
 
         include:
-          - HYLO_LLVM_BUILD_RELEASE: 20250617-222524
+          - HYLO_LLVM_BUILD_RELEASE: 20250910-063105
           - HYLO_LLVM_VERSION: '20.1.6'
           - triple_cpu: x86_64
 
@@ -122,7 +122,7 @@ jobs:
           path: Swifty-LLVM
 
       - name: Set up LLVM
-        uses: hylo-lang/get-llvm@v0.1.1
+        uses: hylo-lang/get-llvm@v0.2.1
 
       - name: Set up latest CMake and Ninja
         uses: lukka/get-cmake@latest
