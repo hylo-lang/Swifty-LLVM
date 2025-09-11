@@ -1,8 +1,10 @@
 #
 # Standard project boilerplate
 #
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.30)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
+set(CMAKE_Swift_LANGUAGE_VERSION 6.1)
+
 project(Swifty-LLVM
   VERSION 0.1.0
   DESCRIPTION "A Swifty interface for the LLVM compiler infrastructure, currently wrapping LLVM's C API."
