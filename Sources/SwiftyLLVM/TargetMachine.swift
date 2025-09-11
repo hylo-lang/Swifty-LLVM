@@ -28,8 +28,7 @@ public struct TargetMachine: @unchecked Sendable {
 
     self.wrapped = .init(
       handle!,
-      dispose: unsafeBitCast(
-        LLVMDisposeTargetMachine(_:), to: (@Sendable (LLVMBuilderRef?) -> Void).self))
+      dispose: LLVMDisposeTargetMachine(_:))
 
   }
 
