@@ -3,7 +3,7 @@
 #
 cmake_minimum_required(VERSION 3.30)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
-set(CMAKE_Swift_LANGUAGE_VERSION 6.1)
+set(CMAKE_Swift_LANGUAGE_VERSION 6)
 
 project(Swifty-LLVM
   VERSION 0.1.0
