@@ -151,6 +151,7 @@ jobs:
 
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
+        shell: bash
         run: >-
           LLVM_DIR="$(llvm-config --prefix)/lib/cmake/llvm"
 
