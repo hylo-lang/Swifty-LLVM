@@ -1,9 +1,13 @@
 #
 # Standard project boilerplate
 #
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.30)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
 set(CMAKE_Swift_LANGUAGE_VERSION 6)
+
+# Needed, otherwise we get this error: CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND
+# https://github.com/hylo-lang/Swifty-LLVM/issues/100
+set(CMAKE_CXX_SCAN_FOR_MODULES 0) 
 
 project(Swifty-LLVM
   VERSION 0.1.0
