@@ -1,7 +1,7 @@
 #
 # Standard project boilerplate
 #
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.26)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
 set(CMAKE_Swift_LANGUAGE_VERSION 6)
 
