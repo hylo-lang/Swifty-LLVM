@@ -52,19 +52,13 @@ jobs:
       env:
         HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
       with:
-        runCmd: >-
-          LLVM_DIR="${{ github.workspace }}/llvm-20.1.6-x86_64-unknown-linux-gnu-MinSizeRel/lib/cmake/llvm"
-          
-          echo "Using LLVM_DIR: $LLVM_DIR"
-
-          ls "$LLVM_DIR"
-
-          cmake -GNinja -S . -B .cmake-build
-          -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
-          -DBUILD_TESTING=YES -DLLVM_DIR="$LLVM_DIR"
-
-          cmake --build .cmake-build
-
+        runCmd: >
+          echo "Using LLVM_DIR: $LLVM_DIR" && \
+          ls "$LLVM_DIR" && \
+          cmake -GNinja -S . -B .cmake-build \
+          -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \ 
+          -DBUILD_TESTING=YES -DLLVM_DIR="$LLVM_DIR" && \
+          cmake --build .cmake-build && \
           ctest --output-on-failure --parallel --test-dir .cmake-build
         push: never
 
@@ -153,15 +147,12 @@ jobs:
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         shell: bash
         run: >-
-          LLVM_DIR="$(llvm-config --prefix)/lib/cmake/llvm"
-
-          echo "Using LLVM_DIR: $LLVM_DIR"
-
-          ls "$LLVM_DIR"
-
-          cmake -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build
-          ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }}
-          -DBUILD_TESTING=YES -DLLVM_DIR="$LLVM_DIR"
+          LLVM_DIR="$(llvm-config --prefix)/lib/cmake/llvm" && \
+          echo "Using LLVM_DIR: $LLVM_DIR" && \
+          ls "$LLVM_DIR" && \
+          cmake -G '${{ matrix.cmake_generator }}' -S . -B .cmake-build \
+          ${{ matrix.cmake_generator != 'Xcode' && format('-DCMAKE_BUILD_TYPE={0}', matrix.cmake_build_type) || '' }} \
+          -DBUILD_TESTING=YES -DLLVM_DIR="$LLVM_DIR" \
           ${{ runner.os == 'macOS' && '-DCMAKE_Swift_COMPILER=swiftc -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)' || '' }}
         working-directory: Swifty-LLVM
 
