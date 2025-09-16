@@ -91,6 +91,11 @@ extension String {
 
 }
 
+extension Substring {
+  func dropSuffix(_ suffix: String) -> Substring {
+    self.hasSuffix(suffix) ? Substring(self.dropLast(suffix.count)) : self
+  }
+}
 // END: Poor person's pkg-config processing.  Used to implement
 // `windowsSettings()` below.
 
@@ -107,10 +112,7 @@ func windowsLinkerSettings() -> [LinkerSetting] {
     return rest[afterSlashes...]
   }
 
-  return Array(
-    linkLibraries
-      .filter { $0.hasPrefix("LLVM") && $0.hasSuffix(".lib") }
-      .map { LinkerSetting.linkedLibrary(String($0.dropLast(4))) })
+  return Array(linkLibraries.map { LinkerSetting.linkedLibrary(String($0.dropSuffix(".lib"))) })
 }
 
 let llvmLinkerSettings =
