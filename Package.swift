@@ -112,7 +112,7 @@ func windowsLinkerSettings() -> [LinkerSetting] {
     return rest[afterSlashes...]
   }
 
-  return Array(linkLibraries.map { LinkerSetting.linkedLibrary(String($0.dropSuffix(".lib"))) })
+  return Array(linkLibraries.map { LinkerSetting.linkedLibrary(String($0.droppingSuffix(".lib"))) })
 }
 
 let llvmLinkerSettings =
