@@ -92,7 +92,7 @@ extension String {
 }
 
 extension Substring {
-  func dropSuffix(_ suffix: String) -> Substring {
+  func droppingSuffix(_ suffix: String) -> Substring {
     self.hasSuffix(suffix) ? Substring(self.dropLast(suffix.count)) : self
   }
 }
