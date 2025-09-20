@@ -150,6 +150,18 @@ jobs:
           # TL;DR: The Windows SDK had a change in 10.0.26100.0 that the Swift compiler didn't account for.
           # The Swift compiler team is aware of the issue and they are going to release a fix some time.
 
+      - name: SPM Cache Setup
+        uses: actions/cache@v4.2.4
+        with:
+          path: Swifty-LLVM/.build
+          key: ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-${{ hashFiles('Swifty-LLVM/**/Package.resolved') || 'no-dependencies' }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
+
+      - name: Build and Test via SPM
+        run: swift test --parallel -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
+        working-directory: Swifty-LLVM
+
       - name: Configure (CMake)
         # We explicitly point to swiftc in the PATH because otherwise CMake picks up the one in XCode.
         shell: bash
@@ -179,19 +191,6 @@ jobs:
       - name: Test (CMake)
         run: ctest --output-on-failure --parallel --test-dir Swifty-LLVM/.cmake-build ${{ matrix.cmake_generator == 'Xcode' && format('-C {0}', matrix.cmake_build_type) || '' }}
 
-      - name: SPM Cache Setup
-        uses: actions/cache@v4.2.4
-        with:
-          path: Swifty-LLVM/.build
-          key: ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-${{ hashFiles('Swifty-LLVM/**/Package.resolved') || 'no-dependencies' }}
-          restore-keys: |
-            ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
-
-      - name: Build and Test via SPM
-        run: swift test --parallel -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
-        working-directory: Swifty-LLVM
-
-      
       - name: Export Coverage
         if: ${{ contains(matrix.swift_test_options, '--enable-code-coverage') }}
         working-directory: Swifty-LLVM
