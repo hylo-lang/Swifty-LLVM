@@ -25,11 +25,6 @@ package's devcontainer (in the `.devcontainer` subdirectory) has
 assert-enabled LLVM builds preinstalled in `/opt/llvm-Debug` and
 `/opt/llvm-MinSizeRel`.
 
-*If* you want to build with the Swift Package Manager and you choose
-to get LLVM some other way, you'll need an installation with an
-`llvm-config` executable, which we will use to create a `pkg-config`
-file for LLVM.
-
 ## Building with CMake and Ninja
 
 1. **Configure**: choose a *build-directory* and a CMake *build type*
@@ -38,29 +33,28 @@ file for LLVM.
 
 	```
 	cmake -D CMAKE_BUILD_TYPE=<build-type> \
-	  -D LLVM_DIR=<LLVM>/lib/cmake/llvm   \
-      -G Ninja -S . -B <build-directory>
-    ```
+	  -D LLVM_DIR=<LLVM>/lib/cmake/llvm    \
+     -G Ninja -S . -B <build-directory>
+   ```
 
-    (on Windows substitute your shell's line continuation character
-    for `\` or just remove the line breaks and backslashes).
+   (on Windows substitute your shell's line continuation character
+   for `\` or just remove the line breaks and backslashes).
     
-    If you want to run tests, add `-DBUILD_TESTING=1`.
+   If you want to run tests, add `-DBUILD_TESTING=1`.
     
-    **Note:** on macOS, if you are not using your Xcode's default
-    toolchain, [you may need `-D
-    CMAKE_Swift_COMPILER=swiftc`](https://gitlab.kitware.com/cmake/cmake/-/issues/25750)
-    to prevent CMake from using Xcode's default `swift`.
-    
-    If this command fails it could be because you have an LLVM without
-    CMake support installed; we suggest you try one of
-    [these](https://github.com/hylo-lang/llvm-build) packages instead.
+   **Note:** on macOS, if you are not using your Xcode's default
+   toolchain, [you may need `-D CMAKE_Swift_COMPILER=swiftc`](https://gitlab.kitware.com/cmake/cmake/-/issues/25750)
+   to prevent CMake from using Xcode's default `swift`.
+   
+   If this command fails it could be because you have an LLVM without
+   CMake support installed; we suggest you try one of
+   [these](https://github.com/hylo-lang/llvm-build) packages instead.
 
-2.  **Build**: 
+2. **Build**: 
 
-    ```
-    cmake --build <build-directory>
-    ```
+   ```
+   cmake --build <build-directory>
+   ```
 
 3. **Test** (requires `-DBUILD_TESTING=1` in step 1):
 
@@ -86,48 +80,20 @@ file for LLVM.
 
 ## Building with Swift Package Manager
 
-First, you need to create a `pkgconfig` file specific to your
-installation and make it visible to your build tools.  We use a `bash`
-script as follows in the top-level directory of this project:
+You can skip the following steps if you are using development containers.
 
-```bash
-./Tools/make-pkgconfig.sh ./llvm.pc
-``` 
+1. Install [pkg-config](https://linux.die.net/man/1/pkg-config).
+  - Ubuntu: `sudo apt install pkg-config`
+  - Windows: `choco install pkgconfiglite` ([Chocolatey](https://community.chocolatey.org/packages/pkgconfiglite)) or [install it manually](https://sourceforge.net/projects/pkgconfiglite/)
+  - MacOS: `sudo port install pkgconfig` ([Mac Ports](https://ports.macports.org/port/pkgconfig/))
+installed, and `<YOUR LLVM>/pkgconfig` added to the `PKG_CONFIG_PATH` environment variable.
+2. Add your LLVM installation's `pkgconfig` subfolder to `PKG_CONFIG_PATH`.
 
-if you are on Windows, your `git` installation (which is required for
-Swift) contains a `bash` executable so you can do something like:
-
-```bash
-C:\Program Files\Git\bin\bash ./Tools/make-pkgconfig.sh ./llvm.pc
-``` 
-
-The command above generates `llvm.pc` in the current directory and
-prints its contents to the terminal.  You can either add its directory
-to your `PKG_CONFIG_PATH` environment variable for use with
-command-line tools:
-
-```bash
-export PKG_CONFIG_PATH=$PWD
-```
-
-or you can put it somewhere that `pkg_config` already searches (needed
-for use with Xcode):
-
-```bash
-sudo mkdir -p /usr/local/lib/pkgconfig && sudo mv llvm.pc /usr/local/lib/pkgconfig/
-```
-
-Once `llvm.pc` is set up, you should be able to **build this project**
-using Swift package manager:
+Now you should be able to build and test the project:
 
 ```bash
 swift build -c release
-```
-
-To test your compiler,
-
-```bash
-swift test -c release --parallel
+swift test -c release
 ```
 
 ## Notes to macOS users:
