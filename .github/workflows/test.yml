@@ -158,10 +158,6 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
 
-      - name: Find libzstd
-        run: pkg-config libzstd --libs
-      - name: Find libzstd Lonly
-        run: pkg-config libzstd --libs-only-L
       - name: Build and Test via SPM
         run: swift test --parallel -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
         working-directory: Swifty-LLVM
