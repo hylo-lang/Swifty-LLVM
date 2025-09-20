@@ -119,7 +119,7 @@ jobs:
           path: Swifty-LLVM
 
       - name: Set up LLVM
-        uses: hylo-lang/get-llvm@io-trial1
+        uses: hylo-lang/get-llvm@v0.3.0
         id: get-llvm
         with:
           llvmVersion: ${{ matrix.HYLO_LLVM_VERSION }}
