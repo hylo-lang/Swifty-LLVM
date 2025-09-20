@@ -130,7 +130,7 @@ jobs:
           path: Swifty-LLVM
 
       - name: Set up LLVM
-        uses: hylo-lang/get-llvm@io-trial
+        uses: hylo-lang/get-llvm@io-trial1
 
       - name: Set up latest CMake and Ninja
         uses: lukka/get-cmake@latest
