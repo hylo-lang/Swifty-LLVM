@@ -123,7 +123,8 @@ jobs:
         id: get-llvm
         with:
           llvmVersion: ${{ matrix.HYLO_LLVM_VERSION }}
-          llvmBuild: ${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
+          llvmBuildRelease: ${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
+          llvmBuildType: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
           addToPkgConfigPath: true
           addToPath: true
 
