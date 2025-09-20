@@ -139,9 +139,14 @@ func readProcessOutput(executable: String, arguments: [String]) -> String {
   return String(data: data, encoding: .utf8)!
 }
 
-/// LLVM requires zstd to be linked dynamically (doesn't come with the installation package).
+/// LLVM requires zstd to be linked dynamically (doesn't come with the installed package).
 /// 
-/// This technique doesn't work on Linux yet because zstd generates wrong pkgconfig file there. See https://github.com/facebook/zstd/issues/4488
+/// This technique is not reliable on Linux yet because zstd generates wrong pkgconfig file there. 
+/// See https://github.com/facebook/zstd/issues/4488 (TL;DR: libzstd.pc contains a non-architecture specific library directory on Linux).
+/// 
+/// However, it is only needed for MacOS - Windows and Linux accidentally links zstd already.
+/// 
+/// This also doesn't work on Windows due to zstd not including a .pc file on Windows.
 func findMacOsZstdLinkerFlags() -> String {
   let res =  readProcessOutput(
     executable: findExecutableOnPath(name: "pkg-config")!, 
@@ -154,7 +159,7 @@ let llvmLinkerSettings =
   osIsWindows
   ? windowsLinkerSettings()
   : [
-   .unsafeFlags([findMacOsZstdLinkerFlags()])
+    .unsafeFlags([findMacOsZstdLinkerFlags()], .when(platforms: [.macOS]))
   ]
 
 let package = Package(
