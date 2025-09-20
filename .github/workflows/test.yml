@@ -99,17 +99,6 @@ jobs:
         include:
           - HYLO_LLVM_BUILD_RELEASE: 20250910-063105
           - HYLO_LLVM_VERSION: '20.1.6'
-          - triple_cpu: x86_64
-
-          - os: windows-2025
-            triple_suffix: unknown-windows-msvc17
-
-          - os: macos-14
-            triple_suffix: apple-darwin24.1.0
-            triple_cpu: arm64
-
-          - os: ubuntu-22.04
-            triple_suffix: unknown-linux-gnu
 
           - spm_configuration: debug
             cmake_build_type: Debug
@@ -131,6 +120,12 @@ jobs:
 
       - name: Set up LLVM
         uses: hylo-lang/get-llvm@io-trial1
+        id: get-llvm
+        with:
+          llvmVersion: ${{ matrix.HYLO_LLVM_VERSION }}
+          llvmBuild: ${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
+          addToPkgConfigPath: true
+          addToPath: true
 
       - name: Set up latest CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -168,7 +163,7 @@ jobs:
         run: >
           set -exu # fail fast, print commands before executing, treat unset variables as an error
 
-          LLVM_DIR="$(llvm-config --prefix)/lib/cmake/llvm"
+          LLVM_DIR="${{ steps.get-llvm.outputs.llvmCmakeDirectory }}"
 
           [ -f "$LLVM_DIR/LLVMConfig.cmake" ] || 
           (echo "LLVMConfig.cmake not found in '$LLVM_DIR'. Available files are:"; 
