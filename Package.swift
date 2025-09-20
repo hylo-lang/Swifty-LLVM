@@ -182,7 +182,5 @@ let package = Package(
 
     // LLVM's C API
     .systemLibrary(name: "llvmc", pkgConfig: "llvm"),
-
-    .systemLibrary(name: "zstd", pkgConfig: "libzstd", ),
   ],
   cxxLanguageStandard: .cxx20)
