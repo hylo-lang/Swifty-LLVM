@@ -113,11 +113,53 @@ func windowsLinkerSettings() -> [LinkerSetting] {
   return Array(linkLibraries.map { LinkerSetting.linkedLibrary(String($0.droppingSuffix(".lib"))) })
 }
 
+/// Finds an executable named `name` or `name.exe` on the PATH.
+func findExecutableOnPath(name: String) -> String? {
+  guard let path = ProcessInfo.processInfo.environment["PATH"] else { 
+    fatalError("No PATH environment variable found")
+  }
+  let executableFileName = osIsWindows ? "\(name).exe" : name
+
+  return path.split(separator: pathSeparator)
+    .map { URL(fileURLWithPath: String($0)).appendingPathComponent(executableFileName).path }
+    .first { FileManager.default.isExecutableFile(atPath: $0) }
+}
+
+func readProcessOutput(executable: String, arguments: [String]) -> String {
+  let process = Process()
+  process.executableURL = URL(fileURLWithPath: executable)
+  process.arguments = arguments
+
+  let pipe = Pipe()
+  process.standardOutput = pipe
+  try! process.run()
+  process.waitUntilExit()
+
+  let data = pipe.fileHandleForReading.readDataToEndOfFile()
+  return String(data: data, encoding: .utf8)!
+}
+
+/// LLVM requires zstd to be linked dynamically (doesn't come with the installed package).
+/// 
+/// This technique is not reliable on Linux yet because zstd generates wrong pkgconfig file there. 
+/// See https://github.com/facebook/zstd/issues/4488 (TL;DR: libzstd.pc contains a non-architecture specific library directory on Linux).
+/// 
+/// However, it is only needed for MacOS - Windows and Linux accidentally links zstd already.
+/// 
+/// This also doesn't work on Windows due to zstd not including a .pc file on Windows.
+func findMacOsZstdLinkerFlags() -> String {
+  let res =  readProcessOutput(
+    executable: findExecutableOnPath(name: "pkg-config")!, 
+    arguments: ["libzstd", "--libs-only-L"]) 
+  print("Linker flags: " + res) 
+  return res.trimmingCharacters(in: .whitespacesAndNewlines)
+}
+
 let llvmLinkerSettings =
   osIsWindows
   ? windowsLinkerSettings()
   : [
-//    .unsafeFlags(["-L/opt/homebrew/lib"], .when(platforms: [.macOS]))
+    .unsafeFlags([findMacOsZstdLinkerFlags()], .when(platforms: [.macOS]))
   ]
 
 let package = Package(
