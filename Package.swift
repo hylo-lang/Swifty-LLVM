@@ -117,7 +117,7 @@ let llvmLinkerSettings =
   osIsWindows
   ? windowsLinkerSettings()
   : [
-    .unsafeFlags(["-L/opt/homebrew/lib"], .when(platforms: [.macOS]))
+//    .unsafeFlags(["-L/opt/homebrew/lib"], .when(platforms: [.macOS]))
   ]
 
 let package = Package(
