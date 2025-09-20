@@ -124,7 +124,7 @@ jobs:
         with:
           llvmVersion: ${{ matrix.HYLO_LLVM_VERSION }}
           llvmBuildRelease: ${{ matrix.HYLO_LLVM_BUILD_RELEASE }}
-          llvmBuildType: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
+          llvmBuildConfig: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
           addToPkgConfigPath: true
           addToPath: true
 
