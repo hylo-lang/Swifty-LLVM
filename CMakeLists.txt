@@ -20,7 +20,7 @@ list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 if (PROJECT_IS_TOP_LEVEL)
   include(cmake/TopLevelDefaults.cmake)
 endif()
-
+set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -v")
 add_subdirectory(Sources)
 
 if(BUILD_TESTING)
