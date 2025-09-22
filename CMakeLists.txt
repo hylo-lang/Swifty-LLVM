@@ -21,6 +21,8 @@ if (PROJECT_IS_TOP_LEVEL)
   include(cmake/TopLevelDefaults.cmake)
 endif()
 set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -v")
+set(CMAKE_STATIC_LIBRARY_PREFIX_Swift lib)
+
 add_subdirectory(Sources)
 
 if(BUILD_TESTING)
