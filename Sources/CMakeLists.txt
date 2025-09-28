@@ -3,11 +3,6 @@ include(HyloUtilities)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# LLVM is built this way, and we must stay compatible with it.
-# TODO: Usage requirement?
-set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
-set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}) # Needed?
 
 # The target that exposes the LLVM C API.

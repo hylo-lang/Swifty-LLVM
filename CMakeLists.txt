@@ -15,6 +15,12 @@ project(Swifty-LLVM
   HOMEPAGE_URL "https://github.com/hylo-lang/Swifty-LLVM"
   LANGUAGES C CXX Swift
 )
+
+# LLVM is built this way, and we must stay compatible with it.
+# TODO: Usage requirement?
+set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+
 enable_testing()
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 if (PROJECT_IS_TOP_LEVEL)
