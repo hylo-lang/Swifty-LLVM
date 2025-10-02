@@ -9,6 +9,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}) # Needed?
 add_library(llvmc INTERFACE)
 target_include_directories(llvmc INTERFACE
   llvmc
+  ${LLVM_INCLUDE_DIRS}
 )
 
 # Our LLVM builds currently only vend support for one target architecture.
@@ -27,6 +28,13 @@ target_link_libraries(llvmc INTERFACE ${llvm_libs})
 add_library(llvmshims STATIC llvmshims/src/shim.cc)
 target_include_directories(llvmshims PUBLIC llvmshims/include)
 target_link_libraries(llvmshims PRIVATE llvmc)
+
+# For Xcode builds, we need to explicitly propagate LLVM include directories
+# because the PRIVATE linkage doesn't propagate includes to dependent targets
+if(CMAKE_GENERATOR MATCHES "Xcode")
+  target_include_directories(llvmshims PUBLIC ${LLVM_INCLUDE_DIRS})
+endif()
+
 # The Ubuntu GitHub runner demands this option: /usr/bin/ld.gold: error:
 # lib/libllvmshims.a(shim.cc.o): requires dynamic R_X86_64_PC32 reloc against
 # '_ZN4llvm17OptimizationLevel2O0E' which may overflow at runtime; recompile with -fPIC.  We don't
