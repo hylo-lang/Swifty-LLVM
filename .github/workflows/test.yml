@@ -86,9 +86,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, ubuntu-22.04, windows-2025]
+        os: [macos-15, ubuntu-22.04, windows-2025]
         spm_configuration: [debug, release]
-        cmake_generator: [Ninja] # TODO: add back XCode generator after switching to macos-15: https://github.com/hylo-lang/hylo/issues/1730
+        cmake_generator: [Ninja, Xcode] # TODO: add back XCode generator after switching to macos-15: https://github.com/hylo-lang/hylo/issues/1730
 
         exclude:
           - os: ubuntu-22.04
