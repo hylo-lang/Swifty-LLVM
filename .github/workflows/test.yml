@@ -97,7 +97,7 @@ jobs:
             cmake_generator: Xcode
 
         include:
-          - HYLO_LLVM_BUILD_RELEASE: 20250910-063105
+          - HYLO_LLVM_BUILD_RELEASE: 20251017-220759
           - HYLO_LLVM_VERSION: '20.1.6'
 
           - spm_configuration: debug
