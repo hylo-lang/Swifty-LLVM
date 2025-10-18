@@ -43,7 +43,7 @@ jobs:
             cmake_build_type: Release
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
       with:
@@ -111,7 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, ubuntu-22.04, windows-2025]
+        os: [macos-15, ubuntu-24.04, windows-2025]
         spm_configuration: [debug, release]
 
         include:
@@ -176,12 +176,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, ubuntu-22.04, windows-2025]
+        os: [macos-15, ubuntu-24.04, windows-2025]
         cmake_build_type: [Debug, Release]
         cmake_generator: [Ninja, Xcode] # TODO: add back XCode generator after switching to macos-15: https://github.com/hylo-lang/hylo/issues/1730
 
         exclude:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             cmake_generator: Xcode
           - os: windows-2025
             cmake_generator: Xcode
