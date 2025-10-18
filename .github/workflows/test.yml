@@ -50,6 +50,12 @@ jobs:
         submodules: true
         show-progress: false
 
+    - name: Initialize Dev Container
+      uses: devcontainers/ci@v0.3
+      with:
+        runCmd: uname -a # Just print OS information
+        push: never
+
     - name: Build and run via CMake
       uses: devcontainers/ci@v0.3
       if: ${{ matrix.build-system == 'cmake' }}
@@ -68,20 +74,21 @@ jobs:
 
           cmake -GNinja -S . -B .cmake-build
           -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
-          -DBUILD_TESTING=YES -DLLVM_DIR="$LLVM_DIR"
+          -DBUILD_TESTING=YES
+          -DLLVM_DIR="$LLVM_DIR"
 
           cmake --build .cmake-build
 
           ctest --output-on-failure --parallel --test-dir .cmake-build
         push: never
 
-    - name: Build and run via SPM
-      uses: devcontainers/ci@v0.3
+    - name: Build and Test via SPM
       if: ${{ matrix.build-system == 'spm' }}
-      env:
-        HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
-      with:
-        runCmd: swift test --parallel -c ${{ matrix.spm_configuration }}
+      uses: devcontainers/ci@v0.3
+      with: # todo make pipe fail if first command fails
+        runCmd: |
+          /usr/bin/llvm-cov --version
+          swift test -c ${{ matrix.spm_configuration }} ${{ env.spm-build-options }} ${{ env.spm-test-options }} ${{ matrix.more-spm-test-options }}
         push: never
 
     - name: Export Coverage
