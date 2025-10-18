@@ -165,7 +165,7 @@ let llvmLinkerSettings =
 let package = Package(
   name: "Swifty-LLVM",
   platforms: [
-    .macOS(.v14),
+    .macOS(.v15),
   ],
   products: [
     .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"]),
