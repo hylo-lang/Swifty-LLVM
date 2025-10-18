@@ -141,6 +141,12 @@ jobs:
           addToPkgConfigPath: true
           addToPath: true
 
+      - name: Set up specific Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        if: ${{ runner.os == 'macOS' }}
+        with:
+          xcode-version: '26.0.1'
+
       - name: Set up swift
         uses: SwiftyLab/setup-swift@latest
         with:
@@ -206,6 +212,12 @@ jobs:
           llvmBuildConfig: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
           addToPkgConfigPath: true
           addToPath: true
+
+      - name: Set up specific Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        if: ${{ runner.os == 'macOS' }}
+        with:
+          xcode-version: '26.0.1'
 
       - name: Set up latest CMake and Ninja
         uses: lukka/get-cmake@latest
