@@ -11,5 +11,5 @@ public struct AddressSpace: Hashable, Sendable {
 
   /// The default address space.
   public static let `default` = AddressSpace(0)
-
+ 
 }
