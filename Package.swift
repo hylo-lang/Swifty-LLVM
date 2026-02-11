@@ -169,6 +169,10 @@ let package = Package(
   ],
   products: [
     .library(name: "SwiftyLLVM", targets: ["SwiftyLLVM"]),
+    .executable(name: "bindcheck", targets: ["BindingChecker"])
+  ],
+  dependencies: [
+    .package(url: "https://github.com/tothambrus11/ClangSwift", revision: "c0ed7f07a34859a3f157f2710c6b6add226332b7")
   ],
   targets: [
     // LLVM API Wrappers.
@@ -178,12 +182,21 @@ let package = Package(
       swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
       linkerSettings: llvmLinkerSettings),
     .target(
+      name: "SwiftyLLVM2",
+      dependencies: ["llvmc", "llvmshims"],
+      swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
+      linkerSettings: llvmLinkerSettings),
+
+    .target(
       name: "llvmshims",
       dependencies: ["llvmc"],
       linkerSettings: llvmLinkerSettings),
 
+    .executableTarget(name: "BindingChecker", dependencies: [.product(name: "Clang", package: "ClangSwift")]),
+
     // Tests.
     .testTarget(name: "LLVMTests", dependencies: ["SwiftyLLVM"]),
+    .testTarget(name: "LLVMTests2", dependencies: ["SwiftyLLVM2"]),
 
     // LLVM's C API
     .systemLibrary(name: "llvmc", pkgConfig: "llvm"),

@@ -1,0 +1,14 @@
+{
+  "originHash" : "2b531bff527d0aa129b6340cafa6bb4b147cc55439352493cbc933dd324c3f57",
+  "pins" : [
+    {
+      "identity" : "clangswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tothambrus11/ClangSwift",
+      "state" : {
+        "revision" : "c0ed7f07a34859a3f157f2710c6b6add226332b7"
+      }
+    }
+  ],
+  "version" : 3
+}
