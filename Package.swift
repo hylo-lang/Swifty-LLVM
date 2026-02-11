@@ -181,11 +181,11 @@ let package = Package(
       dependencies: ["llvmc", "llvmshims"],
       swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
       linkerSettings: llvmLinkerSettings),
-    .target(
-      name: "SwiftyLLVM2",
-      dependencies: ["llvmc", "llvmshims"],
-      swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
-      linkerSettings: llvmLinkerSettings),
+    // .target(
+    //   name: "SwiftyLLVM2",
+    //   dependencies: ["llvmc", "llvmshims"],
+    //   swiftSettings: [.unsafeFlags(["-enable-experimental-feature", "AccessLevelOnImport"])],
+    //   linkerSettings: llvmLinkerSettings),
 
     .target(
       name: "llvmshims",
@@ -196,7 +196,7 @@ let package = Package(
 
     // Tests.
     .testTarget(name: "LLVMTests", dependencies: ["SwiftyLLVM"]),
-    .testTarget(name: "LLVMTests2", dependencies: ["SwiftyLLVM2"]),
+    // .testTarget(name: "LLVMTests2", dependencies: ["SwiftyLLVM2"]),
 
     // LLVM's C API
     .systemLibrary(name: "llvmc", pkgConfig: "llvm"),

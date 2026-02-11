@@ -32,11 +32,11 @@ public struct LLVM: ~Copyable {
   }
 
   // Index corresponds to the module's ID.
-  private var modules: [LLVMModuleRef] = []
+  private var modules: [ModuleReference] = []
 
   /// Creates a new module in the context with given `name` and returns its ID.
   public mutating func createModule(named name: String) -> Module.ID {
-    let m = LLVMModuleCreateWithNameInContext(name, context)!
+    let m = ModuleReference(LLVMModuleCreateWithNameInContext(name, context)!)
     let id = Module.ID(modules.count)
     modules.append(m)
     return id
