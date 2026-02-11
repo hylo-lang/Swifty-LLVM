@@ -2,10 +2,7 @@ internal import llvmc
 import llvmshims
 
 /// The top-level structure in an LLVM program.
-public struct Module: Sendable {
-
-  /// The resources wrapped by an instance of `Module`.
-  private final class Handles: @unchecked Sendable {
+public struct Module: ~Copyable {
 
     /// The context owning the contents of the LLVM module.
     let context: LLVMContextRef
@@ -13,8 +10,8 @@ public struct Module: Sendable {
     /// The LLVM module.
     let module: LLVMModuleRef
 
-    /// Creates an instance with given properties.
-    init(context: LLVMContextRef, module: LLVMModuleRef) {
+    /// Creates an instance by taking ownership of `context` and `module`.
+    private init(context: LLVMContextRef, module: LLVMModuleRef) {
       self.context = context
       self.module = module
     }
@@ -25,23 +22,16 @@ public struct Module: Sendable {
       LLVMContextDispose(context)
     }
 
-  }
-
-  /// Handles to the resources wrapped by this instance.
-  private let handles: Handles
 
   /// Creates an instance with given `name`.
   public init(_ name: String) {
     let c = LLVMContextCreate()!
     let m = LLVMModuleCreateWithNameInContext(name, c)!
-    self.handles = .init(context: c, module: m)
+    self.init(context: c, module: m)
   }
 
   /// A handle to the LLVM object wrapped by this instance.
-  public var llvmModule: ModuleRef { .init(handles.module) }
-
-  /// A handle to the LLVM context associated with this module.
-  internal var context: LLVMContextRef { handles.context }
+  public var llvmModule: ModuleRef { .init(module) }
 
   /// The name of the module.
   public var name: String {
@@ -868,7 +858,7 @@ public struct Module: Sendable {
 
 }
 
-extension Module: CustomStringConvertible {
+extension Module: NCCustomStringConvertible {
 
   public var description: String {
     guard let s = LLVMPrintModuleToString(llvmModule.raw) else { return "" }

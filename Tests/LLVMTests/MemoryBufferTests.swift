@@ -34,7 +34,7 @@ final class MemoryBufferTests: XCTestCase {
 extension String {
 
   /// Creates an instance with the contents of `b`.
-  fileprivate init(decoding b: MemoryBuffer) {
+  fileprivate init(decoding b: borrowing MemoryBuffer) {
     self = b.withUnsafeBytes({ (contents) in
       contents.withMemoryRebound(to: UInt8.self, { (b) in String(bytes: b, encoding: .utf8)! })
     })
