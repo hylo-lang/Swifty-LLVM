@@ -66,7 +66,7 @@ public struct Module: Sendable {
   }
 
   /// The target of the module.
-  public var target: Target? {  
+  public var target: Target? {
     get {
       guard let t = LLVMGetTarget(llvmModule.raw) else { return nil }
       return try? Target(triple: .init(cString: t))
@@ -94,7 +94,7 @@ public struct Module: Sendable {
   /// Runs standard optimization passes on `self` tuned for given `optimization` and `machine`.
   public mutating func runDefaultModulePasses(
     optimization: OptimizationLevel = .none,
-    for machine: TargetMachine? = nil
+    for machine: borrowing TargetMachine? = nil
   ) {
     let o: SwiftyLLVMPassOptimizationLevel
     switch optimization {
@@ -107,7 +107,15 @@ public struct Module: Sendable {
     case .aggressive:
       o = SwiftyLLVMPassOptimizationLevelO3
     }
-    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, machine?.llvm, o)
+
+    // https://forums.swift.org/t/how-can-i-borrow-with-conditional-binding/78759
+    switch machine {
+    case .some(let m):
+      SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, m.llvm, o)
+    case .none:
+      SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, nil, o)
+      break
+    }
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
@@ -125,7 +133,7 @@ public struct Module: Sendable {
   /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
   public func write(
     _ type: CodeGenerationResultType,
-    for machine: TargetMachine,
+    for machine: borrowing TargetMachine,
     to filepath: String
   ) throws {
     var error: UnsafeMutablePointer<CChar>? = nil
@@ -140,7 +148,7 @@ public struct Module: Sendable {
   /// Compiles this module for given `machine` and returns a result of kind `type`.
   public func compile(
     _ type: CodeGenerationResultType,
-    for machine: TargetMachine
+    for machine: borrowing TargetMachine
   ) throws -> MemoryBuffer {
     var output: LLVMMemoryBufferRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
@@ -411,7 +419,7 @@ public struct Module: Sendable {
   public mutating func insertAdd(
     overflow: OverflowBehavior = .ignore,
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     switch overflow {
     case .ignore:
@@ -425,7 +433,7 @@ public struct Module: Sendable {
 
   public mutating func insertFAdd(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFAdd(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
@@ -433,7 +441,7 @@ public struct Module: Sendable {
   public mutating func insertSub(
     overflow: OverflowBehavior = .ignore,
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     switch overflow {
     case .ignore:
@@ -447,7 +455,7 @@ public struct Module: Sendable {
 
   public mutating func insertFSub(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFSub(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
@@ -455,7 +463,7 @@ public struct Module: Sendable {
   public mutating func insertMul(
     overflow: OverflowBehavior = .ignore,
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     switch overflow {
     case .ignore:
@@ -469,7 +477,7 @@ public struct Module: Sendable {
 
   public mutating func insertFMul(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFMul(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
@@ -477,7 +485,7 @@ public struct Module: Sendable {
   public mutating func insertUnsignedDiv(
     exact: Bool = false,
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     if exact {
       return .init(LLVMBuildExactUDiv(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
@@ -489,7 +497,7 @@ public struct Module: Sendable {
   public mutating func insertSignedDiv(
     exact: Bool = false,
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     if exact {
       return .init(LLVMBuildExactSDiv(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
@@ -500,77 +508,77 @@ public struct Module: Sendable {
 
   public mutating func insertFDiv(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFDiv(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertUnsignedRem(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildURem(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertSignedRem(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildSRem(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertFRem(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFRem(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertShl(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildShl(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertLShr(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildLShr(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertAShr(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildAShr(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertBitwiseAnd(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildAnd(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertBitwiseOr(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildOr(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   public mutating func insertBitwiseXor(
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildXor(p.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
   }
 
   // MARK: Memory
 
-  public mutating func insertAlloca(_ type: IRType, at p: InsertionPoint) -> Alloca {
+  public mutating func insertAlloca(_ type: IRType, at p: borrowing InsertionPoint) -> Alloca {
     .init(LLVMBuildAlloca(p.llvm, type.llvm.raw, ""))
   }
 
@@ -585,7 +593,7 @@ public struct Module: Sendable {
     of base: IRValue,
     typed baseType: IRType,
     indices: [IRValue],
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     var i = indices.map({ $0.llvm.raw as Optional })
     let h = LLVMBuildGEP2(p.llvm, baseType.llvm.raw, base.llvm.raw, &i, UInt32(i.count), "")!
@@ -596,7 +604,7 @@ public struct Module: Sendable {
     of base: IRValue,
     typed baseType: IRType,
     indices: [IRValue],
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     var i = indices.map({ $0.llvm.raw as Optional })
     let h = LLVMBuildInBoundsGEP2(
@@ -608,20 +616,20 @@ public struct Module: Sendable {
     of base: IRValue,
     typed baseType: StructType,
     index: Int,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildStructGEP2(p.llvm, baseType.llvm.raw, base.llvm.raw, UInt32(index), ""))
   }
 
   public mutating func insertLoad(
-    _ type: IRType, from source: IRValue, at p: InsertionPoint
+    _ type: IRType, from source: IRValue, at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildLoad2(p.llvm, type.llvm.raw, source.llvm.raw, ""))
   }
 
   @discardableResult
   public mutating func insertStore(
-    _ value: IRValue, to location: IRValue, at p: InsertionPoint
+    _ value: IRValue, to location: IRValue, at p: borrowing InsertionPoint
   ) -> Instruction {
     let r = LLVMBuildStore(p.llvm, value.llvm.raw, location.llvm.raw)
     LLVMSetAlignment(r, UInt32(layout.preferredAlignment(of: value.type)))
@@ -658,7 +666,7 @@ public struct Module: Sendable {
     failureOrdering: AtomicOrdering,
     weak: Bool,
     singleThread: Bool,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     let i = Instruction(
       LLVMBuildAtomicCmpXchg(
@@ -676,7 +684,7 @@ public struct Module: Sendable {
     value: IRValue,
     ordering: AtomicOrdering,
     singleThread: Bool,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(
       LLVMBuildAtomicRMW(
@@ -686,7 +694,7 @@ public struct Module: Sendable {
 
   @discardableResult
   public mutating func insertFence(
-    _ ordering: AtomicOrdering, singleThread: Bool, at p: InsertionPoint
+    _ ordering: AtomicOrdering, singleThread: Bool, at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFence(p.llvm, ordering.llvm, singleThread ? 1 : 0, ""))
   }
@@ -694,21 +702,23 @@ public struct Module: Sendable {
   // MARK: Terminators
 
   @discardableResult
-  public mutating func insertBr(to destination: BasicBlock, at p: InsertionPoint) -> Instruction {
+  public mutating func insertBr(to destination: BasicBlock, at p: borrowing InsertionPoint)
+    -> Instruction
+  {
     .init(LLVMBuildBr(p.llvm, destination.llvm.raw))
   }
 
   @discardableResult
   public mutating func insertCondBr(
     if condition: IRValue, then t: BasicBlock, else e: BasicBlock,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildCondBr(p.llvm, condition.llvm.raw, t.llvm.raw, e.llvm.raw))
   }
 
   @discardableResult
   public mutating func insertSwitch<C: Collection<(IRValue, BasicBlock)>>(
-    on value: IRValue, cases: C, default defaultCase: BasicBlock, at p: InsertionPoint
+    on value: IRValue, cases: C, default defaultCase: BasicBlock, at p: borrowing InsertionPoint
   ) -> Instruction {
     let s = LLVMBuildSwitch(p.llvm, value.llvm.raw, defaultCase.llvm.raw, UInt32(cases.count))
     for (value, destination) in cases {
@@ -718,17 +728,18 @@ public struct Module: Sendable {
   }
 
   @discardableResult
-  public mutating func insertReturn(at p: InsertionPoint) -> Instruction {
+  public mutating func insertReturn(at p: borrowing InsertionPoint) -> Instruction {
     .init(LLVMBuildRetVoid(p.llvm))
   }
 
   @discardableResult
-  public mutating func insertReturn(_ value: IRValue, at p: InsertionPoint) -> Instruction {
+  public mutating func insertReturn(_ value: IRValue, at p: borrowing InsertionPoint) -> Instruction
+  {
     .init(LLVMBuildRet(p.llvm, value.llvm.raw))
   }
 
   @discardableResult
-  public mutating func insertUnreachable(at p: InsertionPoint) -> Instruction {
+  public mutating func insertUnreachable(at p: borrowing InsertionPoint) -> Instruction {
     .init(LLVMBuildUnreachable(p.llvm))
   }
 
@@ -737,7 +748,7 @@ public struct Module: Sendable {
   public mutating func insertExtractValue(
     from whole: IRValue,
     at index: Int,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildExtractValue(p.llvm, whole.llvm.raw, UInt32(index), ""))
   }
@@ -746,7 +757,7 @@ public struct Module: Sendable {
     _ part: IRValue,
     at index: Int,
     into whole: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildInsertValue(p.llvm, whole.llvm.raw, part.llvm.raw, UInt32(index), ""))
   }
@@ -755,28 +766,28 @@ public struct Module: Sendable {
 
   public mutating func insertTrunc(
     _ source: IRValue, to target: IRType,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildTrunc(p.llvm, source.llvm.raw, target.llvm.raw, ""))
   }
 
   public mutating func insertSignExtend(
     _ source: IRValue, to target: IRType,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildSExt(p.llvm, source.llvm.raw, target.llvm.raw, ""))
   }
 
   public mutating func insertZeroExtend(
     _ source: IRValue, to target: IRType,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildZExt(p.llvm, source.llvm.raw, target.llvm.raw, ""))
   }
 
   public mutating func insertIntToPtr(
     _ source: IRValue, to target: IRType? = nil,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     let t = target ?? PointerType(in: &self)
     return .init(LLVMBuildIntToPtr(p.llvm, source.llvm.raw, t.llvm.raw, ""))
@@ -784,21 +795,21 @@ public struct Module: Sendable {
 
   public func insertPtrToInt(
     _ source: IRValue, to target: IRType,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildPtrToInt(p.llvm, source.llvm.raw, target.llvm.raw, ""))
   }
 
   public mutating func insertFPTrunc(
     _ source: IRValue, to target: IRType,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFPTrunc(p.llvm, source.llvm.raw, target.llvm.raw, ""))
   }
 
   public mutating func insertFPExtend(
     _ source: IRValue, to target: IRType,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     .init(LLVMBuildFPExt(p.llvm, source.llvm.raw, target.llvm.raw, ""))
   }
@@ -808,7 +819,7 @@ public struct Module: Sendable {
   public mutating func insertCall(
     _ callee: Function,
     on arguments: [IRValue],
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     insertCall(callee, typed: callee.valueType, on: arguments, at: p)
   }
@@ -817,7 +828,7 @@ public struct Module: Sendable {
     _ callee: IRValue,
     typed calleeType: IRType,
     on arguments: [IRValue],
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     var a = arguments.map({ $0.llvm.raw as Optional })
 
@@ -840,7 +851,7 @@ public struct Module: Sendable {
   public mutating func insertIntegerComparison(
     _ predicate: IntegerPredicate,
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     precondition(lhs.type == rhs.type)
     return .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))
@@ -849,7 +860,7 @@ public struct Module: Sendable {
   public mutating func insertFloatingPointComparison(
     _ predicate: FloatingPointPredicate,
     _ lhs: IRValue, _ rhs: IRValue,
-    at p: InsertionPoint
+    at p: borrowing InsertionPoint
   ) -> Instruction {
     precondition(lhs.type == rhs.type)
     return .init(LLVMBuildFCmp(p.llvm, predicate.llvm, lhs.llvm.raw, rhs.llvm.raw, ""))

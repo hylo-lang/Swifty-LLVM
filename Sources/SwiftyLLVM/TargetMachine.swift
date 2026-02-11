@@ -1,10 +1,10 @@
 internal import llvmc
 
 /// The settings necessary for code generation, including target information and compiler options.
-public struct TargetMachine: @unchecked Sendable {
+public struct TargetMachine: ~Copyable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  private let wrapped: ManagedPointer<LLVMTargetMachineRef>
+  internal let llvm: LLVMTargetMachineRef
 
   /// Creates an instance with given properties.
   ///
@@ -23,13 +23,12 @@ public struct TargetMachine: @unchecked Sendable {
     relocation: RelocationModel = .default,
     code: CodeModel = .default
   ) {
-    let handle = LLVMCreateTargetMachine(
+    llvm = LLVMCreateTargetMachine(
       target.llvm, target.triple, cpu, features, optimization.codegen, relocation.llvm, code.llvm)
+  }
 
-    self.wrapped = .init(
-      handle!,
-      dispose: LLVMDisposeTargetMachine(_:))
-
+  deinit {
+    LLVMDisposeTargetMachine(llvm)
   }
 
   /// The triple of the machine.
@@ -63,12 +62,9 @@ public struct TargetMachine: @unchecked Sendable {
     .init(of: self)
   }
 
-  /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMTargetMachineRef { wrapped.llvm }
-
 }
 
-extension TargetMachine: CustomStringConvertible {
+extension TargetMachine: NCCustomStringConvertible {
 
   public var description: String { triple }
 

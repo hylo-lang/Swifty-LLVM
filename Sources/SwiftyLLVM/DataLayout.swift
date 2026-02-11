@@ -1,24 +1,24 @@
 internal import llvmc
 
 /// How data are represented in memory for a particular target machine.
-public struct DataLayout: @unchecked Sendable {
+public struct DataLayout: ~Copyable{
 
   /// A handle to the LLVM object wrapped by this instance.
-  private let wrapped: ManagedPointer<LLVMTargetDataRef>
+  private let llvm: LLVMTargetDataRef
 
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMTargetDataRef) {
-    self.wrapped = .init(llvm, dispose: LLVMDisposeTargetData(_:))
+    self.llvm = llvm
   }
 
   /// Creates an instance representing the data layout associated with `machine`.
-  public init(of machine: TargetMachine) {
-    let handle = LLVMCreateTargetDataLayout(machine.llvm)
-    self.wrapped = .init(handle!, dispose: LLVMDisposeTargetData(_:))
+  public init(of machine: borrowing TargetMachine) {
+    self.llvm = LLVMCreateTargetDataLayout(machine.llvm)
   }
 
-  /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMTargetDataRef { wrapped.llvm }
+  deinit {
+    LLVMDisposeTargetData(llvm)
+  }
 
   /// Returns the number of bits in the representation of `type`'s instances.
   public func bitWidth(of type: IRType) -> Int {
@@ -64,15 +64,15 @@ public struct DataLayout: @unchecked Sendable {
 
 }
 
-extension DataLayout: Equatable {
+extension DataLayout: NCEquatable {
 
-  public static func == (lhs: Self, rhs: Self) -> Bool {
+  public static func == (lhs: borrowing Self, rhs: borrowing Self) -> Bool {
     lhs.description == rhs.description
   }
 
 }
 
-extension DataLayout: Hashable {
+extension DataLayout: NCHashable {
 
   public func hash(into hasher: inout Hasher) {
     hasher.combine(description)
@@ -80,7 +80,7 @@ extension DataLayout: Hashable {
 
 }
 
-extension DataLayout: CustomStringConvertible {
+extension DataLayout: NCCustomStringConvertible {
 
   public var description: String {
     guard let s = LLVMCopyStringRepOfTargetData(llvm) else { return "" }

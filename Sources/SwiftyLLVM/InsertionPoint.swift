@@ -1,17 +1,16 @@
 internal import llvmc
 
 /// A cursor specifying where IR instructions should be inserted.
-public struct InsertionPoint: @unchecked Sendable {
-
-  /// A pointer the object wrapped by this instance.
-  private let wrapped: ManagedPointer<LLVMBuilderRef>
+public struct InsertionPoint: ~Copyable {
+  /// A handle to the LLVM object wrapped by this instance.
+  internal let llvm: LLVMBuilderRef
 
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMBuilderRef) {
-    self.wrapped = .init(llvm, dispose: LLVMDisposeBuilder(_:))
+    self.llvm = llvm
   }
 
-  /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMBuilderRef { wrapped.llvm }
-
+  deinit {
+    LLVMDisposeBuilder(llvm)
+  }
 }

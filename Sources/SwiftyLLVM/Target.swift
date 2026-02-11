@@ -41,7 +41,7 @@ public struct Target: @unchecked Sendable {
   }
 
   /// Creates an instance representing the target associated with `machine`.
-  public init(of machine: TargetMachine) {
+  public init(of machine: borrowing TargetMachine) {
     let h = LLVMGetTargetMachineTarget(machine.llvm)
     self.init(wrapping: h!, for: machine.triple)
   }
