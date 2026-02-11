@@ -38,7 +38,7 @@ public struct Module: Sendable {
   }
 
   /// A handle to the LLVM object wrapped by this instance.
-  public var llvm: ModuleRef { .init(handles.module) }
+  public var llvmModule: ModuleRef { .init(handles.module) }
 
   /// A handle to the LLVM context associated with this module.
   internal var context: LLVMContextRef { handles.context }
@@ -46,33 +46,33 @@ public struct Module: Sendable {
   /// The name of the module.
   public var name: String {
     get {
-      String(from: llvm.raw, readingWith: LLVMGetModuleIdentifier(_:_:)) ?? ""
+      String(from: llvmModule.raw, readingWith: LLVMGetModuleIdentifier(_:_:)) ?? ""
     }
     set {
-      newValue.withCString({ LLVMSetModuleIdentifier(llvm.raw, $0, newValue.utf8.count) })
+      newValue.withCString({ LLVMSetModuleIdentifier(llvmModule.raw, $0, newValue.utf8.count) })
     }
   }
 
   /// The data layout of the module.
   public var layout: DataLayout {
     get {
-      let s = LLVMGetDataLayoutStr(llvm.raw)
+      let s = LLVMGetDataLayoutStr(llvmModule.raw)
       let h = LLVMCreateTargetData(s)
       return .init(h!)
     }
     set {
-      LLVMSetDataLayout(llvm.raw, newValue.description)
+      LLVMSetDataLayout(llvmModule.raw, newValue.description)
     }
   }
 
   /// The target of the module.
-  public var target: Target? {
+  public var target: Target? {  
     get {
-      guard let t = LLVMGetTarget(llvm.raw) else { return nil }
+      guard let t = LLVMGetTarget(llvmModule.raw) else { return nil }
       return try? Target(triple: .init(cString: t))
     }
     set {
-      LLVMSetTarget(llvm.raw, newValue?.triple)
+      LLVMSetTarget(llvmModule.raw, newValue?.triple)
     }
   }
 
@@ -83,7 +83,7 @@ public struct Module: Sendable {
     let status = withUnsafeMutablePointer(
       to: &message,
       { (m) in
-        LLVMVerifyModule(llvm.raw, LLVMReturnStatusAction, m)
+        LLVMVerifyModule(llvmModule.raw, LLVMReturnStatusAction, m)
       })
 
     if status != 0 {
@@ -107,19 +107,19 @@ public struct Module: Sendable {
     case .aggressive:
       o = SwiftyLLVMPassOptimizationLevelO3
     }
-    SwiftyLLVMRunDefaultModulePasses(llvm.raw, machine?.llvm, o)
+    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, machine?.llvm, o)
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
   public func writeBitcode(to filepath: String) throws {
-    guard LLVMWriteBitcodeToFile(llvm.raw, filepath) == 0 else {
+    guard LLVMWriteBitcodeToFile(llvmModule.raw, filepath) == 0 else {
       throw LLVMError("write failure")
     }
   }
 
   /// Returns the LLVM bitcode of this module.
   public func bitcode() -> MemoryBuffer {
-    .init(LLVMWriteBitcodeToMemoryBuffer(llvm.raw), owned: true)
+    .init(LLVMWriteBitcodeToMemoryBuffer(llvmModule.raw), owned: true)
   }
 
   /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
@@ -129,7 +129,7 @@ public struct Module: Sendable {
     to filepath: String
   ) throws {
     var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMTargetMachineEmitToFile(machine.llvm, llvm.raw, filepath, type.llvm, &error)
+    LLVMTargetMachineEmitToFile(machine.llvm, llvmModule.raw, filepath, type.llvm, &error)
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
@@ -144,7 +144,7 @@ public struct Module: Sendable {
   ) throws -> MemoryBuffer {
     var output: LLVMMemoryBufferRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvm.raw, type.llvm, &error, &output)
+    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvmModule.raw, type.llvm, &error, &output)
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
@@ -161,12 +161,12 @@ public struct Module: Sendable {
 
   /// Returns the function with given `name`, or `nil` if no such function exists.
   public func function(named name: String) -> Function? {
-    LLVMGetNamedFunction(llvm.raw, name).map(Function.init(_:))
+    LLVMGetNamedFunction(llvmModule.raw, name).map(Function.init(_:))
   }
 
   /// Returns the global with given `name`, or `nil` if no such global exists.
   public func global(named name: String) -> GlobalVariable? {
-    LLVMGetNamedGlobal(llvm.raw, name).map(GlobalVariable.init(_:))
+    LLVMGetNamedGlobal(llvmModule.raw, name).map(GlobalVariable.init(_:))
   }
 
   /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
@@ -176,7 +176,7 @@ public struct Module: Sendable {
     guard i != 0 else { return nil }
 
     let h = parameters.withHandles { (p) in
-      LLVMGetIntrinsicDeclaration(llvm.raw, i, p.baseAddress, parameters.count)
+      LLVMGetIntrinsicDeclaration(llvmModule.raw, i, p.baseAddress, parameters.count)
     }
 
     return h.map(Intrinsic.init(_:))
@@ -199,7 +199,7 @@ public struct Module: Sendable {
     _ type: IRType,
     inAddressSpace s: AddressSpace = .default
   ) -> GlobalVariable {
-    .init(LLVMAddGlobalInAddressSpace(llvm.raw, type.llvm.raw, name, s.llvm))
+    .init(LLVMAddGlobalInAddressSpace(llvmModule.raw, type.llvm.raw, name, s.llvm))
   }
 
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
@@ -212,7 +212,7 @@ public struct Module: Sendable {
       precondition(g.valueType == type)
       return g
     } else {
-      return .init(LLVMAddGlobalInAddressSpace(llvm.raw, type.llvm.raw, name, s.llvm))
+      return .init(LLVMAddGlobalInAddressSpace(llvmModule.raw, type.llvm.raw, name, s.llvm))
     }
   }
 
@@ -222,7 +222,7 @@ public struct Module: Sendable {
       precondition(f.valueType == type)
       return f
     } else {
-      return .init(LLVMAddFunction(llvm.raw, name, type.llvm.raw))
+      return .init(LLVMAddFunction(llvmModule.raw, name, type.llvm.raw))
     }
   }
 
@@ -860,7 +860,7 @@ public struct Module: Sendable {
 extension Module: CustomStringConvertible {
 
   public var description: String {
-    guard let s = LLVMPrintModuleToString(llvm.raw) else { return "" }
+    guard let s = LLVMPrintModuleToString(llvmModule.raw) else { return "" }
     defer { LLVMDisposeMessage(s) }
     return String(cString: s)
   }
