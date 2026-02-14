@@ -93,7 +93,7 @@ extension Parameter: AttributeHolder {
     let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, i)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetAttributesAtIndex(parent.llvm.raw, i, &handles)
-    return handles.map(Attribute.init(_:))
+    return handles.map(Attribute.wrapTargetIndependent(_:))
   }
 
 }

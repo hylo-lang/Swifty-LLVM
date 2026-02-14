@@ -51,7 +51,7 @@ extension Function: AttributeHolder {
     let n = LLVMGetAttributeCountAtIndex(llvm.raw, i)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetAttributesAtIndex(llvm.raw, i, &handles)
-    return handles.map(Attribute.init(_:))
+    return handles.map(Attribute.wrapTargetIndependent(_:))
   }
 
 }
@@ -69,7 +69,8 @@ extension Function.Return: AttributeHolder {
     let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, 0)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetAttributesAtIndex(parent.llvm.raw, 0, &handles)
-    return handles.map(Attribute.init(_:))
+    return handles.map { handle in Attribute.wrapTargetIndependent(handle!) }
+    // FIXME: this is unsafe, allows escaping
   }
 
 }

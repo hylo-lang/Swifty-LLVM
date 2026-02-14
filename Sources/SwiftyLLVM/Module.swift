@@ -1,83 +1,62 @@
 internal import llvmc
 import llvmshims
 
-extension Function: EntityViewWithImmutableNonThrowingCreationContext {
+extension Function: EntityView {
   public init(wrappingTemporarily handle: ValueRef) {
     self.init(handle.raw)
   }
-
   public typealias Handle = ValueRef
 
-  public typealias CreationContext = (name: String, type: FunctionType, module: ModuleRef)
-
-  public static func create(using context: CreationContext) -> Handle {
-    .init(LLVMAddFunction(context.module.raw, context.name, context.type.llvm.raw))
-  }
-
   public static func destroy(_ handle: Handle) {
-    LLVMDeleteFunction(handle.raw)
+    // LLVMDeleteFunction(handle.raw)
   }
 }
 
-extension GlobalVariable: EntityViewWithImmutableNonThrowingCreationContext {
+extension GlobalVariable: EntityView {
   public init(wrappingTemporarily handle: ValueRef) {
     self.init(handle.raw)
   }
 
   public typealias Handle = ValueRef
-  public typealias CreationContext = (
-    name: String, type: IRType, module: ModuleRef, addressSpace: AddressSpace
-  )
-
-  public static func create(using context: CreationContext) -> Handle {
-    .init(
-      LLVMAddGlobalInAddressSpace(
-        context.module.raw, context.type.llvm.raw, context.name, context.addressSpace.llvm))
-  }
 
   public static func destroy(_ handle: Handle) {
-    LLVMDeleteGlobal(handle.raw)
+    // LLVMDeleteGlobal(handle.raw)
   }
 }
 
-extension Attribute: EntityViewWithMutableNonThrowingCreationContext {
-  public static func create(using context: inout (name: String, module: ModuleRef)) -> ValueRef {
-    // .init(LLVMCreateEnumAttribute(context.module.raw, context.name.))
+public struct AnyAttribute: EntityView {
+  public init(wrappingTemporarily handle: AttributeRef) {
+    precondition(LLVMIsEnumAttribute(handle.raw) != 0)
+    self.llvm = handle
   }
 
-  public init(wrappingTemporarily handle: ValueRef) {
-    self.init(handle.raw)
-  }
-
-  public typealias Handle = ValueRef
-  public typealias CreationContext = (name: String, module: ModuleRef)
+  public typealias Handle = AttributeRef
 
   public static func destroy(_ handle: Handle) {
     // llvm context can destroy it
   }
+
+  /// Exposes a view of `self` as an attribute of the given holder.
+  public func assuming<T: AttributeHolder>(_: T.Type) -> Attribute<T> {
+    return .targetIndependent(llvm: llvm)
+  }
+
+  /// A handle to the LLVM object wrapped by this instance.
+  let llvm: AttributeRef
 }
 
-// extension Intrinsic: EntityViewWithImmutableNonThrowingCreationContext {
-//   public init(wrappingTemporarily handle: ValueRef) {
-//     self.init(handle.raw)
-//   }
+extension BasicBlock: EntityView {
+  public init(wrappingTemporarily handle: BasicBlockRef) {
+    self.init(handle.raw)
+  }
 
-//   public typealias Handle = ValueRef
-//   public typealias CreationContext = (
-//     llvmIntrinsicId: UInt32, parameters: [IRType], module: ModuleRef
-//   )
+  public typealias Handle = BasicBlockRef
 
-//   public static func create(using context: CreationContext) -> Handle {
-//     let h = context.parameters.withHandles { (p) in
-//       LLVMGetIntrinsicDeclaration(
-//         context.module.raw, context.llvmIntrinsicId, p.baseAddress, context.parameters.count)
-//     }
-//     return .init(h!)
-//   }
+  public static func destroy(_ handle: Handle) {
+    // LLVMDeleteBasicBlock(handle.raw)
+  }
+}
 
-//   public static func destroy(_ handle: Handle) {
-//   }
-// }
 /// The top-level structure in an LLVM program.
 public struct Module: ~Copyable {
 
@@ -99,8 +78,23 @@ public struct Module: ~Copyable {
     LLVMContextDispose(context)
   }
 
+  /// Functions in the module.
   var functions = BidirectionalEntityStore<Function>()
+
+  /// Global variables in the module.
   var globals = BidirectionalEntityStore<GlobalVariable>()
+
+  /// Attributes on functions/parameters/return values.
+  ///
+  /// Attributes are uniqued and stored in the context.
+  var attributes = BidirectionalEntityStore<AnyAttribute>()
+
+  /// Basic blocks of a function.
+  ///
+  /// Basic blocks are owned by their parent functions. When removing a function, all
+  /// of its blocks are removed by LLVM, so we must also remove them from the store.
+  var basicBlocks = BidirectionalEntityStore<BasicBlock>()
+
   // var intrinsics = BidirectionalEntityStore<Intrinsic>()
 
   /// Creates an instance with given `name`.
@@ -280,7 +274,13 @@ public struct Module: ~Copyable {
     _ type: IRType,
     inAddressSpace s: AddressSpace = .default
   ) -> GlobalVariable.ID {
-    globals.create(using: (name: name ?? "", type: type, module: llvmModule, addressSpace: s))
+    guard
+      let handle = LLVMAddGlobalInAddressSpace(llvmModule.raw, type.llvm.raw, name ?? "", s.llvm)
+    else {
+      fatalError(
+        "Failed to add global variable '\(name ?? "")' of type '\(type)' in address space '\(s)'.")
+    }
+    return globals.insert(ValueRef(handle))
   }
 
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
@@ -303,91 +303,118 @@ public struct Module: ~Copyable {
       precondition(functions[existing].valueType == type)
       return existing
     }
-    return functions.create(using: (name: name, type: type, module: llvmModule))
+
+    guard let handle = LLVMAddFunction(llvmModule.raw, name, type.llvm.raw) else {
+      fatalError("Failed to add function '\(name)' of type '\(type)'.")
+    }
+    return functions.insert(ValueRef(handle))
+  }
+
+  /// Creates a target-independent function attribute with given `name` and optional `value` in `module`.
+  public mutating func createFunctionAttribute(
+    _ name: Function.AttributeName, _ value: UInt64 = 0
+  ) -> AnyAttribute.ID {
+    let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
+    if let existing = attributes.id(for: handle) {
+      return existing
+    }
+    return attributes.insert(handle)
+  }
+  /// Creates a target-independent parameter attribute with given `name` and optional `value` in `module`.
+  public mutating func createParameterAttribute(
+    _ name: Parameter.AttributeName, _ value: UInt64 = 0
+  ) -> AnyAttribute.ID {
+    let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
+    if let existing = attributes.id(for: handle) {
+      return existing
+    }
+    return attributes.insert(handle)
+  }
+  /// Creates a target-independent return attribute with given `name` and optional `value` in `module`.
+  public mutating func createReturnAttribute(
+    _ name: Function.Return.AttributeName, _ value: UInt64 = 0
+  ) -> AnyAttribute.ID {
+    let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
+    if let existing = attributes.id(for: handle) {
+      return existing
+    }
+    return attributes.insert(handle)
   }
 
   /// Adds attribute `a` to `f`.
-  public mutating func addAttribute(_ a: Function.Attribute, to f: Function.ID) {
+  public mutating func addFunctionAttribute(_ a: AnyAttribute.ID, to f: Function.ID) {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    LLVMAddAttributeAtIndex(functions[f].llvm.raw, i, a.llvm)
-  }
-
-  /// Adds the attribute named `n` to `f` and returns it.
-  @discardableResult
-  public mutating func addAttribute(
-    named n: Function.AttributeName, to f: Function.ID
-  ) -> Function.Attribute {
-    let a = Function.Attribute(n, in: &self)
-    addAttribute(a, to: f)
-    return a
+    LLVMAddAttributeAtIndex(functions[f].llvm.raw, i, attributes[a].llvm.raw)
   }
 
   /// Adds attribute `a` to the return value of `f`.
-  public mutating func addAttribute(_ a: Function.Return.Attribute, to r: Function.Return) {
-    LLVMAddAttributeAtIndex(r.parent.llvm.raw, UInt32(LLVMAttributeReturnIndex), a.llvm)
-  }
-
-  /// Adds the attribute named `n` to the return value of `f` and returns it.
-  @discardableResult
-  public mutating func addAttribute(
-    named n: Function.Return.AttributeName, to r: Function.Return
-  ) -> Function.Return.Attribute {
-    let a = Function.Return.Attribute(n, in: &self)
-    addAttribute(a, to: r)
-    return a
+  public mutating func addReturnAttribute(_ a: AnyAttribute.ID, to r: Function.ID) {
+    let i = UInt32(LLVMAttributeReturnIndex)
+    LLVMAddAttributeAtIndex(functions[r].llvm.raw, i, attributes[a].llvm.raw)
   }
 
   /// Adds attribute `a` to `p`.
-  public mutating func addAttribute(_ a: Parameter.Attribute, to p: Parameter) {
+  public mutating func addParameterAttribute(_ a: AnyAttribute.ID, to p: Parameter) {  // fixme: avoid storing reference in Parameter
     let i = UInt32(p.index + 1)
-    LLVMAddAttributeAtIndex(p.parent.llvm.raw, i, a.llvm)
+    LLVMAddAttributeAtIndex(p.parent.llvm.raw, i, attributes[a].llvm.raw)
   }
 
-  /// Adds the attribute named `n` to `p` and returns it.
+  /// Adds the attribute named `n` to function `f`, and returns it.
   @discardableResult
-  public mutating func addAttribute(
-    named n: Parameter.AttributeName, to p: Parameter
-  ) -> Parameter.Attribute {
-    let a = Parameter.Attribute(n, in: &self)
-    addAttribute(a, to: p)
+  public mutating func addFunctionAttribute(
+    named n: Function.AttributeName, to f: Function.ID
+  ) -> AnyAttribute.ID {
+    let a = createFunctionAttribute(n)
+    addFunctionAttribute(a, to: f)
     return a
   }
 
-  /// Removes `a` from `f`.
-  public mutating func removeAttribute(_ a: Function.Attribute, from f: Function) {
-    switch a {
-    case .targetIndependent(let h):
-      let k = LLVMGetEnumAttributeKind(h.raw)
-      let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-      LLVMRemoveEnumAttributeAtIndex(f.llvm.raw, i, k)
-    }
+  /// Adds the attribute named `n` to the return value of function `f`, and returns it.
+  @discardableResult
+  public mutating func addReturnAttribute(
+    named n: Function.Return.AttributeName, to f: Function.ID
+  ) -> AnyAttribute.ID {
+    let a = createReturnAttribute(n)
+    addReturnAttribute(a, to: f)
+    return a
   }
 
-  /// Removes `a` from `p`.
-  public mutating func removeAttribute(_ a: Parameter.Attribute, from p: Parameter) {
-    switch a {
-    case .targetIndependent(let h):
-      let k = LLVMGetEnumAttributeKind(h.raw)
-      let i = UInt32(p.index + 1)
-      LLVMRemoveEnumAttributeAtIndex(p.parent.llvm.raw, i, k)
-    }
+  /// Adds the attribute named `n` to `p`, and returns it.
+  @discardableResult
+  public mutating func addParameterAttribute(
+    named n: Parameter.AttributeName, to p: Parameter
+  ) -> AnyAttribute.ID {
+    let a = createParameterAttribute(n)
+    addParameterAttribute(a, to: p)
+    return a
   }
 
-  /// Removes `a` from `r`.
-  public mutating func removeAttribute(_ a: Function.Return.Attribute, from r: Function.Return) {
-    switch a {
-    case .targetIndependent(let h):
-      let k = LLVMGetEnumAttributeKind(h.raw)
-      LLVMRemoveEnumAttributeAtIndex(r.parent.llvm.raw, 0, k)
-    }
+  /// Removes `a` from `f` without destroying the attribute.
+  public mutating func removeFunctionAttribute(_ a: AnyAttribute.ID, from f: Function) {
+    let k = LLVMGetEnumAttributeKind(attributes[a].llvm.raw)
+    let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
+    LLVMRemoveEnumAttributeAtIndex(f.llvm.raw, i, k)
+  }
+
+  /// Removes `a` from `p` without destroying the attribute.
+  public mutating func removeParameterAttribute(_ a: AnyAttribute.ID, from p: Parameter) {
+    let k = LLVMGetEnumAttributeKind(attributes[a].llvm.raw)
+    let i = UInt32(p.index + 1)
+    LLVMRemoveEnumAttributeAtIndex(p.parent.llvm.raw, i, k)
+  }
+
+  /// Removes `a` from `r` without destroying the attribute.
+  public mutating func removeReturnAttribute(_ a: AnyAttribute.ID, from r: Function.Return) {
+    let k = LLVMGetEnumAttributeKind(attributes[a].llvm.raw)
+    LLVMRemoveEnumAttributeAtIndex(r.parent.llvm.raw, 0, k)
   }
 
   /// Appends a basic block named `n` to `f` and returns it.
   ///
   /// A unique name is generated if `n` is empty or if `f` already contains a block named `n`.
   @discardableResult
-  public mutating func appendBlock(named n: String = "", to f: Function) -> BasicBlock {
-    .init(LLVMAppendBasicBlockInContext(context, f.llvm.raw, n))
+  public mutating func appendBlock(named n: String? = nil, to f: Function) -> BasicBlock.ID {
+    return basicBlocks.insert(.init(LLVMAppendBasicBlockInContext(context, f.llvm.raw, n ?? "")))
   }
 
   /// Returns an insertion pointing before `i`.
@@ -424,21 +451,21 @@ public struct Module: ~Copyable {
   }
 
   /// Configures whether `g` is a global constant.
-  public mutating func setGlobalConstant(_ newValue: Bool, for g: GlobalVariable) {
-    LLVMSetGlobalConstant(g.llvm.raw, newValue ? 1 : 0)
+  public mutating func setGlobalConstant(_ newValue: Bool, for g: GlobalVariable.ID) {
+    LLVMSetGlobalConstant(globals[g].llvm.raw, newValue ? 1 : 0)
   }
 
   /// Configures whether `g` is externally initialized.
-  public mutating func setExternallyInitialized(_ newValue: Bool, for g: GlobalVariable) {
-    LLVMSetExternallyInitialized(g.llvm.raw, newValue ? 1 : 0)
+  public mutating func setExternallyInitialized(_ newValue: Bool, for g: GlobalVariable.ID) {
+    LLVMSetExternallyInitialized(globals[g].llvm.raw, newValue ? 1 : 0)
   }
 
   /// Sets the initializer of `g` to `v`.
   ///
   /// - Precondition: if `g` has type pointer-to-`T`, the `newValue`
   ///   must have type `T`.
-  public mutating func setInitializer(_ newValue: IRValue, for g: GlobalVariable) {
-    LLVMSetInitializer(g.llvm.raw, newValue.llvm.raw)
+  public mutating func setInitializer(_ newValue: IRValue, for g: GlobalVariable.ID) {
+    LLVMSetInitializer(globals[g].llvm.raw, newValue.llvm.raw)
   }
 
   /// Sets the preferred alignment of `v` to `a`.
