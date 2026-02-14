@@ -59,7 +59,7 @@ public struct EntityStore<Entity: EntityView>: ~Copyable {
   ///
   /// - Requires: Entity with `id` is present in the store.
   public mutating func remove(_ id: Entity.ID) {
-    guard let handle = handles[id.raw] else {
+    guard let handle = handle(for: id) else {
       fatalError("Attempting to remove entity with ID \(id) that is not present in the store.")
     }
 
@@ -73,9 +73,9 @@ public struct EntityStore<Entity: EntityView>: ~Copyable {
   public mutating func projecting<R>(_ id: Entity.ID, _ witness: (inout Entity) throws -> R)
     rethrows -> R
   {
-    let handle = extract(id)
+    let handle = unsafeExtract(id)
     var entity = Entity(wrappingTemporarily: handle)
-    defer { restore(id, handle) }  // Safety: Required to be run even if `witness` throws.
+    defer { unsafeRestore(id, handle) }  // Safety: Required to be run even if `witness` throws.
     return try witness(&entity)
   }
 
@@ -87,17 +87,33 @@ public struct EntityStore<Entity: EntityView>: ~Copyable {
   )
     rethrows -> R
   {
-    let handle = extract(id)
+    let handle = unsafeExtract(id)
     var entity = Entity(wrappingTemporarily: handle)
-    defer { restore(id, handle) }  // Safety: Required to be run even if `witness` throws.
+    defer { unsafeRestore(id, handle) }  // Safety: Required to be run even if `witness` throws.
     return try witness(&entity, &self)
+  }
+
+  /// Temporarily extracts and projects the entity with given `id`.
+  public subscript(_ id: Entity.ID) -> Entity {
+    mutating _read {
+      let handle = unsafeExtract(id)
+      defer { unsafeRestore(id, handle) }
+      yield Entity(wrappingTemporarily: handle)
+    }
+    _modify {
+      let handle = unsafeExtract(id)
+      var entity = Entity(wrappingTemporarily: handle)
+      defer { unsafeRestore(id, handle) }
+      yield &entity
+    }
   }
 
   /// Extracts the entity with given `id` for temporary use, without destroying it.
   ///
   /// - Requires: Entity with `id` is present in the store.
-  fileprivate mutating func extract(_ id: Entity.ID) -> Entity.Handle {
-    guard let handle = handles[id.raw] else {
+  /// - Note: You must either restore the handle or destroy it yourself to avoid leaking resources.
+  public mutating func unsafeExtract(_ id: Entity.ID) -> Entity.Handle {
+    guard let handle = handle(for: id) else {
       fatalError("Attempting to extract entity with ID \(id) that is not present in the store.")
     }
 
@@ -107,10 +123,10 @@ public struct EntityStore<Entity: EntityView>: ~Copyable {
 
   /// Restores an entity with given `id` and `handle` to the store.
   ///
-  /// - Requires: Entity with `id` has been extracted from the store and not yet
+  /// - Requires: Entity with `id` has been extracted from this store and not yet
   ///   been restored since the last extraction.
-  fileprivate mutating func restore(_ id: Entity.ID, _ handle: Entity.Handle) {
-    guard handles[id.raw] == nil else {
+  public mutating func unsafeRestore(_ id: Entity.ID, _ handle: Entity.Handle) {
+    guard self.handle(for: id) == nil else {
       fatalError("Attempting to restore entity with ID \(id) that is already present in the store.")
     }
 
@@ -123,6 +139,12 @@ public struct EntityStore<Entity: EntityView>: ~Copyable {
   public func contains(_ id: Entity.ID) -> Bool {
     guard id.raw < handles.count else { return false }
     return handles[id.raw] != nil
+  }
+
+  /// Returns the handle of the entity with given `id`, if it is present in the store.
+  public func handle(for id: Entity.ID) -> Entity.Handle? {
+    guard contains(id) else { return nil }
+    return handles[id.raw]
   }
 }
 
@@ -172,7 +194,7 @@ extension EntityViewWithImmutableThrowingCreationContext where CreationContext =
 /// Shorthand for entities that don't require any context to create.
 extension EntityViewWithImmutableNonThrowingCreationContext where CreationContext == () {
   /// Creates a new entity in the store and returns its handle.
-  static func create() -> Handle {
+  public static func create() -> Handle {
     return create(using: ())
   }
 }

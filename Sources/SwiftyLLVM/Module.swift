@@ -1,27 +1,107 @@
 internal import llvmc
 import llvmshims
 
+extension Function: EntityViewWithImmutableNonThrowingCreationContext {
+  public init(wrappingTemporarily handle: ValueRef) {
+    self.init(handle.raw)
+  }
+
+  public typealias Handle = ValueRef
+
+  public typealias CreationContext = (name: String, type: FunctionType, module: ModuleRef)
+
+  public static func create(using context: CreationContext) -> Handle {
+    .init(LLVMAddFunction(context.module.raw, context.name, context.type.llvm.raw))
+  }
+
+  public static func destroy(_ handle: Handle) {
+    LLVMDeleteFunction(handle.raw)
+  }
+}
+
+extension GlobalVariable: EntityViewWithImmutableNonThrowingCreationContext {
+  public init(wrappingTemporarily handle: ValueRef) {
+    self.init(handle.raw)
+  }
+
+  public typealias Handle = ValueRef
+  public typealias CreationContext = (
+    name: String, type: IRType, module: ModuleRef, addressSpace: AddressSpace
+  )
+
+  public static func create(using context: CreationContext) -> Handle {
+    .init(
+      LLVMAddGlobalInAddressSpace(
+        context.module.raw, context.type.llvm.raw, context.name, context.addressSpace.llvm))
+  }
+
+  public static func destroy(_ handle: Handle) {
+    LLVMDeleteGlobal(handle.raw)
+  }
+}
+
+extension Attribute: EntityViewWithMutableNonThrowingCreationContext {
+  public static func create(using context: inout (name: String, module: ModuleRef)) -> ValueRef {
+    // .init(LLVMCreateEnumAttribute(context.module.raw, context.name.))
+  }
+
+  public init(wrappingTemporarily handle: ValueRef) {
+    self.init(handle.raw)
+  }
+
+  public typealias Handle = ValueRef
+  public typealias CreationContext = (name: String, module: ModuleRef)
+
+  public static func destroy(_ handle: Handle) {
+    // llvm context can destroy it
+  }
+}
+
+// extension Intrinsic: EntityViewWithImmutableNonThrowingCreationContext {
+//   public init(wrappingTemporarily handle: ValueRef) {
+//     self.init(handle.raw)
+//   }
+
+//   public typealias Handle = ValueRef
+//   public typealias CreationContext = (
+//     llvmIntrinsicId: UInt32, parameters: [IRType], module: ModuleRef
+//   )
+
+//   public static func create(using context: CreationContext) -> Handle {
+//     let h = context.parameters.withHandles { (p) in
+//       LLVMGetIntrinsicDeclaration(
+//         context.module.raw, context.llvmIntrinsicId, p.baseAddress, context.parameters.count)
+//     }
+//     return .init(h!)
+//   }
+
+//   public static func destroy(_ handle: Handle) {
+//   }
+// }
 /// The top-level structure in an LLVM program.
 public struct Module: ~Copyable {
 
-    /// The context owning the contents of the LLVM module.
-    let context: LLVMContextRef
+  /// The context owning the contents of the LLVM module.
+  let context: LLVMContextRef
 
-    /// The LLVM module.
-    let module: LLVMModuleRef
+  /// The LLVM module.
+  let module: LLVMModuleRef
 
-    /// Creates an instance by taking ownership of `context` and `module`.
-    private init(context: LLVMContextRef, module: LLVMModuleRef) {
-      self.context = context
-      self.module = module
-    }
+  /// Creates an instance by taking ownership of `context` and `module`.
+  private init(context: LLVMContextRef, module: LLVMModuleRef) {
+    self.context = context
+    self.module = module
+  }
 
-    /// Dispose of the managed resources.
-    deinit {
-      LLVMDisposeModule(module)
-      LLVMContextDispose(context)
-    }
+  /// Dispose of the managed resources.
+  deinit {
+    LLVMDisposeModule(module)
+    LLVMContextDispose(context)
+  }
 
+  var functions = BidirectionalEntityStore<Function>()
+  var globals = BidirectionalEntityStore<GlobalVariable>()
+  // var intrinsics = BidirectionalEntityStore<Intrinsic>()
 
   /// Creates an instance with given `name`.
   public init(_ name: String) {
@@ -157,34 +237,37 @@ public struct Module: ~Copyable {
     LLVMGetTypeByName2(context, name).map(AnyType.init(_:))
   }
 
-  /// Returns the function with given `name`, or `nil` if no such function exists.
-  public func function(named name: String) -> Function? {
-    LLVMGetNamedFunction(llvmModule.raw, name).map(Function.init(_:))
+  /// Returns the reference to a function with given `name`, or `nil` if no such function exists.
+  private func function(named name: String) -> Function.ID? {
+    guard let f = LLVMGetNamedFunction(llvmModule.raw, name) else { return nil }
+
+    return functions.id(for: ValueRef(f))
   }
 
-  /// Returns the global with given `name`, or `nil` if no such global exists.
-  public func global(named name: String) -> GlobalVariable? {
-    LLVMGetNamedGlobal(llvmModule.raw, name).map(GlobalVariable.init(_:))
+  /// Returns a the global with given `name`, or `nil` if no such global exists.
+  public func global(named name: String) -> GlobalVariable.ID? {
+    guard let ref = LLVMGetNamedGlobal(llvmModule.raw, name) else { return nil }
+    return globals.id(for: .init(ref))
   }
 
-  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
+  /// Returns the intrinsic function with given `name`, specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
-  public mutating func intrinsic(named name: String, for parameters: [IRType] = []) -> Intrinsic? {
-    let i = name.withCString({ LLVMLookupIntrinsicID($0, name.utf8.count) })
-    guard i != 0 else { return nil }
+  public mutating func intrinsic(named name: String, for parameters: [IRType] = []) -> Function.ID?
+  {
+    let llvmId = name.withCString({ LLVMLookupIntrinsicID($0, name.utf8.count) })
+    guard llvmId != 0 else { return nil }
 
-    let h = parameters.withHandles { (p) in
-      LLVMGetIntrinsicDeclaration(llvmModule.raw, i, p.baseAddress, parameters.count)
-    }
-
-    return h.map(Intrinsic.init(_:))
+    let intrinsic = parameters.withHandles { (p) in
+      LLVMGetIntrinsicDeclaration(self.llvmModule.raw, llvmId, p.baseAddress, parameters.count)
+    }!
+    return functions.id(for: ValueRef(intrinsic))!
   }
 
   /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
   public mutating func intrinsic(
     named name: Intrinsic.Name, for parameters: [IRType] = []
-  ) -> Intrinsic? {
+  ) -> Function.ID? {
     intrinsic(named: name.value, for: parameters)
   }
 
@@ -193,11 +276,11 @@ public struct Module: ~Copyable {
   /// A unique name is generated if `name` is empty or if `self` already contains a global with
   /// the same name.
   public mutating func addGlobalVariable(
-    _ name: String = "",
+    _ name: String? = nil,
     _ type: IRType,
     inAddressSpace s: AddressSpace = .default
-  ) -> GlobalVariable {
-    .init(LLVMAddGlobalInAddressSpace(llvmModule.raw, type.llvm.raw, name, s.llvm))
+  ) -> GlobalVariable.ID {
+    globals.create(using: (name: name ?? "", type: type, module: llvmModule, addressSpace: s))
   }
 
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
@@ -205,35 +288,34 @@ public struct Module: ~Copyable {
     _ name: String,
     _ type: IRType,
     inAddressSpace s: AddressSpace = .default
-  ) -> GlobalVariable {
-    if let g = global(named: name) {
-      precondition(g.valueType == type)
+  ) -> GlobalVariable.ID {
+    if let g = global(named: name) {  // todo avoid copy upon extraction. We may need switch.
+      precondition(globals[g].valueType == type)
       return g
     } else {
-      return .init(LLVMAddGlobalInAddressSpace(llvmModule.raw, type.llvm.raw, name, s.llvm))
+      return addGlobalVariable(name, type, inAddressSpace: s)
     }
   }
 
   /// Returns a function with given `name` and `type`, declaring it if it doesn't exist.
-  public mutating func declareFunction(_ name: String, _ type: FunctionType) -> Function {
-    if let f = function(named: name) {
-      precondition(f.valueType == type)
-      return f
-    } else {
-      return .init(LLVMAddFunction(llvmModule.raw, name, type.llvm.raw))
+  public mutating func declareFunction(_ name: String, _ type: FunctionType) -> Function.ID {
+    if let existing = function(named: name) {
+      precondition(functions[existing].valueType == type)
+      return existing
     }
+    return functions.create(using: (name: name, type: type, module: llvmModule))
   }
 
   /// Adds attribute `a` to `f`.
-  public mutating func addAttribute(_ a: Function.Attribute, to f: Function) {
+  public mutating func addAttribute(_ a: Function.Attribute, to f: Function.ID) {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    LLVMAddAttributeAtIndex(f.llvm.raw, i, a.llvm)
+    LLVMAddAttributeAtIndex(functions[f].llvm.raw, i, a.llvm)
   }
 
   /// Adds the attribute named `n` to `f` and returns it.
   @discardableResult
   public mutating func addAttribute(
-    named n: Function.AttributeName, to f: Function
+    named n: Function.AttributeName, to f: Function.ID
   ) -> Function.Attribute {
     let a = Function.Attribute(n, in: &self)
     addAttribute(a, to: f)
@@ -242,7 +324,7 @@ public struct Module: ~Copyable {
 
   /// Adds attribute `a` to the return value of `f`.
   public mutating func addAttribute(_ a: Function.Return.Attribute, to r: Function.Return) {
-    LLVMAddAttributeAtIndex(r.parent.llvm.raw, 0, a.llvm)
+    LLVMAddAttributeAtIndex(r.parent.llvm.raw, UInt32(LLVMAttributeReturnIndex), a.llvm)
   }
 
   /// Adds the attribute named `n` to the return value of `f` and returns it.
