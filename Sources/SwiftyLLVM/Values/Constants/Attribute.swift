@@ -29,18 +29,15 @@ public enum Attribute<T: AttributeHolder>: Hashable, Sendable {
   /// A target-independent attribute.
   case targetIndependent(llvm: AttributeRef)
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMAttributeRef?) {
-    if LLVMIsEnumAttribute(llvm) != 0 {
-      self = .targetIndependent(llvm: .init(llvm!))
-    } else {
-      fatalError()
-    }
+  /// Creates a target-independent attribute wrapping `llvm`.
+  private init(_ llvm: LLVMAttributeRef?) {
+    precondition(LLVMIsEnumAttribute(llvm) != 0)
+    self = .targetIndependent(llvm: .init(llvm!))
   }
 
-  /// Creates a target-independent attribute with given `name` and optional `value` in `module`.
-  public init(_ name: T.AttributeName, _ value: UInt64 = 0, in module: inout Module) {
-    self = .targetIndependent(llvm: .init(LLVMCreateEnumAttribute(module.context, name.id, value)!))
+  /// Creates a target-independent attribute wrapping `llvm`.
+  static func wrapTargetIndependent(_ llvm: LLVMAttributeRef?) -> Self {
+    return Self(llvm)
   }
 
   /// The value of the attribute if it is target-independent.
