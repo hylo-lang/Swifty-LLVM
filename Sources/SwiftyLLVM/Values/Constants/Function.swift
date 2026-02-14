@@ -21,7 +21,7 @@ public struct Function: Global, Hashable, Sendable {
   }
 
   /// The parameters of the function.
-  public var parameters: Parameters { .init(of: self) }
+  public var parameters: Parameters { .init(of: self) } // todo make this non-escapable
 
   /// The basic blocks of the function.
   public var basicBlocks: [BasicBlock] {
@@ -68,7 +68,7 @@ extension Function {
 extension Function {
 
   /// A collection containing the parameters of a LLVM IR function.
-  public struct Parameters: BidirectionalCollection, Sendable {
+  public struct Parameters: BidirectionalCollection, Sendable { // todo make this non-copyable
 
     public typealias Index = Int
 
