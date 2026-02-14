@@ -13,40 +13,13 @@ public struct BidirectionalEntityStore<Entity: EntityView>: ~Copyable where Enti
   /// Creates an empty entity store.
   public init() {}
 
-  // Note: these are not so nice, they require an extra array lookup. It would be nice if
-  // `create` also returned the handle, but then we would either have to have that all the
-  // time or make another variant of each create function. In practice, array lookup is
-  // probably negligible overhead.
-
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: inout Entity.CreationContext) throws -> Entity.ID
-  where Entity: EntityViewWithMutableThrowingCreationContext {
-    let id = try store.create(using: &context)
-    handleToID[store.handle(for: id)!] = id
-    return id
-  }
-
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: inout Entity.CreationContext) -> Entity.ID
-  where Entity: EntityViewWithMutableNonThrowingCreationContext {
-    let id = store.create(using: &context)
-    handleToID[store.handle(for: id)!] = id
-    return id
-  }
-
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: Entity.CreationContext) throws -> Entity.ID
-  where Entity: EntityViewWithImmutableThrowingCreationContext {
-    let id = try store.create(using: context)
-    handleToID[store.handle(for: id)!] = id
-    return id
-  }
-
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: Entity.CreationContext) -> Entity.ID
-  where Entity: EntityViewWithImmutableNonThrowingCreationContext {
-    let id = store.create(using: context)
-    handleToID[store.handle(for: id)!] = id
+  /// Inserts an entity handle into the store and returns its ID.
+  /// 
+  /// Precondition: `handle` must not be already managed by this store.
+  public mutating func insert(_ handle: Entity.Handle) -> Entity.ID {
+    precondition(!handleToID.keys.contains(handle), "Attempting to insert an already present handle.")
+    let id = store.insert(handle)
+    handleToID[handle] = id
     return id
   }
 

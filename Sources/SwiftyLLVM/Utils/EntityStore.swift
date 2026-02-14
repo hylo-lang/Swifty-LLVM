@@ -19,38 +19,11 @@ public struct EntityStore<Entity: EntityView>: ~Copyable {
     }
   }
 
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: inout Entity.CreationContext) throws -> Entity.ID
-  where Entity: EntityViewWithMutableThrowingCreationContext {
+  /// Inserts an entity handle into the store and starts managing it, returning its new ID.
+  /// 
+  /// Precondition: `handle` must not be already managed by this store.
+  public mutating func insert(_ handle: Entity.Handle) -> Entity.ID {
     let id = Entity.ID(handles.count)
-    let handle = try Entity.create(using: &context)
-    handles.append(handle)
-    return id
-  }
-
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: inout Entity.CreationContext) -> Entity.ID
-  where Entity: EntityViewWithMutableNonThrowingCreationContext {
-    let id = Entity.ID(handles.count)
-    let handle = Entity.create(using: &context)
-    handles.append(handle)
-    return id
-  }
-
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: Entity.CreationContext) throws -> Entity.ID
-  where Entity: EntityViewWithImmutableThrowingCreationContext {
-    let id = Entity.ID(handles.count)
-    let handle = try Entity.create(using: context)
-    handles.append(handle)
-    return id
-  }
-
-  /// Creates a new entity in the store, returning its ID.
-  public mutating func create(using context: Entity.CreationContext) -> Entity.ID
-  where Entity: EntityViewWithImmutableNonThrowingCreationContext {
-    let id = Entity.ID(handles.count)
-    let handle = Entity.create(using: context)
     handles.append(handle)
     return id
   }
@@ -156,47 +129,8 @@ public protocol EntityView: ~Copyable {
   /// Wraps a handle for temporary use as an instance of `Self`.
   init(wrappingTemporarily handle: Handle)
 
-  /// Data required to create the underlying instance of `Self`.
-  associatedtype CreationContext
-
   /// Destroys an instance with the given `handle`.
   static func destroy(_ handle: Handle)
-}
-
-public protocol EntityViewWithImmutableThrowingCreationContext: EntityView {
-  /// Creates a new instance to be inserted into the store, handing off ownership via the returned handle.
-  static func create(using context: CreationContext) throws -> Handle
-}
-
-public protocol EntityViewWithMutableThrowingCreationContext: EntityView {
-  /// Creates a new instance to be inserted into the store, handing off ownership via the returned handle.
-  static func create(using context: inout CreationContext) throws -> Handle
-}
-
-public protocol EntityViewWithImmutableNonThrowingCreationContext: EntityView {
-  /// Creates a new instance to be inserted into the store, handing off ownership via the returned handle.
-  static func create(using context: CreationContext) -> Handle
-}
-
-public protocol EntityViewWithMutableNonThrowingCreationContext: EntityView {
-  /// Creates a new instance to be inserted into the store, handing off ownership via the returned handle.
-  static func create(using context: inout CreationContext) -> Handle
-}
-
-/// Shorthand for entities that don't require any context to create.
-extension EntityViewWithImmutableThrowingCreationContext where CreationContext == () {
-  /// Creates a new entity in the store and returns its handle.
-  static func create() throws -> Handle {
-    return try create(using: ())
-  }
-}
-
-/// Shorthand for entities that don't require any context to create.
-extension EntityViewWithImmutableNonThrowingCreationContext where CreationContext == () {
-  /// Creates a new entity in the store and returns its handle.
-  public static func create() -> Handle {
-    return create(using: ())
-  }
 }
 
 /// Identifies an entity of given type in an `EntityStore`.
