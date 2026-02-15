@@ -1,23 +1,29 @@
 internal import llvmc
 
 /// A constant array in LLVM IR.
-public struct ArrayConstant: Hashable, Sendable {
+public struct ArrayConstant: IRValue, Hashable, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// The number of elements in the array.
-  public let count: Int
+  /// Creates an instance wrapping `llvm`.
+  public init(wrappingTemporarily llvm: ValueRef) {
+    self.llvm = llvm
+  }
 
   /// Creates a constant array of `type` in `module`, filled with the contents of `elements`.
   ///
   /// - Requires: The type of each element in `contents` is `type`.
   public init<S: Sequence>(
-    of type: IRType, containing elements: S, in module: inout Module
-  ) where S.Element == IRValue {
+    of type: any IRType, containing elements: S, in module: inout Module
+  ) where S.Element == any IRValue {
     var values = elements.map({ $0.llvm.raw as Optional })
     self.llvm = .init(LLVMConstArray(type.llvm.raw, &values, UInt32(values.count)))
-    self.count = values.count
+  }
+
+  public var count: Int {
+    let type = LLVMTypeOf(self.llvm.raw)
+    return Int(LLVMGetArrayLength(type))
   }
 
   /// Creates a constant array of `i8` in `module`, filled with the contents of `bytes`.

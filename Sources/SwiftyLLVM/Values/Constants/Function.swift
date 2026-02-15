@@ -7,12 +7,17 @@ public struct Function: Global, Hashable, Sendable {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
+  public init(wrappingTemporarily llvm: ValueRef) {
+    self.llvm = llvm
+  }
+
+  /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMValueRef) {
     self.llvm = .init(llvm)
   }
 
   /// Creates an instance with `v`, failing iff `v` isn't a function.
-  public init?(_ v: IRValue) {
+  public init?(_ v: any IRValue) {
     if let h = LLVMIsAFunction(v.llvm.raw) {
       self.llvm = .init(h)
     } else {
@@ -21,7 +26,7 @@ public struct Function: Global, Hashable, Sendable {
   }
 
   /// The parameters of the function.
-  public var parameters: Parameters { .init(of: self) } // todo make this non-escapable
+  public var parameters: Parameters { .init(of: self) }  // todo make this non-escapable
 
   /// The basic blocks of the function.
   public var basicBlocks: [BasicBlock] {
@@ -46,7 +51,6 @@ public struct Function: Global, Hashable, Sendable {
 
 extension Function {
 
-
   /// The return value of a LLVM IR function.
   public struct Return: Hashable, Sendable {
 
@@ -68,7 +72,7 @@ extension Function {
 extension Function {
 
   /// A collection containing the parameters of a LLVM IR function.
-  public struct Parameters: BidirectionalCollection, Sendable { // todo make this non-copyable
+  public struct Parameters: BidirectionalCollection, Sendable {  // todo make this non-copyable
 
     public typealias Index = Int
 
@@ -103,7 +107,7 @@ extension Function {
 
     public subscript(position: Int) -> Parameter {
       precondition(position >= 0 && position < count, "index is out of bounds")
-      return .init(LLVMGetParam(parent.llvm.raw, UInt32(position)), position)
+      return Parameter(LLVMGetParam(parent.llvm.raw, UInt32(position)))
     }
 
   }

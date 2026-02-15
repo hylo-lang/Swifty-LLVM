@@ -6,14 +6,19 @@ public struct ArrayType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
+  /// Creates an instance wrapping `llvm`.
+  public init(wrappingTemporarily llvm: TypeRef) {
+    self.llvm = llvm
+  }
+
   /// Creates an instance representing arrays of `count` `element`s in `module`.
-  public init(_ count: Int, _ element: IRType, in module: inout Module) {
+  public init(_ count: Int, _ element: any IRType, in module: inout Module) {
     precondition(LLVMGetTypeContext(element.llvm.raw) == module.context)
     self.llvm = .init(LLVMArrayType(element.llvm.raw, UInt32(count)))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a void type.
-  public init?(_ t: IRType) {
+  public init?(_ t: any IRType) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMArrayTypeKind {
       self.llvm = t.llvm
     } else {
@@ -22,7 +27,7 @@ public struct ArrayType: IRType, Hashable {
   }
 
   /// The type of an element in instances of this type.
-  public var element: IRType { AnyType(LLVMGetElementType(llvm.raw)) }
+  public var element: any IRType { AnyType(LLVMGetElementType(llvm.raw)) }
 
   /// The number of elements in instances of this type.
   public var count: Int { Int(LLVMGetArrayLength(llvm.raw)) }
@@ -30,8 +35,8 @@ public struct ArrayType: IRType, Hashable {
   /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `elements`.
   public func constant<S: Sequence>(
     contentsOf elements: S, in module: inout Module
-  ) -> ArrayConstant where S.Element == IRValue {
+  ) -> ArrayConstant where S.Element == any IRValue {
     .init(of: self, containing: elements, in: &module)
   }
-  
+
 }

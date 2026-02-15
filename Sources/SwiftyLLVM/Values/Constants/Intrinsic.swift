@@ -1,5 +1,5 @@
-internal import llvmc
 import Foundation
+internal import llvmc
 
 /// An intrinsic function known to LLVM.
 ///
@@ -10,6 +10,11 @@ public struct Intrinsic: Global, Hashable, Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
+
+  /// Creates an instance wrapping `llvm`.
+  public init(wrappingTemporarily llvm: ValueRef) {
+    self.llvm = llvm
+  }
 
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMValueRef) {
@@ -31,7 +36,7 @@ public struct Intrinsic: Global, Hashable, Sendable {
     precondition(!isOverloaded, "Overloaded intrinsics do not have a single name")
     // See https://searchfox.org/llvm/rev/7a089bc4c00fe35c8f07b7c420be6535ad331161/llvm/lib/IR/Intrinsics.cpp#51
     // and https://searchfox.org/llvm/rev/7a089bc4c00fe35c8f07b7c420be6535ad331161/llvm/lib/IR/Core.cpp#2474
- 
+
     // We may get the name by LLVMIntrinsicCopyOverloadedName2 if we can recover the parameters based on the ValueRef (that contains a ptr),
     // or we could just save them additionally when creating the intrinsic when the user explicitly provides this list. This seems wasteful though.
     return String(from: identifier, readingWith: LLVMIntrinsicGetName(_:_:)) ?? ""

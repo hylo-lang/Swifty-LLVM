@@ -7,12 +7,17 @@ public struct FloatingPointType: IRType, Hashable {
   public let llvm: TypeRef
 
   /// Creates an instance wrapping `llvm`.
+  public init(wrappingTemporarily llvm: TypeRef) {
+    self.llvm = llvm
+  }
+
+  /// Creates an instance wrapping `llvm`.
   private init(_ llvm: LLVMTypeRef) {
     self.llvm = .init(llvm)
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a floating point type.
-  public init?(_ t: IRType) {
+  public init?(_ t: any IRType) {
     switch LLVMGetTypeKind(t.llvm.raw) {
     case LLVMHalfTypeKind, LLVMFloatTypeKind, LLVMDoubleTypeKind, LLVMFP128TypeKind:
       self.llvm = t.llvm
