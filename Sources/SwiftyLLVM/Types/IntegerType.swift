@@ -14,7 +14,7 @@ public struct IntegerType: IRType, Hashable {
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't an integer type.
-  public init?(_ t: IRType) {
+  public init?(_ t: any IRType) {
     guard LLVMGetTypeKind(t.llvm.raw) == LLVMIntegerTypeKind else { return nil }
     self.llvm = t.llvm
   }
@@ -22,6 +22,11 @@ public struct IntegerType: IRType, Hashable {
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMTypeRef) {
     self.llvm = .init(llvm)
+  }
+
+  /// Creates an instance wrapping `handle`.
+  public init(wrappingTemporarily handle: TypeRef) {
+    self.init(handle.raw)
   }
 
   /// The number of bits in the representation of the type's instances.

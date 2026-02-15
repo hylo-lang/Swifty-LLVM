@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The type of a value in LLVM IR.
-public protocol IRType: CustomStringConvertible, Sendable {
+public protocol IRType: CustomStringConvertible, Sendable, LLVMEntity where Handle == TypeRef {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: TypeRef { get }
@@ -21,7 +21,7 @@ extension IRType {
   public var isSized: Bool { LLVMTypeIsSized(llvm.raw) != 0 }
 
   /// The `null` instance of this type (e.g., the zero of `i32`).
-  public var null: IRValue { AnyValue(LLVMConstNull(llvm.raw)) }
+  public var null: any IRValue { AnyValue(LLVMConstNull(llvm.raw)) }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.
   public static func == <R: IRType>(lhs: Self, rhs: R) -> Bool {
@@ -29,38 +29,38 @@ extension IRType {
   }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: IRType, rhs: Self) -> Bool {
+  public static func == (lhs: any IRType, rhs: Self) -> Bool {
     lhs.llvm == rhs.llvm
   }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: Self, rhs: IRType) -> Bool {
+  public static func == (lhs: Self, rhs: any IRType) -> Bool {
     lhs.llvm == rhs.llvm
   }
 
   /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: IRType, rhs: Self) -> Bool {
+  public static func != (lhs: any IRType, rhs: Self) -> Bool {
     lhs.llvm != rhs.llvm
   }
 
   /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: Self, rhs: IRType) -> Bool {
+  public static func != (lhs: Self, rhs: any IRType) -> Bool {
     lhs.llvm != rhs.llvm
   }
 
 }
 
 /// Returns `true` iff `lhs` is equal to `rhs`.
-public func == (lhs: IRType, rhs: IRType) -> Bool {
+public func == (lhs: any IRType, rhs: any IRType) -> Bool {
   lhs.llvm == rhs.llvm
 }
 
 /// Returns `true` iff `lhs` is not equal to `rhs`.
-public func != (lhs: IRType, rhs: IRType) -> Bool {
+public func != (lhs: any IRType, rhs: any IRType) -> Bool {
   lhs.llvm != rhs.llvm
 }
 
-extension Array where Element == IRType {
+extension Array where Element == any IRType {
 
   func withHandles<T>(_ action: (UnsafeMutableBufferPointer<LLVMTypeRef?>) -> T) -> T {
     let p = UnsafeMutablePointer<LLVMTypeRef?>.allocate(capacity: count)

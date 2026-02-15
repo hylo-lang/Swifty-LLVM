@@ -6,16 +6,23 @@ public struct StringConstant: IRValue, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
+  /// Creates an instance wrapping `handle`.
+  public init(wrappingTemporarily handle: ValueRef) {
+    self.llvm = handle
+  }
+
   /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
   /// `nullTerminated` is `true`.
   public init(_ text: String, nullTerminated: Bool = true, in module: inout Module) {
     self.llvm = text.withCString { (s) in
-      .init(LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1))
+      .init(
+        LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1)
+      )
     }
   }
 
   /// Creates an instance with `v`, failing iff `v` is not a constant string value.
-  public init?(_ v: IRValue) {
+  public init?(_ v: any IRValue) {
     if LLVMIsAConstantDataSequential(v.llvm.raw) != nil && LLVMIsConstantString(v.llvm.raw) != 0 {
       self.llvm = v.llvm
     } else {

@@ -7,12 +7,17 @@ public struct FloatingPointConstant: IRValue, Hashable {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
+  public init(wrappingTemporarily llvm: ValueRef) {
+    self.llvm = llvm
+  }
+
+  /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMValueRef) {
     self.llvm = .init(llvm)
   }
 
   /// Creates an instance with `v`, failing iff `v` isn't a constant floating-point number.
-  public init?(_ v: IRValue) {
+  public init?(_ v: any IRValue) {
     if let h = LLVMIsAConstantFP(v.llvm.raw) {
       self.llvm = .init(h)
     } else {

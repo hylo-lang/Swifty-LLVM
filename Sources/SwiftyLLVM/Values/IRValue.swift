@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A value in LLVM IR.
-public protocol IRValue: CustomStringConvertible, Sendable {
+public protocol IRValue: CustomStringConvertible, Sendable, LLVMEntity where Handle == ValueRef {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: ValueRef { get }
@@ -18,7 +18,7 @@ extension IRValue {
   }
 
   /// The LLVM IR type of this value.
-  public var type: IRType { AnyType(LLVMTypeOf(llvm.raw)) }
+  public var type: any IRType { AnyType(LLVMTypeOf(llvm.raw)) }
 
   /// The name of this value.
   public var name: String { String(from: llvm.raw, readingWith: LLVMGetValueName2(_:_:)) ?? "" }
@@ -38,33 +38,33 @@ extension IRValue {
   }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: IRValue, rhs: Self) -> Bool {
+  public static func == (lhs: any IRValue, rhs: Self) -> Bool {
     lhs.llvm == rhs.llvm
   }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: Self, rhs: IRValue) -> Bool {
+  public static func == (lhs: Self, rhs: any IRValue) -> Bool {
     lhs.llvm == rhs.llvm
   }
 
   /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: IRValue, rhs: Self) -> Bool {
+  public static func != (lhs: any IRValue, rhs: Self) -> Bool {
     lhs.llvm != rhs.llvm
   }
 
   /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: Self, rhs: IRValue) -> Bool {
+  public static func != (lhs: Self, rhs: any IRValue) -> Bool {
     lhs.llvm != rhs.llvm
   }
 
 }
 
 /// Returns `true` iff `lhs` is equal to `rhs`.
-public func == (lhs: IRValue, rhs: IRValue) -> Bool {
+public func == (lhs: any IRValue, rhs: any IRValue) -> Bool {
   lhs.llvm == rhs.llvm
 }
 
 /// Returns `true` iff `lhs` is not equal to `rhs`.
-public func != (lhs: IRValue, rhs: IRValue) -> Bool {
+public func != (lhs: any IRValue, rhs: any IRValue) -> Bool {
   lhs.llvm != rhs.llvm
 }

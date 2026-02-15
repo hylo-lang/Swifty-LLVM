@@ -1,4 +1,5 @@
 internal import llvmc
+internal import llvmshims
 
 /// A parameter in a LLVM IR function.
 public struct Parameter: IRValue {
@@ -6,20 +7,20 @@ public struct Parameter: IRValue {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// The index of the parameter in its function.
-  public let index: Int
-
-  /// Creates an instance wrapping `llvm`, which represents the `i`-th parameter of a function.
-  internal init(_ llvm: LLVMValueRef, _ i: Int) {
+  /// Creates an instance wrapping `llvm`.
+  internal init(_ llvm: LLVMValueRef) {
     self.llvm = .init(llvm)
-    self.index = i
+  }
+
+  /// Creates an instance wrapping `llvm`.
+  public init(wrappingTemporarily llvm: ValueRef) {
+    self.llvm = llvm
   }
 
   /// Creates an intance with `v`, failing iff `v` is not a parameter.
-  public init?(_ v: IRValue) {
+  public init?(_ v: any IRValue) {
     if let h = LLVMIsAArgument(v.llvm.raw) {
       self.llvm = .init(h)
-      self.index = Function(LLVMGetParamParent(h)).parameters.firstIndex(where: { $0.llvm.raw == h })!
     } else {
       return nil
     }
@@ -27,6 +28,15 @@ public struct Parameter: IRValue {
 
   /// The function containing the parameter.
   public var parent: Function { .init(LLVMGetParamParent(llvm.raw)) }
+
+  /// The index of the parameter in its function.
+  ///
+  /// Complexity: may be O(#parameters), though it's typically low.
+  public var index: Int {
+    let i = SwiftyLLVMGetArgumentIndex(llvm.raw)
+    assert(i != SWIFTY_LLVM_INVALID_ARGUMENT_INDEX, "Invalid parameter index")
+    return Int(i)
+  }
 
 }
 
