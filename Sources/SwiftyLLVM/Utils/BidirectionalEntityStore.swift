@@ -3,7 +3,7 @@
 ///
 /// Use this when you frequently need to look up entity IDs from handles,
 /// such as when interoperating with C APIs that return opaque pointers.
-public struct BidirectionalEntityStore<Entity: EntityView>: ~Copyable where Entity.Handle: Hashable {
+public struct BidirectionalEntityStore<Entity: LLVMEntity>: ~Copyable where Entity.Handle: Hashable {
   private var store = EntityStore<Entity>()
   /// The id for each handle present in the store.
   ///
@@ -21,14 +21,6 @@ public struct BidirectionalEntityStore<Entity: EntityView>: ~Copyable where Enti
     let id = store.insert(handle)
     handleToID[handle] = id
     return id
-  }
-
-  /// Removes and destroys the entity in the store with the given `id`.
-  ///
-  /// - Requires: Entity with `id` is present in the store.
-  public mutating func remove(_ id: Entity.ID) {
-    handleToID.removeValue(forKey: store.handle(for: id)!)
-    store.remove(id)
   }
 
   /// Extracts the entity with given `id` for the duration of `witness`.
@@ -76,7 +68,6 @@ public struct BidirectionalEntityStore<Entity: EntityView>: ~Copyable where Enti
   /// Extracts the entity with given `id` for temporary use, without destroying it.
   ///
   /// - Requires: Entity with `id` is present in the store.
-  /// - Note: You must either restore the handle or destroy it yourself to avoid leaking resources.
   public mutating func unsafeExtract(_ id: Entity.ID) -> Entity.Handle {
     let handle = store.unsafeExtract(id)
     handleToID.removeValue(forKey: handle)

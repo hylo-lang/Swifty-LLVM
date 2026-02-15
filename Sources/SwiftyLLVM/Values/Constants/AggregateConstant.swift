@@ -8,7 +8,7 @@ public protocol AggregateConstant: IRValue, BidirectionalCollection {
 
 }
 
-extension AggregateConstant where Index == Int, Element == IRValue {
+extension AggregateConstant where Index == Int, Element == any IRValue {
 
   public var startIndex: Int { 0 }
 

@@ -11,8 +11,13 @@ public struct Alloca: IRValue {
     self.llvm = .init(llvm)
   }
 
+  /// Creates an instance wrapping `handle`.
+  public init(wrappingTemporarily handle: ValueRef) {
+    llvm = handle
+  }
+
   /// Creates an instance with `s`, failing iff `s` isn't an `alloca`
-  public init?(_ s: IRValue) {
+  public init?(_ s: any IRValue) {
     if let h = LLVMIsAAllocaInst(s.llvm.raw) {
       self.llvm = .init(h)
     } else {
@@ -21,7 +26,7 @@ public struct Alloca: IRValue {
   }
 
   /// The type of the value allocated by the instruction.
-  public var allocatedType: IRType { AnyType(LLVMGetAllocatedType(llvm.raw)) }
+  public var allocatedType: any IRType { AnyType(LLVMGetAllocatedType(llvm.raw)) }
 
   /// The preferred alignment of the allocated memory.
   public var alignment: Int { Int(LLVMGetAlignment(llvm.raw)) }

@@ -24,7 +24,13 @@ extension AttributeNameProtocol {
 }
 
 /// An attribute on a function, return value, or parameter in LLVM IR.
-public enum Attribute<T: AttributeHolder>: Hashable, Sendable {
+public enum Attribute<T: AttributeHolder>: Hashable, Sendable, LLVMEntity {
+  public typealias Handle = AttributeRef
+
+  /// Creates a target-independent attribute wrapping `llvm`.
+  public init(wrappingTemporarily handle: AttributeRef) {
+    self = .targetIndependent(llvm: handle)
+  }
 
   /// A target-independent attribute.
   case targetIndependent(llvm: AttributeRef)
@@ -50,10 +56,10 @@ public enum Attribute<T: AttributeHolder>: Hashable, Sendable {
   }
 
   /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMAttributeRef {
+  internal var llvm: AttributeRef {
     switch self {
     case .targetIndependent(let h):
-      return h.raw
+      return h
     }
   }
 
