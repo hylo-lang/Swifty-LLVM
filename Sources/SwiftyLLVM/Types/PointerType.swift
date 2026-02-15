@@ -11,8 +11,13 @@ public struct PointerType: IRType, Hashable {
     self.llvm = .init(llvm)
   }
 
+  /// Creates an instance wrapping `handle`.
+  public init(wrappingTemporarily handle: TypeRef) {
+    self.init(handle.raw)
+  }
+
   /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
-  public init?(_ t: IRType) {
+  public init?(_ t: any IRType) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMPointerTypeKind {
       self.llvm = t.llvm
     } else {

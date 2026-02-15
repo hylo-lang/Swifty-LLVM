@@ -11,6 +11,10 @@ public struct GlobalVariable: Global, Sendable {
     self.llvm = .init(llvm)
   }
 
+  public init(wrappingTemporarily handle: ValueRef) {
+    self.init(handle.raw)
+  }
+
   /// `true` if this value is constant.
   ///
   /// If this value is a global constant, its value is immutable throughout the runtime execution
@@ -24,6 +28,6 @@ public struct GlobalVariable: Global, Sendable {
   public var isExternallyInitialized: Bool { LLVMIsExternallyInitialized(llvm.raw) != 0 }
 
   /// The initial value of this global.
-  public var initializer: IRValue? { LLVMGetInitializer(llvm.raw).map(AnyValue.init(_:)) }
+  public var initializer: (any IRValue)? { LLVMGetInitializer(llvm.raw).map(AnyValue.init(_:)) }
 
 }

@@ -23,6 +23,11 @@ void SwiftyLLVMRunDefaultModulePasses(
   LLVMTargetMachineRef t,
   SwiftyLLVMPassOptimizationLevel optimization);
 
+  
+extern const unsigned int SWIFTY_LLVM_INVALID_ARGUMENT_INDEX;
+
+unsigned int SwiftyLLVMGetArgumentIndex(LLVMValueRef argument);
+
 LLVM_C_EXTERN_C_END
 
 #endif

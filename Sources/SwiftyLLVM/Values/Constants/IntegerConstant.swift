@@ -11,8 +11,13 @@ public struct IntegerConstant: IRValue, Hashable {
     self.llvm = .init(llvm)
   }
 
+  /// Creates an instance wrapping `handle`.
+  public init(wrappingTemporarily handle: ValueRef) {
+    self.llvm = handle
+  }
+
   /// Creates an instance with `v`, failing iff `v` isn't a constant integer value.
-  public init?(_ v: IRValue) {
+  public init?(_ v: any IRValue) {
     if let h = LLVMIsAConstantInt(v.llvm.raw) {
       self.llvm = .init(h)
     } else {
