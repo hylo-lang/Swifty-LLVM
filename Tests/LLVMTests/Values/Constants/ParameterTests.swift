@@ -5,10 +5,10 @@ final class ParameterTests: XCTestCase {
 
   func testIndex() {
     var m = Module("foo")
-    let i64 = m.types[IntegerType.create(64, in: &m)]
-    let i64ID = AnyType.ID(m.types.id(for: i64)!)
+    let i64 = m.types[m.integerType(64)]
+    let i64ID = AnyType.ID(m.integerType(64))
 
-    let f = m.declareFunction("fn", FunctionType.create(from: [i64ID, i64ID], in: &m))
+    let f = m.declareFunction("fn", m.functionType(from: [i64ID, i64ID], to: nil))
     XCTAssertEqual(m.values[f].parameters[0].index, 0)
     XCTAssertEqual(m.values[f].parameters[1].index, 1)
 
@@ -18,17 +18,14 @@ final class ParameterTests: XCTestCase {
 
   func testParent() {
     var m = Module("foo")
-    let i64 = m.types[IntegerType.create(64, in: &m)]
-    let i64ID = AnyType.ID(m.types.id(for: i64)!)
 
-    let f = m.declareFunction("fn", FunctionType.create(from: [i64ID, i64ID], in: &m))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.erased, m.i64.erased], to: nil))
     XCTAssertEqual(m.values[f].parameters[0].parent, m.values[f])
   }
 
   func testAttributes() throws {
     var m = Module("foo")
-    let ptr = PointerType.create(in: &m)
-    let f = m.declareFunction("f", FunctionType.create(from: [ptr.erased], in: &m))
+    let f = m.declareFunction("f", m.functionType(from: [m.ptr.erased], to: nil))
     let p = m.values[f].parameters[0]
     let pid = try XCTUnwrap(m.values.id(for: p))
     let a = m.createParameterAttribute(.nofree)
@@ -48,26 +45,24 @@ final class ParameterTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let i64 = m.types[IntegerType.create(64, in: &m)]
-    let i64ID = AnyType.ID(m.types.id(for: i64)!)
+    let i64ID = m.i64.erased
 
-    let f = m.declareFunction("fn", FunctionType.create(from: [i64ID], in: &m))
+    let f = m.declareFunction("fn", m.functionType(from: [i64ID], to: nil))
     let p: any IRValue = m.values[f].parameters[0]
     XCTAssertNotNil(Parameter(p))
-    let q: any IRValue = m.types[IntegerType.create(64, in: &m)].zero
+    let q: any IRValue = m.types[m.i64].zero
     XCTAssertNil(Parameter(q))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let i64 = m.types[IntegerType.create(64, in: &m)]
-    let i64ID = AnyType.ID(m.types.id(for: i64)!)
+    let i64 = m.i64.erased
 
-    let p = m.values[m.declareFunction("fn", FunctionType.create(from: [i64ID], in: &m))].parameters[0]
-    let q = m.values[m.declareFunction("fn", FunctionType.create(from: [i64ID], in: &m))].parameters[0]
+    let p = m.values[m.declareFunction("fn", m.functionType(from: [i64]))].parameters[0]
+    let q = m.values[m.declareFunction("fn", m.functionType(from: [i64]))].parameters[0]
     XCTAssertEqual(p, q)
 
-    let r = m.values[m.declareFunction("fn1", FunctionType.create(from: [i64ID], in: &m))].parameters[0]
+    let r = m.values[m.declareFunction("fn1", m.functionType(from: [i64]))].parameters[0]
     XCTAssertNotEqual(p, r)
   }
 

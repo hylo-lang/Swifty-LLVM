@@ -5,34 +5,34 @@ final class ArrayTypeTests: XCTestCase {
 
   func testCount() {
     var m = Module("foo")
-    let i16 = m.types[IntegerType.create(16, in: &m)]
-    XCTAssertEqual(m.types[ArrayType.create(8, i16, in: &m)].count, 8)
+    let i16 = m.integerType(16)
+    XCTAssertEqual(m.types[m.arrayType(8, i16)].count, 8)
   }
 
   func testElement() {
     var m = Module("foo")
-    let i16 = m.types[IntegerType.create(16, in: &m)]
-    XCTAssertEqual(IntegerType(m.types[ArrayType.create(8, i16, in: &m)].element), i16)
+    let i16 = m.integerType(16)
+    XCTAssertEqual(IntegerType(m.types[m.arrayType(8, i16)].element), m.types[i16])
   }
 
   func testConversion() {
     var m = Module("foo")
-    let i16 = m.types[IntegerType.create(16, in: &m)]
-    let t: any IRType = m.types[ArrayType.create(8, i16, in: &m)]
+    let i16 = m.integerType(16)
+    let t: any IRType = m.types[m.arrayType(8, i16)]
     XCTAssertNotNil(ArrayType(t))
-    let u: any IRType = m.types[IntegerType.create(64, in: &m)]
+    let u: any IRType = m.types[m.integerType(64)]
     XCTAssertNil(ArrayType(u))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let i16 = m.types[IntegerType.create(16, in: &m)]
+    let i16 = m.integerType(16)
 
-    let t = m.types[ArrayType.create(8, i16, in: &m)]
-    let u = m.types[ArrayType.create(8, i16, in: &m)]
+    let t = m.types[m.arrayType(8, i16)]
+    let u = m.types[m.arrayType(8, i16)]
     XCTAssertEqual(t, u)
 
-    let v = m.types[ArrayType.create(16, i16, in: &m)]
+    let v = m.types[m.arrayType(16, i16)]
     XCTAssertNotEqual(t, v)
   }
 

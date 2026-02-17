@@ -11,19 +11,6 @@ public struct FunctionType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Creates an instance with given `parameters` and `returnType` in `module`.
-  ///
-  /// The return type is `void` if `returnType` is passed `nil`.
-  @available(*, deprecated, message: "Use create(from:to:in:) instead.")
-  public init(
-    from parameters: [any IRType], to returnType: (any IRType)? = nil, in module: inout Module
-  ) {
-    let r = returnType ?? (module.types[VoidType.create(in: &module)] as any IRType)
-    self.llvm = parameters.withHandles { (p) in
-      .init(LLVMFunctionType(r.llvm.raw, p.baseAddress, UInt32(p.count), 0))
-    }
-  }
-
   /// Returns the ID of a function type with given `parameters` and `returnType` in `module`.
   ///
   /// The return type is `void` if `returnType` is passed `nil`.

@@ -33,7 +33,7 @@ final class FloatingPointConstantTests: XCTestCase {
     let ty = m.types[ft]
     let t: any IRValue = m.values[ty.zero(in: &m)]
     XCTAssertNotNil(FloatingPointConstant(t))
-    let i64 = IntegerType.create(64, in: &m)
+    let i64 = m.integerType(64)
     let u: any IRValue = m.types[i64].zero
     XCTAssertNil(FloatingPointConstant(u))
   }

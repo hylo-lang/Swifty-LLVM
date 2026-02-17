@@ -5,23 +5,21 @@ final class PoisonTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let float = FloatingPointType.float(in: &m)
-    let t: any IRValue = m.values[Poison.create(of: m.types[float], in: &m)]
+    let t: any IRValue = m.values[m.poisonValue(of: m.float)]
+
     XCTAssertNotNil(Poison(t))
-    let i64 = IntegerType.create(64, in: &m)
+    let i64 = m.integerType(64)
     let u: any IRValue = m.types[i64].zero
     XCTAssertNil(Poison(u))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let double = FloatingPointType.double(in: &m)
-    let t = Poison.create(of: m.types[double], in: &m)
-    let u = Poison.create(of: m.types[double], in: &m)
+    let t = m.poisonValue(of: m.double)
+    let u = m.poisonValue(of: m.double)
     XCTAssertEqual(t, u)
 
-    let float = FloatingPointType.float(in: &m)
-    let v = Poison.create(of: m.types[float], in: &m)
+    let v = m.poisonValue(of: m.float)
     XCTAssertNotEqual(t, v)
   }
 

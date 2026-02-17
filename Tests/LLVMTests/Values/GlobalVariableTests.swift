@@ -5,8 +5,7 @@ final class GlobalVariableTests: XCTestCase {
 
   func testIsGlobalConstant() {
     var m = Module("foo")
-    let ptr = PointerType.create(in: &m)
-    let g = m.declareGlobalVariable("gl", ptr)
+    let g = m.declareGlobalVariable("gl", m.ptr)
     XCTAssertFalse(m.values[g].isGlobalConstant)
     m.setGlobalConstant(true, for: g)
     XCTAssert(m.values[g].isGlobalConstant)
@@ -14,8 +13,7 @@ final class GlobalVariableTests: XCTestCase {
 
   func testIsExternallyInitialized() {
     var m = Module("foo")
-    let ptr = PointerType.create(in: &m)
-    let g = m.declareGlobalVariable("gl", ptr)
+    let g = m.declareGlobalVariable("gl", m.ptr)
     let gv0 = m.values[g]
     XCTAssertFalse(gv0.isExternallyInitialized)
     m.setExternallyInitialized(true, for: g)
@@ -25,8 +23,7 @@ final class GlobalVariableTests: XCTestCase {
 
   func testLinkage() {
     var m = Module("foo")
-    let ptr = PointerType.create(in: &m)
-    let g = m.declareGlobalVariable("gl", ptr)
+    let g = m.declareGlobalVariable("gl", m.ptr)
     m.setLinkage(.private, for: g)
     let gv = m.values[g]
     XCTAssertEqual(gv.linkage, .private)
@@ -34,7 +31,7 @@ final class GlobalVariableTests: XCTestCase {
 
   func testInitializer() {
     var m = Module("foo")
-    let i8id = IntegerType.create(8, in: &m)
+    let i8id = m.integerType(8)
     let i8 = m.types[i8id]
     let g = m.declareGlobalVariable("x", i8id)
 

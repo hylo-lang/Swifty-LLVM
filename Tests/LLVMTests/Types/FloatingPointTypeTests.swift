@@ -6,15 +6,15 @@ final class FloatingPointTypeTests: XCTestCase {
   func testConversion() {
     var m = Module("foo")
 
-    let t0 = m.types[FloatingPointType.half(in: &m)] as any IRType
-    let t1 = m.types[FloatingPointType.float(in: &m)] as any IRType
-    let t2 = m.types[FloatingPointType.double(in: &m)] as any IRType
-    let t3 = m.types[FloatingPointType.fp128(in: &m)] as any IRType
+    let t0 = m.types[m.half] as any IRType
+    let t1 = m.types[m.float] as any IRType
+    let t2 = m.types[m.double] as any IRType
+    let t3 = m.types[m.fp128] as any IRType
     for t in [t0, t1, t2, t3] {
       XCTAssertNotNil(FloatingPointType(t))
     }
 
-    let u = m.types[IntegerType.create(64, in: &m)] as any IRType
+    let u = m.types[m.integerType(64)] as any IRType
     XCTAssertNil(FloatingPointType(u))
   }
 

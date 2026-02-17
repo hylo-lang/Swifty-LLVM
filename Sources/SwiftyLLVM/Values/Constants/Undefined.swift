@@ -18,8 +18,9 @@ public struct Undefined: IRValue, Hashable {
   }
 
   /// Creates and registers an undefined value of type `t` in `module`.
-  public static func create(of t: some IRType, in module: inout Module) -> Self.ID {
-    .init(module.values.insertIfAbsent(ValueRef(LLVMGetUndef(t.llvm.raw))))
+  public static func create<T: IRType>(of t: LLVMID<T>, in module: inout Module) -> Self.ID {
+    let h = module.types[t]
+    return .init(module.values.insertIfAbsent(ValueRef(LLVMGetUndef(h.llvm.raw))))
   }
 
   /// Creates an instance with `v`, failing iff `v` is not an undefined value.
