@@ -7,7 +7,8 @@ public protocol LLVMEntity: ~Copyable {
   init(wrappingTemporarily handle: Handle)
 }
 
-public struct LLVMIdentity<T: LLVMEntity>: Hashable, Sendable {
+/// The identity of an LLVM entity.
+public struct LLVMID<T: LLVMEntity>: Hashable, Sendable {
 
   /// The type-erased value of this identity.
   public let raw: UInt
@@ -20,16 +21,16 @@ public struct LLVMIdentity<T: LLVMEntity>: Hashable, Sendable {
 }
 
 extension LLVMEntity {
-  public typealias ID = LLVMIdentity<Self>
+  public typealias ID = LLVMID<Self>
 }
 
-extension LLVMIdentity where T: IRValue {
+extension LLVMID where T: IRValue {
   public var erased: AnyValue.ID {
     AnyValue.ID(uncheckedFrom: self.raw)
   }
 }
 
-extension LLVMIdentity where T: IRType {
+extension LLVMID where T: IRType {
   public var erased: AnyType.ID {
     AnyType.ID(uncheckedFrom: self.raw)
   }
