@@ -25,6 +25,13 @@ public struct Alloca: IRValue {
     }
   }
 
+  public static func insert<T: IRType>(_ type: T.ID, at p: borrowing InsertionPoint, in module: inout Module)
+    -> Alloca.ID
+  {
+    let handle = LLVMBuildAlloca(p.llvm, module.types[type].llvm.raw, "")!
+    return Alloca.ID(module.values.insert(ValueRef(handle)))
+  }
+
   /// The type of the value allocated by the instruction.
   public var allocatedType: any IRType { AnyType(LLVMGetAllocatedType(llvm.raw)) }
 

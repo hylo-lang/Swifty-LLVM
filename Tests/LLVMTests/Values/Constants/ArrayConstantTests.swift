@@ -5,7 +5,7 @@ final class ArrayConstantTests: XCTestCase {
 
   func testInit() {
     var m = Module("foo")
-    let i32 = m.types[IntegerType.create(32, in: &m)]
+    let i32 = m.types[m.integerType(32)]
 
     let a = ArrayConstant(
       of: i32, containing: (0 ..< 5).map({ i32.constant($0) }), in: &m)
@@ -17,7 +17,7 @@ final class ArrayConstantTests: XCTestCase {
   func testInitFromBytes() {
     var m = Module("foo")
 
-    let i8 = m.types[IntegerType.create(8, in: &m)]
+    let i8 = m.types[m.integerType(8)]
     let a = ArrayConstant(bytes: [0, 1, 2, 3, 4], in: &m)
     XCTAssertEqual(a.count, 5)
     XCTAssertEqual(IntegerConstant(a[1]), i8.constant(1))
@@ -26,7 +26,7 @@ final class ArrayConstantTests: XCTestCase {
 
   func testEquality() {
     var m = Module("foo")
-    let i32 = m.types[IntegerType.create(32, in: &m)]
+    let i32 = m.types[m.integerType(32)]
 
     let a = ArrayConstant(
       of: i32, containing: (0 ..< 5).map({ i32.constant($0) }), in: &m)

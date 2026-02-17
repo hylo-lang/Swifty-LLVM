@@ -19,7 +19,7 @@ final class StringConstantTests: XCTestCase {
     var m = Module("foo")
     let t: any IRValue = StringConstant("Bonjour!", in: &m)
     XCTAssertNotNil(StringConstant(t))
-    let u: any IRValue = m.types[IntegerType.create(64, in: &m)].zero
+    let u: any IRValue = m.types[m.i64].zero
     XCTAssertNil(StringConstant(u))
   }
 

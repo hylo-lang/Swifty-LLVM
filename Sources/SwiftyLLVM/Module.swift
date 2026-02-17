@@ -62,23 +62,23 @@ extension BidirectionalEntityStore where Entity == AnyValue {
   }
 }
 
-extension LLVMIdentity<Attribute<Function>> {
+extension LLVMID<Attribute<Function>> {
   public init(_ id: AnyAttribute.ID) {
     self.init(uncheckedFrom: id.raw)
   }
 }
-extension LLVMIdentity<Attribute<Parameter>> {
+extension LLVMID<Attribute<Parameter>> {
   public init(_ id: AnyAttribute.ID) {
     self.init(uncheckedFrom: id.raw)
   }
 }
-extension LLVMIdentity<Attribute<Function.Return>> {
+extension LLVMID<Attribute<Function.Return>> {
   public init(_ id: AnyAttribute.ID) {
     self.init(uncheckedFrom: id.raw)
   }
 }
 
-extension LLVMIdentity<AnyAttribute> {
+extension LLVMID<AnyAttribute> {
   public init<Holder: AttributeHolder>(_ id: Attribute<Holder>.ID) {
     self.init(uncheckedFrom: id.raw)
   }
@@ -106,23 +106,23 @@ extension BidirectionalEntityStore where Entity == AnyAttribute {
   }
 }
 
-extension LLVMIdentity<AnyType> {
+extension LLVMID<AnyType> {
   public init<Ty: IRType>(_ id: Ty.ID) {
     self.init(uncheckedFrom: id.raw)
   }
 }
-extension LLVMIdentity where T: IRType {
+extension LLVMID where T: IRType {
   public init(_ id: AnyType.ID) {
     self.init(uncheckedFrom: id.raw)
   }
 }
 
-extension LLVMIdentity<AnyValue> {
+extension LLVMID<AnyValue> {
   public init<V: IRValue>(_ id: V.ID) {
     self.init(uncheckedFrom: id.raw)
   }
 }
-extension LLVMIdentity where T: IRValue {
+extension LLVMID where T: IRValue {
   public init(_ id: AnyValue.ID) {
     self.init(uncheckedFrom: id.raw)
   }
@@ -549,18 +549,17 @@ public struct Module: ~Copyable {
   /// Sets the preferred alignment of `v` to `a`.
   ///
   /// - Requires: `a` is whole power of 2.
-  public mutating func setAlignment(_ a: Int, for v: Alloca) {
-    LLVMSetAlignment(v.llvm.raw, UInt32(a))
+  public mutating func setAlignment(_ a: Int, for v: Alloca.ID) {
+    LLVMSetAlignment(values[v].llvm.raw, UInt32(a))
   }
 
   // MARK: Basic type instances
 
   /// The `void` type.
-  public private(set) lazy var void: VoidType.ID = VoidType.create(in: &self)
+  public private(set) lazy var void: VoidType.ID = voidType()
 
   /// The `ptr` type in the default address space.
-  public private(set) lazy var ptr: PointerType.ID = PointerType.create(
-    inAddressSpace: .default, in: &self)
+  public private(set) lazy var ptr: PointerType.ID = pointerType(inAddressSpace: .default)
 
   /// The `half` type.
   public private(set) lazy var half: FloatingPointType.ID = FloatingPointType.half(in: &self)
@@ -575,22 +574,22 @@ public struct Module: ~Copyable {
   public private(set) lazy var fp128: FloatingPointType.ID = FloatingPointType.fp128(in: &self)
 
   /// The 1-bit integer type.
-  public private(set) lazy var i1: IntegerType.ID = IntegerType.create(1, in: &self)
+  public private(set) lazy var i1: IntegerType.ID = integerType(1)
 
   /// The 8-bit integer type.
-  public private(set) lazy var i8: IntegerType.ID = IntegerType.create(8, in: &self)
+  public private(set) lazy var i8: IntegerType.ID = integerType(8)
 
   /// The 16-bit integer type.
-  public private(set) lazy var i16: IntegerType.ID = IntegerType.create(16, in: &self)
+  public private(set) lazy var i16: IntegerType.ID = integerType(16)
 
   /// The 32-bit integer type.
-  public private(set) lazy var i32: IntegerType.ID = IntegerType.create(32, in: &self)
+  public private(set) lazy var i32: IntegerType.ID = integerType(32)
 
   /// The 64-bit integer type.
-  public private(set) lazy var i64: IntegerType.ID = IntegerType.create(64, in: &self)
+  public private(set) lazy var i64: IntegerType.ID = integerType(64)
 
   /// The 128-bit integer type.
-  public private(set) lazy var i128: IntegerType.ID = IntegerType.create(128, in: &self)
+  public private(set) lazy var i128: IntegerType.ID = integerType(128)
 
   /// Registers the parameters of `function` in the ID system.
   ///
@@ -769,24 +768,24 @@ public struct Module: ~Copyable {
     return .init(values.insert(ValueRef(handle)))
   }
 
-  public mutating func insertBitwiseAnd<U: IRValue, V: IRValue>(
-    _ lhs: U.ID, _ rhs: V.ID,
+  public mutating func insertBitwiseAnd(
+    _ lhs: LLVMID<some IRValue>, _ rhs: LLVMID<some IRValue>,
     at p: borrowing InsertionPoint
   ) -> Instruction.ID {
     let handle = LLVMBuildAnd(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
     return .init(values.insert(ValueRef(handle)))
   }
 
-  public mutating func insertBitwiseOr<U: IRValue, V: IRValue>(
-    _ lhs: U.ID, _ rhs: V.ID,
+  public mutating func insertBitwiseOr(
+    _ lhs: LLVMID<some IRValue>, _ rhs: LLVMID<some IRValue>,
     at p: borrowing InsertionPoint
   ) -> Instruction.ID {
     let handle = LLVMBuildOr(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
     return .init(values.insert(ValueRef(handle)))
   }
 
-  public mutating func insertBitwiseXor<U: IRValue, V: IRValue>(
-    _ lhs: U.ID, _ rhs: V.ID,
+  public mutating func insertBitwiseXor(
+    _ lhs: LLVMID<some IRValue>, _ rhs: LLVMID<some IRValue>,
     at p: borrowing InsertionPoint
   ) -> Instruction.ID {
     let handle = LLVMBuildXor(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
@@ -795,12 +794,10 @@ public struct Module: ~Copyable {
 
   // MARK: Memory
 
-  public mutating func insertAlloca<T: IRType>(_ type: T.ID, at p: borrowing InsertionPoint)
-    -> Alloca
+  public mutating func insertAlloca(_ type: LLVMID<some IRType>, at p: borrowing InsertionPoint)
+    -> Alloca.ID
   {
-    let handle = LLVMBuildAlloca(p.llvm, types[type].llvm.raw, "")!
-    let id = Instruction.ID(values.insert(ValueRef(handle)))
-    return .init(wrappingTemporarily: values[id].llvm)
+    Alloca.insert(type, at: p, in: &self)
   }
 
   /// Returns the entry block of `f`, if any.
@@ -813,7 +810,8 @@ public struct Module: ~Copyable {
   /// Inerts an `alloca` allocating memory on the stack a value of `type`, at the entry of `f`.
   ///
   /// - Requires: `f` has an entry block.
-  public mutating func insertAlloca<T: IRType>(_ type: T.ID, atEntryOf f: Function.ID) -> Alloca {
+  public mutating func insertAlloca<T: IRType>(_ type: T.ID, atEntryOf f: Function.ID) -> Alloca.ID
+  {
     insertAlloca(type, at: startOf(entryOf(f)!))
   }
 
@@ -1134,6 +1132,56 @@ public struct Module: ~Copyable {
     return .init(values.insert(ValueRef(handle)))
   }
 
+  // MARK: Type constructors
+
+  public mutating func integerType(_ bitWidth: Int) -> IntegerType.ID {
+    return IntegerType.create(bitWidth, in: &self)
+  }
+
+  /// Creates an opaque pointer type in the given address space.
+  public mutating func pointerType(inAddressSpace s: AddressSpace = .default) -> PointerType.ID {
+    PointerType.create(inAddressSpace: s, in: &self)
+  }
+
+  /// Creates a function type with given parameter type IDs and optional return type ID.
+  public mutating func functionType(
+    from parameters: [AnyType.ID],
+    to returnType: AnyType.ID? = nil
+  ) -> FunctionType.ID {
+    FunctionType.create(from: parameters, to: returnType, in: &self)
+  }
+
+  /// Creates an array type of `count` elements of `element`.
+  public mutating func arrayType<T: IRType>(_ count: Int, _ element: T.ID) -> ArrayType.ID {
+    ArrayType.create(count, types[element] as T, in: &self)
+  }
+
+  /// Creates or retrieves the `void` type, returning its ID.
+  public mutating func voidType() -> VoidType.ID {
+    return VoidType.create(in: &self)
+  }
+
+  /// Creates a struct type with given field type IDs.
+  public mutating func structType(_ fields: [AnyType.ID], packed: Bool = false) -> StructType.ID {
+    StructType.create(fields, packed: packed, in: &self)
+  }
+
+  /// Creates a named struct type with given field type IDs.
+  public mutating func structType(named name: String, _ fields: [AnyType.ID], packed: Bool = false)
+    -> StructType.ID
+  {
+    StructType.create(named: name, fields, packed: packed, in: &self)
+  }
+
+  /// Creates an instruction representing an undefined value of type `type`.
+  public mutating func undefinedValue<T: IRType>(of type: T.ID) -> Undefined.ID {
+    Undefined.create(of: type, in: &self)
+  }
+
+  /// Creates an instruction representing a poison value of type `type`.
+  public mutating func poisonValue<T: IRType>(of type: T.ID) -> Poison.ID {
+    return Poison.create(of: type, in: &self)
+  }
 }
 
 extension Module: NCCustomStringConvertible {

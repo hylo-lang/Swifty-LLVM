@@ -1,5 +1,6 @@
-@testable import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class CodeGenerationTests: XCTestCase {
 
@@ -34,13 +35,6 @@ final class CodeGenerationTests: XCTestCase {
 }
 
 extension Module {
-
-  private mutating func functionType(
-    from parameters: [AnyType.ID],
-    to returnType: AnyType.ID? = nil
-  ) -> FunctionType.ID {
-    FunctionType.create(from: parameters, to: returnType, in: &self)
-  }
 
   /// Emits contents in `self` to prepare the tests in `CodeGenerationTests`.
   ///
@@ -81,14 +75,12 @@ extension Module {
 
     // %0 = alloca [16 x i8], align 8
     // %1 = alloca double, align 8
-    let x0 = insertAlloca(ArrayType.create(16, types[i8], in: &self), at: endOf(b0))
+    let x0 = insertAlloca(arrayType(16, i8), at: endOf(b0))
     setAlignment(8, for: x0)
     let x1 = insertAlloca(double, at: endOf(b0))
-    let x0ID = try XCTUnwrap(values.id(for: x0))
-    let x1ID = try XCTUnwrap(values.id(for: x1))
 
     // store double 0x400921FB54442D18, ptr %1, align 8
-    insertStore(types[double].constant(.pi, in: &self), to: x1ID, at: endOf(b0))
+    insertStore(types[double].constant(.pi, in: &self), to: x1, at: endOf(b0))
 
     // %2 = call ptr @llvm.coro.prepare.retcon(ptr @deg)
     // %3 = call { ptr, ptr } %2(ptr %0, ptr %1)
@@ -96,7 +88,7 @@ extension Module {
     let x2 = insertCall(prepare, on: [projectDegrees.erased], at: endOf(b0))
     let projectDegreesType = values[projectDegrees].valueType(in: &self)
     let x3 = insertCall(
-      x2.erased, typed: projectDegreesType, on: [x0ID.erased, x1ID.erased], at: endOf(b0))
+      x2.erased, typed: projectDegreesType, on: [x0.erased, x1.erased], at: endOf(b0))
 
     // %4 = extractvalue { ptr, ptr } %3, 1
     // %5 = load double, ptr %4, align 8
@@ -110,16 +102,17 @@ extension Module {
     // %7 = extractvalue { ptr, ptr } %3, 0
     // call void %7(ptr %0, i1 false
     let x7 = insertExtractValue(from: x3, at: 0, at: endOf(b0))
-    let resumeTypeID = FunctionType.create(from: [ptr.erased, i1.erased], in: &self)
+    let resumeType = functionType(from: [ptr.erased, i1.erased])
     let i1False = types[i1].constant(0, in: &self).erased
     _ = insertCall(
-      x7.erased, typed: resumeTypeID, on: [x0ID.erased, i1False], at: endOf(b0))
+      x7.erased, typed: resumeType, on: [x0.erased, i1False], at: endOf(b0))
 
     // %8 = load double, ptr %1, align 8
     // %9 = fcmp ueq double %8, 0.000000e+00
     // %10 = zext i1 %9 to i32
-    let x8 = insertLoad(double, from: x1ID, at: endOf(b0))
-    let x9 = insertFloatingPointComparison(.ueq, x8, types[double].constant(0, in: &self), at: endOf(b0))
+    let x8 = insertLoad(double, from: x1, at: endOf(b0))
+    let x9 = insertFloatingPointComparison(
+      .ueq, x8, types[double].constant(0, in: &self), at: endOf(b0))
     let xa = insertZeroExtend(x9, to: i32, at: endOf(b0))
 
     // ret i32 %10
@@ -145,8 +138,8 @@ extension Module {
     let dealloc = declareFunction("dealloc", functionType(from: [ptr.erased]))
 
     // define { ptr, ptr } @deg(ptr %0, ptr %1)
-    let pairOfPointersID = StructType.create([ptr.erased, ptr.erased], in: &self).erased
-    let s = functionType(from: [ptr.erased, ptr.erased], to: pairOfPointersID)
+    let pairOfPointers = structType([ptr.erased, ptr.erased]).erased
+    let s = functionType(from: [ptr.erased, ptr.erased], to: pairOfPointers)
     let f = declareFunction("deg", s)
     let r = try XCTUnwrap(values[f].parameters.last)
     let rID = try XCTUnwrap(values.id(for: r))
@@ -155,7 +148,6 @@ extension Module {
 
     // %2 = alloca double, align 8
     let x0 = insertAlloca(double, at: endOf(b0))
-    let x0ID = try XCTUnwrap(values.id(for: x0))
 
     // %3 = call token @llvm.coro.id.retcon.once(
     //   i32 16, i32 8, ptr %0, ptr @slide, ptr @alloc, ptr @dealloc)
@@ -170,7 +162,7 @@ extension Module {
         i32_16,  // size of the frame buffer
         i32_8,  // alignment of the frame buffer
         frameBufferID.erased,  // the frame buffer
-        slide.erased, alloc.erased, dealloc.erased
+        slide.erased, alloc.erased, dealloc.erased,
       ],
       at: endOf(b0))
     let coroutineIDID = coroutineID
@@ -190,17 +182,17 @@ extension Module {
     let x1 = insertLoad(double, from: rID, at: endOf(b0))
     let x2 = insertFMul(x1, types[double].constant(180, in: &self), at: endOf(b0))
     let x3 = insertFDiv(x2, types[double].constant(.pi, in: &self), at: endOf(b0))
-    insertStore(x3, to: x0ID, at: endOf(b0))
+    insertStore(x3, to: x0, at: endOf(b0))
 
     // %8 = call i1 (...) @llvm.coro.suspend.retcon.i1(ptr %2)
     let suspend = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.suspend.retcon, for: [i1]))
-    _ = insertCall(suspend, on: [x0ID.erased], at: endOf(b0))
+    _ = insertCall(suspend, on: [x0.erased], at: endOf(b0))
 
     // %9 = load double, ptr %2, align 8
     // %10 = fmul double %9, 0x400921FB54442D18
     // %11 = fdiv double %10, 1.800000e+02
     // store double %11, ptr %1, align 8
-    let x4 = insertLoad(double, from: x0ID, at: endOf(b0))
+    let x4 = insertLoad(double, from: x0, at: endOf(b0))
     let x5 = insertFMul(x4, types[double].constant(.pi, in: &self), at: endOf(b0))
     let x6 = insertFDiv(x5, types[double].constant(180, in: &self), at: endOf(b0))
     insertStore(x6, to: rID, at: endOf(b0))
@@ -208,7 +200,7 @@ extension Module {
     // %12 = call token @llvm.coro.end.results()
     let results = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.end.results))
     let resultToken = insertCall(Function.ID(results.erased), on: [], at: endOf(b0))
-    
+
     // %13 = call i1 @llvm.coro.end(ptr %4, i1 false, token %12)
     let end = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.end))
     _ = insertCall(
@@ -234,10 +226,8 @@ extension Module {
 
     // %0 = alloca i64, align 8
     // %1 = alloca double, align 8
-    let x0 = insertAlloca(i64, at: endOf(b0))
+    let x0: Alloca.ID = insertAlloca(i64, at: endOf(b0))
     let x1 = insertAlloca(double, at: endOf(b0))
-    let x0ID = try XCTUnwrap(values.id(for: x0))
-    let x1ID = try XCTUnwrap(values.id(for: x1))
     let pi = types[double].constant(.pi, in: &self)
     let i64_11 = types[i64].constant(11, in: &self)
     let i64_13 = types[i64].constant(13, in: &self)
@@ -253,21 +243,21 @@ extension Module {
     // store atomic double 0x400921FB54442D18, ptr %1 monotonic, align 8
     // store atomic double 0x400921FB54442D18, ptr %1 release, align 8
     // store atomic double 0x400921FB54442D18, ptr %1 seq_cst, align 8
-    let s1 = insertStore(pi, to: x1ID, at: endOf(b0))
+    let s1 = insertStore(pi, to: x1, at: endOf(b0))
     setOrdering(.monotonic, for: s1)
-    let s2 = insertStore(pi, to: x1ID, at: endOf(b0))
+    let s2 = insertStore(pi, to: x1, at: endOf(b0))
     setOrdering(.release, for: s2)
-    let s3 = insertStore(pi, to: x1ID, at: endOf(b0))
+    let s3 = insertStore(pi, to: x1, at: endOf(b0))
     setOrdering(.sequentiallyConsistent, for: s3)
 
     // %2 = load atomic double, ptr %1 monotonic, align 8
     // %3 = load atomic double, ptr %1 acquire, align 8
     // %4 = load atomic double, ptr %1 seq_cst, align 8
-    let x2 = insertLoad(double, from: x1ID, at: endOf(b0))
+    let x2 = insertLoad(double, from: x1, at: endOf(b0))
     setOrdering(.monotonic, for: x2)
-    let x3 = insertLoad(double, from: x1ID, at: endOf(b0))
+    let x3 = insertLoad(double, from: x1, at: endOf(b0))
     setOrdering(.acquire, for: x3)
-    let x4 = insertLoad(double, from: x1ID, at: endOf(b0))
+    let x4 = insertLoad(double, from: x1, at: endOf(b0))
     setOrdering(.sequentiallyConsistent, for: x4)
 
     // %5 = atomicrmw xchg ptr %1, double 0x400921FB54442D18 monotonic, align 8
@@ -275,165 +265,270 @@ extension Module {
     // %7 = atomicrmw xchg ptr %1, double 0x400921FB54442D18 release, align 8
     // %8 = atomicrmw xchg ptr %1, double 0x400921FB54442D18 acq_rel, align 8
     // %9 = atomicrmw xchg ptr %1, double 0x400921FB54442D18 seq_cst, align 8
-    let _ = insertAtomicRMW(x1ID, operation: .xchg, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .xchg, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .xchg, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .xchg, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .xchg, value: pi, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .xchg, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .xchg, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .xchg, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .xchg, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
+    )
+    let _ = insertAtomicRMW(
+      x1, operation: .xchg, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %10 = atomicrmw add ptr %0, i64 11 monotonic, align 8
     // %11 = atomicrmw add ptr %0, i64 11 acquire, align 8
     // %12 = atomicrmw add ptr %0, i64 11 release, align 8
     // %13 = atomicrmw add ptr %0, i64 11 acq_rel, align 8
     // %14 = atomicrmw add ptr %0, i64 11 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .add, value: i64_11, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .add, value: i64_11, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .add, value: i64_11, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .add, value: i64_11, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .add, value: i64_11, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .add, value: i64_11, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .add, value: i64_11, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .add, value: i64_11, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .add, value: i64_11, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .add, value: i64_11, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %15 = atomicrmw fadd ptr %1, double 0x400921FB54442D18 monotonic, align 8
     // %16 = atomicrmw fadd ptr %1, double 0x400921FB54442D18 acquire, align 8
     // %17 = atomicrmw fadd ptr %1, double 0x400921FB54442D18 release, align 8
     // %18 = atomicrmw fadd ptr %1, double 0x400921FB54442D18 acq_rel, align 8
     // %19 = atomicrmw fadd ptr %1, double 0x400921FB54442D18 seq_cst, align 8
-    let _ = insertAtomicRMW(x1ID, operation: .fAdd, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fAdd, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fAdd, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fAdd, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fAdd, value: pi, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fAdd, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fAdd, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fAdd, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fAdd, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
+    )
+    let _ = insertAtomicRMW(
+      x1, operation: .fAdd, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %20 = atomicrmw sub ptr %0, i64 13 monotonic, align 8
     // %21 = atomicrmw sub ptr %0, i64 13 acquire, align 8
     // %22 = atomicrmw sub ptr %0, i64 13 release, align 8
     // %23 = atomicrmw sub ptr %0, i64 13 acq_rel, align 8
     // %24 = atomicrmw sub ptr %0, i64 13 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .sub, value: i64_13, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .sub, value: i64_13, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .sub, value: i64_13, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .sub, value: i64_13, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .sub, value: i64_13, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .sub, value: i64_13, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .sub, value: i64_13, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .sub, value: i64_13, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .sub, value: i64_13, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .sub, value: i64_13, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %25 = atomicrmw fsub ptr %1, double 0x400921FB54442D18 monotonic, align 8
     // %26 = atomicrmw fsub ptr %1, double 0x400921FB54442D18 acquire, align 8
     // %27 = atomicrmw fsub ptr %1, double 0x400921FB54442D18 release, align 8
     // %28 = atomicrmw fsub ptr %1, double 0x400921FB54442D18 acq_rel, align 8
     // %29 = atomicrmw fsub ptr %1, double 0x400921FB54442D18 seq_cst, align 8
-    let _ = insertAtomicRMW(x1ID, operation: .fSub, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fSub, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fSub, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fSub, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fSub, value: pi, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fSub, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fSub, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fSub, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fSub, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
+    )
+    let _ = insertAtomicRMW(
+      x1, operation: .fSub, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %30 = atomicrmw max ptr %0, i64 17 monotonic, align 8
     // %31 = atomicrmw max ptr %0, i64 17 acquire, align 8
     // %32 = atomicrmw max ptr %0, i64 17 release, align 8
     // %33 = atomicrmw max ptr %0, i64 17 acq_rel, align 8
     // %34 = atomicrmw max ptr %0, i64 17 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .max, value: i64_17, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .max, value: i64_17, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .max, value: i64_17, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .max, value: i64_17, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .max, value: i64_17, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .max, value: i64_17, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .max, value: i64_17, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .max, value: i64_17, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .max, value: i64_17, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .max, value: i64_17, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %35 = atomicrmw umax ptr %0, i64 19 monotonic, align 8
     // %36 = atomicrmw umax ptr %0, i64 19 acquire, align 8
     // %37 = atomicrmw umax ptr %0, i64 19 release, align 8
     // %38 = atomicrmw umax ptr %0, i64 19 acq_rel, align 8
     // %39 = atomicrmw umax ptr %0, i64 19 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .uMax, value: i64_19, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMax, value: i64_19, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMax, value: i64_19, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMax, value: i64_19, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMax, value: i64_19, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMax, value: i64_19, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMax, value: i64_19, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMax, value: i64_19, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMax, value: i64_19, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMax, value: i64_19, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %40 = atomicrmw fmax ptr %1, double 0x400921FB54442D18 monotonic, align 8
     // %41 = atomicrmw fmax ptr %1, double 0x400921FB54442D18 acquire, align 8
     // %42 = atomicrmw fmax ptr %1, double 0x400921FB54442D18 release, align 8
     // %43 = atomicrmw fmax ptr %1, double 0x400921FB54442D18 acq_rel, align 8
     // %44 = atomicrmw fmax ptr %1, double 0x400921FB54442D18 seq_cst, align 8
-    let _ = insertAtomicRMW(x1ID, operation: .fMax, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMax, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMax, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMax, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMax, value: pi, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMax, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMax, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMax, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMax, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
+    )
+    let _ = insertAtomicRMW(
+      x1, operation: .fMax, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %45 = atomicrmw min ptr %0, i64 17 monotonic, align 8
     // %46 = atomicrmw min ptr %0, i64 17 acquire, align 8
     // %47 = atomicrmw min ptr %0, i64 17 release, align 8
     // %48 = atomicrmw min ptr %0, i64 17 acq_rel, align 8
     // %49 = atomicrmw min ptr %0, i64 17 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .min, value: i64_17, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .min, value: i64_17, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .min, value: i64_17, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .min, value: i64_17, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .min, value: i64_17, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .min, value: i64_17, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .min, value: i64_17, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .min, value: i64_17, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .min, value: i64_17, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .min, value: i64_17, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %50 = atomicrmw umin ptr %0, i64 19 monotonic, align 8
     // %51 = atomicrmw umin ptr %0, i64 19 acquire, align 8
     // %52 = atomicrmw umin ptr %0, i64 19 release, align 8
     // %53 = atomicrmw umin ptr %0, i64 19 acq_rel, align 8
     // %54 = atomicrmw umin ptr %0, i64 19 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .uMin, value: i64_19, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMin, value: i64_19, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMin, value: i64_19, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMin, value: i64_19, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .uMin, value: i64_19, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMin, value: i64_19, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMin, value: i64_19, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMin, value: i64_19, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMin, value: i64_19, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .uMin, value: i64_19, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %55 = atomicrmw fmin ptr %1, double 0x400921FB54442D18 monotonic, align 8
     // %56 = atomicrmw fmin ptr %1, double 0x400921FB54442D18 acquire, align 8
     // %57 = atomicrmw fmin ptr %1, double 0x400921FB54442D18 release, align 8
     // %58 = atomicrmw fmin ptr %1, double 0x400921FB54442D18 acq_rel, align 8
     // %59 = atomicrmw fmin ptr %1, double 0x400921FB54442D18 seq_cst, align 8
-    let _ = insertAtomicRMW(x1ID, operation: .fMin, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMin, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMin, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMin, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x1ID, operation: .fMin, value: pi, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMin, value: pi, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMin, value: pi, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMin, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x1, operation: .fMin, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
+    )
+    let _ = insertAtomicRMW(
+      x1, operation: .fMin, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %60 = atomicrmw and ptr %0, i64 23 monotonic, align 8
     // %61 = atomicrmw and ptr %0, i64 23 acquire, align 8
     // %62 = atomicrmw and ptr %0, i64 23 release, align 8
     // %63 = atomicrmw and ptr %0, i64 23 acq_rel, align 8
     // %64 = atomicrmw and ptr %0, i64 23 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .and, value: i64_23, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .and, value: i64_23, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .and, value: i64_23, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .and, value: i64_23, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .and, value: i64_23, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .and, value: i64_23, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .and, value: i64_23, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .and, value: i64_23, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .and, value: i64_23, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .and, value: i64_23, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %65 = atomicrmw nand ptr %0, i64 29 monotonic, align 8
     // %66 = atomicrmw nand ptr %0, i64 29 acquire, align 8
     // %67 = atomicrmw nand ptr %0, i64 29 release, align 8
     // %68 = atomicrmw nand ptr %0, i64 29 acq_rel, align 8
     // %69 = atomicrmw nand ptr %0, i64 29 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .nand, value: i64_29, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .nand, value: i64_29, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .nand, value: i64_29, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .nand, value: i64_29, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .nand, value: i64_29, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .nand, value: i64_29, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .nand, value: i64_29, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .nand, value: i64_29, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .nand, value: i64_29, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .nand, value: i64_29, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %70 = atomicrmw or ptr %0, i64 31 monotonic, align 8
     // %71 = atomicrmw or ptr %0, i64 31 acquire, align 8
     // %72 = atomicrmw or ptr %0, i64 31 release, align 8
     // %73 = atomicrmw or ptr %0, i64 31 acq_rel, align 8
     // %74 = atomicrmw or ptr %0, i64 31 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .or, value: i64_31, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .or, value: i64_31, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .or, value: i64_31, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .or, value: i64_31, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .or, value: i64_31, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .or, value: i64_31, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .or, value: i64_31, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .or, value: i64_31, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .or, value: i64_31, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .or, value: i64_31, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %75 = atomicrmw xor ptr %0, i64 37 monotonic, align 8
     // %76 = atomicrmw xor ptr %0, i64 37 acquire, align 8
     // %77 = atomicrmw xor ptr %0, i64 37 release, align 8
     // %78 = atomicrmw xor ptr %0, i64 37 acq_rel, align 8
     // %79 = atomicrmw xor ptr %0, i64 37 seq_cst, align 8
-    let _ = insertAtomicRMW(x0ID, operation: .xor, value: i64_37, ordering: .monotonic, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .xor, value: i64_37, ordering: .acquire, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .xor, value: i64_37, ordering: .release, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .xor, value: i64_37, ordering: .acquireRelease, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicRMW(x0ID, operation: .xor, value: i64_37, ordering: .sequentiallyConsistent, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .xor, value: i64_37, ordering: .monotonic, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .xor, value: i64_37, ordering: .acquire, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .xor, value: i64_37, ordering: .release, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .xor, value: i64_37, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
+    let _ = insertAtomicRMW(
+      x0, operation: .xor, value: i64_37, ordering: .sequentiallyConsistent, singleThread: false,
+      at: endOf(b0))
 
     // %80 = cmpxchg ptr %0, i64 41, i64 43 monotonic monotonic, align 8
     // %81 = cmpxchg ptr %0, i64 41, i64 43 monotonic acquire, align 8
@@ -450,21 +545,51 @@ extension Module {
     // %92 = cmpxchg ptr %0, i64 41, i64 43 seq_cst monotonic, align 8
     // %93 = cmpxchg ptr %0, i64 41, i64 43 seq_cst acquire, align 8
     // %94 = cmpxchg ptr %0, i64 41, i64 43 seq_cst seq_cst, align 8
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .monotonic, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .acquire, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .monotonic, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .acquire, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .monotonic, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .acquire, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .monotonic, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .acquire, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent, failureOrdering: .monotonic, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent, failureOrdering: .acquire, weak: false, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent, failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .monotonic,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .acquire,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .monotonic,
+      failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .monotonic,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .acquire,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquire,
+      failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .monotonic,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .acquire,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .release,
+      failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .monotonic,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .acquire,
+      weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquireRelease,
+      failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent,
+      failureOrdering: .monotonic, weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent,
+      failureOrdering: .acquire, weak: false, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent,
+      failureOrdering: .sequentiallyConsistent, weak: false, singleThread: false, at: endOf(b0))
 
     // %95 = cmpxchg weak ptr %0, i64 41, i64 43 monotonic monotonic, align 8
     // %96 = cmpxchg weak ptr %0, i64 41, i64 43 monotonic acquire, align 8
@@ -481,21 +606,51 @@ extension Module {
     // %107 = cmpxchg weak ptr %0, i64 41, i64 43 seq_cst monotonic, align 8
     // %108 = cmpxchg weak ptr %0, i64 41, i64 43 seq_cst acquire, align 8
     // %109 = cmpxchg weak ptr %0, i64 41, i64 43 seq_cst seq_cst, align 8
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .monotonic, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .acquire, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .monotonic, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .acquire, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .monotonic, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .acquire, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .monotonic, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .acquire, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent, failureOrdering: .monotonic, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent, failureOrdering: .acquire, weak: true, singleThread: false, at: endOf(b0))
-    let _ = insertAtomicCmpXchg(x0ID, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent, failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .monotonic,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .monotonic, failureOrdering: .acquire,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .monotonic,
+      failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .monotonic,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquire, failureOrdering: .acquire,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquire,
+      failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .monotonic,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .release, failureOrdering: .acquire,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .release,
+      failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .monotonic,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquireRelease, failureOrdering: .acquire,
+      weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .acquireRelease,
+      failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent,
+      failureOrdering: .monotonic, weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent,
+      failureOrdering: .acquire, weak: true, singleThread: false, at: endOf(b0))
+    let _ = insertAtomicCmpXchg(
+      x0, old: i64_41, new: i64_43, successOrdering: .sequentiallyConsistent,
+      failureOrdering: .sequentiallyConsistent, weak: true, singleThread: false, at: endOf(b0))
 
     // fence acquire
     // fence release
