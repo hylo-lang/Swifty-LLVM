@@ -5,8 +5,8 @@ final class StructTypeTests: XCTestCase {
 
   func testInlineStruct() {
     var m = Module("foo")
-    let t = IntegerType(64, in: &m)
-    let s = StructType([t, t], in: &m)
+    let t = IntegerType.create(64, in: &m)
+    let s = m.types[StructType.create([t.erased, t.erased], in: &m)]
     XCTAssert(s.isLiteral)
     XCTAssertFalse(s.isPacked)
     XCTAssertFalse(s.isOpaque)
@@ -15,8 +15,8 @@ final class StructTypeTests: XCTestCase {
 
   func testNamedStruct() {
     var m = Module("foo")
-    let t = IntegerType(64, in: &m)
-    let s = StructType(named: "S", [t, t], in: &m)
+    let t = IntegerType.create(64, in: &m)
+    let s = m.types[StructType.create(named: "S", [t.erased, t.erased], in: &m)]
     XCTAssertFalse(s.isLiteral)
     XCTAssertFalse(s.isPacked)
     XCTAssertFalse(s.isOpaque)
@@ -25,47 +25,49 @@ final class StructTypeTests: XCTestCase {
 
   func testPackedStruct() {
     var m = Module("foo")
-    let t = IntegerType(64, in: &m)
-    XCTAssert(StructType([t, t], packed: true, in: &m).isPacked)
-    XCTAssert(StructType(named: "S", [t, t], packed: true, in: &m).isPacked)
+    let t = IntegerType.create(64, in: &m)
+    XCTAssert(m.types[StructType.create([t.erased, t.erased], packed: true, in: &m)].isPacked)
+    XCTAssert(m.types[StructType.create(named: "S", [t.erased, t.erased], packed: true, in: &m)].isPacked)
   }
 
   func testFields() {
     var m = Module("foo")
-    let t = IntegerType(64, in: &m)
-    let u = IntegerType(32, in: &m)
+    let t = IntegerType.create(64, in: &m)
+    let u = IntegerType.create(32, in: &m)
+    let tType = m.types[t]
+    let uType = m.types[u]
 
-    let s0 = StructType([], in: &m)
+    let s0 = m.types[StructType.create([], in: &m)]
     XCTAssertEqual(s0.fields.count, 0)
 
-    let s1 = StructType([t], in: &m)
+    let s1 = m.types[StructType.create([t.erased], in: &m)]
     XCTAssertEqual(s1.fields.count, 1)
-    XCTAssert(s1.fields[0] == t)
+    XCTAssert(s1.fields[0] == tType)
 
-    let s2 = StructType([t, u], in: &m)
+    let s2 = m.types[StructType.create([t.erased, u.erased], in: &m)]
     XCTAssertEqual(s2.fields.count, 2)
-    XCTAssert(s2.fields[0] == t)
-    XCTAssert(s2.fields[1] == u)
+    XCTAssert(s2.fields[0] == tType)
+    XCTAssert(s2.fields[1] == uType)
   }
 
   func testConversion() {
     var m = Module("foo")
-    let t: IRType = StructType([], in: &m)
+    let t: any IRType = m.types[StructType.create([], in: &m)]
     XCTAssertNotNil(StructType(t))
-    let u: IRType = IntegerType(64, in: &m)
+    let u: any IRType = m.types[IntegerType.create(64, in: &m)]
     XCTAssertNil(StructType(u))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let t = IntegerType(64, in: &m)
-    let u = IntegerType(32, in: &m)
+    let t = IntegerType.create(64, in: &m)
+    let u = IntegerType.create(32, in: &m)
 
-    let s0 = StructType([t, u], in: &m)
-    let s1 = StructType([t, u], in: &m)
+    let s0 = m.types[StructType.create([t.erased, u.erased], in: &m)]
+    let s1 = m.types[StructType.create([t.erased, u.erased], in: &m)]
     XCTAssertEqual(s0, s1)
 
-    let s2 = StructType([u, t], in: &m)
+    let s2 = m.types[StructType.create([u.erased, t.erased], in: &m)]
     XCTAssertNotEqual(s0, s2)
   }
 

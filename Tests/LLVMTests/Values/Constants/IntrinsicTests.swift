@@ -1,4 +1,4 @@
-import SwiftyLLVM
+@testable import SwiftyLLVM
 import XCTest
 
 final class IntinsicTests: XCTestCase {
@@ -13,29 +13,29 @@ final class IntinsicTests: XCTestCase {
     var m = Module("foo")
 
     // llvm.va_start is overloaded for different address spaces.
-    let p0 = PointerType(in: &m)
+    let p0 = PointerType.create(in: &m)
     let f = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.va_start, for: [p0]))
-    XCTAssertTrue(f.isOverloaded)
+    XCTAssertTrue(m.values[f].isOverloaded)
 
     // llvm.smax is overloaded for different integer types.
-    let i16 = IntegerType(16, in: &m)
+    let i16 = IntegerType.create(16, in: &m)
     let g = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.smax, for: [i16]))
-    XCTAssert(g.isOverloaded)
+    XCTAssert(m.values[g].isOverloaded)
 
     // llvm.trap is not overloaded.
     let h = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.trap))
-    XCTAssertFalse(h.isOverloaded)
+    XCTAssertFalse(m.values[h].isOverloaded)
   }
 
   func testName() throws {
     var m = Module("foo")
     let f = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.trap, for: []))
-    XCTAssertEqual(f.name, "llvm.trap")
+    XCTAssertEqual(Intrinsic(wrappingTemporarily: m.values[f].llvm).name, "llvm.trap")
   }
 
   func testEquality() throws {
     var m = Module("foo")
-    let p0 = PointerType(in: &m)
+    let p0 = PointerType.create(in: &m)
     let f = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.va_start, for: [p0]))
     let g = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.va_start, for: [p0]))
     XCTAssertEqual(f, g)

@@ -1,21 +1,22 @@
-import SwiftyLLVM
+@testable import SwiftyLLVM
 import XCTest
 
 final class AttributeTests: XCTestCase {
 
   func testEquality() {
     var m = Module("foo")
-    let a = Function.Attribute(.cold, in: &m)
-    let b = Function.Attribute(.cold, in: &m)
+    let a = m.createFunctionAttribute(.cold)
+    let b = m.createFunctionAttribute(.cold)
     XCTAssertEqual(a, b)
 
-    let c = Function.Attribute(.hot, in: &m)
+    let c = m.createFunctionAttribute(.hot)
     XCTAssertNotEqual(a, c)
   }
 
   func testValue() {
     var m = Module("foo")
-    XCTAssertEqual(Parameter.Attribute(.dereferenceable_or_null, 64, in: &m).value, 64)
+    let a = m.createParameterAttribute(.dereferenceable_or_null, 64)
+    XCTAssertEqual(m.attributes[a].value, 64)
   }
 
 }
