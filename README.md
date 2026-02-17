@@ -78,16 +78,21 @@ assert-enabled LLVM builds preinstalled in `/opt/llvm-Debug` and
 2. **Profit**: open the `.xcodeproj` file in the *build-directory* and
    use Xcode's UI to build and test.
 
-## Building with Swift Package Manager
+## Building with Swift Package Manager or Xcode
 
 You can skip the following steps if you are using development containers.
 
-1. Install [pkg-config](https://linux.die.net/man/1/pkg-config).
+1. Install [pkg-config](https://en.wikipedia.org/wiki/Pkg-config).
   - Ubuntu: `sudo apt install pkg-config`
   - Windows: `choco install pkgconfiglite` ([Chocolatey](https://community.chocolatey.org/packages/pkgconfiglite)) or [install it manually](https://sourceforge.net/projects/pkgconfiglite/)
   - MacOS: `sudo port install pkgconfig` ([Mac Ports](https://ports.macports.org/port/pkgconfig/))
-installed, and `<YOUR LLVM>/pkgconfig` added to the `PKG_CONFIG_PATH` environment variable.
-2. Add your LLVM installation's `pkgconfig` subfolder to `PKG_CONFIG_PATH`.
+2. a) When not using Xcode: Add your [LLVM installation](https://github.com/hylo-lang/llvm-build)'s `pkgconfig` subfolder to `PKG_CONFIG_PATH` unless you are using Xcode.
+
+   b) When using Xcode: You will need to install `llvm.pc` in a directory that's already searched by Xcode, e.g. `/usr/local/lib/pkgconfig/`. The Hylo LLVM installation includes a script in [`<LLVM>/pkgconfig/install-pc.sh`](https://github.com/hylo-lang/llvm-build/blob/main/scripts/install-pc.sh) that helps with this:
+    ```
+    cd <LLVM>/pkgconfig
+    ./install-pc.sh llvm.pc /usr/local/lib/pkgconfig/
+    ```
 
 Now you should be able to build and test the project:
 
