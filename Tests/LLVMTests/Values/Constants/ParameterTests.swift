@@ -28,8 +28,8 @@ final class ParameterTests: XCTestCase {
     let f = m.declareFunction("f", m.functionType(from: [m.ptr.erased], to: nil))
     let p = m.values[f].parameters[0]
     let pid = try XCTUnwrap(m.values.id(for: p))
-    let a = m.createParameterAttribute(.nofree)
-    let b = m.createParameterAttribute(.dereferenceable_or_null, 8)
+    let a = m.parameterAttribute(.nofree)
+    let b = m.parameterAttribute(.dereferenceable_or_null, 8)
 
     m.addParameterAttribute(a, to: pid)
     m.addParameterAttribute(b, to: pid)
