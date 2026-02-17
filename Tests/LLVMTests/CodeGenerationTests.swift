@@ -127,12 +127,12 @@ extension Module {
     let slide = declareFunction("slide", functionType(from: [ptr.erased, i1.erased]))
     let slideParameter1 = try XCTUnwrap(values.id(for: values[slide].parameters[1]))
     addParameterAttribute(
-      createParameterAttribute(.zeroext),
+      parameterAttribute(.zeroext),
       to: slideParameter1)
 
     // declare noalias ptr @alloc(i32)
     let alloc = declareFunction("alloc", functionType(from: [i32.erased], to: ptr.erased))
-    addReturnAttribute(createReturnAttribute(.noalias), to: alloc)
+    addReturnAttribute(returnAttribute(.noalias), to: alloc)
 
     // declare void @dealloc(ptr)
     let dealloc = declareFunction("dealloc", functionType(from: [ptr.erased]))

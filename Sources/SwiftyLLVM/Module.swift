@@ -395,21 +395,21 @@ public struct Module: ~Copyable {
   }
 
   /// Creates a target-independent function attribute with given `name` and optional `value` in `module`.
-  public mutating func createFunctionAttribute(
+  public mutating func functionAttribute(
     _ name: Function.AttributeName, _ value: UInt64 = 0
   ) -> Function.Attribute.ID {
     let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
     return .init(attributes.insertIfAbsent(handle))
   }
   /// Creates a target-independent parameter attribute with given `name` and optional `value` in `module`.
-  public mutating func createParameterAttribute(
+  public mutating func parameterAttribute(
     _ name: Parameter.AttributeName, _ value: UInt64 = 0
   ) -> Parameter.Attribute.ID {
     let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
     return .init(attributes.insertIfAbsent(handle))
   }
   /// Creates a target-independent return attribute with given `name` and optional `value` in `module`.
-  public mutating func createReturnAttribute(
+  public mutating func returnAttribute(
     _ name: Function.Return.AttributeName, _ value: UInt64 = 0
   ) -> Function.Return.Attribute.ID {
     let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
@@ -422,11 +422,11 @@ public struct Module: ~Copyable {
     LLVMAddAttributeAtIndex(values[f].llvm.raw, i, attributes[a].llvm.raw)
   }
   /// Adds attribute `a` to the return value of `f`.
-  public mutating func addReturnAttribute(_ a: Function.Return.Attribute.ID, to r: Function.ID) {
+  public mutating func addReturnAttribute(_ a: Function.Return.Attribute.ID, to f: Function.ID) {
     let i = UInt32(LLVMAttributeReturnIndex)
-    LLVMAddAttributeAtIndex(values[r].llvm.raw, i, attributes[a].llvm.raw)
+    LLVMAddAttributeAtIndex(values[f].llvm.raw, i, attributes[a].llvm.raw)
   }
-  /// Adds attribute `a` to `p`.
+  /// Adds attribute `a` to parameter `p`.
   public mutating func addParameterAttribute(_ a: Parameter.Attribute.ID, to p: Parameter.ID) {
     read(values[p]) { parameter in
       let i = UInt32(parameter.index + 1)
@@ -439,7 +439,7 @@ public struct Module: ~Copyable {
   public mutating func addFunctionAttribute(
     named n: Function.AttributeName, to f: Function.ID
   ) -> Function.Attribute.ID {
-    let a = createFunctionAttribute(n)
+    let a = functionAttribute(n)
     addFunctionAttribute(a, to: f)
     return a
   }
@@ -448,7 +448,7 @@ public struct Module: ~Copyable {
   public mutating func addReturnAttribute(
     named n: Function.Return.AttributeName, to f: Function.ID
   ) -> Function.Return.Attribute.ID {
-    let a = createReturnAttribute(n)
+    let a = returnAttribute(n)
     addReturnAttribute(a, to: f)
     return a
   }
@@ -457,7 +457,7 @@ public struct Module: ~Copyable {
   public mutating func addParameterAttribute(
     named n: Parameter.AttributeName, to p: Parameter.ID
   ) -> Parameter.Attribute.ID {
-    let a = createParameterAttribute(n)
+    let a = parameterAttribute(n)
     addParameterAttribute(a, to: p)
     return a
   }
