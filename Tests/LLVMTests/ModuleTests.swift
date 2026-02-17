@@ -1,5 +1,6 @@
-@testable import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class ModuleTests: XCTestCase {
 
@@ -12,7 +13,7 @@ final class ModuleTests: XCTestCase {
 
   func testTypeNamed() throws {
     var m = Module("foo")
-    let t = StructType.create(named: "T", [], in: &m).erased
+    let t = m.structType(named: "T", []).erased
     let u = try XCTUnwrap(m.type(named: "T"))
     XCTAssert(t == u)
     XCTAssertNil(m.type(named: "U"))
@@ -20,7 +21,7 @@ final class ModuleTests: XCTestCase {
 
   func testFunctionNamed() throws {
     var m = Module("foo")
-    let f = m.declareFunction("fn", FunctionType.create(from: [], in: &m))
+    let f = m.declareFunction("fn", m.functionType(from: []))
     let g = try XCTUnwrap(m.function(named: "fn"))
     XCTAssert(f == g)
     XCTAssertNil(m.type(named: "gn"))
@@ -28,7 +29,7 @@ final class ModuleTests: XCTestCase {
 
   func testGlobalNamed() throws {
     var m = Module("foo")
-    let x = m.declareGlobalVariable("gl", PointerType.create(in: &m))
+    let x = m.declareGlobalVariable("gl", m.ptr)
     let y = try XCTUnwrap(m.global(named: "gl"))
     XCTAssert(x == y)
     XCTAssertNil(m.type(named: "gn"))
@@ -36,9 +37,8 @@ final class ModuleTests: XCTestCase {
 
   func testAddGlobalVariable() {
     var m = Module("foo")
-    let ptr = PointerType.create(in: &m)
-    let x = m.addGlobalVariable("g", ptr)
-    let y = m.addGlobalVariable("g", ptr)
+    let x = m.addGlobalVariable("g", m.ptr)
+    let y = m.addGlobalVariable("g", m.ptr)
     XCTAssert(x != y)
   }
 
@@ -46,16 +46,16 @@ final class ModuleTests: XCTestCase {
     var m = Module("foo")
     XCTAssertNoThrow(try m.verify())
 
-    let f = m.declareFunction("fn", FunctionType.create(from: [], in: &m))
+    let f = m.declareFunction("fn", m.functionType(from: []))
     m.appendBlock(to: f)
     XCTAssertThrowsError(try m.verify())
   }
 
   func testCompile() throws {
     var m = Module("foo")
-    let i32 = IntegerType.create(32, in: &m)
+    let i32 = m.integerType(32)
 
-    let f = m.declareFunction("main", FunctionType.create(from: [], to: i32.erased, in: &m))
+    let f = m.declareFunction("main", m.functionType(from: [], to: i32.erased))
     let b = m.appendBlock(to: f)
     m.insertReturn(m.types[i32].zero(in: &m), at: m.endOf(b))
 
@@ -66,9 +66,9 @@ final class ModuleTests: XCTestCase {
 
   func testStandardModulePasses() throws {
     var m = Module("foo")
-    let i32 = IntegerType.create(32, in: &m)
+    let i32 = m.integerType(32)
 
-    let f = m.declareFunction("main", FunctionType.create(from: [], to: i32.erased, in: &m))
+    let f = m.declareFunction("main", m.functionType(from: [], to: i32.erased))
     let b = m.appendBlock(to: f)
     m.insertReturn(m.types[i32].zero(in: &m), at: m.endOf(b))
 
