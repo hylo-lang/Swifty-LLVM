@@ -11,38 +11,12 @@ public struct EntityStore<Entity: LLVMEntity>: ~Copyable {
   public init() {}
 
   /// Inserts an entity handle into the store and starts managing it, returning its new ID.
-  /// 
+  ///
   /// Precondition: `handle` must not be already managed by this store.
-  public mutating func insert(_ handle: Entity.Handle) -> Entity.ID {
-    let id = Entity.ID(uncheckedFrom: .init(bits: UInt64(handles.count)))
+  internal mutating func insert(_ handle: Entity.Handle) -> Entity.ID {
+    let id = Entity.ID(uncheckedFrom: .init(handles.count))
     handles.append(handle)
     return id
-  }
-
-  /// Extracts the entity with given `id` for the duration of `witness`.
-  ///
-  /// - Requires: Entity with `id` is present in the store.
-  public mutating func projecting<R>(_ id: Entity.ID, _ witness: (inout Entity) throws -> R)
-    rethrows -> R
-  {
-    let handle = unsafeExtract(id)
-    var entity = Entity(wrappingTemporarily: handle)
-    defer { unsafeRestore(id, handle) }  // Safety: Required to be run even if `witness` throws.
-    return try witness(&entity)
-  }
-
-  /// Extracts the entity with given `id` for the duration of `witness`.
-  ///
-  /// - Requires: Entity with `id` is present in the store.
-  public mutating func projecting<R>(
-    _ id: Entity.ID, _ witness: (inout Entity, inout Self) throws -> R
-  )
-    rethrows -> R
-  {
-    let handle = unsafeExtract(id)
-    var entity = Entity(wrappingTemporarily: handle)
-    defer { unsafeRestore(id, handle) }  // Safety: Required to be run even if `witness` throws.
-    return try witness(&entity, &self)
   }
 
   /// Temporarily extracts and projects the entity with given `id`.
@@ -64,12 +38,12 @@ public struct EntityStore<Entity: LLVMEntity>: ~Copyable {
   ///
   /// - Requires: Entity with `id` is present in the store.
   /// - Note: You must either restore the handle or destroy it yourself to avoid leaking resources.
-  public mutating func unsafeExtract(_ id: Entity.ID) -> Entity.Handle {
+  internal mutating func unsafeExtract(_ id: Entity.ID) -> Entity.Handle {
     guard let handle = handle(for: id) else {
       fatalError("Attempting to extract entity with ID \(id) that is not present in the store.")
     }
 
-    handles[id.erased.raw] = nil
+    handles[Int(id.raw)] = nil
     return handle
   }
 
@@ -77,12 +51,12 @@ public struct EntityStore<Entity: LLVMEntity>: ~Copyable {
   ///
   /// - Requires: Entity with `id` has been extracted from this store and not yet
   ///   been restored since the last extraction.
-  public mutating func unsafeRestore(_ id: Entity.ID, _ handle: Entity.Handle) {
+  internal mutating func unsafeRestore(_ id: Entity.ID, _ handle: Entity.Handle) {
     guard self.handle(for: id) == nil else {
       fatalError("Attempting to restore entity with ID \(id) that is already present in the store.")
     }
 
-    handles[id.raw] = handle
+    handles[Int(id.raw)] = handle
   }
 
   /// Checks if the store contains an entity with given `id`.
@@ -90,22 +64,12 @@ public struct EntityStore<Entity: LLVMEntity>: ~Copyable {
   /// Note: Temporarily extracted entities are not considered to be contained.
   public func contains(_ id: Entity.ID) -> Bool {
     guard id.raw < handles.count else { return false }
-    return handles[id.raw] != nil
+    return handles[Int(id.raw)] != nil
   }
 
   /// Returns the handle of the entity with given `id`, if it is present in the store.
   public func handle(for id: Entity.ID) -> Entity.Handle? {
     guard contains(id) else { return nil }
-    return handles[id.raw]
-  }
-}
-
-/// Identifies an entity of given type in an `EntityStore`.
-public struct EntityID<Entity: EntityView>: Hashable, Sendable {
-  fileprivate let raw: Int
-
-  /// Forms a new entity ID with the given raw value.
-  fileprivate init(_ raw: Int) {
-    self.raw = raw
+    return handles[Int(id.raw)]
   }
 }

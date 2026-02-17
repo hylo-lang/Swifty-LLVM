@@ -7,8 +7,7 @@ public protocol LLVMEntity: ~Copyable {
   init(wrappingTemporarily handle: Handle)
 }
 
-
-public struct LLVMIdentity<T: LLVMEntity> {
+public struct LLVMIdentity<T: LLVMEntity>: Hashable, Sendable {
 
   /// The type-erased value of this identity.
   public let raw: UInt

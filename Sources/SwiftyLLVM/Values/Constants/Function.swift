@@ -1,7 +1,8 @@
+import Glibc
 internal import llvmc
 
 /// A function in LLVM IR.
-public struct Function: Global, Hashable, Sendable {
+public struct Function: Global, Callable, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
@@ -16,17 +17,10 @@ public struct Function: Global, Hashable, Sendable {
     self.llvm = .init(llvm)
   }
 
-  /// Creates an instance with `v`, failing iff `v` isn't a function.
-  public init?(_ v: any IRValue) {
-    if let h = LLVMIsAFunction(v.llvm.raw) {
-      self.llvm = .init(h)
-    } else {
-      return nil
-    }
+  /// Returns `true` iff the IR in `self` is well formed.
+  public func isWellFormed() -> Bool {
+    LLVMVerifyFunction(llvm.raw, LLVMReturnStatusAction) == 0
   }
-
-  /// The parameters of the function.
-  public var parameters: Parameters { .init(of: self) }  // todo make this non-escapable
 
   /// The basic blocks of the function.
   public var basicBlocks: [BasicBlock] {
@@ -36,15 +30,21 @@ public struct Function: Global, Hashable, Sendable {
     return handles.map({ .init($0!) })
   }
 
+  public var parameters: Function.Parameters { .init(of: self) }
+
   /// The the function's entry, if any.
   public var entry: BasicBlock? {
     guard LLVMCountBasicBlocks(llvm.raw) > 0 else { return nil }
     return .init(LLVMGetEntryBasicBlock(llvm.raw))
   }
 
-  /// Returns `true` iff the IR in `self` is well formed.
-  public func isWellFormed() -> Bool {
-    LLVMVerifyFunction(llvm.raw, LLVMReturnStatusAction) == 0
+  /// Creates an instance with `v`, failing iff `v` isn't a function.
+  public init?(_ v: any IRValue) {
+    if let h = LLVMIsAFunction(v.llvm.raw) {
+      self.llvm = .init(h)
+    } else {
+      return nil
+    }
   }
 
 }
@@ -58,14 +58,11 @@ extension Function {
     public let parent: Function
 
     /// Creates an instance representing the return value of `parent`.
-    fileprivate init(_ parent: Function) {
-      self.parent = parent
+    fileprivate init(_ parent: some Callable) {
+      self.parent = Function(wrappingTemporarily: parent.llvm)
     }
 
   }
-
-  /// The return value of the function.
-  public var returnValue: Return { .init(self) }
 
 }
 
@@ -79,10 +76,10 @@ extension Function {
     public typealias Element = Parameter
 
     /// The function containing the elements of the collection.
-    private let parent: Function
+    private let parent: any Callable
 
     /// Creates a collection containing the parameters of `f`.
-    fileprivate init(of f: Function) {
+    fileprivate init(of f: any Callable) {
       self.parent = f
     }
 
@@ -112,4 +109,12 @@ extension Function {
 
   }
 
+}
+
+extension Callable {
+  /// The return value of the function.
+  public var returnValue: Function.Return { .init(self) }
+
+  /// The parameters of the function.
+  public var parameters: Function.Parameters { .init(of: self) }
 }

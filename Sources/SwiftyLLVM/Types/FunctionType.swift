@@ -14,11 +14,32 @@ public struct FunctionType: IRType, Hashable {
   /// Creates an instance with given `parameters` and `returnType` in `module`.
   ///
   /// The return type is `void` if `returnType` is passed `nil`.
-  public init(from parameters: [any IRType], to returnType: (any IRType)? = nil, in module: inout Module) {
-    let r = returnType ?? VoidType(in: &module)
+  @available(*, deprecated, message: "Use create(from:to:in:) instead.")
+  public init(
+    from parameters: [any IRType], to returnType: (any IRType)? = nil, in module: inout Module
+  ) {
+    let r = returnType ?? (module.types[VoidType.create(in: &module)] as any IRType)
     self.llvm = parameters.withHandles { (p) in
       .init(LLVMFunctionType(r.llvm.raw, p.baseAddress, UInt32(p.count), 0))
     }
+  }
+
+  /// Returns the ID of a function type with given `parameters` and `returnType` in `module`.
+  ///
+  /// The return type is `void` if `returnType` is passed `nil`.
+  public static func create(
+    from parameters: [AnyType.ID],
+    to returnType: AnyType.ID? = nil,
+    in module: inout Module
+  ) -> Self.ID {
+    let r =
+      returnType.map({ module.types[$0] as any IRType })
+      ?? (module.types[VoidType.create(in: &module)] as any IRType)
+    let p = parameters.map({ module.types[$0] as any IRType })
+    let handle = p.withHandles { (handles) in
+      TypeRef(LLVMFunctionType(r.llvm.raw, handles.baseAddress, UInt32(handles.count), 0))
+    }
+    return .init(module.types.insertIfAbsent(handle))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a function type.
@@ -49,4 +70,3 @@ public struct FunctionType: IRType, Hashable {
   }
 
 }
-

@@ -12,6 +12,7 @@ public struct ArrayType: IRType, Hashable {
   }
 
   /// Creates an instance representing arrays of `count` `element`s in `module`.
+  @available(*, deprecated, message: "Use ArrayType.create(_ count:_ elementType: in:) instead.")
   public init(_ count: Int, _ element: any IRType, in module: inout Module) {
     precondition(LLVMGetTypeContext(element.llvm.raw) == module.context)
     self.llvm = .init(LLVMArrayType(element.llvm.raw, UInt32(count)))
@@ -24,6 +25,15 @@ public struct ArrayType: IRType, Hashable {
     } else {
       return nil
     }
+  }
+
+  public static func create(_ count: Int, _ element: some IRType, in module: inout Module)
+    -> Self.ID
+  {
+    precondition(LLVMGetTypeContext(element.llvm.raw) == module.context)
+
+    let handle = TypeRef(LLVMArrayType2(element.llvm.raw, UInt64(count)))
+    return ArrayType.ID(module.types.insertIfAbsent(handle))
   }
 
   /// The type of an element in instances of this type.

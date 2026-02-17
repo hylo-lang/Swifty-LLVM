@@ -12,8 +12,14 @@ public struct Poison: IRValue, Hashable {
   }
 
   /// Creates the poison value of `t`.
+  @available(*, deprecated, message: "Use create(of:in:) instead.")
   public init(of t: any IRType) {
     self.llvm = .init(LLVMGetPoison(t.llvm.raw))
+  }
+
+  /// Creates and registers the poison value of `t` in `module`.
+  public static func create(of t: some IRType, in module: inout Module) -> Self.ID {
+    .init(module.values.insertIfAbsent(ValueRef(LLVMGetPoison(t.llvm.raw))))
   }
 
   /// Creates an intance with `v`, failing iff `v` is not a poison value.

@@ -1,20 +1,23 @@
-import SwiftyLLVM
+@testable import SwiftyLLVM
 import XCTest
 
 final class SwitchTests: XCTestCase {
 
   func testSwitch() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", .init(from: [], in: &m))
+    let f = m.declareFunction("fn", FunctionType.create(from: [], in: &m))
     let b = m.appendBlock(to: f)
 
     let c0 = m.appendBlock(to: f)
     let c1 = m.appendBlock(to: f)
     let c2 = m.appendBlock(to: f)
+    let i16 = m.types[m.i16]
+    let z = i16.constant(0, in: &m)
+    let o = i16.constant(1, in: &m)
 
     _ = m.insertSwitch(
-      on: m.i16(0),
-      cases: [(m.i16(0), c0), (m.i16(1), c1)],
+      on: z,
+      cases: [(z.erased, c0), (o.erased, c1)],
       default: c2,
       at: m.endOf(b))
   }
