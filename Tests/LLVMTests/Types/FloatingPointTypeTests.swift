@@ -1,4 +1,4 @@
-import SwiftyLLVM
+@testable import SwiftyLLVM
 import XCTest
 
 final class FloatingPointTypeTests: XCTestCase {
@@ -6,32 +6,33 @@ final class FloatingPointTypeTests: XCTestCase {
   func testConversion() {
     var m = Module("foo")
 
-    let t0: IRType = FloatingPointType.half(in: &m)
-    let t1: IRType = FloatingPointType.float(in: &m)
-    let t2: IRType = FloatingPointType.double(in: &m)
-    let t3: IRType = FloatingPointType.fp128(in: &m)
+    let t0 = m.types[FloatingPointType.half(in: &m)] as any IRType
+    let t1 = m.types[FloatingPointType.float(in: &m)] as any IRType
+    let t2 = m.types[FloatingPointType.double(in: &m)] as any IRType
+    let t3 = m.types[FloatingPointType.fp128(in: &m)] as any IRType
     for t in [t0, t1, t2, t3] {
       XCTAssertNotNil(FloatingPointType(t))
     }
 
-    let u: IRType = IntegerType(64, in: &m)
+    let u = m.types[IntegerType.create(64, in: &m)] as any IRType
     XCTAssertNil(FloatingPointType(u))
   }
 
   func testCallSyntax() {
     var m = Module("foo")
-    let double = FloatingPointType.double(in: &m)
-    XCTAssertEqual(double(1).value.value, 1, accuracy: .ulpOfOne)
+    let double = m.types[FloatingPointType.double(in: &m)]
+    let x = double(1, in: &m)
+    XCTAssertEqual(m.values[x].value.value, 1, accuracy: .ulpOfOne)
   }
 
   func testEquality() {
     var m = Module("foo")
-    let t = FloatingPointType.double(in: &m)
-    let u = FloatingPointType.double(in: &m)
-    XCTAssertEqual(t, u)
+    let t = m.types[FloatingPointType.double(in: &m)]
+    let u = m.types[FloatingPointType.double(in: &m)]
+    XCTAssertEqual(t.llvm, u.llvm)
 
-    let v = FloatingPointType.float(in: &m)
-    XCTAssertNotEqual(t, v)
+    let v = m.types[FloatingPointType.float(in: &m)]
+    XCTAssertNotEqual(t.llvm, v.llvm)
   }
 
 }

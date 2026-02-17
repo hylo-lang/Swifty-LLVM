@@ -1,23 +1,27 @@
-import SwiftyLLVM
+@testable import SwiftyLLVM
 import XCTest
 
 final class PoisonTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: IRValue = Poison(of: FloatingPointType.float(in: &m))
+    let float = FloatingPointType.float(in: &m)
+    let t: any IRValue = m.values[Poison.create(of: m.types[float], in: &m)]
     XCTAssertNotNil(Poison(t))
-    let u: IRValue = IntegerType(64, in: &m).zero
+    let i64 = IntegerType.create(64, in: &m)
+    let u: any IRValue = m.types[i64].zero
     XCTAssertNil(Poison(u))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let t = Poison(of: FloatingPointType.double(in: &m))
-    let u = Poison(of: FloatingPointType.double(in: &m))
+    let double = FloatingPointType.double(in: &m)
+    let t = Poison.create(of: m.types[double], in: &m)
+    let u = Poison.create(of: m.types[double], in: &m)
     XCTAssertEqual(t, u)
 
-    let v = Poison(of: FloatingPointType.float(in: &m))
+    let float = FloatingPointType.float(in: &m)
+    let v = Poison.create(of: m.types[float], in: &m)
     XCTAssertNotEqual(t, v)
   }
 

@@ -12,8 +12,14 @@ public struct VoidType: IRType, Hashable {
   }
 
   /// Creates an instance in `module`.
+  @available(*, deprecated, message: "Use create(in:) instead.")
   public init(in module: inout Module) {
     self.llvm = .init(LLVMVoidTypeInContext(module.context))
+  }
+
+  /// Returns the ID of the void type in `module`.
+  public static func create(in module: inout Module) -> Self.ID {
+    .init(module.types.insertIfAbsent(.init(LLVMVoidTypeInContext(module.context))))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a void type.

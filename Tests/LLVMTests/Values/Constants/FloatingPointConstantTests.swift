@@ -1,42 +1,53 @@
-import SwiftyLLVM
+@testable import SwiftyLLVM
 import XCTest
 
 final class FloatingPointConstantTests: XCTestCase {
 
   func testZero() {
     var m = Module("foo")
-    let x = FloatingPointType.double(in: &m).zero
-    XCTAssertEqual(x.value.value, 0.0, accuracy: .ulpOfOne)
+    let t = FloatingPointType.double(in: &m)
+    let ty = m.types[t]
+    let x = ty.zero(in: &m)
+    XCTAssertEqual(m.values[x].value.value, 0.0, accuracy: .ulpOfOne)
   }
 
   func testInitWithDouble() {
     var m = Module("foo")
-    let x = FloatingPointType.double(in: &m).constant(4.2)
-    XCTAssertEqual(x.value.value, 4.2, accuracy: .ulpOfOne)
+    let t = FloatingPointType.double(in: &m)
+    let ty = m.types[t]
+    let x = ty.constant(4.2, in: &m)
+    XCTAssertEqual(m.values[x].value.value, 4.2, accuracy: .ulpOfOne)
   }
 
   func testInitWithText() {
     var m = Module("foo")
-    let x = FloatingPointType.double(in: &m).constant(parsing: "4.2")
-    XCTAssertEqual(x.value.value, 4.2, accuracy: .ulpOfOne)
+    let t = FloatingPointType.double(in: &m)
+    let ty = m.types[t]
+    let x = ty.constant(parsing: "4.2", in: &m)
+    XCTAssertEqual(m.values[x].value.value, 4.2, accuracy: .ulpOfOne)
   }
 
   func testConversion() {
     var m = Module("foo")
-    let t: IRValue = FloatingPointType.float(in: &m).zero
+    let ft = FloatingPointType.float(in: &m)
+    let ty = m.types[ft]
+    let t: any IRValue = m.values[ty.zero(in: &m)]
     XCTAssertNotNil(FloatingPointConstant(t))
-    let u: IRValue = IntegerType(64, in: &m).zero
+    let i64 = IntegerType.create(64, in: &m)
+    let u: any IRValue = m.types[i64].zero
     XCTAssertNil(FloatingPointConstant(u))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let t = FloatingPointType.double(in: &m).zero
-    let u = FloatingPointType.double(in: &m).zero
-    XCTAssertEqual(t, u)
+    let ty = FloatingPointType.double(in: &m)
+    let tType = m.types[ty]
+    let t = tType.zero(in: &m)
+    let u = tType.zero(in: &m)
+    XCTAssertEqual(m.values[t], m.values[u])
 
-    let v = FloatingPointType.double(in: &m).constant(4.2)
-    XCTAssertNotEqual(t, v)
+    let v = tType.constant(4.2, in: &m)
+    XCTAssertNotEqual(m.values[t], m.values[v])
   }
 
 }

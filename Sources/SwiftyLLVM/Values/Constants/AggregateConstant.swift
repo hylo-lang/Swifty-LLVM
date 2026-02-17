@@ -24,7 +24,7 @@ extension AggregateConstant where Index == Int, Element == any IRValue {
     return position - 1
   }
 
-  public subscript(position: Int) -> IRValue {
+  public subscript(position: Int) -> any IRValue {
     precondition(position >= 0 && position < count, "index is out of bounds")
     return AnyValue(LLVMGetAggregateElement(llvm.raw, UInt32(position)))
   }

@@ -26,8 +26,16 @@ public struct PointerType: IRType, Hashable {
   }
 
   /// Creates an opaque pointer type in address space `s` in `module`.
+  @available(*, deprecated, message: "Use create(inAddressSpace:in:) instead.")
   public init(inAddressSpace s: AddressSpace = .default, in module: inout Module) {
     self.init(LLVMPointerTypeInContext(module.context, s.llvm))
+  }
+
+  /// Returns the ID of an opaque pointer type in address space `s` in `module`.
+  public static func create(inAddressSpace s: AddressSpace = .default, in module: inout Module)
+    -> Self.ID
+  {
+    .init(module.types.insertIfAbsent(.init(LLVMPointerTypeInContext(module.context, s.llvm))))
   }
 
   /// The address space of the pointer.
