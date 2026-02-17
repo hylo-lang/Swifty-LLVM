@@ -12,10 +12,26 @@ public struct StructType: IRType, Hashable {
   }
 
   /// Creates an instance with given `fields` in `module`, packed iff `packed` is `true`.
+  @available(*, deprecated, message: "Use create(_:packed:in:) instead.")
   public init(_ fields: [any IRType], packed: Bool = false, in module: inout Module) {
     self.llvm = fields.withHandles { (f) in
       .init(LLVMStructTypeInContext(module.context, f.baseAddress, UInt32(f.count), packed ? 1 : 0))
     }
+  }
+
+  /// Returns the ID of a struct type with given `fields` in `module`, packed iff `packed` is `true`.
+  public static func create(
+    _ fields: [AnyType.ID],
+    packed: Bool = false,
+    in module: inout Module
+  ) -> Self.ID {
+    let f = fields.map({ module.types[$0] as any IRType })
+    let handle = f.withHandles { (types) in
+      TypeRef(
+        LLVMStructTypeInContext(
+          module.context, types.baseAddress, UInt32(types.count), packed ? 1 : 0))
+    }
+    return .init(module.types.insertIfAbsent(handle))
   }
 
   /// Creates a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
@@ -29,6 +45,21 @@ public struct StructType: IRType, Hashable {
     fields.withHandles { (f) in
       LLVMStructSetBody(self.llvm.raw, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
     }
+  }
+
+  /// Returns the ID of a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
+  public static func create(
+    named name: String,
+    _ fields: [AnyType.ID],
+    packed: Bool = false,
+    in module: inout Module
+  ) -> Self.ID {
+    let handle = TypeRef(LLVMStructCreateNamed(module.context, name))
+    let f = fields.map({ module.types[$0] as any IRType })
+    f.withHandles { (types) in
+      LLVMStructSetBody(handle.raw, types.baseAddress, UInt32(types.count), packed ? 1 : 0)
+    }
+    return .init(module.types.insertIfAbsent(handle))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a struct type.
