@@ -78,8 +78,8 @@ final class FunctionTests: XCTestCase {
   func testAttributes() {
     var m = Module("foo")
     let f = m.declareFunction("f", m.functionType(from: []))
-    let a = m.createFunctionAttribute(.alwaysinline)
-    let b = m.createFunctionAttribute(.hot)
+    let a = m.functionAttribute(.alwaysinline)
+    let b = m.functionAttribute(.hot)
 
     m.addFunctionAttribute(a, to: f)
     m.addFunctionAttribute(b, to: f)
@@ -97,8 +97,8 @@ final class FunctionTests: XCTestCase {
     var m = Module("foo")
     let f = m.declareFunction("f", m.functionType(from: [], to: m.ptr.erased))
     let r = m.values[f].returnValue
-    let a = m.createReturnAttribute(.noalias)
-    let b = m.createReturnAttribute(.dereferenceable_or_null, 8)
+    let a = m.returnAttribute(.noalias)
+    let b = m.returnAttribute(.dereferenceable_or_null, 8)
 
     m.addReturnAttribute(a, to: f)
     m.addReturnAttribute(b, to: f)
