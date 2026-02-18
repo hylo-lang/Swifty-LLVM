@@ -5,7 +5,7 @@ final class SwitchTests: XCTestCase {
 
   func testSwitch() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionTypeD(from: []))
     let b = m.appendBlock(to: f)
 
     let c0 = m.appendBlock(to: f)

@@ -1173,16 +1173,30 @@ public struct Module: ~Copyable {
     PointerType.create(inAddressSpace: s, in: &self)
   }
 
+  public mutating func functionTypeD(from: [AnyType.Identity], to: AnyType.Identity? = nil)
+    -> FunctionType.Identity
+  {
+    FunctionType.create(from: from, to: to, in: &self)
+  }
+
   /// Creates a function type with given parameter and return types.
   public mutating func functionType<each T: IRType, R: IRType>(
     from parameters: (repeat (each T).Identity), to returnType: R.Identity
   ) -> FunctionType.Identity {
-    FunctionType.create(from: parameters, to: returnType.erased, in: &self)
+    var erased = [AnyType.Identity]()
+    /// Map variadic tuple to array:
+    for p in repeat each parameters {
+      erased.append(p.erased)
+    }
+
+    return FunctionType.create(from: erased, to: returnType.erased, in: &self)
   }
 
   /// Creates a function type with given parameter types and void as return type.
-  public mutating func functionType<each T: IRType>(from parameters: (repeat (each T).Identity)) -> FunctionType.Identity {
-    FunctionType.create(from: parameters, to: nil, in: &self)
+  public mutating func functionType<each T: IRType>(from parameters: (repeat (each T).Identity))
+    -> FunctionType.Identity
+  {
+    functionType(from: (), to: void)
   }
 
   /// Creates an array type of `count` elements of `element`.

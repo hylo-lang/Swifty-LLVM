@@ -22,7 +22,7 @@ final class IRValueTests: XCTestCase {
     let i64 = m.integerType(64)
     XCTAssert(m.types[i64].null.isConstant)
 
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionType(from: ()))
     let b = m.appendBlock(to: f)
     let i = m.values[m.insertAlloca(i64, at: m.endOf(b))]
     XCTAssertFalse(i.isConstant)
@@ -30,7 +30,7 @@ final class IRValueTests: XCTestCase {
 
   func testIsTerminator() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionType(from: ()))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
 

@@ -14,24 +14,17 @@ public struct FunctionType: IRType, Hashable {
   /// Returns the ID of a function type with given `parameters` and `returnType` in `module`.
   ///
   /// The return type is `void` if `returnType` is passed `nil`.
-  public static func create<each T: IRType>(
-    from parameters: (repeat (each T).Identity),
+  public static func create(
+    from parameters: [AnyType.Identity],
     to returnType: AnyType.Identity? = nil,
     in module: inout Module
   ) -> Self.Identity {
-    let r =
-      returnType.map({ module.types[$0] as any IRType })
-      ?? (module.types[VoidType.create(in: &module)] as any IRType)
+    let r = module.types[returnType ?? module.void.erased]
 
-    // Mapping variadic tuple to array:
-    var handles: [LLVMTypeRef?] = []
-    for param in repeat each parameters {
-      handles.append(module.types[param.erased].llvm.raw)
-    }
-
-    let handle = handles.withUnsafeMutableBufferPointer { buffer in
-      return TypeRef(LLVMFunctionType(r.llvm.raw, buffer.baseAddress, UInt32(buffer.count), 0))
-    }
+    let handle = parameters.map { module.types[$0] }
+      .withHandles { f in
+        return TypeRef(LLVMFunctionType(r.llvm.raw, f.baseAddress, UInt32(f.count), 0))
+      }
     return .init(module.types.demandId(for: handle))
   }
 

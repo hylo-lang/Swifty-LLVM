@@ -6,7 +6,7 @@ final class IRTypeTests: XCTestCase {
   func testIsSized() {
     var m = Module("foo")
     XCTAssert(m.types[m.integerType(64)].isSized)
-    XCTAssertFalse(m.types[m.functionType(from: [])].isSized)
+    XCTAssertFalse(m.types[m.functionType(from: ())].isSized)
   }
 
   func testEqualty() {

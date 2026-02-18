@@ -21,7 +21,7 @@ final class ModuleTests: XCTestCase {
 
   func testFunctionNamed() throws {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionType(from: ()))
     let g = try XCTUnwrap(m.function(named: "fn"))
     XCTAssert(f == g)
     XCTAssertNil(m.type(named: "gn"))
@@ -46,7 +46,7 @@ final class ModuleTests: XCTestCase {
     var m = Module("foo")
     XCTAssertNoThrow(try m.verify())
 
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionTypeD(from: []))
     m.appendBlock(to: f)
     XCTAssertThrowsError(try m.verify())
   }
@@ -55,7 +55,7 @@ final class ModuleTests: XCTestCase {
     var m = Module("foo")
     let i32 = m.integerType(32)
 
-    let f = m.declareFunction("main", m.functionType(from: [], to: i32.erased))
+    let f = m.declareFunction("main", m.functionType(from: (), to: i32.erased))
     let b = m.appendBlock(to: f)
     m.insertReturn(m.types[i32].zero(in: &m), at: m.endOf(b))
 
@@ -68,7 +68,7 @@ final class ModuleTests: XCTestCase {
     var m = Module("foo")
     let i32 = m.integerType(32)
 
-    let f = m.declareFunction("main", m.functionType(from: [], to: i32.erased))
+    let f = m.declareFunction("main", m.functionType(from: (), to: i32.erased))
     let b = m.appendBlock(to: f)
     m.insertReturn(m.types[i32].zero(in: &m), at: m.endOf(b))
 
