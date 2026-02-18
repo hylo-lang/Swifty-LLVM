@@ -68,7 +68,7 @@ extension Module {
   private mutating func emitMain(
     projectingDegreesWith projectDegrees: Function.Identity
   ) throws -> Function.Identity {
-    let s = functionType(from: [], to: i32.erased)
+    let s = functionType(from: (), to: i32.erased)
     let f = declareFunction("main", s)
 
     let b0 = appendBlock(named: "b0", to: f)
@@ -102,7 +102,7 @@ extension Module {
     // %7 = extractvalue { ptr, ptr } %3, 0
     // call void %7(ptr %0, i1 false
     let x7 = insertExtractValue(from: x3, at: 0, at: endOf(b0))
-    let resumeType = functionType(from: [ptr.erased, i1.erased])
+    let resumeType = functionType(from: (ptr, i1))
     let i1False = types[i1].constant(0, in: &self).erased
     _ = insertCall(
       x7.erased, typed: resumeType, on: [x0.erased, i1False], at: endOf(b0))
@@ -124,22 +124,21 @@ extension Module {
   /// Defines a coroutine that projects the value in degrees of an angle passed in radians.
   private mutating func emitProjectDegrees() throws -> Function.Identity {
     // declare void @slide(ptr, i1 zeroext)
-    let slide = declareFunction("slide", functionType(from: [ptr.erased, i1.erased]))
+    let slide = declareFunction("slide", functionType(from: (ptr, i1)))
     let slideParameter1 = try XCTUnwrap(values.id(for: values[slide].parameters[1]))
     addParameterAttribute(
       parameterAttribute(.zeroext),
       to: slideParameter1)
 
     // declare noalias ptr @alloc(i32)
-    let alloc = declareFunction("alloc", functionType(from: [i32.erased], to: ptr.erased))
+    let alloc = declareFunction("alloc", functionType(from: (i32), to: ptr))
     addReturnAttribute(returnAttribute(.noalias), to: alloc)
 
     // declare void @dealloc(ptr)
-    let dealloc = declareFunction("dealloc", functionType(from: [ptr.erased]))
-
+    let dealloc = declareFunction("dealloc", functionType(from: (ptr)))
     // define { ptr, ptr } @deg(ptr %0, ptr %1)
     let pairOfPointers = structType([ptr.erased, ptr.erased]).erased
-    let s = functionType(from: [ptr.erased, ptr.erased], to: pairOfPointers)
+    let s = functionType(from: (ptr, ptr), to: pairOfPointers)
     let f = declareFunction("deg", s)
     let r = try XCTUnwrap(values[f].parameters.last)
     let rID = try XCTUnwrap(values.id(for: r))
@@ -198,7 +197,7 @@ extension Module {
 
     // %12 = call token @llvm.coro.end.results()
     let results = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.end.results))
-    let resultToken = insertCall(Function.Identity(results.erased), on: [], at: endOf(b0))
+    let resultToken = insertCall(results, on: [], at: endOf(b0))
 
     // %13 = call i1 @llvm.coro.end(ptr %4, i1 false, token %12)
     let end = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.end))
@@ -218,7 +217,7 @@ extension Module {
   }
 
   private mutating func emitTestAtomics() throws -> Function.Identity {
-    let s = functionType(from: [])
+    let s = functionType(from: ())
     let f = declareFunction("testAtomics", s)
 
     let b0 = appendBlock(named: "b0", to: f)

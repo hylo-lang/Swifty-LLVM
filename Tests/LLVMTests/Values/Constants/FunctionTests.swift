@@ -5,7 +5,7 @@ final class FunctionTests: XCTestCase {
 
   func testWellFormed() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionType(from: ()))
     XCTAssert(m.values[f].isWellFormed())
     m.appendBlock(to: f)
     XCTAssertFalse(m.values[f].isWellFormed())
@@ -13,7 +13,7 @@ final class FunctionTests: XCTestCase {
 
   func testEntry() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionType(from: ()))
     XCTAssertNil(m.values[f].entry)
     m.appendBlock(to: f)
     XCTAssertNotNil(m.values[f].entry)
@@ -24,14 +24,14 @@ final class FunctionTests: XCTestCase {
     let t = m.types[m.i64]
     let u = m.types[m.i32]
 
-    let f0 = m.declareFunction("f0", m.functionType(from: []))
+    let f0 = m.declareFunction("f0", m.functionType(from: ()))
     XCTAssertEqual(m.values[f0].parameters.count, 0)
 
-    let f1 = m.declareFunction("f1", m.functionType(from: [m.i64.erased]))
+    let f1 = m.declareFunction("f1", m.functionType(from: (m.i64)))
     XCTAssertEqual(m.values[f1].parameters.count, 1)
     XCTAssert(m.values[f1].parameters[0].type == t)
 
-    let f2 = m.declareFunction("f2", m.functionType(from: [m.i64.erased, m.i32.erased]))
+    let f2 = m.declareFunction("f2", m.functionType(from: (m.i64, m.i32)))
     XCTAssertEqual(m.values[f2].parameters.count, 2)
     XCTAssert(m.values[f2].parameters[0].type == t)
     XCTAssert(m.values[f2].parameters[1].type == u)
@@ -40,7 +40,7 @@ final class FunctionTests: XCTestCase {
   func testBasicBlocks() {
     var m = Module("foo")
 
-    let f = m.declareFunction("f", m.functionType(from: []))
+    let f = m.declareFunction("f", m.functionType(from: ()))
     XCTAssertEqual(m.values[f].basicBlocks.count, 0)
     XCTAssert(m.values[f].basicBlocks.elementsEqual([]))
 
@@ -58,7 +58,7 @@ final class FunctionTests: XCTestCase {
 
   func testBasicBlockIndices() {
     var m = Module("foo")
-    let f = m.declareFunction("f", m.functionType(from: []))
+    let f = m.declareFunction("f", m.functionType(from: ()))
     XCTAssertEqual(m.values[f].basicBlocks.startIndex, m.values[f].basicBlocks.endIndex)
 
     m.appendBlock(to: f)
@@ -77,7 +77,7 @@ final class FunctionTests: XCTestCase {
 
   func testAttributes() {
     var m = Module("foo")
-    let f = m.declareFunction("f", m.functionType(from: []))
+    let f = m.declareFunction("f", m.functionType(from: ()))
     let a = m.functionAttribute(.alwaysinline)
     let b = m.functionAttribute(.hot)
 
@@ -95,7 +95,7 @@ final class FunctionTests: XCTestCase {
 
   func testReturnAttributes() {
     var m = Module("foo")
-    let f = m.declareFunction("f", m.functionType(from: [], to: m.ptr.erased))
+    let f = m.declareFunction("f", m.functionType(from: (), to: m.ptr.erased))
     let r = m.values[f].returnValue
     let a = m.returnAttribute(.noalias)
     let b = m.returnAttribute(.dereferenceable_or_null, 8)
@@ -114,7 +114,7 @@ final class FunctionTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.values[m.declareFunction("fn", m.functionType(from: []))]
+    let t: any IRValue = m.values[m.declareFunction("fn", m.functionType(from: ()))]
     XCTAssertNotNil(Function(t))
     let u: any IRValue = m.types[m.integerType(64)].zero
     XCTAssertNil(Function(u))
@@ -122,21 +122,21 @@ final class FunctionTests: XCTestCase {
 
   func testEquality() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
-    let g = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionType(from: ()))
+    let g = m.declareFunction("fn", m.functionType(from: ()))
     XCTAssertEqual(f, g)
 
-    let h = m.declareFunction("fn1", m.functionType(from: []))
+    let h = m.declareFunction("fn1", m.functionType(from: ()))
     XCTAssertNotEqual(f, h)
   }
 
   func testReturnEquality() {
     var m = Module("foo")
-    let f = m.values[m.declareFunction("fn", m.functionType(from: []))].returnValue
-    let g = m.values[m.declareFunction("fn", m.functionType(from: []))].returnValue
+    let f = m.values[m.declareFunction("fn", m.functionType(from: ()))].returnValue
+    let g = m.values[m.declareFunction("fn", m.functionType(from: ()))].returnValue
     XCTAssertEqual(f, g)
 
-    let h = m.values[m.declareFunction("fn1", m.functionType(from: []))].returnValue
+    let h = m.values[m.declareFunction("fn1", m.functionType(from: ()))].returnValue
     XCTAssertNotEqual(f, h)
   }
 
