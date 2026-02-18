@@ -12,7 +12,7 @@ public struct PointerType: IRType, Hashable {
   }
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: TypeRef) {
+  public init(temporarilyWrapping handle: TypeRef) {
     self.init(handle.raw)
   }
 
@@ -33,9 +33,9 @@ public struct PointerType: IRType, Hashable {
 
   /// Returns the ID of an opaque pointer type in address space `s` in `module`.
   public static func create(inAddressSpace s: AddressSpace = .default, in module: inout Module)
-    -> Self.ID
+    -> Self.Identity
   {
-    .init(module.types.insertIfAbsent(.init(LLVMPointerTypeInContext(module.context, s.llvm))))
+    .init(module.types.demandId(for: .init(LLVMPointerTypeInContext(module.context, s.llvm))))
   }
 
   /// The address space of the pointer.

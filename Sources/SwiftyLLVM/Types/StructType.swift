@@ -7,7 +7,7 @@ public struct StructType: IRType, Hashable {
   public let llvm: TypeRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: TypeRef) {
+  public init(temporarilyWrapping llvm: TypeRef) {
     self.llvm = llvm
   }
 
@@ -21,17 +21,17 @@ public struct StructType: IRType, Hashable {
 
   /// Returns the ID of a struct type with given `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
-    _ fields: [AnyType.ID],
+    _ fields: [AnyType.Identity],
     packed: Bool = false,
     in module: inout Module
-  ) -> Self.ID {
+  ) -> Self.Identity {
     let f = fields.map({ module.types[$0] as any IRType })
     let handle = f.withHandles { (types) in
       TypeRef(
         LLVMStructTypeInContext(
           module.context, types.baseAddress, UInt32(types.count), packed ? 1 : 0))
     }
-    return .init(module.types.insertIfAbsent(handle))
+    return .init(module.types.demandId(for: handle))
   }
 
   /// Creates a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
@@ -50,16 +50,16 @@ public struct StructType: IRType, Hashable {
   /// Returns the ID of a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
     named name: String,
-    _ fields: [AnyType.ID],
+    _ fields: [AnyType.Identity],
     packed: Bool = false,
     in module: inout Module
-  ) -> Self.ID {
+  ) -> Self.Identity {
     let handle = TypeRef(LLVMStructCreateNamed(module.context, name))
     let f = fields.map({ module.types[$0] as any IRType })
     f.withHandles { (types) in
       LLVMStructSetBody(handle.raw, types.baseAddress, UInt32(types.count), packed ? 1 : 0)
     }
-    return .init(module.types.insertIfAbsent(handle))
+    return .init(module.types.demandId(for: handle))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a struct type.

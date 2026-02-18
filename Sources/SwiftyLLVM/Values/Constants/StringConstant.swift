@@ -7,7 +7,7 @@ public struct StringConstant: IRValue, Hashable {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: ValueRef) {
+  public init(temporarilyWrapping handle: ValueRef) {
     self.llvm = handle
   }
 

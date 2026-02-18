@@ -11,7 +11,7 @@ public struct GlobalVariable: Global, Sendable {
     self.llvm = .init(llvm)
   }
 
-  public init(wrappingTemporarily handle: ValueRef) {
+  public init(temporarilyWrapping handle: ValueRef) {
     self.init(handle.raw)
   }
 
