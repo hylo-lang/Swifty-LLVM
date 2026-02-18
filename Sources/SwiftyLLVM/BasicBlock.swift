@@ -10,7 +10,7 @@ public struct BasicBlock: Hashable, Sendable, LLVMEntity {
   }
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: BasicBlockRef) {
+  public init(temporarilyWrapping handle: BasicBlockRef) {
     self.llvm = handle
   }
 

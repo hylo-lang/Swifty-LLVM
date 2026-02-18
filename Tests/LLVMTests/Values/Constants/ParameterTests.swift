@@ -5,10 +5,9 @@ final class ParameterTests: XCTestCase {
 
   func testIndex() {
     var m = Module("foo")
-    let i64 = m.types[m.integerType(64)]
-    let i64ID = AnyType.ID(m.integerType(64))
+    let i64 = m.i64.erased
 
-    let f = m.declareFunction("fn", m.functionType(from: [i64ID, i64ID], to: nil))
+    let f = m.declareFunction("fn", m.functionType(from: [i64, i64], to: nil))
     XCTAssertEqual(m.values[f].parameters[0].index, 0)
     XCTAssertEqual(m.values[f].parameters[1].index, 1)
 
@@ -45,9 +44,9 @@ final class ParameterTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let i64ID = m.i64.erased
+    let i64 = m.i64.erased
 
-    let f = m.declareFunction("fn", m.functionType(from: [i64ID], to: nil))
+    let f = m.declareFunction("fn", m.functionType(from: [i64], to: nil))
     let p: any IRValue = m.values[f].parameters[0]
     XCTAssertNotNil(Parameter(p))
     let q: any IRValue = m.types[m.i64].zero

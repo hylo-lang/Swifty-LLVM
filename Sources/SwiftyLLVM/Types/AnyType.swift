@@ -12,7 +12,7 @@ public struct AnyType: IRType, Hashable {
   }
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: TypeRef) {
+  public init(temporarilyWrapping handle: TypeRef) {
     self.llvm = handle
   }
 }

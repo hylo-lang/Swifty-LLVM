@@ -1,14 +1,14 @@
 
 /// Extends `EntityStore` with bidirectional Handle↔ID lookup.
 ///
-/// Use this when you frequently need to look up entity IDs from handles,
+/// Use this struct when you frequently need to look up entity IDs from handles,
 /// such as when interoperating with C APIs that return opaque pointers.
 public struct BidirectionalEntityStore<Entity: LLVMEntity>: ~Copyable where Entity.Handle: Hashable {
   private var store = EntityStore<Entity>()
   /// The id for each handle present in the store.
   ///
   /// Note: Elements are removed while the entity is in use since it gets temporarily extracted.
-  private var handleToID: [Entity.Handle: Entity.ID] = [:]
+  private var handleToID: [Entity.Handle: Entity.Identity] = [:]
 
   /// Creates an empty entity store.
   public init() {}
@@ -16,14 +16,14 @@ public struct BidirectionalEntityStore<Entity: LLVMEntity>: ~Copyable where Enti
   /// Inserts an entity handle into the store and returns its ID.
   /// 
   /// Precondition: `handle` must not be already managed by this store.
-  internal mutating func insert(_ handle: Entity.Handle) -> Entity.ID {
+  internal mutating func insert(_ handle: Entity.Handle) -> Entity.Identity {
     precondition(!handleToID.keys.contains(handle), "Attempting to insert an already present handle.")
     let id = store.insert(handle)
     handleToID[handle] = id
     return id
   }
 
-  internal mutating func insertIfAbsent(_ handle: Entity.Handle) -> Entity.ID {
+  internal mutating func demandId(for handle: Entity.Handle) -> Entity.Identity {
     if let existingID = handleToID[handle] {
       return existingID
     } 
@@ -33,7 +33,7 @@ public struct BidirectionalEntityStore<Entity: LLVMEntity>: ~Copyable where Enti
   }
 
   /// Temporarily extracts and projects the entity with given `id`.
-  public subscript(_ id: Entity.ID) -> Entity {
+  public subscript(_ id: Entity.Identity) -> Entity {
     mutating _read {
       let handle = store.handle(for: id)!
       handleToID.removeValue(forKey: handle)
@@ -51,7 +51,7 @@ public struct BidirectionalEntityStore<Entity: LLVMEntity>: ~Copyable where Enti
   /// Extracts the entity with given `id` for temporary use, without destroying it.
   ///
   /// - Requires: Entity with `id` is present in the store.
-  internal mutating func unsafeExtract(_ id: Entity.ID) -> Entity.Handle {
+  internal mutating func unsafeExtract(_ id: Entity.Identity) -> Entity.Handle {
     let handle = store.unsafeExtract(id)
     handleToID.removeValue(forKey: handle)
     return handle
@@ -63,13 +63,13 @@ public struct BidirectionalEntityStore<Entity: LLVMEntity>: ~Copyable where Enti
   ///   - Entity with `id` has been extracted from this store and not yet
   ///     been restored since the last extraction.
   ///   - `id` used to correspond to the given `handle` before extraction.
-  internal mutating func unsafeRestore(_ id: Entity.ID, _ handle: Entity.Handle) {
+  internal mutating func unsafeRestore(_ id: Entity.Identity, _ handle: Entity.Handle) {
     store.unsafeRestore(id, handle)
     handleToID[handle] = id
   }
 
   /// Returns true iff the store contains an entity with given `id`.
-  public func contains(_ id: Entity.ID) -> Bool {
+  public func contains(_ id: Entity.Identity) -> Bool {
     store.contains(id)
   }
 
@@ -79,7 +79,7 @@ public struct BidirectionalEntityStore<Entity: LLVMEntity>: ~Copyable where Enti
   }
 
   /// Returns the ID of the entity with given `handle`, if it is present in the store.
-  public func id(for handle: Entity.Handle) -> Entity.ID? {
+  public func id(for handle: Entity.Handle) -> Entity.Identity? {
     handleToID[handle]
   }
 }

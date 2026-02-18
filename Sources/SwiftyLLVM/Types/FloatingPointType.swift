@@ -7,7 +7,7 @@ public struct FloatingPointType: IRType, Hashable {
   public let llvm: TypeRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: TypeRef) {
+  public init(temporarilyWrapping llvm: TypeRef) {
     self.llvm = llvm
   }
 
@@ -27,48 +27,48 @@ public struct FloatingPointType: IRType, Hashable {
   }
 
   /// Returns the type `half` in `module`
-  public static func half(in module: inout Module) -> Self.ID {
-    .init(module.types.insertIfAbsent(.init(LLVMHalfTypeInContext(module.context))))
+  public static func half(in module: inout Module) -> Self.Identity {
+    .init(module.types.demandId(for: .init(LLVMHalfTypeInContext(module.context))))
   }
 
   /// Returns the type `float` in `module`.
-  public static func float(in module: inout Module) -> Self.ID {
-    .init(module.types.insertIfAbsent(.init(LLVMFloatTypeInContext(module.context))))
+  public static func float(in module: inout Module) -> Self.Identity {
+    .init(module.types.demandId(for: .init(LLVMFloatTypeInContext(module.context))))
   }
 
   /// Returns the type `double` in `module`
-  public static func double(in module: inout Module) -> Self.ID {
-    .init(module.types.insertIfAbsent(.init(LLVMDoubleTypeInContext(module.context))))
+  public static func double(in module: inout Module) -> Self.Identity {
+    .init(module.types.demandId(for: .init(LLVMDoubleTypeInContext(module.context))))
   }
 
   /// Returns the type `fp128` in `module`
-  public static func fp128(in module: inout Module) -> Self.ID {
-    .init(module.types.insertIfAbsent(.init(LLVMFP128TypeInContext(module.context))))
+  public static func fp128(in module: inout Module) -> Self.Identity {
+    .init(module.types.demandId(for: .init(LLVMFP128TypeInContext(module.context))))
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`.
-  public func callAsFunction(_ v: Double, in module: inout Module) -> FloatingPointConstant.ID {
+  public func callAsFunction(_ v: Double, in module: inout Module) -> FloatingPointConstant.Identity {
     constant(v, in: &module)
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`.
-  public func constant(_ v: Double, in module: inout Module) -> FloatingPointConstant.ID {
-    .init(module.values.insertIfAbsent(.init(LLVMConstReal(llvm.raw, v))))
+  public func constant(_ v: Double, in module: inout Module) -> FloatingPointConstant.Identity {
+    .init(module.values.demandId(for: .init(LLVMConstReal(llvm.raw, v))))
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is parsed from `text`.
   ///
   /// Zero is returned if `text` is not a valid floating-point value.
-  public func constant(parsing text: String, in module: inout Module) -> FloatingPointConstant.ID {
+  public func constant(parsing text: String, in module: inout Module) -> FloatingPointConstant.Identity {
     let handle = text.withCString({
       LLVMConstRealOfStringAndSize(llvm.raw, $0, UInt32(text.utf8.count))
     })
-    return .init(module.values.insertIfAbsent(.init(handle!)))
+    return .init(module.values.demandId(for: .init(handle!)))
   }
 
   /// The zero value of this type.
-  public func zero(in module: inout Module) -> FloatingPointConstant.ID {
-    .init(module.values.insertIfAbsent(.init(LLVMConstNull(llvm.raw))))
+  public func zero(in module: inout Module) -> FloatingPointConstant.Identity {
+    .init(module.values.demandId(for: .init(LLVMConstNull(llvm.raw))))
   }
 
 }

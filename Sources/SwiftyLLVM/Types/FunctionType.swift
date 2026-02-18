@@ -7,7 +7,7 @@ public struct FunctionType: IRType, Hashable {
   public let llvm: TypeRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: TypeRef) {
+  public init(temporarilyWrapping llvm: TypeRef) {
     self.llvm = llvm
   }
 
@@ -15,10 +15,10 @@ public struct FunctionType: IRType, Hashable {
   ///
   /// The return type is `void` if `returnType` is passed `nil`.
   public static func create(
-    from parameters: [AnyType.ID],
-    to returnType: AnyType.ID? = nil,
+    from parameters: [AnyType.Identity],
+    to returnType: AnyType.Identity? = nil,
     in module: inout Module
-  ) -> Self.ID {
+  ) -> Self.Identity {
     let r =
       returnType.map({ module.types[$0] as any IRType })
       ?? (module.types[VoidType.create(in: &module)] as any IRType)
@@ -26,7 +26,7 @@ public struct FunctionType: IRType, Hashable {
     let handle = p.withHandles { (handles) in
       TypeRef(LLVMFunctionType(r.llvm.raw, handles.baseAddress, UInt32(handles.count), 0))
     }
-    return .init(module.types.insertIfAbsent(handle))
+    return .init(module.types.demandId(for: handle))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a function type.

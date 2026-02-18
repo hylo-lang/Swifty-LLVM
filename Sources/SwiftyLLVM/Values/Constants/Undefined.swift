@@ -7,7 +7,7 @@ public struct Undefined: IRValue, Hashable {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: ValueRef) {
+  public init(temporarilyWrapping llvm: ValueRef) {
     self.llvm = llvm
   }
 
@@ -18,9 +18,9 @@ public struct Undefined: IRValue, Hashable {
   }
 
   /// Creates and registers an undefined value of type `t` in `module`.
-  public static func create<T: IRType>(of t: LLVMID<T>, in module: inout Module) -> Self.ID {
+  public static func create<T: IRType>(of t: LLVMIdentity<T>, in module: inout Module) -> Self.Identity {
     let h = module.types[t]
-    return .init(module.values.insertIfAbsent(ValueRef(LLVMGetUndef(h.llvm.raw))))
+    return .init(module.values.demandId(for: ValueRef(LLVMGetUndef(h.llvm.raw))))
   }
 
   /// Creates an instance with `v`, failing iff `v` is not an undefined value.
