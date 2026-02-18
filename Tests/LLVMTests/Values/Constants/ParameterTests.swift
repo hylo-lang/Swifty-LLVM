@@ -14,6 +14,16 @@ final class ParameterTests: XCTestCase {
     let p = Parameter(m.values[f].parameters[1] as any IRValue)
     XCTAssertEqual(p?.index, 1)
   }
+  func testIndexDynamic() {
+    var m = Module("foo")
+
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.erased, m.i64.erased]))
+    XCTAssertEqual(m.values[f].parameters[0].index, 0)
+    XCTAssertEqual(m.values[f].parameters[1].index, 1)
+
+    let p = Parameter(m.values[f].parameters[1] as any IRValue)
+    XCTAssertEqual(p?.index, 1)
+  }
 
   func testParent() {
     var m = Module("foo")
@@ -22,6 +32,12 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(m.values[f].parameters[0].parent, m.values[f])
   }
 
+  func testParentDynamic() {
+    var m = Module("foo")
+
+    let f: Function.Identity = m.declareFunction("fn", m.functionType(from: [m.i64.erased, m.i64.erased]))
+    XCTAssertEqual(m.values[f].parameters[0].parent, m.values[f])
+  }
   func testAttributes() throws {
     var m = Module("foo")
     let f = m.declareFunction("f", m.functionType(from: (m.ptr)))

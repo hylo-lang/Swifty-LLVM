@@ -8,11 +8,23 @@ final class FunctionTypeTests: XCTestCase {
     let f = m.types[m.functionType(from: ())]
     XCTAssert(f.returnType == m.types[m.void])
   }
+  func testDefaultReturnTypeDynamic() {
+    var m = Module("foo")
+    let f = m.types[m.functionType(from: [])]
+    XCTAssert(f.returnType == m.types[m.void])
+  }
 
   func testReturnType() {
     var m = Module("foo")
     let t = m.i64
     let f = m.types[m.functionType(from: (), to: t)]
+    XCTAssert(f.returnType == m.types[t])
+  }
+
+  func testReturnTypeDynamic() {
+    var m = Module("foo")
+    let t = m.i64
+    let f = m.types[m.functionType(from: [], to: t.erased)]
     XCTAssert(f.returnType == m.types[t])
   }
 
