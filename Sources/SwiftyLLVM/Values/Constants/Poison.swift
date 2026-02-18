@@ -7,7 +7,7 @@ public struct Poison: IRValue, Hashable {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily handle: ValueRef) {
+  public init(temporarilyWrapping handle: ValueRef) {
     self.llvm = handle
   }
 
@@ -18,9 +18,9 @@ public struct Poison: IRValue, Hashable {
   }
 
   /// Creates and registers the poison value of `t` in `module`.
-  public static func create<T: IRType>(of t: LLVMID<T>, in module: inout Module) -> Self.ID {
+  public static func create<T: IRType>(of t: LLVMIdentity<T>, in module: inout Module) -> Self.Identity {
     let h = module.types[t]
-    return .init(module.values.insertIfAbsent(ValueRef(LLVMGetPoison(h.llvm.raw))))
+    return .init(module.values.demandId(for: ValueRef(LLVMGetPoison(h.llvm.raw))))
   }
 
   /// Creates an intance with `v`, failing iff `v` is not a poison value.

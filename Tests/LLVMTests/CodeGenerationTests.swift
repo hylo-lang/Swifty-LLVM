@@ -66,8 +66,8 @@ extension Module {
 
   /// Defines a function `main` that calls the coroutine created by `emitProjectDegrees`.
   private mutating func emitMain(
-    projectingDegreesWith projectDegrees: Function.ID
-  ) throws -> Function.ID {
+    projectingDegreesWith projectDegrees: Function.Identity
+  ) throws -> Function.Identity {
     let s = functionType(from: [], to: i32.erased)
     let f = declareFunction("main", s)
 
@@ -122,7 +122,7 @@ extension Module {
   }
 
   /// Defines a coroutine that projects the value in degrees of an angle passed in radians.
-  private mutating func emitProjectDegrees() throws -> Function.ID {
+  private mutating func emitProjectDegrees() throws -> Function.Identity {
     // declare void @slide(ptr, i1 zeroext)
     let slide = declareFunction("slide", functionType(from: [ptr.erased, i1.erased]))
     let slideParameter1 = try XCTUnwrap(values.id(for: values[slide].parameters[1]))
@@ -165,13 +165,12 @@ extension Module {
         slide.erased, alloc.erased, dealloc.erased,
       ],
       at: endOf(b0))
-    let coroutineIDID = coroutineID
 
     // %4 = call ptr @llvm.coro.begin(token %3, ptr null)
     let begin = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.begin))
     let coroutineHandle = insertCall(
       begin,
-      on: [coroutineIDID.erased, types[ptr].null(in: &self)],
+      on: [coroutineID.erased, types[ptr].null(in: &self)],
       at: endOf(b0))
     let coroutineHandleID = coroutineHandle
 
@@ -199,7 +198,7 @@ extension Module {
 
     // %12 = call token @llvm.coro.end.results()
     let results = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.end.results))
-    let resultToken = insertCall(Function.ID(results.erased), on: [], at: endOf(b0))
+    let resultToken = insertCall(Function.Identity(results.erased), on: [], at: endOf(b0))
 
     // %13 = call i1 @llvm.coro.end(ptr %4, i1 false, token %12)
     let end = try XCTUnwrap(intrinsic(named: Intrinsic.llvm.coro.end))
@@ -218,7 +217,7 @@ extension Module {
     return f
   }
 
-  private mutating func emitTestAtomics() throws -> Function.ID {
+  private mutating func emitTestAtomics() throws -> Function.Identity {
     let s = functionType(from: [])
     let f = declareFunction("testAtomics", s)
 
@@ -226,7 +225,7 @@ extension Module {
 
     // %0 = alloca i64, align 8
     // %1 = alloca double, align 8
-    let x0: Alloca.ID = insertAlloca(i64, at: endOf(b0))
+    let x0: Alloca.Identity = insertAlloca(i64, at: endOf(b0))
     let x1 = insertAlloca(double, at: endOf(b0))
     let pi = types[double].constant(.pi, in: &self)
     let i64_11 = types[i64].constant(11, in: &self)

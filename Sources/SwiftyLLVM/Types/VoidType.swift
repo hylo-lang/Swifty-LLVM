@@ -7,7 +7,7 @@ public struct VoidType: IRType, Hashable {
   public let llvm: TypeRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: TypeRef) {
+  public init(temporarilyWrapping llvm: TypeRef) {
     self.llvm = llvm
   }
 
@@ -18,8 +18,8 @@ public struct VoidType: IRType, Hashable {
   }
 
   /// Returns the ID of the void type in `module`.
-  public static func create(in module: inout Module) -> Self.ID {
-    .init(module.types.insertIfAbsent(.init(LLVMVoidTypeInContext(module.context))))
+  public static func create(in module: inout Module) -> Self.Identity {
+    .init(module.types.demandId(for: .init(LLVMVoidTypeInContext(module.context))))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a void type.

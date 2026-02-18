@@ -4,11 +4,11 @@ public protocol LLVMEntity: ~Copyable {
   associatedtype Handle: Equatable
 
   /// Wraps a handle for temporary use as an instance of `Self`.
-  init(wrappingTemporarily handle: Handle)
+  init(temporarilyWrapping handle: Handle)
 }
 
 /// The identity of an LLVM entity.
-public struct LLVMID<T: LLVMEntity>: Hashable, Sendable {
+public struct LLVMIdentity<T: LLVMEntity>: Hashable, Sendable {
 
   /// The type-erased value of this identity.
   public let raw: UInt
@@ -21,17 +21,17 @@ public struct LLVMID<T: LLVMEntity>: Hashable, Sendable {
 }
 
 extension LLVMEntity {
-  public typealias ID = LLVMID<Self>
+  public typealias Identity = LLVMIdentity<Self>
 }
 
-extension LLVMID where T: IRValue {
-  public var erased: AnyValue.ID {
-    AnyValue.ID(uncheckedFrom: self.raw)
+extension LLVMIdentity where T: IRValue {
+  public var erased: AnyValue.Identity {
+    AnyValue.Identity(uncheckedFrom: self.raw)
   }
 }
 
-extension LLVMID where T: IRType {
-  public var erased: AnyType.ID {
-    AnyType.ID(uncheckedFrom: self.raw)
+extension LLVMIdentity where T: IRType {
+  public var erased: AnyType.Identity {
+    AnyType.Identity(uncheckedFrom: self.raw)
   }
 }

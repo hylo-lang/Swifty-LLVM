@@ -64,23 +64,7 @@ public struct DataLayout: ~Copyable {
 
 }
 
-extension DataLayout: NCEquatable {
-
-  public static func == (lhs: borrowing Self, rhs: borrowing Self) -> Bool {
-    lhs.description == rhs.description
-  }
-
-}
-
-extension DataLayout: NCHashable {
-
-  public func hash(into hasher: inout Hasher) {
-    hasher.combine(description)
-  }
-
-}
-
-extension DataLayout: NCCustomStringConvertible {
+extension DataLayout {
 
   public var description: String {
     guard let s = LLVMCopyStringRepOfTargetData(llvm) else { return "" }

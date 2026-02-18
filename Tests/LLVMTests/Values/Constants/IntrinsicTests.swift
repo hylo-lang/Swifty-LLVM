@@ -28,7 +28,7 @@ final class IntinsicTests: XCTestCase {
   func testName() throws {
     var m = Module("foo")
     let f = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.trap, for: []))
-    XCTAssertEqual(Intrinsic(wrappingTemporarily: m.values[f].llvm).name, "llvm.trap")
+    XCTAssertEqual(Intrinsic(temporarilyWrapping: m.values[f].llvm).name, "llvm.trap")
   }
 
   func testEquality() throws {

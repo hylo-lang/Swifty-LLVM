@@ -28,7 +28,7 @@ public enum Attribute<T: AttributeHolder>: Hashable, Sendable, LLVMEntity {
   public typealias Handle = AttributeRef
 
   /// Creates a target-independent attribute wrapping `llvm`.
-  public init(wrappingTemporarily handle: AttributeRef) {
+  public init(temporarilyWrapping handle: AttributeRef) {
     self = .targetIndependent(llvm: handle)
   }
 

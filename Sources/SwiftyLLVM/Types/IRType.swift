@@ -24,8 +24,8 @@ extension IRType {
   public var null: any IRValue { AnyValue(LLVMConstNull(llvm.raw)) }
 
   /// Returns the `null` instance of this type, registered in `module`.
-  public func null(in module: inout Module) -> AnyValue.ID {
-    .init(module.values.insertIfAbsent(ValueRef(LLVMConstNull(llvm.raw))))
+  public func null(in module: inout Module) -> AnyValue.Identity {
+    .init(module.values.demandId(for: ValueRef(LLVMConstNull(llvm.raw))))
   }
 
   /// Returns `true` iff `lhs` is equal to `rhs`.

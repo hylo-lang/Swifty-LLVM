@@ -17,9 +17,9 @@ public struct IntegerType: IRType, Hashable {
   /// Returns the ID of an integer type with given `bitWidth` in `module`.
   ///
   /// - Requires: `bitWidth` is greater than 0.
-  public static func create(_ bitWidth: Int, in module: inout Module) -> Self.ID {
+  public static func create(_ bitWidth: Int, in module: inout Module) -> Self.Identity {
     .init(
-      module.types.insertIfAbsent(.init(LLVMIntTypeInContext(module.context, UInt32(bitWidth)))))
+      module.types.demandId(for: .init(LLVMIntTypeInContext(module.context, UInt32(bitWidth)))))
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't an integer type.
@@ -34,7 +34,7 @@ public struct IntegerType: IRType, Hashable {
   }
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: TypeRef) {
+  public init(temporarilyWrapping handle: TypeRef) {
     self.init(handle.raw)
   }
 
@@ -50,20 +50,21 @@ public struct IntegerType: IRType, Hashable {
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, registered in `module`.
-  public func callAsFunction(_ v: Int, in module: inout Module) -> IntegerConstant.ID {
+  public func callAsFunction(_ v: Int, in module: inout Module) -> IntegerConstant.Identity {
     constant(v, in: &module)
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
   /// sign-extending if needed to fit `self.bitWidth`.
+  @available(*, deprecated, message: "TODO migrate to returning id")
   public func constant<T: BinaryInteger>(_ v: T) -> SwiftyLLVM.IntegerConstant {
     .init(LLVMConstInt(llvm.raw, UInt64(truncatingIfNeeded: v), 0))
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, registered in `module`.
-  public func constant<T: BinaryInteger>(_ v: T, in module: inout Module) -> IntegerConstant.ID {
+  public func constant<T: BinaryInteger>(_ v: T, in module: inout Module) -> IntegerConstant.Identity {
     .init(
-      module.values.insertIfAbsent(
+      module.values.demandId(for: 
         ValueRef(LLVMConstInt(llvm.raw, UInt64(truncatingIfNeeded: v), 0))))
   }
 
@@ -85,11 +86,11 @@ public struct IntegerType: IRType, Hashable {
     parsing text: String,
     radix: Int = 10,
     in module: inout Module
-  ) -> IntegerConstant.ID {
+  ) -> IntegerConstant.Identity {
     let h = text.withCString { (s) in
       LLVMConstIntOfStringAndSize(llvm.raw, s, UInt32(text.utf8.count), UInt8(radix))!
     }
-    return .init(module.values.insertIfAbsent(ValueRef(h)))
+    return .init(module.values.demandId(for: ValueRef(h)))
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value's binary presentation is
@@ -103,10 +104,10 @@ public struct IntegerType: IRType, Hashable {
   public func constant<Words: Collection<UInt64>>(
     words: Words,
     in module: inout Module
-  ) -> IntegerConstant.ID {
+  ) -> IntegerConstant.Identity {
     let w = Array(words)
     let handle = LLVMConstIntOfArbitraryPrecision(llvm.raw, UInt32(w.count), w)!
-    return .init(module.values.insertIfAbsent(ValueRef(handle)))
+    return .init(module.values.demandId(for: ValueRef(handle)))
   }
 
   /// The zero value of this type.
@@ -115,8 +116,8 @@ public struct IntegerType: IRType, Hashable {
   }
 
   /// The zero value of this type, registered in `module`.
-  public func zero(in module: inout Module) -> IntegerConstant.ID {
-    .init(module.values.insertIfAbsent(ValueRef(LLVMConstNull(llvm.raw))))
+  public func zero(in module: inout Module) -> IntegerConstant.Identity {
+    .init(module.values.demandId(for: ValueRef(LLVMConstNull(llvm.raw))))
   }
 
 }

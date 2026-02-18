@@ -13,7 +13,7 @@ public struct Parameter: IRValue {
   }
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: ValueRef) {
+  public init(temporarilyWrapping llvm: ValueRef) {
     self.llvm = llvm
   }
 
@@ -30,11 +30,9 @@ public struct Parameter: IRValue {
   public var parent: Function { .init(LLVMGetParamParent(llvm.raw)) }
 
   /// The index of the parameter in its function.
-  ///
-  /// Complexity: may be O(#parameters), though it's typically low.
   public var index: Int {
     let i = SwiftyLLVMGetArgumentIndex(llvm.raw)
-    assert(i != SWIFTY_LLVM_INVALID_ARGUMENT_INDEX, "Invalid parameter index")
+    assert(i != -1, "Invalid parameter index")
     return Int(i)
   }
 
@@ -42,10 +40,12 @@ public struct Parameter: IRValue {
 
 extension Parameter: Hashable {
 
+  /// Computes the hash based on the LLVM object reference.
   public func hash(into hasher: inout Hasher) {
     hasher.combine(llvm)
   }
 
+  /// Checks references equality of two Parameter wrappers.
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.llvm == rhs.llvm
   }

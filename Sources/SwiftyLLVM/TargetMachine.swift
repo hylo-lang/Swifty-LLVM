@@ -64,7 +64,7 @@ public struct TargetMachine: ~Copyable {
 
 }
 
-extension TargetMachine: NCCustomStringConvertible {
+extension TargetMachine {
 
   public var description: String { triple }
 

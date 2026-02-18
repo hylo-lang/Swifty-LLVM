@@ -84,15 +84,13 @@ void SwiftyLLVMRunDefaultModulePasses(
   mpm.run(*unwrap(self), mam);
 }
 
-const unsigned int SWIFTY_LLVM_INVALID_ARGUMENT_INDEX = (unsigned int)-1;
-
-unsigned int SwiftyLLVMGetArgumentIndex(LLVMValueRef argument) {
+long SwiftyLLVMGetArgumentIndex(LLVMValueRef argument) {
   llvm::Value *v = llvm::unwrap(argument);
 
   if (llvm::Argument *Arg = llvm::dyn_cast<llvm::Argument>(v)) {
     return Arg->getArgNo();
   }
 
-  return SWIFTY_LLVM_INVALID_ARGUMENT_INDEX;
+  return -1;
 }
 }

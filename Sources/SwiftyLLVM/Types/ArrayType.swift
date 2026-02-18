@@ -7,7 +7,7 @@ public struct ArrayType: IRType, Hashable {
   public let llvm: TypeRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: TypeRef) {
+  public init(temporarilyWrapping llvm: TypeRef) {
     self.llvm = llvm
   }
 
@@ -28,12 +28,12 @@ public struct ArrayType: IRType, Hashable {
   }
 
   public static func create(_ count: Int, _ element: some IRType, in module: inout Module)
-    -> Self.ID
+    -> Self.Identity
   {
     precondition(LLVMGetTypeContext(element.llvm.raw) == module.context)
 
     let handle = TypeRef(LLVMArrayType2(element.llvm.raw, UInt64(count)))
-    return ArrayType.ID(module.types.insertIfAbsent(handle))
+    return ArrayType.Identity(module.types.demandId(for: handle))
   }
 
   /// The type of an element in instances of this type.

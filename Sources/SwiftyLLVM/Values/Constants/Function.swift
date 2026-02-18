@@ -1,4 +1,3 @@
-import Glibc
 internal import llvmc
 
 /// A function in LLVM IR.
@@ -8,7 +7,7 @@ public struct Function: Global, Callable, Hashable {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: ValueRef) {
+  public init(temporarilyWrapping llvm: ValueRef) {
     self.llvm = llvm
   }
 
@@ -59,7 +58,7 @@ extension Function {
 
     /// Creates an instance representing the return value of `parent`.
     fileprivate init(_ parent: some Callable) {
-      self.parent = Function(wrappingTemporarily: parent.llvm)
+      self.parent = Function(temporarilyWrapping: parent.llvm)
     }
 
   }

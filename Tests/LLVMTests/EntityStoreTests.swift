@@ -15,7 +15,7 @@ struct MockEntity: LLVMEntity, Hashable {
 
   var handle: Handle
 
-  init(wrappingTemporarily handle: Handle) {
+  init(temporarilyWrapping handle: Handle) {
     self.handle = handle
   }
 
@@ -126,13 +126,13 @@ final class BidirectionalEntityStoreTests: XCTestCase {
 
   }
 
-  func testInsertIfAbsentReturnsSameID() {
+  func testdemandReturnsSameID() {
     var arena = TrackedHandleArena()
     var store = BidirectionalEntityStore<MockEntity>()
     let handle = arena.makeHandle(name: "Uniq", value: 1)
 
-    let id1 = store.insertIfAbsent(handle)
-    let id2 = store.insertIfAbsent(handle)
+    let id1 = store.demandId(for: handle)
+    let id2 = store.demandId(for: handle)
 
     XCTAssertEqual(id1.raw, id2.raw)
   }
