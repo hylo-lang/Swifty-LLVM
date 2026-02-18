@@ -5,7 +5,7 @@ final class AllocaTests: XCTestCase {
 
   func testAllocatedType() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionTypeD(from: []))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
     let i = m.values[m.insertAlloca(i64, at: m.endOf(b))]
@@ -14,7 +14,7 @@ final class AllocaTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let f = m.declareFunction("fn", m.functionType(from: []))
+    let f = m.declareFunction("fn", m.functionTypeD(from: []))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
     let i = m.values[m.insertAlloca(i64, at: m.endOf(b))]
