@@ -1173,12 +1173,16 @@ public struct Module: ~Copyable {
     PointerType.create(inAddressSpace: s, in: &self)
   }
 
-  /// Creates a function type with given parameter type IDs and optional return type ID.
-  public mutating func functionType(
-    from parameters: [AnyType.Identity],
-    to returnType: AnyType.Identity? = nil
+  /// Creates a function type with given parameter and return types.
+  public mutating func functionType<each T: IRType, R: IRType>(
+    from parameters: (repeat (each T).Identity), to returnType: R.Identity
   ) -> FunctionType.Identity {
-    FunctionType.create(from: parameters, to: returnType, in: &self)
+    FunctionType.create(from: parameters, to: returnType.erased, in: &self)
+  }
+
+  /// Creates a function type with given parameter types and void as return type.
+  public mutating func functionType<each T: IRType>(from parameters: (repeat (each T).Identity)) -> FunctionType.Identity {
+    FunctionType.create(from: parameters, to: nil, in: &self)
   }
 
   /// Creates an array type of `count` elements of `element`.
