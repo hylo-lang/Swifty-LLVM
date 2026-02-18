@@ -12,7 +12,7 @@ public struct AnyValue: IRValue, LLVMEntity {
   }
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: ValueRef) {
+  public init(temporarilyWrapping handle: ValueRef) {
     self.init(handle.raw)
   }
 

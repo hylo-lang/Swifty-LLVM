@@ -12,7 +12,7 @@ public struct Intrinsic: Global, Callable, Hashable, Sendable {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
-  public init(wrappingTemporarily llvm: ValueRef) {
+  public init(temporarilyWrapping llvm: ValueRef) {
     self.llvm = llvm
   }
 

@@ -13,9 +13,8 @@ final class IRValueTests: XCTestCase {
 
   func testIsNull() {
     var m = Module("foo")
-    let i64 = m.types[m.integerType(64)]
-    XCTAssert(i64.null.isNull)
-    XCTAssertFalse(i64.constant(42).isNull)
+    XCTAssert(m.values[m.types[m.i64].null(in: &m)].isNull)
+    XCTAssertFalse(m.types[m.i64].constant(42).isNull)
   }
 
   func testIsConstant() {

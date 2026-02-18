@@ -12,7 +12,7 @@ final class FunctionTypeTests: XCTestCase {
   func testReturnType() {
     var m = Module("foo")
     let t = m.types[m.integerType(64)]
-    let f = m.types[m.functionType(from: [], to: AnyType.ID(m.types.id(for: t)!))]
+    let f = m.types[m.functionType(from: [], to: AnyType.Identity(m.types.id(for: t)!))]
     XCTAssert(f.returnType == t)
   }
 
@@ -24,14 +24,14 @@ final class FunctionTypeTests: XCTestCase {
     let f0 = m.types[m.functionType(from: [])]
     XCTAssertEqual(f0.parameters.count, 0)
 
-    let tID = AnyType.ID(m.types.id(for: t)!)
-    let uID = AnyType.ID(m.types.id(for: u)!)
+    let te = m.types.id(for: t)!.erased
+    let ue = m.types.id(for: u)!.erased
 
-    let f1 = m.types[m.functionType(from: [tID])]
+    let f1 = m.types[m.functionType(from: [te])]
     XCTAssertEqual(f1.parameters.count, 1)
     XCTAssert(f1.parameters[0] == t)
 
-    let f2 = m.types[m.functionType(from: [tID, uID])]
+    let f2 = m.types[m.functionType(from: [te, ue])]
     XCTAssertEqual(f2.parameters.count, 2)
     XCTAssert(f2.parameters[0] == t)
     XCTAssert(f2.parameters[1] == u)
@@ -49,8 +49,8 @@ final class FunctionTypeTests: XCTestCase {
     var m = Module("foo")
     let t = m.types[m.integerType(64)]
     let u = m.types[m.integerType(32)]
-    let tID = AnyType.ID(m.types.id(for: t)!)
-    let uID = AnyType.ID(m.types.id(for: u)!)
+    let tID = AnyType.Identity(m.types.id(for: t)!)
+    let uID = AnyType.Identity(m.types.id(for: u)!)
 
     let f0 = m.types[m.functionType(from: [tID, uID])]
     let f1 = m.types[m.functionType(from: [tID, uID])]

@@ -12,7 +12,7 @@ public struct Alloca: IRValue {
   }
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: ValueRef) {
+  public init(temporarilyWrapping handle: ValueRef) {
     llvm = handle
   }
 
@@ -25,11 +25,11 @@ public struct Alloca: IRValue {
     }
   }
 
-  public static func insert<T: IRType>(_ type: T.ID, at p: borrowing InsertionPoint, in module: inout Module)
-    -> Alloca.ID
+  public static func insert<T: IRType>(_ type: T.Identity, at p: borrowing InsertionPoint, in module: inout Module)
+    -> Alloca.Identity
   {
     let handle = LLVMBuildAlloca(p.llvm, module.types[type].llvm.raw, "")!
-    return Alloca.ID(module.values.insert(ValueRef(handle)))
+    return Alloca.Identity(module.values.insert(ValueRef(handle)))
   }
 
   /// The type of the value allocated by the instruction.

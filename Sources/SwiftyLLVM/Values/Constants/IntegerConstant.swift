@@ -12,7 +12,7 @@ public struct IntegerConstant: IRValue, Hashable {
   }
 
   /// Creates an instance wrapping `handle`.
-  public init(wrappingTemporarily handle: ValueRef) {
+  public init(temporarilyWrapping handle: ValueRef) {
     self.llvm = handle
   }
 
