@@ -46,7 +46,7 @@ final class ModuleTests: XCTestCase {
     var m = Module("foo")
     XCTAssertNoThrow(try m.verify())
 
-    let f = m.declareFunction("fn", m.functionTypeD(from: []))
+    let f = m.declareFunction("fn", m.functionType(from: []))
     m.appendBlock(to: f)
     XCTAssertThrowsError(try m.verify())
   }
