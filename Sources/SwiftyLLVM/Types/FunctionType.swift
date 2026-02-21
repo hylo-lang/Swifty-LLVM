@@ -15,17 +15,17 @@ public struct FunctionType: IRType, Hashable {
   ///
   /// The return type is `void` if `returnType` is passed `nil`.
   public static func create(
-    from parameters: [AnyType.Identity],
-    to returnType: AnyType.Identity? = nil,
+    from parameters: [AnyType.Reference],
+    to returnType: AnyType.Reference? = nil,
     in module: inout Module
-  ) -> Self.Identity {
-    let r = module.types[returnType ?? module.void.erased]
+  ) -> FunctionType.Reference {
+    let r = returnType ?? module.void.erased
 
-    let handle = parameters.map { module.types[$0] }
-      .withHandles { f in
-        return TypeRef(LLVMFunctionType(r.llvm.raw, f.baseAddress, UInt32(f.count), 0))
-      }
-    return .init(module.types.demandId(for: handle))
+    var mutableParameters = parameters.map { Optional.some($0.raw) }
+
+    return mutableParameters.withUnsafeMutableBufferPointer { f in
+      return FunctionType.Reference(LLVMFunctionType(r.raw, f.baseAddress, UInt32(f.count), 0))
+    }
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a function type.
@@ -38,14 +38,14 @@ public struct FunctionType: IRType, Hashable {
   }
 
   /// The return type of the function.
-  public var returnType: any IRType { AnyType(LLVMGetReturnType(llvm.raw)) }
+  public var returnType: AnyType.Reference { .init(LLVMGetReturnType(llvm.raw)) }
 
   /// The parameters of the function.
-  public var parameters: [any IRType] {
+  public var parameters: [AnyType.Reference] {
     let n = LLVMCountParamTypes(llvm.raw)
     var handles: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetParamTypes(llvm.raw, &handles)
-    return handles.map({ AnyType($0!) as any IRType })
+    return handles.map { AnyType.Reference($0!) }
   }
 
   /// Whether the function accepts a variable number of arguments

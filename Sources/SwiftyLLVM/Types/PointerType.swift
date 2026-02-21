@@ -6,14 +6,9 @@ public struct PointerType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Creates an instance wrapping `llvm`.
-  private init(_ llvm: LLVMTypeRef) {
-    self.llvm = .init(llvm)
-  }
-
   /// Creates an instance wrapping `handle`.
   public init(temporarilyWrapping handle: TypeRef) {
-    self.init(handle.raw)
+    self.llvm = handle
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
@@ -25,17 +20,11 @@ public struct PointerType: IRType, Hashable {
     }
   }
 
-  /// Creates an opaque pointer type in address space `s` in `module`.
-  @available(*, deprecated, message: "Use create(inAddressSpace:in:) instead.")
-  public init(inAddressSpace s: AddressSpace = .default, in module: inout Module) {
-    self.init(LLVMPointerTypeInContext(module.context, s.llvm))
-  }
-
   /// Returns the ID of an opaque pointer type in address space `s` in `module`.
   public static func create(inAddressSpace s: AddressSpace = .default, in module: inout Module)
-    -> Self.Identity
+    -> PointerType.Reference
   {
-    .init(module.types.demandId(for: .init(LLVMPointerTypeInContext(module.context, s.llvm))))
+    .init(LLVMPointerTypeInContext(module.context, s.llvm))
   }
 
   /// The address space of the pointer.

@@ -1,21 +1,15 @@
 internal import llvmc
 
 /// A basic block in LLVM IR.
-public struct BasicBlock: Hashable, Sendable, LLVMEntity {
-  public typealias Handle = BasicBlockRef
-
-  /// Creates an instance wrapping `handle`.
-  init(_ handle: LLVMBasicBlockRef) {
-    self.llvm = .init(handle)
-  }
+public struct BasicBlock: Hashable, LLVMEntity {
+  /// A handle to the LLVM object wrapped by this instance.
+  public let llvm: BasicBlockRef
 
   /// Creates an instance wrapping `handle`.
   public init(temporarilyWrapping handle: BasicBlockRef) {
     self.llvm = handle
   }
 
-  /// A handle to the LLVM object wrapped by this instance.
-  public let llvm: BasicBlockRef
 }
 
 extension BasicBlock: CustomStringConvertible {

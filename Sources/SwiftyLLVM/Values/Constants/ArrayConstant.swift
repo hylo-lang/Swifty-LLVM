@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A constant array in LLVM IR.
-public struct ArrayConstant: IRValue, Hashable, Sendable {
+public struct ArrayConstant: IRValue, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
@@ -14,11 +14,11 @@ public struct ArrayConstant: IRValue, Hashable, Sendable {
   /// Creates a constant array of `type` in `module`, filled with the contents of `elements`.
   ///
   /// - Requires: The type of each element in `contents` is `type`.
-  public init<S: Sequence>(
-    of type: any IRType, containing elements: S, in module: inout Module
-  ) where S.Element == any IRValue {
-    var values = elements.map({ $0.llvm.raw as Optional })
-    self.llvm = .init(LLVMConstArray(type.llvm.raw, &values, UInt32(values.count)))
+  public static func create<T: IRType, S: Sequence>(
+    of type: T.Reference, containing elements: S, in module: inout Module
+  ) -> ArrayConstant.Reference where S.Element == AnyValue.Reference {
+    var values = elements.map({ Optional.some($0.raw) })
+    return .init(LLVMConstArray(type.raw, &values, UInt32(values.count)))
   }
 
   public var count: Int {
@@ -27,9 +27,12 @@ public struct ArrayConstant: IRValue, Hashable, Sendable {
   }
 
   /// Creates a constant array of `i8` in `module`, filled with the contents of `bytes`.
-  public init<S: Sequence>(bytes: S, in module: inout Module) where S.Element == UInt8 {
-    let i8 = module.types[IntegerType.create(8, in: &module)]
-    self.init(of: i8, containing: bytes.map({ i8.constant($0) }), in: &module)
+  public static func create<S: Sequence>(bytes: S, in module: inout Module)
+    -> ArrayConstant.Reference where S.Element == UInt8
+  {
+    let i8 = module.i8
+    let byteConstants = bytes.map({ i8.unsafePointee.constant($0).erased })
+    return ArrayConstant.create(of: i8, containing: byteConstants, in: &module)
   }
 
 }
@@ -38,6 +41,6 @@ extension ArrayConstant: AggregateConstant {
 
   public typealias Index = Int
 
-  public typealias Element = IRValue
+  public typealias Element = AnyValue.Reference
 
 }

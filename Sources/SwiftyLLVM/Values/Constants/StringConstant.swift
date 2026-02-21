@@ -13,9 +13,11 @@ public struct StringConstant: IRValue, Hashable {
 
   /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
   /// `nullTerminated` is `true`.
-  public init(_ text: String, nullTerminated: Bool = true, in module: inout Module) {
-    self.llvm = text.withCString { (s) in
-      .init(
+  public static func create(_ text: String, nullTerminated: Bool = true, in module: inout Module)
+    -> StringConstant.Reference
+  {
+    text.withCString { (s) in
+      StringConstant.Reference(
         LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1)
       )
     }

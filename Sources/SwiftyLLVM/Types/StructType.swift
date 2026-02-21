@@ -11,55 +11,33 @@ public struct StructType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Creates an instance with given `fields` in `module`, packed iff `packed` is `true`.
-  @available(*, deprecated, message: "Use create(_:packed:in:) instead.")
-  public init(_ fields: [any IRType], packed: Bool = false, in module: inout Module) {
-    self.llvm = fields.withHandles { (f) in
-      .init(LLVMStructTypeInContext(module.context, f.baseAddress, UInt32(f.count), packed ? 1 : 0))
-    }
-  }
-
   /// Returns the ID of a struct type with given `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
-    _ fields: [AnyType.Identity],
+    _ fields: [AnyType.Reference],
     packed: Bool = false,
     in module: inout Module
-  ) -> Self.Identity {
-    let f = fields.map({ module.types[$0] as any IRType })
-    let handle = f.withHandles { (types) in
-      TypeRef(
+  ) -> StructType.Reference {
+    var f = fields.map({ Optional.some($0.raw) })
+    return f.withUnsafeMutableBufferPointer { p in
+      StructType.Reference(
         LLVMStructTypeInContext(
-          module.context, types.baseAddress, UInt32(types.count), packed ? 1 : 0))
-    }
-    return .init(module.types.demandId(for: handle))
-  }
-
-  /// Creates a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
-  ///
-  /// A unique name is generated if `name` is empty or if `module` already contains a struct with
-  /// the same name.
-  public init(
-    named name: String, _ fields: [any IRType], packed: Bool = false, in module: inout Module
-  ) {
-    self.llvm = .init(LLVMStructCreateNamed(module.context, name))
-    fields.withHandles { (f) in
-      LLVMStructSetBody(self.llvm.raw, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
+          module.context, p.baseAddress, UInt32(p.count), packed ? 1 : 0))
     }
   }
 
   /// Returns the ID of a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
     named name: String,
-    _ fields: [AnyType.Identity],
+    _ fields: [AnyType.Reference],
     packed: Bool = false,
     in module: inout Module
-  ) -> Self.Identity {
-    let handle = TypeRef(LLVMStructCreateNamed(module.context, name))
-    let f = fields.map({ module.types[$0] as any IRType })
-    f.withHandles { (types) in
-      LLVMStructSetBody(handle.raw, types.baseAddress, UInt32(types.count), packed ? 1 : 0)
+  ) -> Self.Reference {
+    let s = StructType.Reference(LLVMStructCreateNamed(module.context, name))
+    var f = fields.map { Optional.some($0.raw) }
+    f.withUnsafeMutableBufferPointer { (types) in
+      LLVMStructSetBody(s.raw, types.baseAddress, UInt32(types.count), packed ? 1 : 0)
     }
-    return .init(module.types.demandId(for: handle))
+    return s
   }
 
   /// Creates an instance with `t`, failing iff `t` isn't a struct type.
@@ -92,8 +70,8 @@ public struct StructType: IRType, Hashable {
   /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `parts`.
   public func constant<S: Sequence>(
     aggregating elements: S, in module: inout Module
-  ) -> StructConstant where S.Element == any IRValue {
-    .init(of: self, aggregating: elements, in: &module)
+  ) -> StructConstant.Reference where S.Element == AnyValue.Reference {
+    StructConstant.create(aggregating: elements, in: &module)
   }
 
 }
@@ -101,11 +79,11 @@ public struct StructType: IRType, Hashable {
 extension StructType {
 
   /// A collection containing the fields of a struct type in LLVM IR.
-  public struct Fields: BidirectionalCollection, Sendable {
+  public struct Fields: BidirectionalCollection {
 
     public typealias Index = Int
 
-    public typealias Element = IRType
+    public typealias Element = AnyType.Reference
 
     /// The struct type containing the elements of the collection.
     private let parent: StructType
@@ -134,9 +112,9 @@ extension StructType {
       return position - 1
     }
 
-    public subscript(position: Int) -> any IRType {
+    public subscript(position: Int) -> AnyType.Reference {
       precondition(position >= 0 && position < count, "index is out of bounds")
-      return AnyType(LLVMStructGetTypeAtIndex(parent.llvm.raw, UInt32(position)))
+      return .init(LLVMStructGetTypeAtIndex(parent.llvm.raw, UInt32(position)))
     }
 
   }

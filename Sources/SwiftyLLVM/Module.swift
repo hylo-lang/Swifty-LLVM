@@ -1,133 +1,6 @@
 internal import llvmc
 internal import llvmshims
 
-public struct AnyAttribute: LLVMEntity {
-  public init(temporarilyWrapping handle: AttributeRef) {
-    precondition(LLVMIsEnumAttribute(handle.raw) != 0)
-    self.llvm = handle
-  }
-
-  public typealias Handle = AttributeRef
-
-  /// Exposes a view of `self` as an attribute of the given holder.
-  public func assuming<T: AttributeHolder>(_: T.Type) -> Attribute<T> {
-    return .targetIndependent(llvm: llvm)
-  }
-
-  /// A handle to the LLVM object wrapped by this instance.
-  let llvm: AttributeRef
-}
-
-extension BidirectionalEntityStore where Entity == AnyType {
-  public func id<T: IRType>(for type: T) -> T.Identity? {
-    return id(for: type.llvm).map { id in T.Identity(uncheckedFrom: id.raw) }
-  }
-
-  public subscript<T: IRType>(_ id: T.Identity) -> T where T.Handle == AnyType.Handle {
-    mutating _read {
-      let handle = unsafeExtract(id.erased)
-      defer { unsafeRestore(id.erased, handle) }
-
-      yield T(temporarilyWrapping: handle)
-    }
-    _modify {
-      let handle = unsafeExtract(id.erased)
-      defer { unsafeRestore(id.erased, handle) }
-
-      var v = T(temporarilyWrapping: handle)
-      yield &v
-    }
-  }
-}
-
-extension BidirectionalEntityStore where Entity == AnyValue {
-  func id<T: IRValue>(for value: T) -> T.Identity? {
-    return id(for: value.llvm).map { id in T.Identity(uncheckedFrom: id.raw) }
-  }
-
-  public subscript<T: IRValue>(_ id: T.Identity) -> T where T.Handle == AnyValue.Handle {
-    mutating _read {
-      let handle = unsafeExtract(id.erased)
-      defer { unsafeRestore(id.erased, handle) }
-
-      yield T(temporarilyWrapping: handle)
-    }
-    _modify {
-      let handle = unsafeExtract(id.erased)
-      defer { unsafeRestore(id.erased, handle) }
-
-      var v = T(temporarilyWrapping: handle)
-      yield &v
-    }
-  }
-}
-
-extension LLVMIdentity<Attribute<Function>> {
-  public init(_ id: AnyAttribute.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-extension LLVMIdentity<Attribute<Parameter>> {
-  public init(_ id: AnyAttribute.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-extension LLVMIdentity<Attribute<Function.Return>> {
-  public init(_ id: AnyAttribute.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-
-extension LLVMIdentity<AnyAttribute> {
-  public init<Holder: AttributeHolder>(_ id: Attribute<Holder>.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-
-extension BidirectionalEntityStore where Entity == AnyAttribute {
-  func id<T: AttributeHolder>(for value: Attribute<T>) -> Attribute<T>.Identity? {
-    id(for: value.llvm).map { id in Attribute<T>.Identity(uncheckedFrom: id.raw) }
-  }
-
-  public subscript<T: AttributeHolder>(_ id: Attribute<T>.Identity) -> Attribute<T> {
-    mutating _read {
-      let handle = unsafeExtract(AnyAttribute.Identity(id))
-      defer { unsafeRestore(AnyAttribute.Identity(id), handle) }
-
-      yield Attribute<T>(temporarilyWrapping: handle)
-    }
-    _modify {
-      let handle = unsafeExtract(AnyAttribute.Identity(id))
-      defer { unsafeRestore(AnyAttribute.Identity(id), handle) }
-
-      var v = Attribute<T>(temporarilyWrapping: handle)
-      yield &v
-    }
-  }
-}
-
-extension LLVMIdentity<AnyType> {
-  public init<Ty: IRType>(_ id: Ty.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-extension LLVMIdentity where T: IRType {
-  public init(_ id: AnyType.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-
-extension LLVMIdentity<AnyValue> {
-  public init<V: IRValue>(_ id: V.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-extension LLVMIdentity where T: IRValue {
-  public init(_ id: AnyValue.Identity) {
-    self.init(uncheckedFrom: id.raw)
-  }
-}
-
 /// The top-level structure in an LLVM program.
 public struct Module: ~Copyable {
 
@@ -148,22 +21,6 @@ public struct Module: ~Copyable {
     LLVMDisposeModule(module)
     LLVMContextDispose(context)
   }
-
-  /// Basic blocks of a function.
-  ///
-  /// Basic blocks are owned by their parent functions.
-  /// Currently, functions cannot be removed without invalidating all existing IDs.
-  public var basicBlocks = BidirectionalEntityStore<BasicBlock>()
-
-  // /// Instructions of within basic blocks.
-  // ///
-  // /// Instructions are owned by their parent basic blocks. When removing a block, all
-  // /// of its instructions are removed by LLVM, so we must also remove them from the store.
-  // var instructions = BidirectionalEntityStore<Instruction>()
-
-  public var types = BidirectionalEntityStore<AnyType>()
-  public var values = BidirectionalEntityStore<AnyValue>()
-  public var attributes = BidirectionalEntityStore<AnyAttribute>()
 
   /// Creates an instance with given `name`.
   public init(_ name: String) {
@@ -295,54 +152,42 @@ public struct Module: ~Copyable {
   }
 
   /// Returns the type with given `name`, or `nil` if no such type exists.
-  public func type(named name: String) -> AnyType.Identity? {
-    LLVMGetTypeByName2(context, name).map { types.id(for: TypeRef($0))! }
+  public func type(named name: String) -> AnyType.Reference? {
+    LLVMGetTypeByName2(context, name).map { AnyType.Reference($0) }
   }
 
   /// Returns the reference to a function with given `name`, or `nil` if no such function exists.
-  public func function(named name: String) -> Function.Identity? {
-    guard let f = LLVMGetNamedFunction(llvmModule.raw, name) else { return nil }
-
-    return Function.Identity(values.id(for: ValueRef(f))!)
+  public func function(named name: String) -> Function.Reference? {
+    LLVMGetNamedFunction(llvmModule.raw, name).map { Function.Reference($0) }
   }
 
   /// Returns a the global with given `name`, or `nil` if no such global exists.
-  public func global(named name: String) -> GlobalVariable.Identity? {
-    guard let ref = LLVMGetNamedGlobal(llvmModule.raw, name) else { return nil }
-    return GlobalVariable.Identity(values.id(for: ValueRef(ref))!)
+  public func global(named name: String) -> GlobalVariable.Reference? {
+    LLVMGetNamedGlobal(llvmModule.raw, name).map { GlobalVariable.Reference($0) }
   }
 
   /// Returns the intrinsic function with given `name`, specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
-  public mutating func intrinsic(named name: String, for parameters: [AnyType.Identity] = [])
-    -> Intrinsic
-    .Identity?
+  public mutating func intrinsic(named name: String, for parameters: [AnyType.Reference] = [])
+    -> IntrinsicFunction
+    .Reference?
   {
     let llvmId = name.withCString({ LLVMLookupIntrinsicID($0, name.utf8.count) })
     guard llvmId != 0 else { return nil }
 
-    var p = parameters.map({ types[$0].llvm.raw as LLVMTypeRef? })
-    let intrinsic = p.withUnsafeMutableBufferPointer { buffer in
+    var p = parameters.map({ Optional.some($0.raw) })
+    return p.withUnsafeMutableBufferPointer { buffer in
       LLVMGetIntrinsicDeclaration(self.llvmModule.raw, llvmId, buffer.baseAddress, parameters.count)
-    }!
-    return Intrinsic.Identity(values.demandId(for: ValueRef(intrinsic)))
+        .map { IntrinsicFunction.Reference($0) }
+    }
   }
 
   /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
   public mutating func intrinsic(
-    named name: Intrinsic.Name, for parameters: [AnyType.Identity] = []
-  ) -> Intrinsic.Identity? {
+    named name: IntrinsicFunction.Name, for parameters: [AnyType.Reference] = []
+  ) -> IntrinsicFunction.Reference? {
     intrinsic(named: name.value, for: parameters)
-  }
-
-  /// Returns the intrinsic with given `name`, if any, specialized for `parameters`.
-  ///
-  /// Works when all parameters of the same type, otherwise pass AnyType.IDs directly.
-  public mutating func intrinsic<T: IRType>(
-    named name: Intrinsic.Name, for parameters: [T.Identity]
-  ) -> Intrinsic.Identity? {
-    intrinsic(named: name.value, for: parameters.map(AnyType.Identity.init(_:)))
   }
 
   /// Creates and returns a global variable with given `name` and `type`.
@@ -351,27 +196,24 @@ public struct Module: ~Copyable {
   /// the same name.
   public mutating func addGlobalVariable<T: IRType>(
     _ name: String? = nil,
-    _ type: T.Identity,
+    _ type: T.Reference,
     inAddressSpace s: AddressSpace = .default
-  ) -> GlobalVariable.Identity {
-    guard
-      let handle = LLVMAddGlobalInAddressSpace(
-        llvmModule.raw, types[type].llvm.raw, name ?? "", s.llvm)
+  ) -> GlobalVariable.Reference {
+    guard let handle = LLVMAddGlobalInAddressSpace(llvmModule.raw, type.raw, name ?? "", s.llvm)
     else {
-      fatalError(
-        "Failed to add global variable '\(name ?? "")' in address space '\(s)'.")
+      fatalError("Failed to add global variable '\(name ?? "")' in address space '\(s)'.")
     }
-    return GlobalVariable.Identity(values.insert(ValueRef(handle)))
+    return GlobalVariable.Reference(handle)
   }
 
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
   public mutating func declareGlobalVariable<T: IRType>(
     _ name: String,
-    _ type: T.Identity,
+    _ type: T.Reference,
     inAddressSpace s: AddressSpace = .default
-  ) -> GlobalVariable.Identity {
-    if let g = global(named: name) {  // todo avoid copy upon extraction. We may need switch.
-      let existingType = values[g].valueType(in: &self)
+  ) -> GlobalVariable.Reference {
+    if let g = global(named: name) {
+      let existingType = g.unsafePointee.valueType
       precondition(existingType == type.erased)
       return g
     } else {
@@ -380,74 +222,68 @@ public struct Module: ~Copyable {
   }
 
   /// Returns a function with given `name` and `type`, declaring it if it doesn't exist.
-  public mutating func declareFunction(_ name: String, _ type: FunctionType.Identity)
-    -> Function.Identity
+  public mutating func declareFunction(_ name: String, _ type: FunctionType.Reference)
+    -> Function.Reference
   {
     if let existing = function(named: name) {
-      let existingType = values[existing].valueType(in: &self)
+      let existingType = existing.unsafePointee.valueType
       precondition(existingType == type.erased)
       return existing
     }
 
-    guard let handle = LLVMAddFunction(llvmModule.raw, name, types[type].llvm.raw) else {
+    guard let handle = LLVMAddFunction(llvmModule.raw, name, type.raw) else {
       fatalError("Failed to add function '\(name)'.")
     }
-    let function = Function.Identity(values.insert(ValueRef(handle)))
-    registerFunctionParameters(function)
-    return function
+    return Function.Reference(handle)
   }
 
   /// Creates a target-independent function attribute with given `name` and optional `value` in `module`.
   public mutating func functionAttribute(
     _ name: Function.AttributeName, _ value: UInt64 = 0
-  ) -> Function.Attribute.Identity {
-    let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
-    return .init(attributes.demandId(for: handle))
+  ) -> Function.Attribute.Reference {
+    .init(LLVMCreateEnumAttribute(context, name.id, value))
   }
   /// Creates a target-independent parameter attribute with given `name` and optional `value` in `module`.
   public mutating func parameterAttribute(
     _ name: Parameter.AttributeName, _ value: UInt64 = 0
-  ) -> Parameter.Attribute.Identity {
-    let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
-    return .init(attributes.demandId(for: handle))
+  ) -> Parameter.Attribute.Reference {
+    .init(LLVMCreateEnumAttribute(context, name.id, value))
   }
   /// Creates a target-independent return attribute with given `name` and optional `value` in `module`.
   public mutating func returnAttribute(
     _ name: Function.Return.AttributeName, _ value: UInt64 = 0
-  ) -> Function.Return.Attribute.Identity {
-    let handle = AttributeRef(LLVMCreateEnumAttribute(context, name.id, value))
-    return .init(attributes.demandId(for: handle))
+  ) -> Function.Return.Attribute.Reference {
+    .init(LLVMCreateEnumAttribute(context, name.id, value))
   }
 
   /// Adds attribute `a` to `f`.
   public mutating func addFunctionAttribute(
-    _ a: Function.Attribute.Identity, to f: Function.Identity
+    _ a: Function.Attribute.Reference, to f: Function.Reference
   ) {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    LLVMAddAttributeAtIndex(values[f].llvm.raw, i, attributes[a].llvm.raw)
+    LLVMAddAttributeAtIndex(f.raw, i, a.raw)
   }
   /// Adds attribute `a` to the return value of `f`.
   public mutating func addReturnAttribute(
-    _ a: Function.Return.Attribute.Identity, to f: Function.Identity
+    _ a: Function.Return.Attribute.Reference, to f: Function.Reference
   ) {
     let i = UInt32(LLVMAttributeReturnIndex)
-    LLVMAddAttributeAtIndex(values[f].llvm.raw, i, attributes[a].llvm.raw)
+    LLVMAddAttributeAtIndex(f.raw, i, a.raw)
   }
   /// Adds attribute `a` to parameter `p`.
   public mutating func addParameterAttribute(
-    _ a: Parameter.Attribute.Identity, to p: Parameter.Identity
+    _ a: Parameter.Attribute.Reference, to p: Parameter.Reference
   ) {
-    read(values[p]) { parameter in
-      let i = UInt32(parameter.index + 1)
-      LLVMAddAttributeAtIndex(parameter.parent.llvm.raw, i, attributes[a].llvm.raw)
-    }
+    let parameter = p.unsafePointee
+    let i = UInt32(parameter.index + 1)
+    LLVMAddAttributeAtIndex(parameter.parent.llvm.raw, i, a.raw)
   }
 
   /// Adds the attribute named `n` to function `f`, and returns it.
   @discardableResult
   public mutating func addFunctionAttribute(
-    named n: Function.AttributeName, to f: Function.Identity
-  ) -> Function.Attribute.Identity {
+    named n: Function.AttributeName, to f: Function.Reference
+  ) -> Function.Attribute.Reference {
     let a = functionAttribute(n)
     addFunctionAttribute(a, to: f)
     return a
@@ -455,8 +291,8 @@ public struct Module: ~Copyable {
   /// Adds the attribute named `n` to the return value of function `f`, and returns it.
   @discardableResult
   public mutating func addReturnAttribute(
-    named n: Function.Return.AttributeName, to f: Function.Identity
-  ) -> Function.Return.Attribute.Identity {
+    named n: Function.Return.AttributeName, to f: Function.Reference
+  ) -> Function.Return.Attribute.Reference {
     let a = returnAttribute(n)
     addReturnAttribute(a, to: f)
     return a
@@ -464,8 +300,8 @@ public struct Module: ~Copyable {
   /// Adds the attribute named `n` to `p`, and returns it.
   @discardableResult
   public mutating func addParameterAttribute(
-    named n: Parameter.AttributeName, to p: Parameter.Identity
-  ) -> Parameter.Attribute.Identity {
+    named n: Parameter.AttributeName, to p: Parameter.Reference
+  ) -> Parameter.Attribute.Reference {
     let a = parameterAttribute(n)
     addParameterAttribute(a, to: p)
     return a
@@ -473,29 +309,28 @@ public struct Module: ~Copyable {
 
   /// Removes `a` from `f` without destroying the attribute.
   public mutating func removeFunctionAttribute(
-    _ a: Function.Attribute.Identity, from f: Function.Identity
+    _ a: Function.Attribute.Reference, from f: Function.Reference
   ) {
-    let k = LLVMGetEnumAttributeKind(attributes[a].llvm.raw)
+    let k = LLVMGetEnumAttributeKind(a.raw)
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
-    LLVMRemoveEnumAttributeAtIndex(values[f].llvm.raw, i, k)
+    LLVMRemoveEnumAttributeAtIndex(f.raw, i, k)
   }
 
-  /// Removes `a` from `p` without destroying the attribute.
+  /// Removes `attribute` from `parameter`, without destroying the attribute.
   public mutating func removeParameterAttribute(
-    _ a: Parameter.Attribute.Identity, from p: Parameter.Identity
+    _ attribute: Parameter.Attribute.Reference, from parameter: Parameter.Reference
   ) {
-    let k = LLVMGetEnumAttributeKind(attributes[a].llvm.raw)
-    read(values[p]) { parameter in
-      let i = UInt32(parameter.index + 1)
-      LLVMRemoveEnumAttributeAtIndex(parameter.parent.llvm.raw, i, k)
-    }
+    let k = LLVMGetEnumAttributeKind(attribute.raw)
+    let p = parameter.unsafePointee
+    let i = UInt32(p.index + 1)
+    LLVMRemoveEnumAttributeAtIndex(p.parent.llvm.raw, i, k)
   }
 
-  /// Removes `a` from `r` without destroying the attribute.
+  /// Removes `attribute` from `r` without destroying the attribute.
   public mutating func removeReturnAttribute(
-    _ a: Function.Return.Attribute.Identity, from r: Function.Return
+    _ attribute: Function.Return.Attribute.Reference, from r: Function.Return
   ) {
-    let k = LLVMGetEnumAttributeKind(attributes[a].llvm.raw)
+    let k = LLVMGetEnumAttributeKind(attribute.raw)
     LLVMRemoveEnumAttributeAtIndex(r.parent.llvm.raw, 0, k)
   }
 
@@ -503,54 +338,53 @@ public struct Module: ~Copyable {
   ///
   /// A unique name is generated if `n` is empty or if `f` already contains a block named `n`.
   @discardableResult
-  public mutating func appendBlock(named n: String? = nil, to f: Function.Identity)
-    -> BasicBlock.Identity
+  public mutating func appendBlock(named n: String? = nil, to f: Function.Reference)
+    -> BasicBlock.Reference
   {
-    return basicBlocks.insert(
-      .init(LLVMAppendBasicBlockInContext(context, values[f].llvm.raw, n ?? "")))
+    return .init(LLVMAppendBasicBlockInContext(context, f.raw, n ?? ""))
   }
 
   /// Returns an insertion pointing before `i`.
-  public mutating func before(_ i: Instruction.Identity) -> InsertionPoint {
+  public mutating func before(_ i: Instruction.Reference) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
-    LLVMPositionBuilderBefore(h, values[i].llvm.raw)
-    return InsertionPoint(h)
+    LLVMPositionBuilderBefore(h, i.raw)
+    return InsertionPoint(sinking: h)
   }
 
   /// Returns an insertion point at the start of `b`.
-  public mutating func startOf(_ b: BasicBlock.Identity) -> InsertionPoint {
-    if let h = LLVMGetFirstInstruction(basicBlocks[b].llvm.raw) {
-      return before(Instruction.Identity(values.id(for: ValueRef(h))!))
+  public mutating func startOf(_ b: BasicBlock.Reference) -> InsertionPoint {
+    if let h = LLVMGetFirstInstruction(b.raw) {
+      return before(Instruction.Reference(h))
     } else {
       return endOf(b)
     }
   }
 
   /// Returns an insertion point at the end of `b`.
-  public mutating func endOf(_ b: BasicBlock.Identity) -> InsertionPoint {
+  public mutating func endOf(_ b: BasicBlock.Reference) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
-    LLVMPositionBuilderAtEnd(h, basicBlocks[b].llvm.raw)
-    return InsertionPoint(h)
+    LLVMPositionBuilderAtEnd(h, b.raw)
+    return InsertionPoint(sinking: h)
   }
 
   /// Sets the name of `v` to `n`.
-  public mutating func setName<V: IRValue>(_ n: String, for v: V.Identity) {
-    n.withCString({ LLVMSetValueName2(values[v].llvm.raw, $0, n.utf8.count) })
+  public mutating func setName<V: IRValue>(_ n: String, for v: V.Reference) {
+    n.withCString({ LLVMSetValueName2(v.raw, $0, n.utf8.count) })
   }
 
   /// Sets the linkage of `g` to `l`.
-  public mutating func setLinkage<G: Global>(_ l: Linkage, for g: G.Identity) {
-    LLVMSetLinkage(values[g].llvm.raw, l.llvm)
+  public mutating func setLinkage<G: Global>(_ l: Linkage, for g: G.Reference) {
+    LLVMSetLinkage(g.raw, l.llvm)
   }
 
   /// Configures whether `g` is a global constant.
-  public mutating func setGlobalConstant(_ newValue: Bool, for g: GlobalVariable.Identity) {
-    LLVMSetGlobalConstant(values[g].llvm.raw, newValue ? 1 : 0)
+  public mutating func setGlobalConstant(_ newValue: Bool, for g: GlobalVariable.Reference) {
+    LLVMSetGlobalConstant(g.raw, newValue ? 1 : 0)
   }
 
   /// Configures whether `g` is externally initialized.
-  public mutating func setExternallyInitialized(_ newValue: Bool, for g: GlobalVariable.Identity) {
-    LLVMSetExternallyInitialized(values[g].llvm.raw, newValue ? 1 : 0)
+  public mutating func setExternallyInitialized(_ newValue: Bool, for g: GlobalVariable.Reference) {
+    LLVMSetExternallyInitialized(g.raw, newValue ? 1 : 0)
   }
 
   /// Sets the initializer of `g` to `v`.
@@ -558,574 +392,516 @@ public struct Module: ~Copyable {
   /// - Precondition: if `g` has type pointer-to-`T`, the `newValue`
   ///   must have type `T`.
   public mutating func setInitializer<V: IRValue>(
-    _ newValue: V.Identity, for g: GlobalVariable.Identity
+    _ newValue: V.Reference, for g: GlobalVariable.Reference
   ) {
-    LLVMSetInitializer(values[g].llvm.raw, values[newValue].llvm.raw)
+    LLVMSetInitializer(g.raw, newValue.raw)
   }
 
   /// Sets the preferred alignment of `v` to `a`.
   ///
   /// - Requires: `a` is whole power of 2.
-  public mutating func setAlignment(_ a: Int, for v: Alloca.Identity) {
-    LLVMSetAlignment(values[v].llvm.raw, UInt32(a))
+  public mutating func setAlignment(_ a: Int, for v: Alloca.Reference) {
+    LLVMSetAlignment(v.raw, UInt32(a))
   }
 
   // MARK: Basic type instances
 
   /// The `void` type.
-  public private(set) lazy var void: VoidType.Identity = voidType()
+  public private(set) lazy var void: VoidType.Reference = voidType()
 
   /// The `ptr` type in the default address space.
-  public private(set) lazy var ptr: PointerType.Identity = pointerType(inAddressSpace: .default)
+  public private(set) lazy var ptr: PointerType.Reference = pointerType(inAddressSpace: .default)
 
   /// The `half` type.
-  public private(set) lazy var half: FloatingPointType.Identity = FloatingPointType.half(in: &self)
+  public private(set) lazy var half: FloatingPointType.Reference = FloatingPointType.half(in: &self)
 
   /// The `float` type.
-  public private(set) lazy var float: FloatingPointType.Identity = FloatingPointType.float(
+  public private(set) lazy var float: FloatingPointType.Reference = FloatingPointType.float(
     in: &self)
 
   /// The `double` type.
-  public private(set) lazy var double: FloatingPointType.Identity = FloatingPointType.double(
+  public private(set) lazy var double: FloatingPointType.Reference = FloatingPointType.double(
     in: &self)
 
   /// The `fp128` type.
-  public private(set) lazy var fp128: FloatingPointType.Identity = FloatingPointType.fp128(
+  public private(set) lazy var fp128: FloatingPointType.Reference = FloatingPointType.fp128(
     in: &self)
 
   /// The 1-bit integer type.
-  public private(set) lazy var i1: IntegerType.Identity = integerType(1)
+  public private(set) lazy var i1: IntegerType.Reference = integerType(1)
 
   /// The 8-bit integer type.
-  public private(set) lazy var i8: IntegerType.Identity = integerType(8)
+  public private(set) lazy var i8: IntegerType.Reference = integerType(8)
 
   /// The 16-bit integer type.
-  public private(set) lazy var i16: IntegerType.Identity = integerType(16)
+  public private(set) lazy var i16: IntegerType.Reference = integerType(16)
 
   /// The 32-bit integer type.
-  public private(set) lazy var i32: IntegerType.Identity = integerType(32)
+  public private(set) lazy var i32: IntegerType.Reference = integerType(32)
 
   /// The 64-bit integer type.
-  public private(set) lazy var i64: IntegerType.Identity = integerType(64)
+  public private(set) lazy var i64: IntegerType.Reference = integerType(64)
 
   /// The 128-bit integer type.
-  public private(set) lazy var i128: IntegerType.Identity = integerType(128)
-
-  /// Registers the parameters of `function` in the ID system.
-  ///
-  /// Precondition: the `function`'s parameters are not yet registered.
-  private mutating func registerFunctionParameters(_ function: Function.Identity) {
-    let functionHandle = values[function].llvm.raw
-    let parameterCount = LLVMCountParams(functionHandle)
-
-    for index in 0..<parameterCount {
-      guard let parameterHandle = LLVMGetParam(functionHandle, index) else { continue }
-      _ = values.insert(ValueRef(parameterHandle))
-    }
-  }
+  public private(set) lazy var i128: IntegerType.Reference = integerType(128)
 
   // MARK: Arithmetics
 
   public mutating func insertAdd<U: IRValue, V: IRValue>(
     overflow: OverflowBehavior = .ignore,
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     switch overflow {
-    case .ignore:  // todo test if this works when both operands are the same.
-      let handle = LLVMBuildAdd(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+    case .ignore:
+      .init(LLVMBuildAdd(p.llvm, lhs.raw, rhs.raw, "")!)
     case .nuw:
-      let handle = LLVMBuildNUWAdd(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildNUWAdd(p.llvm, lhs.raw, rhs.raw, "")!)
     case .nsw:
-      let handle = LLVMBuildNSWAdd(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildNSWAdd(p.llvm, lhs.raw, rhs.raw, "")!)
     }
   }
 
   public mutating func insertFAdd<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {  // todo test if this works when both operands are the same.
-    let handle = LLVMBuildFAdd(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFAdd(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertSub<U: IRValue, V: IRValue>(
     overflow: OverflowBehavior = .ignore,
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     switch overflow {
     case .ignore:
-      let handle = LLVMBuildSub(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildSub(p.llvm, lhs.raw, rhs.raw, "")!)
     case .nuw:
-      let handle = LLVMBuildNUWSub(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildNUWSub(p.llvm, lhs.raw, rhs.raw, "")!)
     case .nsw:
-      let handle = LLVMBuildNSWSub(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildNSWSub(p.llvm, lhs.raw, rhs.raw, "")!)
     }
   }
 
   public mutating func insertFSub<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildFSub(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFSub(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertMul<U: IRValue, V: IRValue>(
     overflow: OverflowBehavior = .ignore,
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     switch overflow {
     case .ignore:
-      let handle = LLVMBuildMul(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildMul(p.llvm, lhs.raw, rhs.raw, "")!)
     case .nuw:
-      let handle = LLVMBuildNUWMul(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildNUWMul(p.llvm, lhs.raw, rhs.raw, "")!)
     case .nsw:
-      let handle = LLVMBuildNSWMul(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildNSWMul(p.llvm, lhs.raw, rhs.raw, "")!)
     }
   }
 
   public mutating func insertFMul<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildFMul(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFMul(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertUnsignedDiv<U: IRValue, V: IRValue>(
     exact: Bool = false,
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     if exact {
-      let handle = LLVMBuildExactUDiv(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildExactUDiv(p.llvm, lhs.raw, rhs.raw, "")!)
     } else {
-      let handle = LLVMBuildUDiv(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildUDiv(p.llvm, lhs.raw, rhs.raw, "")!)
     }
   }
 
   public mutating func insertSignedDiv<U: IRValue, V: IRValue>(
     exact: Bool = false,
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     if exact {
-      let handle = LLVMBuildExactSDiv(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildExactSDiv(p.llvm, lhs.raw, rhs.raw, "")!)
     } else {
-      let handle = LLVMBuildSDiv(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-      return .init(values.insert(ValueRef(handle)))
+      .init(LLVMBuildSDiv(p.llvm, lhs.raw, rhs.raw, "")!)
     }
   }
 
   public mutating func insertFDiv<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildFDiv(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFDiv(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertUnsignedRem<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildURem(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    return .init(LLVMBuildURem(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertSignedRem<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildSRem(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildSRem(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertFRem<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildFRem(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFRem(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertShl<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildShl(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildShl(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertLShr<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildLShr(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildLShr(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertAShr<U: IRValue, V: IRValue>(
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildAShr(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildAShr(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertBitwiseAnd(
-    _ lhs: LLVMIdentity<some IRValue>, _ rhs: LLVMIdentity<some IRValue>,
+    _ lhs: Reference<some IRValue>, _ rhs: Reference<some IRValue>,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildAnd(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildAnd(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertBitwiseOr(
-    _ lhs: LLVMIdentity<some IRValue>, _ rhs: LLVMIdentity<some IRValue>,
+    _ lhs: Reference<some IRValue>, _ rhs: Reference<some IRValue>,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildOr(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildOr(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertBitwiseXor(
-    _ lhs: LLVMIdentity<some IRValue>, _ rhs: LLVMIdentity<some IRValue>,
+    _ lhs: Reference<some IRValue>, _ rhs: Reference<some IRValue>,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildXor(p.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    let handle = LLVMBuildXor(p.llvm, lhs.raw, rhs.raw, "")!
+    return .init(handle)
   }
 
   // MARK: Memory
 
   public mutating func insertAlloca(
-    _ type: LLVMIdentity<some IRType>, at p: borrowing InsertionPoint
+    _ type: Reference<some IRType>, at p: borrowing InsertionPoint
   )
-    -> Alloca.Identity
+    -> Alloca.Reference
   {
     Alloca.insert(type, at: p, in: &self)
   }
 
   /// Returns the entry block of `f`, if any.
   public mutating func entryOf(
-    _ f: Function.Identity
-  ) -> BasicBlock.Identity? {
-    guard let e = values[f].entry else { return nil }
-    return basicBlocks.id(for: e.llvm)!
+    _ f: Function.Reference
+  ) -> BasicBlock.Reference? {
+    LLVMGetFirstBasicBlock(f.raw).map { BasicBlock.Reference($0) }
   }
   /// Inerts an `alloca` allocating memory on the stack a value of `type`, at the entry of `f`.
   ///
   /// - Requires: `f` has an entry block.
-  public mutating func insertAlloca<T: IRType>(_ type: T.Identity, atEntryOf f: Function.Identity)
-    -> Alloca.Identity
+  public mutating func insertAlloca<T: IRType>(_ type: T.Reference, atEntryOf f: Function.Reference)
+    -> Alloca.Reference
   {
     insertAlloca(type, at: startOf(entryOf(f)!))
   }
 
   public mutating func insertGetElementPointer<V: IRValue, T: IRType>(
-    of base: V.Identity,
-    typed baseType: T.Identity,
-    indices: [AnyValue.Identity],
+    of base: V.Reference,
+    typed baseType: T.Reference,
+    indices: [AnyValue.Reference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    var i = indices.map({ values[$0].llvm.raw as Optional })
-    let handle = LLVMBuildGEP2(
-      p.llvm, types[baseType].llvm.raw, values[base].llvm.raw, &i, UInt32(i.count), "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    var i = indices.map({ Optional.some($0.raw) })
+    let handle = LLVMBuildGEP2(p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!
+    return .init(handle)
   }
 
   public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType>(
-    of base: V.Identity,
-    typed baseType: T.Identity,
-    indices: [AnyValue.Identity],
+    of base: V.Reference,
+    typed baseType: T.Reference,
+    indices: [AnyValue.Reference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    var i = indices.map({ values[$0].llvm.raw as Optional })
+  ) -> Instruction.Reference {
+    var i = indices.map({ Optional.some($0.raw) })
     let handle = LLVMBuildInBoundsGEP2(
-      p.llvm, types[baseType].llvm.raw, values[base].llvm.raw, &i, UInt32(i.count), "")!
-    return .init(values.insert(ValueRef(handle)))
+      p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!
+    return .init(handle)
   }
 
   public mutating func insertGetStructElementPointer<V: IRValue>(
-    of base: V.Identity,
-    typed baseType: StructType.Identity,
+    of base: V.Reference,
+    typed baseType: StructType.Reference,
     index: Int,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     let handle = LLVMBuildStructGEP2(
-      p.llvm, types[baseType].llvm.raw, values[base].llvm.raw, UInt32(index), "")!
-    return .init(values.insert(ValueRef(handle)))
+      p.llvm, baseType.raw, base.raw, UInt32(index), "")!
+    return .init(handle)
   }
 
   public mutating func insertLoad<T: IRType, V: IRValue>(
-    _ type: T.Identity, from source: V.Identity, at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    .init(
-      values.insert(
-        ValueRef(LLVMBuildLoad2(p.llvm, types[type].llvm.raw, values[source].llvm.raw, ""))))
+    _ type: T.Reference, from source: V.Reference, at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    .init(LLVMBuildLoad2(p.llvm, type.raw, source.raw, "")!)
   }
 
   @discardableResult
   public mutating func insertStore<V1: IRValue, V2: IRValue>(
-    _ value: V1.Identity, to location: V2.Identity, at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let r = LLVMBuildStore(p.llvm, values[value].llvm.raw, values[location].llvm.raw)!
-    LLVMSetAlignment(r, UInt32(layout.preferredAlignment(of: values[value].type)))
-    return .init(values.insert(ValueRef(r)))
+    _ value: V1.Reference, to location: V2.Reference, at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    let r = LLVMBuildStore(p.llvm, value.raw, location.raw)!
+    LLVMSetAlignment(r, UInt32(layout.preferredAlignment(of: value.unsafePointee.type.unsafePointee)))
+    return .init(r)
   }
 
   // MARK: Atomics
 
-  public mutating func setOrdering(_ ordering: AtomicOrdering, for i: Instruction.Identity) {
-    LLVMSetOrdering(values[i].llvm.raw, ordering.llvm)
+  public mutating func setOrdering(_ ordering: AtomicOrdering, for i: Instruction.Reference) {
+    LLVMSetOrdering(i.raw, ordering.llvm)
   }
 
   public mutating func setCmpXchgSuccessOrdering(
-    _ ordering: AtomicOrdering, for i: Instruction.Identity
+    _ ordering: AtomicOrdering, for i: Instruction.Reference
   ) {
-    LLVMSetCmpXchgSuccessOrdering(values[i].llvm.raw, ordering.llvm)
+    LLVMSetCmpXchgSuccessOrdering(i.raw, ordering.llvm)
   }
 
   public mutating func setCmpXchgFailureOrdering(
-    _ ordering: AtomicOrdering, for i: Instruction.Identity
+    _ ordering: AtomicOrdering, for i: Instruction.Reference
   ) {
-    LLVMSetCmpXchgFailureOrdering(values[i].llvm.raw, ordering.llvm)
+    LLVMSetCmpXchgFailureOrdering(i.raw, ordering.llvm)
   }
 
-  public mutating func setAtomicRMWBinOp(_ binOp: AtomicRMWBinOp, for i: Instruction.Identity) {
-    LLVMSetAtomicRMWBinOp(values[i].llvm.raw, binOp.llvm)
+  public mutating func setAtomicRMWBinOp(_ binOp: AtomicRMWBinOp, for i: Instruction.Reference) {
+    LLVMSetAtomicRMWBinOp(i.raw, binOp.llvm)
   }
 
-  public mutating func setAtomicSingleThread(for i: Instruction.Identity) {
-    LLVMSetAtomicSingleThread(values[i].llvm.raw, 1)
+  public mutating func setAtomicSingleThread(for i: Instruction.Reference) {
+    LLVMSetAtomicSingleThread(i.raw, 1)
   }
 
   public mutating func insertAtomicCmpXchg<V1: IRValue, V2: IRValue, V3: IRValue>(
-    _ atomic: V1.Identity,
-    old: V2.Identity,
-    new: V3.Identity,
+    _ atomic: V1.Reference,
+    old: V2.Reference,
+    new: V3.Reference,
     successOrdering: AtomicOrdering,
     failureOrdering: AtomicOrdering,
     weak: Bool,
     singleThread: Bool,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     let handle = LLVMBuildAtomicCmpXchg(
-      p.llvm, values[atomic].llvm.raw, values[old].llvm.raw, values[new].llvm.raw,
+      p.llvm, atomic.raw, old.raw, new.raw,
       successOrdering.llvm,
       failureOrdering.llvm, singleThread ? 1 : 0)!
-    let i = Instruction.Identity(values.insert(ValueRef(handle)))
+    let i = Instruction.Reference(handle)
     if weak {
-      LLVMSetWeak(values[i].llvm.raw, 1)
+      LLVMSetWeak(i.raw, 1)
     }
     return i
   }
 
   public mutating func insertAtomicRMW<V1: IRValue, V2: IRValue>(
-    _ atomic: V1.Identity,
+    _ atomic: V1.Reference,
     operation: AtomicRMWBinOp,
-    value: V2.Identity,
+    value: V2.Reference,
     ordering: AtomicOrdering,
     singleThread: Bool,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildAtomicRMW(
-      p.llvm, operation.llvm, values[atomic].llvm.raw, values[value].llvm.raw, ordering.llvm,
-      singleThread ? 1 : 0
-    )!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(
+      LLVMBuildAtomicRMW(
+        p.llvm, operation.llvm, atomic.raw, value.raw, ordering.llvm,
+        singleThread ? 1 : 0
+      )!)
   }
 
   @discardableResult
   public mutating func insertFence(
     _ ordering: AtomicOrdering, singleThread: Bool, at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildFence(p.llvm, ordering.llvm, singleThread ? 1 : 0, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFence(p.llvm, ordering.llvm, singleThread ? 1 : 0, "")!)
   }
 
   // MARK: Terminators
 
   @discardableResult
-  public mutating func insertBr(to destination: BasicBlock.Identity, at p: borrowing InsertionPoint)
-    -> Instruction.Identity
+  public mutating func insertBr(
+    to destination: BasicBlock.Reference, at p: borrowing InsertionPoint
+  )
+    -> Instruction.Reference
   {
-    let handle = LLVMBuildBr(p.llvm, basicBlocks[destination].llvm.raw)!
-    return .init(values.insert(ValueRef(handle)))
+    .init(LLVMBuildBr(p.llvm, destination.raw)!)
   }
 
   @discardableResult
   public mutating func insertCondBr<V: IRValue>(
-    if condition: V.Identity, then t: BasicBlock.Identity, else e: BasicBlock.Identity,
+    if condition: V.Reference, then t: BasicBlock.Reference, else e: BasicBlock.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildCondBr(
-      p.llvm, values[condition].llvm.raw, basicBlocks[t].llvm.raw, basicBlocks[e].llvm.raw)!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(
+      LLVMBuildCondBr(
+        p.llvm, condition.raw, t.raw, e.raw)!)
   }
 
   @discardableResult
   public mutating func insertSwitch<
-    V: IRValue, C: Collection<(AnyValue.Identity, BasicBlock.Identity)>
+    V: IRValue, C: Collection<(AnyValue.Reference, BasicBlock.Reference)>
   >(
-    on value: V.Identity, cases: C, default defaultCase: BasicBlock.Identity,
+    on value: V.Reference, cases: C, default defaultCase: BasicBlock.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
+  ) -> Instruction.Reference {
     let s = LLVMBuildSwitch(
-      p.llvm, values[value].llvm.raw, basicBlocks[defaultCase].llvm.raw, UInt32(cases.count))!
+      p.llvm, value.raw, defaultCase.raw, UInt32(cases.count))!
     for (caseValue, destination) in cases {
-      LLVMAddCase(s, values[caseValue].llvm.raw, basicBlocks[destination].llvm.raw)
+      LLVMAddCase(s, caseValue.raw, destination.raw)
     }
-    return .init(values.insert(ValueRef(s)))
+    return .init(s)
   }
 
   @discardableResult
-  public mutating func insertReturn(at p: borrowing InsertionPoint) -> Instruction.Identity {
-    let handle = LLVMBuildRetVoid(p.llvm)!
-    return .init(values.insert(ValueRef(handle)))
+  public mutating func insertReturn(at p: borrowing InsertionPoint) -> Instruction.Reference {
+    .init(LLVMBuildRetVoid(p.llvm)!)
   }
 
   @discardableResult
-  public mutating func insertReturn<V: IRValue>(_ value: V.Identity, at p: borrowing InsertionPoint)
-    -> Instruction.Identity
+  public mutating func insertReturn<V: IRValue>(
+    _ value: V.Reference, at p: borrowing InsertionPoint
+  )
+    -> Instruction.Reference
   {
-    let handle = LLVMBuildRet(p.llvm, values[value].llvm.raw)!
-    return .init(values.insert(ValueRef(handle)))
+    .init(LLVMBuildRet(p.llvm, value.raw)!)
   }
 
   @discardableResult
-  public mutating func insertUnreachable(at p: borrowing InsertionPoint) -> Instruction.Identity {
-    let handle = LLVMBuildUnreachable(p.llvm)!
-    return .init(values.insert(ValueRef(handle)))
+  public mutating func insertUnreachable(at p: borrowing InsertionPoint) -> Instruction.Reference {
+    .init(LLVMBuildUnreachable(p.llvm)!)
   }
 
   // MARK: Aggregate operations
 
   public mutating func insertExtractValue<V: IRValue>(
-    from whole: V.Identity,
+    from whole: V.Reference,
     at index: Int,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildExtractValue(p.llvm, values[whole].llvm.raw, UInt32(index), "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildExtractValue(p.llvm, whole.raw, UInt32(index), "")!)
   }
 
   public mutating func insertInsertValue<V1: IRValue, V2: IRValue>(
-    _ part: V1.Identity,
+    _ part: V1.Reference,
     at index: Int,
-    into whole: V2.Identity,
+    into whole: V2.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildInsertValue(
-      p.llvm, values[whole].llvm.raw, values[part].llvm.raw, UInt32(index), "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildInsertValue(p.llvm, whole.raw, part.raw, UInt32(index), "")!)
   }
 
   // MARK: Conversions
 
   public mutating func insertTrunc<V: IRValue, T: IRType>(
-    _ source: V.Identity, to target: T.Identity,
+    _ source: V.Reference, to target: T.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildTrunc(p.llvm, values[source].llvm.raw, types[target].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildTrunc(p.llvm, source.raw, target.raw, "")!)
   }
 
   public mutating func insertSignExtend<V: IRValue, T: IRType>(
-    _ source: V.Identity, to target: T.Identity,
+    _ source: V.Reference, to target: T.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildSExt(p.llvm, values[source].llvm.raw, types[target].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildSExt(p.llvm, source.raw, target.raw, "")!)
   }
 
   public mutating func insertZeroExtend<V: IRValue, T: IRType>(
-    _ source: V.Identity, to target: T.Identity,
+    _ source: V.Reference, to target: T.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildZExt(p.llvm, values[source].llvm.raw, types[target].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildZExt(p.llvm, source.raw, target.raw, "")!)
   }
 
-  public mutating func insertIntToPtr<V: IRValue>(
-    _ source: V.Identity, to target: AnyType.Identity? = nil,
+  public mutating func insertIntToPtr<V: IRValue, T: IRType>(
+    _ source: V.Reference, to target: T.Reference? = nil,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let typeHandle =
-      if let t = target {
-        types[t].llvm.raw
-      } else {
-        types[ptr].llvm.raw
-      }
-    let handle = LLVMBuildIntToPtr(p.llvm, values[source].llvm.raw, typeHandle, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    let t = target?.raw ?? ptr.raw
+    return .init(LLVMBuildIntToPtr(p.llvm, source.raw, t, "")!)
   }
 
   public mutating func insertPtrToInt<V: IRValue, T: IRType>(
-    _ source: V.Identity, to target: T.Identity,
+    _ source: V.Reference, to target: T.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildPtrToInt(p.llvm, values[source].llvm.raw, types[target].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildPtrToInt(p.llvm, source.raw, target.raw, "")!)
   }
 
   public mutating func insertFPTrunc<V: IRValue, T: IRType>(
-    _ source: V.Identity, to target: T.Identity,
+    _ source: V.Reference, to target: T.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildFPTrunc(p.llvm, values[source].llvm.raw, types[target].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFPTrunc(p.llvm, source.raw, target.raw, "")!)
   }
 
   public mutating func insertFPExtend<V: IRValue, T: IRType>(
-    _ source: V.Identity, to target: T.Identity,
+    _ source: V.Reference, to target: T.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let handle = LLVMBuildFPExt(p.llvm, values[source].llvm.raw, types[target].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    .init(LLVMBuildFPExt(p.llvm, source.raw, target.raw, "")!)
   }
 
   // MARK: Others
 
   public mutating func insertCall<C: Callable>(
-    _ callee: C.Identity,
-    on arguments: [AnyValue.Identity],
+    _ callee: C.Reference,
+    on arguments: [AnyValue.Reference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    let calleeTypeID = values[callee].valueType(in: &self)
+  ) -> Instruction.Reference {
+    let calleeTypeID = callee.unsafePointee.valueType
     return insertCall(callee.erased, typed: calleeTypeID, on: arguments, at: p)
   }
 
   public mutating func insertCall<T: IRType>(
-    _ callee: AnyValue.Identity,
-    typed calleeType: T.Identity,
-    on arguments: [AnyValue.Identity],
+    _ callee: AnyValue.Reference,
+    typed calleeType: T.Reference,
+    on arguments: [AnyValue.Reference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    var a = arguments.map({ values[$0].llvm.raw as Optional })
+  ) -> Instruction.Reference {
+    var a = arguments.map({ $0.raw as Optional })
 
     // Debug: Print function type and arguments
-    let calleeTypeWrapper = types[calleeType]
+    let calleeTypeWrapper = calleeType.unsafePointee
     if let funcType = FunctionType(calleeTypeWrapper) {
       // Check if this is a problematic call (mismatched number of parameters when not vararg)
       if funcType.parameters.count != arguments.count && !funcType.isVarArg {
-        let functionName = values[Function.Identity(callee)].name
+        let functionName = Function.Reference(callee.raw).unsafePointee.name
         var debugInfo = "Parameter count mismatch on LLVM function call: \(functionName)\n"
         debugInfo += "Expected parameters: \(funcType.parameters.count)\n"
         debugInfo += "Provided arguments: \(arguments.count)\n"
@@ -1133,42 +909,36 @@ public struct Module: ~Copyable {
       }
     }
 
-    let h = LLVMBuildCall2(
-      p.llvm, types[calleeType].llvm.raw, values[callee].llvm.raw, &a, UInt32(a.count), "")!
-    return .init(values.insert(ValueRef(h)))
+    return .init(LLVMBuildCall2(p.llvm, calleeType.raw, callee.raw, &a, UInt32(a.count), "")!)
   }
 
   public mutating func insertIntegerComparison<U: IRValue, V: IRValue>(
     _ predicate: IntegerPredicate,
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    precondition(values[lhs].type == values[rhs].type)
-    let handle = LLVMBuildICmp(
-      p.llvm, predicate.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    precondition(lhs.unsafePointee.type == rhs.unsafePointee.type)
+    return .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   public mutating func insertFloatingPointComparison<U: IRValue, V: IRValue>(
     _ predicate: FloatingPointPredicate,
-    _ lhs: U.Identity, _ rhs: V.Identity,
+    _ lhs: U.Reference, _ rhs: V.Reference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.Identity {
-    precondition(values[lhs].type == values[rhs].type)
-    let handle = LLVMBuildFCmp(
-      p.llvm, predicate.llvm, values[lhs].llvm.raw, values[rhs].llvm.raw, "")!
-    return .init(values.insert(ValueRef(handle)))
+  ) -> Instruction.Reference {
+    precondition(lhs.unsafePointee.type == rhs.unsafePointee.type)
+    return .init(LLVMBuildFCmp(p.llvm, predicate.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   // MARK: Type constructors
 
-  public mutating func integerType(_ bitWidth: Int) -> IntegerType.Identity {
+  public mutating func integerType(_ bitWidth: Int) -> IntegerType.Reference {
     return IntegerType.create(bitWidth, in: &self)
   }
 
   /// Creates an opaque pointer type in the given address space.
   public mutating func pointerType(inAddressSpace s: AddressSpace = .default)
-    -> PointerType.Identity
+    -> PointerType.Reference
   {
     PointerType.create(inAddressSpace: s, in: &self)
   }
@@ -1176,8 +946,8 @@ public struct Module: ~Copyable {
   /// Creates a function type with given parameter and return types.
   ///
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the function type `(i64, i8) -> i8`.
-  public mutating func functionType(from: [AnyType.Identity], to: AnyType.Identity? = nil)
-    -> FunctionType.Identity
+  public mutating func functionType(from: [AnyType.Reference], to: AnyType.Reference? = nil)
+    -> FunctionType.Reference
   {
     FunctionType.create(from: from, to: to, in: &self)
   }
@@ -1186,9 +956,9 @@ public struct Module: ~Copyable {
   ///
   /// - Example: `functionType(from: (i64, i8), to: i32)` creates the function type `(i64, i8) -> i32`.
   public mutating func functionType<each T: IRType, R: IRType>(
-    from parameters: (repeat LLVMIdentity<each T>), to returnType: R.Identity
-  ) -> FunctionType.Identity {
-    var erased = [AnyType.Identity]()
+    from parameters: (repeat Reference<each T>), to returnType: R.Reference
+  ) -> FunctionType.Reference {
+    var erased = [AnyType.Reference]()
     /// Map variadic tuple to array:
     for p in repeat each parameters {
       erased.append(p.erased)
@@ -1200,10 +970,10 @@ public struct Module: ~Copyable {
   /// Creates a function type with given parameter types and void as return type.
   ///
   /// - Example: `functionType(from: (i64, i8))` creates the function type `(i64, i8) -> void`.
-  public mutating func functionType<each T: IRType>(from parameters: (repeat LLVMIdentity<each T>))
-    -> FunctionType.Identity
+  public mutating func functionType<each T: IRType>(from parameters: (repeat Reference<each T>))
+    -> FunctionType.Reference
   {
-    var erased = [AnyType.Identity]()
+    var erased = [AnyType.Reference]()
     /// Map variadic tuple to array:
     for p in repeat each parameters {
       erased.append(p.erased)
@@ -1212,40 +982,80 @@ public struct Module: ~Copyable {
   }
 
   /// Creates an array type of `count` elements of `element`.
-  public mutating func arrayType<T: IRType>(_ count: Int, _ element: T.Identity)
-    -> ArrayType.Identity
+  public mutating func arrayType<T: IRType>(_ count: Int, _ element: T.Reference)
+    -> ArrayType.Reference
   {
-    ArrayType.create(count, types[element] as T, in: &self)
+    ArrayType.create(count, element, in: &self)
   }
 
   /// Creates or retrieves the `void` type, returning its ID.
-  public mutating func voidType() -> VoidType.Identity {
+  public mutating func voidType() -> VoidType.Reference {
     return VoidType.create(in: &self)
   }
 
   /// Creates a struct type with given field type IDs.
-  public mutating func structType(_ fields: [AnyType.Identity], packed: Bool = false)
-    -> StructType.Identity
+  public mutating func structType(_ fields: [AnyType.Reference], packed: Bool = false)
+    -> StructType.Reference
   {
     StructType.create(fields, packed: packed, in: &self)
   }
 
   /// Creates a named struct type with given field type IDs.
   public mutating func structType(
-    named name: String, _ fields: [AnyType.Identity], packed: Bool = false
+    named name: String, _ fields: [AnyType.Reference], packed: Bool = false
   )
-    -> StructType.Identity
+    -> StructType.Reference
   {
     StructType.create(named: name, fields, packed: packed, in: &self)
   }
 
   /// Creates an instruction representing an undefined value of type `type`.
-  public mutating func undefinedValue<T: IRType>(of type: T.Identity) -> Undefined.Identity {
+  public mutating func undefinedValue<T: IRType>(of type: T.Reference) -> Undefined.Reference {
     Undefined.create(of: type, in: &self)
   }
 
   /// Creates an instruction representing a poison value of type `type`.
-  public mutating func poisonValue<T: IRType>(of type: T.Identity) -> Poison.Identity {
+  public mutating func poisonValue<T: IRType>(of type: T.Reference) -> Poison.Reference {
     return Poison.create(of: type, in: &self)
+  }
+
+  /// Creates a constant struct of `type` in `module` aggregating `elements`.
+  ///
+  /// - Requires: The type of `contents[i]` has the same type as the `i`-th element of `type`.
+  public mutating func structConstant<S: Sequence>(
+    of type: StructType.Reference, aggregating elements: S
+  ) -> StructConstant.Reference where S.Element == AnyValue.Reference {
+    StructConstant.create(of: type, aggregating: elements, in: &self)
+  }
+
+  /// Creates a constant struct in `module` aggregating `elements`, packing them if
+  /// `isPacked` is `true`.
+  public mutating func structConstant<S: Sequence>(
+    aggregating elements: S, packed isPacked: Bool = false
+  ) -> StructConstant.Reference where S.Element == AnyValue.Reference {
+    StructConstant.create(aggregating: elements, packed: isPacked, in: &self)
+  }
+
+  /// Creates a constant array of `type`, filled with the contents of `elements`.
+  ///
+  /// - Requires: The type of each element in `contents` is `type`.
+  public mutating func arrayConstant<T: IRType, S: Sequence>(
+    of type: T.Reference, containing elements: S
+  ) -> ArrayConstant.Reference where S.Element == AnyValue.Reference {
+    ArrayConstant.create(of: type, containing: elements, in: &self)
+  }
+
+  /// Creates a constant array of `i8` in `module`, filled with the contents of `bytes`.
+  public mutating func arrayConstant<S: Sequence>(bytes: S) -> ArrayConstant.Reference
+  where S.Element == UInt8 {
+    ArrayConstant.create(bytes: bytes, in: &self)
+  }
+
+  /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
+  /// `nullTerminated` is `true`.
+  public mutating func stringConstant(_ text: String, nullTerminated: Bool = true)
+    -> StringConstant.Reference
+  {
+    StringConstant.create(text, nullTerminated: nullTerminated, in: &self)
   }
 }
