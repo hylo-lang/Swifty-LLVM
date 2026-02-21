@@ -11,16 +11,9 @@ public struct Undefined: IRValue, Hashable {
     self.llvm = llvm
   }
 
-  /// Creates an undefined value of type `t`.
-  @available(*, deprecated, message: "Use create(of:in:) instead.")
-  public init(of t: any IRType) {
-    self.llvm = .init(LLVMGetUndef(t.llvm.raw))
-  }
-
   /// Creates and registers an undefined value of type `t` in `module`.
-  public static func create<T: IRType>(of t: LLVMIdentity<T>, in module: inout Module) -> Self.Identity {
-    let h = module.types[t]
-    return .init(module.values.demandId(for: ValueRef(LLVMGetUndef(h.llvm.raw))))
+  public static func create<T: IRType>(of t: T.Reference, in module: inout Module) -> Self.Reference {
+    return .init(LLVMGetUndef(t.raw))
   }
 
   /// Creates an instance with `v`, failing iff `v` is not an undefined value.

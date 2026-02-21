@@ -7,36 +7,35 @@ final class IntegerTypeTests: XCTestCase {
     var m = Module("foo")
     let i64 = m.integerType(64)
     let i32 = m.integerType(32)
-    XCTAssertEqual(m.types[i64].bitWidth, 64)
-    XCTAssertEqual(m.types[i32].bitWidth, 32)
+    XCTAssertEqual(i64.unsafePointee.bitWidth, 64)
+    XCTAssertEqual(i32.unsafePointee.bitWidth, 32)
   }
 
   func testCallSyntax() {
     var m = Module("foo")
     let i64 = m.integerType(64)
-    let t = m.types[i64]
-    XCTAssertEqual(t(1).sext, 1)
+    XCTAssertEqual(i64.unsafePointee(1).unsafePointee.sext, 1)
   }
 
   func testConversion() {
     var m = Module("foo")
     let i64 = m.integerType(64)
-    let t: any IRType = m.types[i64]
+    let t: any IRType = i64.unsafePointee
     XCTAssertNotNil(IntegerType(t))
     let float = m.float
-    let u: any IRType = m.types[float]
+    let u: any IRType = float.unsafePointee
     XCTAssertNil(IntegerType(u))
   }
 
   func testEquality() {
     var m = Module("foo")
     let i64 = m.integerType(64)
-    let t = m.types[i64]
-    let u = m.types[i64]
+    let t = i64.unsafePointee
+    let u = i64.unsafePointee
     XCTAssertEqual(t, u)
 
     let i32 = m.integerType(32)
-    let v = m.types[i32]
+    let v = i32.unsafePointee
     XCTAssertNotEqual(t, v)
   }
 

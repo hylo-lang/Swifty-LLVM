@@ -88,12 +88,12 @@ extension Parameter: AttributeHolder {
   }
 
   /// The attributes of the parameter.
-  public var attributes: [Attribute] {
+  public var attributes: [Attribute.Reference] {
     let i = UInt32(index + 1)
     let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, i)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetAttributesAtIndex(parent.llvm.raw, i, &handles)
-    return handles.map(Attribute.wrapTargetIndependent(_:))
+    return handles.map { Attribute.Reference($0!) }
   }
 
 }

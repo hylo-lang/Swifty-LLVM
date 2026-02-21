@@ -1,13 +1,14 @@
-@testable import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class UndefinedTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.values[m.undefinedValue(of: m.float)]
+    let t: any IRValue = m.undefinedValue(of: m.float).unsafePointee
     XCTAssertNotNil(Undefined(t))
-    let u: any IRValue = m.types[m.i64].zero
+    let u: any IRValue = m.i64.unsafePointee.zero.unsafePointee
     XCTAssertNil(Undefined(u))
   }
 

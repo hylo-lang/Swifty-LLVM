@@ -6,7 +6,7 @@ internal import llvmc
 /// Intrinsic functions have well known names and semantics and are required to follow certain
 /// restrictions. Overall, these intrinsics represent an extension mechanism for the LLVM language
 /// that does not require changing all of the transformations in LLVM when adding to the language.
-public struct Intrinsic: Global, Callable, Hashable, Sendable {
+public struct IntrinsicFunction: Global, Callable, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
@@ -14,11 +14,6 @@ public struct Intrinsic: Global, Callable, Hashable, Sendable {
   /// Creates an instance wrapping `llvm`.
   public init(temporarilyWrapping llvm: ValueRef) {
     self.llvm = llvm
-  }
-
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
-    self.llvm = .init(llvm)
   }
 
   /// The intrinsic's identifier.
@@ -44,7 +39,7 @@ public struct Intrinsic: Global, Callable, Hashable, Sendable {
 
 }
 
-extension Intrinsic {
+extension IntrinsicFunction {
 
   /// The name of an intrinsic.
   @dynamicMemberLookup

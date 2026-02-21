@@ -11,30 +11,25 @@ public struct Function: Global, Callable, Hashable {
     self.llvm = llvm
   }
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
-    self.llvm = .init(llvm)
-  }
-
   /// Returns `true` iff the IR in `self` is well formed.
   public func isWellFormed() -> Bool {
     LLVMVerifyFunction(llvm.raw, LLVMReturnStatusAction) == 0
   }
 
   /// The basic blocks of the function.
-  public var basicBlocks: [BasicBlock] {
+  public var basicBlocks: [BasicBlock.Reference] {
     let n = LLVMCountBasicBlocks(llvm.raw)
     var handles: [LLVMBasicBlockRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetBasicBlocks(llvm.raw, &handles)
-    return handles.map({ .init($0!) })
+    return handles.map({ BasicBlock.Reference($0!) })
   }
 
   public var parameters: Function.Parameters { .init(of: self) }
 
   /// The the function's entry, if any.
-  public var entry: BasicBlock? {
+  public var entry: BasicBlock.Reference? {
     guard LLVMCountBasicBlocks(llvm.raw) > 0 else { return nil }
-    return .init(LLVMGetEntryBasicBlock(llvm.raw))
+    return BasicBlock.Reference(LLVMGetEntryBasicBlock(llvm.raw))
   }
 
   /// Creates an instance with `v`, failing iff `v` isn't a function.
@@ -51,7 +46,7 @@ public struct Function: Global, Callable, Hashable {
 extension Function {
 
   /// The return value of a LLVM IR function.
-  public struct Return: Hashable, Sendable {
+  public struct Return: Hashable {
 
     /// The function defining the return value.
     public let parent: Function
@@ -68,11 +63,11 @@ extension Function {
 extension Function {
 
   /// A collection containing the parameters of a LLVM IR function.
-  public struct Parameters: BidirectionalCollection, Sendable {  // todo make this non-copyable
+  public struct Parameters: BidirectionalCollection {
 
     public typealias Index = Int
 
-    public typealias Element = Parameter
+    public typealias Element = Parameter.Reference
 
     /// The function containing the elements of the collection.
     private let parent: any Callable
@@ -101,9 +96,9 @@ extension Function {
       return position - 1
     }
 
-    public subscript(position: Int) -> Parameter {
+    public subscript(position: Int) -> Parameter.Reference {
       precondition(position >= 0 && position < count, "index is out of bounds")
-      return Parameter(LLVMGetParam(parent.llvm.raw, UInt32(position)))
+      return .init(LLVMGetParam(parent.llvm.raw, UInt32(position)))
     }
 
   }

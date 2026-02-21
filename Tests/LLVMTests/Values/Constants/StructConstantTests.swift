@@ -5,48 +5,49 @@ final class StructConstantTests: XCTestCase {
 
   func testInitNamed() {
     var m = Module("foo")
-    let i32id = m.integerType(32)
-    let i32 = m.types[i32id]
+    let i32 = m.integerType(32)
 
-    let t = m.types[m.structType([i32id.erased, i32id.erased])]
-    let a = StructConstant(of: t, aggregating: [i32.constant(4), i32.constant(2)], in: &m)
-    XCTAssertEqual(a.count, 2)
-    XCTAssertEqual(StructType(a.type), t)
-    XCTAssertEqual(IntegerConstant(a[0]), i32.constant(4))
-    XCTAssertEqual(IntegerConstant(a[1]), i32.constant(2))
+    let t = m.structType([i32.erased, i32.erased])
+    let a = m.structConstant(
+      of: t, aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
+    XCTAssertEqual(a.unsafePointee.count, 2)
+    XCTAssertEqual(StructType.Reference(a.unsafePointee.type), t)
+    XCTAssertEqual(StructType(StructType.Reference(a.unsafePointee.type).unsafePointee), t.unsafePointee)
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[0]), i32.unsafePointee.constant(4))
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[1]), i32.unsafePointee.constant(2))
   }
 
   func testInitFromValues() throws {
     var m = Module("foo")
-    let i32 = m.types[m.integerType(32)]
+    let i32 = m.integerType(32)
 
-    let a = StructConstant(aggregating: [i32.constant(4), i32.constant(2)], in: &m)
-    XCTAssertEqual(a.count, 2)
-    XCTAssertEqual(try XCTUnwrap(StructType(a.type)).isPacked, false)
-    XCTAssertEqual(IntegerConstant(a[0]), i32.constant(4))
-    XCTAssertEqual(IntegerConstant(a[1]), i32.constant(2))
+    let a = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
+    XCTAssertEqual(a.unsafePointee.count, 2)
+    XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, false)
+    XCTAssertEqual(IntegerConstant(a.unsafePointee[0].unsafePointee), i32.unsafePointee.constant(4).unsafePointee)
+    XCTAssertEqual(IntegerConstant(a.unsafePointee[1].unsafePointee), i32.unsafePointee.constant(2).unsafePointee)
   }
 
   func testInitFromValuesPacked() throws {
     var m = Module("foo")
-    let i32 = m.types[m.integerType(32)]
+    let i32 = m.integerType(32)
 
-    let a = StructConstant(aggregating: [i32.constant(4), i32.constant(2)], packed: true, in: &m)
-    XCTAssertEqual(a.count, 2)
-    XCTAssertEqual(try XCTUnwrap(StructType(a.type)).isPacked, true)
-    XCTAssertEqual(IntegerConstant(a[0]), i32.constant(4))
-    XCTAssertEqual(IntegerConstant(a[1]), i32.constant(2))
+    let a = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased], packed: true)
+    XCTAssertEqual(a.unsafePointee.count, 2)
+    XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, true)
+    XCTAssertEqual(IntegerConstant(a.unsafePointee[0].unsafePointee), i32.unsafePointee.constant(4).unsafePointee)
+    XCTAssertEqual(IntegerConstant(a.unsafePointee[1].unsafePointee), i32.unsafePointee.constant(2).unsafePointee)
   }
 
   func testEquality() {
     var m = Module("foo")
-    let i32 = m.types[m.integerType(32)]
+    let i32 = m.integerType(32)
 
-    let a = StructConstant(aggregating: [i32.constant(4), i32.constant(2)], in: &m)
-    let b = StructConstant(aggregating: [i32.constant(4), i32.constant(2)], in: &m)
+    let a = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
+    let b = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
     XCTAssertEqual(a, b)
 
-    let c = StructConstant(aggregating: [i32.constant(2), i32.constant(4)], in: &m)
+    let c = m.structConstant(aggregating: [i32.unsafePointee.constant(2).erased, i32.unsafePointee.constant(4).erased])
     XCTAssertNotEqual(a, c)
   }
 

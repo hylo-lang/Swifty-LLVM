@@ -6,25 +6,25 @@ final class IRValueTests: XCTestCase {
   func testName() {
     var m = Module("foo")
     let g = m.declareGlobalVariable("x", m.pointerType())
-    XCTAssertEqual(m.values[g].name, "x")
+    XCTAssertEqual(g.unsafePointee.name, "x")
     m.setName("y", for: g)
-    XCTAssertEqual(m.values[g].name, "y")
+    XCTAssertEqual(g.unsafePointee.name, "y")
   }
 
   func testIsNull() {
     var m = Module("foo")
-    XCTAssert(m.values[m.types[m.i64].null(in: &m)].isNull)
-    XCTAssertFalse(m.types[m.i64].constant(42).isNull)
+    XCTAssert(m.i64.unsafePointee.null.unsafePointee.isNull)
+    XCTAssertFalse(m.i64.unsafePointee.constant(42).unsafePointee.isNull)
   }
 
   func testIsConstant() {
     var m = Module("foo")
     let i64 = m.integerType(64)
-    XCTAssert(m.types[i64].null.isConstant)
+    XCTAssert(i64.unsafePointee.null.unsafePointee.isConstant)
 
     let f = m.declareFunction("fn", m.functionType(from: ()))
     let b = m.appendBlock(to: f)
-    let i = m.values[m.insertAlloca(i64, at: m.endOf(b))]
+    let i = m.insertAlloca(i64, at: m.endOf(b)).unsafePointee
     XCTAssertFalse(i.isConstant)
   }
 
@@ -35,16 +35,16 @@ final class IRValueTests: XCTestCase {
     let i64 = m.integerType(64)
 
     let p = m.endOf(b)
-    let i = m.values[m.insertAlloca(i64, at: p)]
+    let i = m.insertAlloca(i64, at: p).unsafePointee
     XCTAssertFalse(i.isTerminator)
     let j = m.insertReturn(at: p)
-    XCTAssert(m.values[j].isTerminator)
+    XCTAssert(j.unsafePointee.isTerminator)
   }
 
   func testEqualty() {
     var m = Module("foo")
-    let t = m.types[m.integerType(64)].null
-    let u = m.types[m.integerType(32)].null
+    let t = m.integerType(64).unsafePointee.null.unsafePointee
+    let u = m.integerType(32).unsafePointee.null.unsafePointee
 
     XCTAssert(t == (t as any IRValue))
     XCTAssert((t as any IRValue) == t)
@@ -57,7 +57,7 @@ final class IRValueTests: XCTestCase {
 
   func testStringConvertible() {
     var m = Module("foo")
-    let t = m.types[m.integerType(64)].null
+    let t = m.integerType(64).unsafePointee.null
     XCTAssertEqual("\(t)", "\(t)", "Unstable string representation!")
   }
 

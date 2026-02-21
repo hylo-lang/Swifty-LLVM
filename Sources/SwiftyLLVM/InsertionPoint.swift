@@ -5,9 +5,9 @@ public struct InsertionPoint: ~Copyable {
   /// A handle to the LLVM object wrapped by this instance.
   internal let llvm: LLVMBuilderRef
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMBuilderRef) {
-    self.llvm = llvm
+  /// Creates an instance taking ownership of `reference`.
+  internal init(sinking reference: LLVMBuilderRef) {
+    self.llvm = reference
   }
 
   deinit {

@@ -8,11 +8,6 @@ public struct Parameter: IRValue {
   public let llvm: ValueRef
 
   /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
-    self.llvm = .init(llvm)
-  }
-
-  /// Creates an instance wrapping `llvm`.
   public init(temporarilyWrapping llvm: ValueRef) {
     self.llvm = llvm
   }
@@ -26,8 +21,8 @@ public struct Parameter: IRValue {
     }
   }
 
-  /// The function containing the parameter.
-  public var parent: Function { .init(LLVMGetParamParent(llvm.raw)) }
+  /// Temporary wrapper of the function containing the parameter.
+  public var parent: Function { .init(temporarilyWrapping: LLVMGetParamParent(llvm.raw)) }
 
   /// The index of the parameter in its function.
   public var index: Int {

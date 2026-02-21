@@ -24,11 +24,12 @@ extension AttributeNameProtocol {
 }
 
 /// An attribute on a function, return value, or parameter in LLVM IR.
-public enum Attribute<T: AttributeHolder>: Hashable, Sendable, LLVMEntity {
+public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
   public typealias Handle = AttributeRef
 
   /// Creates a target-independent attribute wrapping `llvm`.
   public init(temporarilyWrapping handle: AttributeRef) {
+    precondition(LLVMIsEnumAttribute(handle.raw) != 0)
     self = .targetIndependent(llvm: handle)
   }
 
@@ -36,14 +37,8 @@ public enum Attribute<T: AttributeHolder>: Hashable, Sendable, LLVMEntity {
   case targetIndependent(llvm: AttributeRef)
 
   /// Creates a target-independent attribute wrapping `llvm`.
-  private init(_ llvm: LLVMAttributeRef?) {
-    precondition(LLVMIsEnumAttribute(llvm) != 0)
-    self = .targetIndependent(llvm: .init(llvm!))
-  }
-
-  /// Creates a target-independent attribute wrapping `llvm`.
-  static func wrapTargetIndependent(_ llvm: LLVMAttributeRef?) -> Self {
-    return Self(llvm)
+  static func wrapTargetIndependent(_ llvm: LLVMAttributeRef) -> Self {
+    return Self(temporarilyWrapping: AttributeRef(llvm))
   }
 
   /// The value of the attribute if it is target-independent.
@@ -63,4 +58,18 @@ public enum Attribute<T: AttributeHolder>: Hashable, Sendable, LLVMEntity {
     }
   }
 
+}
+
+public protocol IRAttribute: Hashable, LLVMEntity where Handle == AttributeRef {
+}
+
+extension Attribute: IRAttribute {
+}
+
+public struct AnyAttribute: LLVMEntity, IRAttribute {
+  public let llvm: AttributeRef
+
+  public init(temporarilyWrapping llvm: AttributeRef) {
+    self.llvm = llvm
+  }
 }

@@ -46,12 +46,12 @@ extension Function: AttributeHolder {
   }
 
   /// The attributes of the function.
-  public var attributes: [Attribute] {
+  public var attributes: [AnyAttribute.Reference] {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
     let n = LLVMGetAttributeCountAtIndex(llvm.raw, i)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetAttributesAtIndex(llvm.raw, i, &handles)
-    return handles.map(Attribute.wrapTargetIndependent(_:))
+    return handles.map { AnyAttribute.Reference($0!) }
   }
 
 }
@@ -65,12 +65,11 @@ extension Function.Return: AttributeHolder {
   public typealias AttributeName = Parameter.AttributeName
 
   /// The attributes of the return value.
-  public var attributes: [Attribute] {
+  public var attributes: [Attribute.Reference] {
     let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, 0)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetAttributesAtIndex(parent.llvm.raw, 0, &handles)
-    return handles.map { handle in Attribute.wrapTargetIndependent(handle!) }
-    // FIXME: this is unsafe, allows escaping
+    return handles.map { Attribute.Reference($0!) }
   }
 
 }

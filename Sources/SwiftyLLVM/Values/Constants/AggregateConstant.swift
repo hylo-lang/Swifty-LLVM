@@ -8,7 +8,7 @@ public protocol AggregateConstant: IRValue, BidirectionalCollection {
 
 }
 
-extension AggregateConstant where Index == Int, Element == any IRValue {
+extension AggregateConstant where Index == Int, Element == AnyValue.Reference {
 
   public var startIndex: Int { 0 }
 
@@ -24,9 +24,9 @@ extension AggregateConstant where Index == Int, Element == any IRValue {
     return position - 1
   }
 
-  public subscript(position: Int) -> any IRValue {
+  public subscript(position: Int) -> AnyValue.Reference {
     precondition(position >= 0 && position < count, "index is out of bounds")
-    return AnyValue(LLVMGetAggregateElement(llvm.raw, UInt32(position)))
+    return .init(LLVMGetAggregateElement(llvm.raw, UInt32(position)))
   }
 
 }
