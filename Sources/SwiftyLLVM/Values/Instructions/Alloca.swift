@@ -6,11 +6,6 @@ public struct Alloca: IRValue {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
-    self.llvm = .init(llvm)
-  }
-
   /// Creates an instance wrapping `handle`.
   public init(temporarilyWrapping handle: ValueRef) {
     llvm = handle
@@ -25,15 +20,16 @@ public struct Alloca: IRValue {
     }
   }
 
-  public static func insert<T: IRType>(_ type: T.Identity, at p: borrowing InsertionPoint, in module: inout Module)
-    -> Alloca.Identity
+  public static func insert<T: IRType>(
+    _ type: T.Reference, at p: borrowing InsertionPoint, in module: inout Module
+  )
+    -> Alloca.Reference
   {
-    let handle = LLVMBuildAlloca(p.llvm, module.types[type].llvm.raw, "")!
-    return Alloca.Identity(module.values.insert(ValueRef(handle)))
+    return Alloca.Reference(LLVMBuildAlloca(p.llvm, type.raw, "")!)
   }
 
   /// The type of the value allocated by the instruction.
-  public var allocatedType: any IRType { AnyType(LLVMGetAllocatedType(llvm.raw)) }
+  public var allocatedType: AnyType.Reference { .init(LLVMGetAllocatedType(llvm.raw)) }
 
   /// The preferred alignment of the allocated memory.
   public var alignment: Int { Int(LLVMGetAlignment(llvm.raw)) }

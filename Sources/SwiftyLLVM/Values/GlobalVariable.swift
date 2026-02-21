@@ -1,18 +1,13 @@
 internal import llvmc
 
 /// A global value in LLVM IR.
-public struct GlobalVariable: Global, Sendable {
+public struct GlobalVariable: Global {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
-    self.llvm = .init(llvm)
-  }
-
   public init(temporarilyWrapping handle: ValueRef) {
-    self.init(handle.raw)
+    self.llvm = handle
   }
 
   /// `true` if this value is constant.
@@ -28,6 +23,8 @@ public struct GlobalVariable: Global, Sendable {
   public var isExternallyInitialized: Bool { LLVMIsExternallyInitialized(llvm.raw) != 0 }
 
   /// The initial value of this global.
-  public var initializer: (any IRValue)? { LLVMGetInitializer(llvm.raw).map(AnyValue.init(_:)) }
+  public var initializer: AnyValue.Reference? {
+    LLVMGetInitializer(llvm.raw).map(AnyValue.Reference.init(_:))
+  }
 
 }

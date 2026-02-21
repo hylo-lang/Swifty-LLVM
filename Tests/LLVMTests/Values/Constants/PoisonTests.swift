@@ -5,11 +5,11 @@ final class PoisonTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.values[m.poisonValue(of: m.float)]
+    let t: any IRValue = m.poisonValue(of: m.float).unsafePointee
 
     XCTAssertNotNil(Poison(t))
     let i64 = m.integerType(64)
-    let u: any IRValue = m.types[i64].zero
+    let u: any IRValue = i64.unsafePointee.zero.unsafePointee
     XCTAssertNil(Poison(u))
   }
 

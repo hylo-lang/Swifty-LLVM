@@ -8,9 +8,8 @@ extension Global {
   /// The LLVM IR "value type" of this global.
   ///
   /// This "value type" of a global differs from its formal type, which is always a pointer type.
-  public func valueType(in module: inout Module) -> AnyType.Identity {
-    let handle = TypeRef(LLVMGlobalGetValueType(llvm.raw))
-    return .init(module.types.demandId(for: handle))
+  public var valueType: AnyType.Reference {
+    .init(LLVMGlobalGetValueType(llvm.raw))
   }
 
   /// The linkage of this global.
