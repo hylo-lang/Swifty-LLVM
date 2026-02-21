@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A value in LLVM IR.
-public protocol IRValue: CustomStringConvertible, Sendable, LLVMEntity where Handle == ValueRef {
+public protocol IRValue: CustomStringConvertible, LLVMEntity where Handle == ValueRef {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: ValueRef { get }
@@ -9,6 +9,13 @@ public protocol IRValue: CustomStringConvertible, Sendable, LLVMEntity where Han
 }
 
 extension IRValue {
+  public init(temporarilyWrapping r: Self.Reference) {
+    self.init(temporarilyWrapping: r.raw)
+  }
+
+  init(temporarilyWrapping r: LLVMValueRef) {
+    self.init(temporarilyWrapping: ValueRef(r))
+  }
 
   /// A string representation of the value.
   public var description: String {
@@ -18,7 +25,7 @@ extension IRValue {
   }
 
   /// The LLVM IR type of this value.
-  public var type: any IRType { AnyType(LLVMTypeOf(llvm.raw)) }
+  public var type: AnyType.Reference { .init(LLVMTypeOf(llvm.raw)) }
 
   /// The name of this value.
   public var name: String { String(from: llvm.raw, readingWith: LLVMGetValueName2(_:_:)) ?? "" }

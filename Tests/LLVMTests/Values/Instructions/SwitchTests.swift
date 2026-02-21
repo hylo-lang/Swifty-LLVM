@@ -1,5 +1,6 @@
-@testable import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class SwitchTests: XCTestCase {
 
@@ -11,9 +12,9 @@ final class SwitchTests: XCTestCase {
     let c0 = m.appendBlock(to: f)
     let c1 = m.appendBlock(to: f)
     let c2 = m.appendBlock(to: f)
-    let i16 = m.types[m.i16]
-    let z = i16.constant(0, in: &m)
-    let o = i16.constant(1, in: &m)
+    let i16 = m.i16.unsafePointee
+    let z = i16.constant(0)
+    let o = i16.constant(1)
 
     _ = m.insertSwitch(
       on: z,
