@@ -5,21 +5,24 @@ final class PointerTypeTests: XCTestCase {
 
   func testDefaultAddressSpace() {
     var m = Module("foo")
-    XCTAssertEqual(PointerType(in: &m).addressSpace, .default)
+    XCTAssertEqual(m.pointerType().pointee.addressSpace, .default)
+    XCTAssertEqual(m.ptr.pointee.addressSpace, .default)
   }
 
   func testConversion() {
     var m = Module("foo")
-    let t: IRType = PointerType(in: &m)
-    XCTAssertNotNil(PointerType(t))
-    let u: IRType = IntegerType(64, in: &m)
-    XCTAssertNil(PointerType(u))
+    
+    let t = m.pointerType()
+    XCTAssertNotNil(PointerType.UnsafeReference(t.erased))
+    
+    let u = m.integerType(64)
+    XCTAssertNil(PointerType.UnsafeReference(u.erased))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let t = PointerType(in: &m)
-    let u = PointerType(in: &m)
+    let t = m.pointerType().pointee
+    let u = m.pointerType().pointee
     XCTAssertEqual(t, u)
   }
 

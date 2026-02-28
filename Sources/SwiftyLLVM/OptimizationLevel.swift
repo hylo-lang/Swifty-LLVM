@@ -1,4 +1,5 @@
 internal import llvmc
+internal import llvmshims
 
 /// The level of optimization used during code generation.
 public enum OptimizationLevel: Hashable, Sendable {
@@ -26,6 +27,20 @@ public enum OptimizationLevel: Hashable, Sendable {
       return LLVMCodeGenLevelDefault
     case .aggressive:
       return LLVMCodeGenLevelAggressive
+    }
+  }
+
+  /// The optimization level representation used by optimization passes exposed by the custom LLVM shims in SwiftyLLVM.
+  internal var swiftyLLVM: SwiftyLLVMPassOptimizationLevel {
+    switch self {
+    case .none:
+      SwiftyLLVMPassOptimizationLevelO0
+    case .less:
+      SwiftyLLVMPassOptimizationLevelO1
+    case .default:
+      SwiftyLLVMPassOptimizationLevelO2
+    case .aggressive:
+      SwiftyLLVMPassOptimizationLevelO3
     }
   }
 

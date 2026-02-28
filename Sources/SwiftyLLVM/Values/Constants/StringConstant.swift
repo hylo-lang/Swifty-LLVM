@@ -6,20 +6,20 @@ public struct StringConstant: IRValue, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
-  /// `nullTerminated` is `true`.
-  public init(_ text: String, nullTerminated: Bool = true, in module: inout Module) {
-    self.llvm = text.withCString { (s) in
-      .init(LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1))
-    }
+  /// Creates an instance wrapping `handle`.
+  public init(temporarilyWrapping handle: ValueRef) {
+    self.llvm = handle
   }
 
-  /// Creates an instance with `v`, failing iff `v` is not a constant string value.
-  public init?(_ v: IRValue) {
-    if LLVMIsAConstantDataSequential(v.llvm.raw) != nil && LLVMIsConstantString(v.llvm.raw) != 0 {
-      self.llvm = v.llvm
-    } else {
-      return nil
+  /// Creates a string constant from `text` in `module`, appending a null terminator iff
+  /// `nullTerminated` is `true`.
+  public static func create(_ text: String, nullTerminated: Bool = true, in module: inout Module)
+    -> StringConstant.UnsafeReference
+  {
+    text.withCString { (s) in
+      StringConstant.UnsafeReference(
+        LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1)
+      )
     }
   }
 
@@ -33,4 +33,15 @@ public struct StringConstant: IRValue, Hashable {
     } ?? ""
   }
 
+}
+
+extension UnsafeReference<StringConstant> {
+  /// Creates an instance with `v`, failing iff `v` is not a constant string value.
+  public init?(_ v: AnyValue.UnsafeReference) {
+    if LLVMIsAConstantDataSequential(v.llvm.raw) != nil && LLVMIsConstantString(v.llvm.raw) != 0 {
+      self.init(v.llvm)
+    } else {
+      return nil
+    }
+  }
 }

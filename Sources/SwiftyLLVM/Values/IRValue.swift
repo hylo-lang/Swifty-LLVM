@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A value in LLVM IR.
-public protocol IRValue: CustomStringConvertible, Sendable {
+public protocol IRValue: CustomStringConvertible, LLVMEntity where Handle == ValueRef {
 
   /// A handle to the LLVM object wrapped by this instance.
   var llvm: ValueRef { get }
@@ -9,6 +9,15 @@ public protocol IRValue: CustomStringConvertible, Sendable {
 }
 
 extension IRValue {
+  /// Creates an instance wrapping `r`.
+  public init(temporarilyWrapping r: Self.UnsafeReference) {
+    self.init(temporarilyWrapping: r.raw)
+  }
+
+  /// Creates an instance wrapping the native handle `r`.
+  init(temporarilyWrapping r: LLVMValueRef) {
+    self.init(temporarilyWrapping: ValueRef(r))
+  }
 
   /// A string representation of the value.
   public var description: String {
@@ -18,7 +27,7 @@ extension IRValue {
   }
 
   /// The LLVM IR type of this value.
-  public var type: IRType { AnyType(LLVMTypeOf(llvm.raw)) }
+  public var type: AnyType.UnsafeReference { .init(LLVMTypeOf(llvm.raw)) }
 
   /// The name of this value.
   public var name: String { String(from: llvm.raw, readingWith: LLVMGetValueName2(_:_:)) ?? "" }
@@ -32,39 +41,4 @@ extension IRValue {
   /// `true` iff this value is a terminator instruction.
   public var isTerminator: Bool { LLVMIsATerminatorInst(llvm.raw) != nil }
 
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == <R: IRValue>(lhs: Self, rhs: R) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: IRValue, rhs: Self) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: Self, rhs: IRValue) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: IRValue, rhs: Self) -> Bool {
-    lhs.llvm != rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: Self, rhs: IRValue) -> Bool {
-    lhs.llvm != rhs.llvm
-  }
-
-}
-
-/// Returns `true` iff `lhs` is equal to `rhs`.
-public func == (lhs: IRValue, rhs: IRValue) -> Bool {
-  lhs.llvm == rhs.llvm
-}
-
-/// Returns `true` iff `lhs` is not equal to `rhs`.
-public func != (lhs: IRValue, rhs: IRValue) -> Bool {
-  lhs.llvm != rhs.llvm
 }

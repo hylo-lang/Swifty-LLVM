@@ -1,87 +1,72 @@
 internal import llvmc
 
 /// How data are represented in memory for a particular target machine.
-public struct DataLayout: @unchecked Sendable {
+public struct DataLayout: ~Copyable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  private let wrapped: ManagedPointer<LLVMTargetDataRef>
+  private let llvm: LLVMTargetDataRef
 
   /// Creates an instance wrapping `llvm`.
   internal init(_ llvm: LLVMTargetDataRef) {
-    self.wrapped = .init(llvm, dispose: LLVMDisposeTargetData(_:))
+    self.llvm = llvm
   }
 
   /// Creates an instance representing the data layout associated with `machine`.
-  public init(of machine: TargetMachine) {
-    let handle = LLVMCreateTargetDataLayout(machine.llvm)
-    self.wrapped = .init(handle!, dispose: LLVMDisposeTargetData(_:))
+  public init(of machine: borrowing TargetMachine) {
+    self.llvm = LLVMCreateTargetDataLayout(machine.llvm)
   }
 
-  /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMTargetDataRef { wrapped.llvm }
+  deinit {
+    LLVMDisposeTargetData(llvm)
+  }
 
   /// Returns the number of bits in the representation of `type`'s instances.
-  public func bitWidth(of type: IRType) -> Int {
+  public func bitWidth(of type: UnsafeReference<some IRType>) -> Int {
     Int(LLVMSizeOfTypeInBits(llvm, type.llvm.raw))
   }
 
   /// Returns the storage size of the representation of `type`'s instances in bytes.
-  public func storageSize(of type: IRType) -> Int {
+  public func storageSize(of type: UnsafeReference<some IRType>) -> Int {
     Int(LLVMStoreSizeOfType(llvm, type.llvm.raw))
   }
 
   /// Returns the number of bytes from one instance of `type` to the next when stored in contiguous
   /// memory.
-  public func storageStride(of type: IRType) -> Int {
+  public func storageStride(of type: UnsafeReference<some IRType>) -> Int {
     let align = abiAlignment(of: type)
     assert(align > 0)
     return (storageSize(of: type) + align - 1) / align * align
   }
 
   /// The alignment of `type`'s instances in bytes.
-  public func preferredAlignment(of type: IRType) -> Int {
+  public func preferredAlignment(of type: UnsafeReference<some IRType>) -> Int {
     Int(LLVMPreferredAlignmentOfType(llvm, type.llvm.raw))
   }
 
   /// The ABI alignment of `type`'s instances in bytes.
-  public func abiAlignment(of type: IRType) -> Int {
+  public func abiAlignment(of type: UnsafeReference<some IRType>) -> Int {
     Int(LLVMABIAlignmentOfType(llvm, type.llvm.raw))
   }
 
   /// Returns the offset in bytes of the element at given `index`.
   ///
   /// - Requires: `index` is a valid element index in `type`.
-  public func offset(of index: Int, in type: StructType) -> Int {
+  public func offset(of index: Int, in type: StructType.UnsafeReference) -> Int {
     Int(LLVMOffsetOfElement(llvm, type.llvm.raw, UInt32(index)))
   }
 
   /// Returns the index of the element containing the byte at given `offset`.
   ///
   /// - Requires: `offset` is a valid byte offset in `type`.
-  public func index(at offset: Int, in type: StructType) -> Int {
+  public func index(at offset: Int, in type: StructType.UnsafeReference) -> Int {
     Int(LLVMElementAtOffset(llvm, type.llvm.raw, UInt64(offset)))
   }
 
 }
 
-extension DataLayout: Equatable {
+extension DataLayout {
 
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.description == rhs.description
-  }
-
-}
-
-extension DataLayout: Hashable {
-
-  public func hash(into hasher: inout Hasher) {
-    hasher.combine(description)
-  }
-
-}
-
-extension DataLayout: CustomStringConvertible {
-
+  /// The canonical LLVM data layout string.
   public var description: String {
     guard let s = LLVMCopyStringRepOfTargetData(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }

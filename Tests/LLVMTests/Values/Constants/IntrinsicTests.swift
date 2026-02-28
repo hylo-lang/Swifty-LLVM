@@ -1,46 +1,45 @@
-import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class IntinsicTests: XCTestCase {
 
   func testInit() {
     var m = Module("foo")
-    XCTAssertNotNil(m.intrinsic(named: Intrinsic.llvm.trap))
-    XCTAssertNil(m.intrinsic(named: Intrinsic.llvm.does_not_exist))
+    XCTAssertNotNil(m.intrinsic(named: IntrinsicFunction.llvm.trap))
+    XCTAssertNil(m.intrinsic(named: IntrinsicFunction.llvm.does_not_exist))
   }
 
   func testIsOverloaded() throws {
     var m = Module("foo")
 
     // llvm.va_start is overloaded for different address spaces.
-    let p0 = PointerType(in: &m)
-    let f = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.va_start, for: [p0]))
-    XCTAssertTrue(f.isOverloaded)
+    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
+    XCTAssertTrue(f.pointee.isOverloaded)
 
     // llvm.smax is overloaded for different integer types.
-    let i16 = IntegerType(16, in: &m)
-    let g = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.smax, for: [i16]))
-    XCTAssert(g.isOverloaded)
+    let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.smax, for: (m.i16)))
+    XCTAssert(g.pointee.isOverloaded)
 
     // llvm.trap is not overloaded.
-    let h = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.trap))
-    XCTAssertFalse(h.isOverloaded)
+    let h = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
+    XCTAssertFalse(h.pointee.isOverloaded)
   }
 
   func testName() throws {
     var m = Module("foo")
-    let f = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.trap, for: []))
-    XCTAssertEqual(f.name, "llvm.trap")
+    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap, for: []))
+    XCTAssertEqual(IntrinsicFunction(temporarilyWrapping: f.llvm).name, "llvm.trap")
   }
 
   func testEquality() throws {
     var m = Module("foo")
-    let p0 = PointerType(in: &m)
-    let f = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.va_start, for: [p0]))
-    let g = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.va_start, for: [p0]))
+
+    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
+    let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
     XCTAssertEqual(f, g)
 
-    let h = try XCTUnwrap(m.intrinsic(named: Intrinsic.llvm.va_end, for: [p0]))
+    let h = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_end, for: (m.ptr)))
     XCTAssertNotEqual(f, h)
   }
 
