@@ -11,15 +11,15 @@ public struct ArrayType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  public static func create(_ count: Int, _ element: Reference<some IRType>, in module: inout Module)
-    -> ArrayType.Reference
+  public static func create(_ count: Int, _ element: UnsafeReference<some IRType>, in module: inout Module)
+    -> ArrayType.UnsafeReference
   {
     precondition(LLVMGetTypeContext(element.llvm.raw) == module.context)
-    return ArrayType.Reference(LLVMArrayType2(element.llvm.raw, UInt64(count)))
+    return ArrayType.UnsafeReference(LLVMArrayType2(element.llvm.raw, UInt64(count)))
   }
 
   /// The type of an element in instances of this type.
-  public var element: AnyType.Reference { .init(LLVMGetElementType(llvm.raw)) }
+  public var element: AnyType.UnsafeReference { .init(LLVMGetElementType(llvm.raw)) }
 
   /// The number of elements in instances of this type.
   public var count: Int { Int(LLVMGetArrayLength(llvm.raw)) }
@@ -27,15 +27,15 @@ public struct ArrayType: IRType, Hashable {
   /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `elements`.
   public func constant<S: Sequence>(
     contentsOf elements: S, in module: inout Module
-  ) -> ArrayConstant.Reference where S.Element == AnyValue.Reference {
-    ArrayConstant.create(of: ArrayType.Reference(llvm), containing: elements, in: &module)
+  ) -> ArrayConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
+    ArrayConstant.create(of: ArrayType.UnsafeReference(llvm), containing: elements, in: &module)
   }
 
 }
 
-extension Reference<ArrayType> {
+extension UnsafeReference<ArrayType> {
   /// Creates an instance with `t`, failing iff `t` isn't a void type.
-  public init?(_ t: Reference<AnyType>) {
+  public init?(_ t: UnsafeReference<AnyType>) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMArrayTypeKind {
       self.init(t.llvm)
     } else {

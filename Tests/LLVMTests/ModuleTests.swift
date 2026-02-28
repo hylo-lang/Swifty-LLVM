@@ -67,7 +67,7 @@ final class ModuleTests: XCTestCase {
 
     let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
-    m.insertReturn(i32.unsafePointee.zero, at: m.endOf(b))
+    m.insertReturn(i32.pointee.zero, at: m.endOf(b))
 
     let t = try TargetMachine(for: .host())
     let a = try m.compile(.assembly, for: t)
@@ -80,7 +80,7 @@ final class ModuleTests: XCTestCase {
 
     let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
-    m.insertReturn(m.i32.unsafePointee.zero, at: m.endOf(b))
+    m.insertReturn(m.i32.pointee.zero, at: m.endOf(b))
 
     let h = try Target.host()
     m.runDefaultModulePasses(for: TargetMachine(for: h))

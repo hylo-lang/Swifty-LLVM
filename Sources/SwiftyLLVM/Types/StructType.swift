@@ -13,13 +13,13 @@ public struct StructType: IRType, Hashable {
 
   /// Returns the ID of a struct type with given `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
-    _ fields: [AnyType.Reference],
+    _ fields: [AnyType.UnsafeReference],
     packed: Bool = false,
     in module: inout Module
-  ) -> StructType.Reference {
+  ) -> StructType.UnsafeReference {
     var f = fields.map({ Optional.some($0.raw) })
     return f.withUnsafeMutableBufferPointer { p in
-      StructType.Reference(
+      StructType.UnsafeReference(
         LLVMStructTypeInContext(
           module.context, p.baseAddress, UInt32(p.count), packed ? 1 : 0))
     }
@@ -28,11 +28,11 @@ public struct StructType: IRType, Hashable {
   /// Returns the ID of a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
     named name: String,
-    _ fields: [AnyType.Reference],
+    _ fields: [AnyType.UnsafeReference],
     packed: Bool = false,
     in module: inout Module
-  ) -> Self.Reference {
-    let s = StructType.Reference(LLVMStructCreateNamed(module.context, name))
+  ) -> Self.UnsafeReference {
+    let s = StructType.UnsafeReference(LLVMStructCreateNamed(module.context, name))
     var f = fields.map { Optional.some($0.raw) }
     f.withUnsafeMutableBufferPointer { (types) in
       LLVMStructSetBody(s.raw, types.baseAddress, UInt32(types.count), packed ? 1 : 0)
@@ -61,15 +61,15 @@ public struct StructType: IRType, Hashable {
   /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `parts`.
   public func constant<S: Sequence>(
     aggregating elements: S, in module: inout Module
-  ) -> StructConstant.Reference where S.Element == AnyValue.Reference {
+  ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
     StructConstant.create(aggregating: elements, in: &module)
   }
 
 }
 
-extension Reference<StructType> {
+extension UnsafeReference<StructType> {
   /// Creates an instance with `t`, failing iff `t` isn't a struct type.
-  public init?(_ t: AnyType.Reference) {
+  public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMStructTypeKind {
       self.init(t.llvm)
     } else {
@@ -85,7 +85,7 @@ extension StructType {
 
     public typealias Index = Int
 
-    public typealias Element = AnyType.Reference
+    public typealias Element = AnyType.UnsafeReference
 
     /// The struct type containing the elements of the collection.
     private let parent: StructType
@@ -114,7 +114,7 @@ extension StructType {
       return position - 1
     }
 
-    public subscript(position: Int) -> AnyType.Reference {
+    public subscript(position: Int) -> AnyType.UnsafeReference {
       precondition(position >= 0 && position < count, "index is out of bounds")
       return .init(LLVMStructGetTypeAtIndex(parent.llvm.raw, UInt32(position)))
     }

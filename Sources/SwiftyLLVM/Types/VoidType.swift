@@ -12,15 +12,15 @@ public struct VoidType: IRType, Hashable {
   }
 
   /// Returns the ID of the void type in `module`.
-  public static func create(in module: inout Module) -> VoidType.Reference {
+  public static func create(in module: inout Module) -> VoidType.UnsafeReference {
     .init(LLVMVoidTypeInContext(module.context))
   }
 
 }
 
-extension Reference<VoidType> {
+extension UnsafeReference<VoidType> {
   /// Creates an instance with `t`, failing iff `t` isn't a void type.
-  public init?(_ t: AnyType.Reference) {
+  public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMVoidTypeKind {
       self.init(t.llvm)
     } else {

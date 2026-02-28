@@ -9,7 +9,7 @@ public protocol IRValue: CustomStringConvertible, LLVMEntity where Handle == Val
 }
 
 extension IRValue {
-  public init(temporarilyWrapping r: Self.Reference) {
+  public init(temporarilyWrapping r: Self.UnsafeReference) {
     self.init(temporarilyWrapping: r.raw)
   }
 
@@ -25,7 +25,7 @@ extension IRValue {
   }
 
   /// The LLVM IR type of this value.
-  public var type: AnyType.Reference { .init(LLVMTypeOf(llvm.raw)) }
+  public var type: AnyType.UnsafeReference { .init(LLVMTypeOf(llvm.raw)) }
 
   /// The name of this value.
   public var name: String { String(from: llvm.raw, readingWith: LLVMGetValueName2(_:_:)) ?? "" }

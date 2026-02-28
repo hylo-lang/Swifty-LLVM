@@ -12,24 +12,24 @@ public struct Alloca: IRValue {
   }
 
   public static func insert<T: IRType>(
-    _ type: T.Reference, at p: borrowing InsertionPoint, in module: inout Module
+    _ type: T.UnsafeReference, at p: borrowing InsertionPoint, in module: inout Module
   )
-    -> Alloca.Reference
+    -> Alloca.UnsafeReference
   {
-    return Alloca.Reference(LLVMBuildAlloca(p.llvm, type.raw, "")!)
+    return Alloca.UnsafeReference(LLVMBuildAlloca(p.llvm, type.raw, "")!)
   }
 
   /// The type of the value allocated by the instruction.
-  public var allocatedType: AnyType.Reference { .init(LLVMGetAllocatedType(llvm.raw)) }
+  public var allocatedType: AnyType.UnsafeReference { .init(LLVMGetAllocatedType(llvm.raw)) }
 
   /// The preferred alignment of the allocated memory.
   public var alignment: Int { Int(LLVMGetAlignment(llvm.raw)) }
 
 }
 
-extension Reference<Alloca> {
+extension UnsafeReference<Alloca> {
   /// Creates an instance with `s`, failing iff `s` isn't an `alloca`
-  public init?(_ s: AnyValue.Reference) {
+  public init?(_ s: AnyValue.UnsafeReference) {
     if let h = LLVMIsAAllocaInst(s.llvm.raw) {
       self.init(h)
     } else {

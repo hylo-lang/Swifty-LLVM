@@ -15,15 +15,15 @@ final class IntinsicTests: XCTestCase {
 
     // llvm.va_start is overloaded for different address spaces.
     let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
-    XCTAssertTrue(f.unsafePointee.isOverloaded)
+    XCTAssertTrue(f.pointee.isOverloaded)
 
     // llvm.smax is overloaded for different integer types.
     let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.smax, for: (m.i16)))
-    XCTAssert(g.unsafePointee.isOverloaded)
+    XCTAssert(g.pointee.isOverloaded)
 
     // llvm.trap is not overloaded.
     let h = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
-    XCTAssertFalse(h.unsafePointee.isOverloaded)
+    XCTAssertFalse(h.pointee.isOverloaded)
   }
 
   func testName() throws {

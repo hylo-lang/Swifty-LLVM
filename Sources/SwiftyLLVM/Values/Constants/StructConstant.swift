@@ -15,8 +15,8 @@ public struct StructConstant: IRValue, Hashable {
   ///
   /// - Requires: The type of `contents[i]` has the same type as the `i`-th element of `type`.
   public static func create<S: Sequence>(
-    of type: StructType.Reference, aggregating elements: S, in module: inout Module
-  ) -> StructConstant.Reference where S.Element == AnyValue.Reference {
+    of type: StructType.UnsafeReference, aggregating elements: S, in module: inout Module
+  ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
     var values = elements.map({ Optional.some($0.raw) })
     return .init(LLVMConstNamedStruct(type.llvm.raw, &values, UInt32(values.count)))
   }
@@ -25,7 +25,7 @@ public struct StructConstant: IRValue, Hashable {
   /// `isPacked` is `true`.
   public static func create<S: Sequence>(
     aggregating elements: S, packed isPacked: Bool = false, in module: inout Module
-  ) -> StructConstant.Reference where S.Element == AnyValue.Reference {
+  ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
     var values = elements.map({ Optional.some($0.raw) })
     return .init(
       LLVMConstStructInContext(
@@ -41,6 +41,6 @@ extension StructConstant: AggregateConstant {
 
   public typealias Index = Int
 
-  public typealias Element = AnyValue.Reference
+  public typealias Element = AnyValue.UnsafeReference
 
 }

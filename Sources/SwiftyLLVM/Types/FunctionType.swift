@@ -15,28 +15,28 @@ public struct FunctionType: IRType, Hashable {
   ///
   /// The return type is `void` if `returnType` is passed `nil`.
   public static func create(
-    from parameters: [AnyType.Reference],
-    to returnType: AnyType.Reference? = nil,
+    from parameters: [AnyType.UnsafeReference],
+    to returnType: AnyType.UnsafeReference? = nil,
     in module: inout Module
-  ) -> FunctionType.Reference {
+  ) -> FunctionType.UnsafeReference {
     let r = returnType ?? module.void.erased
 
     var mutableParameters = parameters.map { Optional.some($0.raw) }
 
     return mutableParameters.withUnsafeMutableBufferPointer { f in
-      return FunctionType.Reference(LLVMFunctionType(r.raw, f.baseAddress, UInt32(f.count), 0))
+      return FunctionType.UnsafeReference(LLVMFunctionType(r.raw, f.baseAddress, UInt32(f.count), 0))
     }
   }
 
   /// The return type of the function.
-  public var returnType: AnyType.Reference { .init(LLVMGetReturnType(llvm.raw)) }
+  public var returnType: AnyType.UnsafeReference { .init(LLVMGetReturnType(llvm.raw)) }
 
   /// The parameters of the function.
-  public var parameters: [AnyType.Reference] {
+  public var parameters: [AnyType.UnsafeReference] {
     let n = LLVMCountParamTypes(llvm.raw)
     var handles: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetParamTypes(llvm.raw, &handles)
-    return handles.map { AnyType.Reference($0!) }
+    return handles.map { AnyType.UnsafeReference($0!) }
   }
 
   /// Whether the function accepts a variable number of arguments
@@ -48,9 +48,9 @@ public struct FunctionType: IRType, Hashable {
 
 }
 
-extension Reference<FunctionType> {
+extension UnsafeReference<FunctionType> {
   /// Creates an instance with `t`, failing iff `t` isn't a function type.
-  public init?(_ t: AnyType.Reference) {
+  public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMFunctionTypeKind {
       self.init(t.llvm)
     } else {

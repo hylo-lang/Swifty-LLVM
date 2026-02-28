@@ -6,13 +6,13 @@ final class ArrayTypeTests: XCTestCase {
   func testCount() {
     var m = Module("foo")
     let i16 = m.integerType(16)
-    XCTAssertEqual(m.arrayType(8, i16).unsafePointee.count, 8)
+    XCTAssertEqual(m.arrayType(8, i16).pointee.count, 8)
   }
 
   func testElement() {
     var m = Module("foo")
     let i16 = m.i16
-    XCTAssertEqual(IntegerType.Reference(m.arrayType(8, i16).unsafePointee.element), i16)
+    XCTAssertEqual(IntegerType.UnsafeReference(m.arrayType(8, i16).pointee.element), i16)
   }
 
   func testConversion() {
@@ -20,21 +20,21 @@ final class ArrayTypeTests: XCTestCase {
     let i16 = m.integerType(16)
     
     let t = m.arrayType(8, i16)
-    XCTAssertNotNil(ArrayType.Reference(t.erased))
+    XCTAssertNotNil(ArrayType.UnsafeReference(t.erased))
     
     let u = m.integerType(64)
-    XCTAssertNil(ArrayType.Reference(u.erased))
+    XCTAssertNil(ArrayType.UnsafeReference(u.erased))
   }
 
   func testEquality() {
     var m = Module("foo")
     let i16 = m.integerType(16)
 
-    let t = m.arrayType(8, i16).unsafePointee
-    let u = m.arrayType(8, i16).unsafePointee
+    let t = m.arrayType(8, i16).pointee
+    let u = m.arrayType(8, i16).pointee
     XCTAssertEqual(t, u)
 
-    let v = m.arrayType(16, i16).unsafePointee
+    let v = m.arrayType(16, i16).pointee
     XCTAssertNotEqual(t, v)
   }
 

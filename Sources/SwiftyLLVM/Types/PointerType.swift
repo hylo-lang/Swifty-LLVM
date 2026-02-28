@@ -13,7 +13,7 @@ public struct PointerType: IRType, Hashable {
 
   /// Returns the ID of an opaque pointer type in address space `s` in `module`.
   public static func create(inAddressSpace s: AddressSpace = .default, in module: inout Module)
-    -> PointerType.Reference
+    -> PointerType.UnsafeReference
   {
     .init(LLVMPointerTypeInContext(module.context, s.llvm))
   }
@@ -23,9 +23,9 @@ public struct PointerType: IRType, Hashable {
 
 }
 
-extension Reference<PointerType> {
+extension UnsafeReference<PointerType> {
   /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
-  public init?(_ t: AnyType.Reference) {
+  public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMPointerTypeKind {
       self.init(t.llvm)
     } else {

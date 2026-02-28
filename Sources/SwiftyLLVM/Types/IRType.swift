@@ -10,7 +10,7 @@ public protocol IRType: CustomStringConvertible, LLVMEntity where Handle == Type
 
 extension IRType {
 
-  public init(temporarilyWrapping r: Self.Reference) {
+  public init(temporarilyWrapping r: Self.UnsafeReference) {
     self.init(temporarilyWrapping: r.raw)
   }
 
@@ -29,6 +29,6 @@ extension IRType {
   public var isSized: Bool { LLVMTypeIsSized(llvm.raw) != 0 }
 
   /// The `null` instance of this type (e.g., the zero of `i32`).
-  public var null: AnyValue.Reference { .init(LLVMConstNull(llvm.raw)) }
+  public var null: AnyValue.UnsafeReference { .init(LLVMConstNull(llvm.raw)) }
 
 }
