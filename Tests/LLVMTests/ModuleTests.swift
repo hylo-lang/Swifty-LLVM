@@ -27,12 +27,22 @@ final class ModuleTests: XCTestCase {
     XCTAssertNil(m.type(named: "gn"))
   }
 
+  func testIntrinsicNamed() throws {
+    var m = Module("foo")
+    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
+    let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
+    XCTAssert(f == g)
+  }
+
   func testGlobalNamed() throws {
     var m = Module("foo")
     let x = m.declareGlobalVariable("gl", m.ptr)
     let y = try XCTUnwrap(m.global(named: "gl"))
     XCTAssert(x == y)
     XCTAssertNil(m.type(named: "gn"))
+
+    let z = m.declareGlobalVariable("gl", m.ptr)
+    XCTAssert(x == z)
   }
 
   func testAddGlobalVariable() {
