@@ -13,7 +13,7 @@ public struct ArrayConstant: IRValue, Hashable {
 
   /// Creates a constant array of `type` in `module`, filled with the contents of `elements`.
   ///
-  /// - Requires: The type of each element in `contents` is `type`.
+  /// - Requires: The type of each element in `elements` is `type`.
   public static func create<T: IRType, S: Sequence>(
     of type: T.UnsafeReference, containing elements: S, in module: inout Module
   ) -> ArrayConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {

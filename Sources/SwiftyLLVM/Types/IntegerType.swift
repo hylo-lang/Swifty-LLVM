@@ -6,7 +6,7 @@ public struct IntegerType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Returns the ID of an integer type with given `bitWidth` in `module`.
+  /// Returns a reference to an integer type with given `bitWidth` in `module`.
   ///
   /// - Requires: `bitWidth` is greater than 0.
   public static func create(_ bitWidth: Int, in module: inout Module) -> IntegerType.UnsafeReference {
@@ -24,7 +24,7 @@ public struct IntegerType: IRType, Hashable {
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
   /// sign-extending if needed to fit `self.bitWidth`.
   ///
-  /// - Requires: `v` must be representable in `self.`
+  /// - Requires: `v` must be representable in `self`.
   public func callAsFunction(_ v: Int) -> IntegerConstant.UnsafeReference {
     constant(v)
   }

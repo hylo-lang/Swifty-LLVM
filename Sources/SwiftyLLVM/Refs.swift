@@ -15,7 +15,7 @@ public struct TypeRef: Hashable {
 /// An LLVM value reference.
 public struct ValueRef: Hashable {
 
-  /// The underlying LLVM value; not exposed to avoid rexporting llvmc
+  /// The underlying LLVM value; not exposed to avoid re-exporting llvmc.
   let raw: llvmc.LLVMValueRef
 
   /// An instance whose underlying value is `raw`.
@@ -26,7 +26,7 @@ public struct ValueRef: Hashable {
 /// An LLVM basic block reference.
 public struct BasicBlockRef: Hashable {
 
-  /// The underlying LLVM value; not exposed to avoid rexporting llvmc
+  /// The underlying LLVM value; not exposed to avoid re-exporting llvmc.
   let raw: llvmc.LLVMBasicBlockRef
 
   /// An instance whose underlying value is `raw`.
@@ -37,7 +37,7 @@ public struct BasicBlockRef: Hashable {
 /// An LLVM module reference.
 public struct ModuleRef: Hashable {
 
-  /// The underlying LLVM value; not exposed to avoid rexporting llvmc
+  /// The underlying LLVM value; not exposed to avoid re-exporting llvmc.
   let raw: llvmc.LLVMModuleRef
 
   /// An instance whose underlying value is `raw`.
@@ -48,7 +48,7 @@ public struct ModuleRef: Hashable {
 /// An LLVM attribute reference.
 public struct AttributeRef: Hashable {
 
-  /// The underlying LLVM value; not exposed to avoid rexporting llvmc
+  /// The underlying LLVM value; not exposed to avoid re-exporting llvmc.
   let raw: llvmc.LLVMAttributeRef
 
   /// An instance whose underlying value is `raw`.
