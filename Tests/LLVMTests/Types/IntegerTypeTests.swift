@@ -19,12 +19,12 @@ final class IntegerTypeTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
+    
     let i64 = m.integerType(64)
-    let t: any IRType = i64.unsafePointee
-    XCTAssertNotNil(IntegerType(t))
+    XCTAssertNotNil(IntegerType.Reference(i64.erased))
+
     let float = m.float
-    let u: any IRType = float.unsafePointee
-    XCTAssertNil(IntegerType(u))
+    XCTAssertNil(IntegerType.Reference(float.erased))
   }
 
   func testEquality() {

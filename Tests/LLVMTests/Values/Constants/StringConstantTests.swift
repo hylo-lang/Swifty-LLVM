@@ -17,14 +17,17 @@ final class StringConstantTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.stringConstant("Bonjour!").unsafePointee
-    XCTAssertNotNil(StringConstant(t))
-    let u: any IRValue = m.i64.unsafePointee.zero.unsafePointee
-    XCTAssertNil(StringConstant(u))
+
+    let t = m.stringConstant("Bonjour!")
+    XCTAssertNotNil(StringConstant.Reference(t.erased))
+
+    let u = m.i64.unsafePointee.zero
+    XCTAssertNil(StringConstant.Reference(u.erased))
   }
 
   func testEquality() {
     var m = Module("foo")
+
     let t = m.stringConstant("Bonjour!")
     let u = m.stringConstant("Bonjour!")
     XCTAssertEqual(t, u)

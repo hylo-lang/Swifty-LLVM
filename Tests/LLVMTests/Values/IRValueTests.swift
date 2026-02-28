@@ -11,6 +11,14 @@ final class IRValueTests: XCTestCase {
     XCTAssertEqual(g.unsafePointee.name, "y")
   }
 
+  func testDescription() {
+    var m = Module("foo")
+    let g = m.declareGlobalVariable("x", m.pointerType())
+    XCTAssertEqual(g.unsafePointee.description, "@x = external global ptr")
+    m.setName("y", for: g)
+    XCTAssertEqual(g.unsafePointee.description, "@y = external global ptr")
+  }
+
   func testIsNull() {
     var m = Module("foo")
     XCTAssert(m.i64.unsafePointee.null.unsafePointee.isNull)

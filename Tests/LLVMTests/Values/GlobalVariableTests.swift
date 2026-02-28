@@ -27,7 +27,7 @@ final class GlobalVariableTests: XCTestCase {
     XCTAssertEqual(g.unsafePointee.linkage, .private)
   }
 
-  func testInitializer() {
+  func testInitializer() throws {
     var m = Module("foo")
     let i8id = m.integerType(8)
     let i8 = i8id.unsafePointee
@@ -38,7 +38,9 @@ final class GlobalVariableTests: XCTestCase {
     let z = i8.zero
     m.setInitializer(z, for: g)
     let gv1 = g.unsafePointee
-    XCTAssertEqual(gv1.initializer.map { IntegerConstant($0.unsafePointee) }, i8.zero.unsafePointee)
+    
+    let i = try XCTUnwrap(gv1.initializer)
+    XCTAssertEqual(IntegerConstant.Reference(i), i8.zero)
   }
 
 }

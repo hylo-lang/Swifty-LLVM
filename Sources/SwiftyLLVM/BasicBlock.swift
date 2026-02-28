@@ -10,13 +10,15 @@ public struct BasicBlock: Hashable, LLVMEntity {
     self.llvm = handle
   }
 
+  public var name: String? {
+    guard let s = LLVMGetBasicBlockName(llvm.raw) else { return nil }
+    let n = String(cString: s)
+    if n.isEmpty { return nil }
+    return n
+  }
 }
 
 extension BasicBlock: CustomStringConvertible {
-
-  public var description: String {
-    guard let s = LLVMGetBasicBlockName(llvm.raw) else { return "" }
-    return String(cString: s)
-  }
+  public var description: String { name ?? "<unnamed>" }
 
 }

@@ -12,7 +12,6 @@ final class StructConstantTests: XCTestCase {
       of: t, aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)))
     XCTAssertEqual(a.unsafePointee.count, 2)
     XCTAssertEqual(StructType.Reference(a.unsafePointee.type), t)
-    XCTAssertEqual(StructType(StructType.Reference(a.unsafePointee.type).unsafePointee), t.unsafePointee)
     XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[0]), i32.unsafePointee.constant(4))
     XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[1]), i32.unsafePointee.constant(2))
   }
@@ -23,7 +22,7 @@ final class StructConstantTests: XCTestCase {
     
     let a = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)))
     XCTAssertEqual(a.unsafePointee.count, 2)
-    XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, false)
+    XCTAssertEqual(try XCTUnwrap(StructType.Reference(a.unsafePointee.type)).unsafePointee.isPacked, false)
     XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[0]), i32.unsafePointee.constant(4))
     XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[1]), i32.unsafePointee.constant(2))
   }
@@ -34,7 +33,7 @@ final class StructConstantTests: XCTestCase {
     
     let a = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)), packed: true)
     XCTAssertEqual(a.unsafePointee.count, 2)
-    XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, true)
+    XCTAssertEqual(try XCTUnwrap(StructType.Reference(a.unsafePointee.type)).unsafePointee.isPacked, true)
     XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[0]), i32.unsafePointee.constant(4))
     XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[1]), i32.unsafePointee.constant(2))
   }

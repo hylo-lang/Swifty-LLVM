@@ -13,6 +13,18 @@ final class ArrayConstantTests: XCTestCase {
     XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[2]), i32.unsafePointee.constant(2))
   }
 
+  func testInitTuple() {
+    var m = Module("foo")
+
+    let a = m.arrayConstant(
+      of: m.i32,
+      containing: (m.i32.unsafePointee.constant(1), m.i32.unsafePointee.constant(2)))
+
+    XCTAssertEqual(a.unsafePointee.count, 2)
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[0]), m.i32.unsafePointee.constant(1))
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[1]), m.i32.unsafePointee.constant(2))
+  }
+
   func testInitFromBytes() {
     var m = Module("foo")
 

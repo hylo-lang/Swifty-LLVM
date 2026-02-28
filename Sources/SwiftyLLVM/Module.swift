@@ -106,6 +106,13 @@ public struct Module: ~Copyable {
     .init(LLVMWriteBitcodeToMemoryBuffer(llvmModule.raw), owned: true)
   }
 
+  /// Returns the string representation of this module in LL code.
+  public func llCode() -> String {
+    let s = LLVMPrintModuleToString(llvmModule.raw)
+    defer { LLVMDisposeMessage(s) }
+    return String(cString: s!)
+  }
+
   /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
   public func write(
     _ type: CodeGenerationResultType,
@@ -153,13 +160,12 @@ public struct Module: ~Copyable {
     LLVMGetNamedGlobal(llvmModule.raw, name).map { GlobalVariable.Reference($0) }
   }
 
-  /// Returns the intrinsic function with given `name`, specialized for `parameters`, or `nil` if no such
+  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
-  public mutating func intrinsic(named name: String, for parameters: [AnyType.Reference] = [])
-    -> IntrinsicFunction
-    .Reference?
-  {
-    let llvmId = name.withCString({ LLVMLookupIntrinsicID($0, name.utf8.count) })
+  public mutating func intrinsic(
+    named name: IntrinsicFunction.Name, for parameters: [AnyType.Reference] = []
+  ) -> IntrinsicFunction.Reference? {
+    let llvmId = name.value.withCString({ LLVMLookupIntrinsicID($0, name.value.utf8.count) })
     guard llvmId != 0 else { return nil }
 
     var p = parameters.map({ Optional.some($0.raw) })
@@ -167,27 +173,6 @@ public struct Module: ~Copyable {
       LLVMGetIntrinsicDeclaration(self.llvmModule.raw, llvmId, buffer.baseAddress, parameters.count)
         .map { IntrinsicFunction.Reference($0) }
     }
-  }
-
-  /// Returns the intrinsic function with given `name`, specialized for `parameters`, or `nil` if no such
-  /// intrinsic exists.
-  /// 
-  /// You can call this with a tuple of typed references.
-  public mutating func intrinsic<each T: IRType>(named name: String, for parameters: (repeat Reference<each T>)
-  ) -> IntrinsicFunction.Reference? {
-    var erased = [AnyType.Reference]()
-    for p in repeat each parameters {
-      erased.append(p.erased)
-    }
-    return intrinsic(named: name, for: erased)
-  }
-  
-  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
-  /// intrinsic exists.
-  public mutating func intrinsic(
-    named name: IntrinsicFunction.Name, for parameters: [AnyType.Reference] = []
-  ) -> IntrinsicFunction.Reference? {
-    intrinsic(named: name.value, for: parameters)
   }
 
   /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
@@ -245,10 +230,7 @@ public struct Module: ~Copyable {
       return existing
     }
 
-    guard let handle = LLVMAddFunction(llvmModule.raw, name, type.raw) else {
-      fatalError("Failed to add function '\(name)'.")
-    }
-    return Function.Reference(handle)
+    return Function.Reference(LLVMAddFunction(llvmModule.raw, name, type.raw)!)
   }
 
   /// Creates a target-independent function attribute with given `name` and optional `value` in `module`.
@@ -1215,9 +1197,6 @@ public struct Module: ~Copyable {
     StringConstant.create(text, nullTerminated: nullTerminated, in: &self)
   }
 
-  public var description: String {
-    guard let s = LLVMPrintModuleToString(module) else { return "" }
-    defer { LLVMDisposeMessage(s) }
-    return String(cString: s)
-  }
+  /// The LLVM IR string representation of this module.
+  public var description: String { llCode() }
 }

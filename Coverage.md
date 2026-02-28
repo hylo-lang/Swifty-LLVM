@@ -119,7 +119,7 @@
 - [ ] LLVMAddModuleFlag
 - [ ] LLVMDumpModule
 - [ ] LLVMPrintModuleToFile
-- [ ] LLVMPrintModuleToString
+- [x] LLVMPrintModuleToString
 - [ ] LLVMGetModuleInlineAsm
 - [ ] LLVMSetModuleInlineAsm2
 - [ ] LLVMAppendModuleInlineAsm

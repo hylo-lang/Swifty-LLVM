@@ -11,8 +11,8 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(f.unsafePointee.parameters[0].unsafePointee.index, 0)
     XCTAssertEqual(f.unsafePointee.parameters[1].unsafePointee.index, 1)
 
-    let p = Parameter(f.unsafePointee.parameters[1].unsafePointee as any IRValue)
-    XCTAssertEqual(p?.index, 1)
+    let p = Parameter.Reference(f.unsafePointee.parameters[1].erased)
+    XCTAssertEqual(p?.unsafePointee.index, 1)
   }
   func testIndexDynamic() {
     var m = Module("foo")
@@ -21,8 +21,8 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(f.unsafePointee.parameters[0].unsafePointee.index, 0)
     XCTAssertEqual(f.unsafePointee.parameters[1].unsafePointee.index, 1)
 
-    let p = Parameter(f.unsafePointee.parameters[1].unsafePointee as any IRValue)
-    XCTAssertEqual(p?.index, 1)
+    let p = Parameter.Reference(f.unsafePointee.parameters[1].erased)
+    XCTAssertEqual(p?.unsafePointee.index, 1)
   }
 
   func testParent() {
@@ -59,11 +59,13 @@ final class ParameterTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
+
     let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
-    let p: any IRValue = f.unsafePointee.parameters[0].unsafePointee
-    XCTAssertNotNil(Parameter(p))
-    let q: any IRValue = m.i64.unsafePointee.zero.unsafePointee
-    XCTAssertNil(Parameter(q))
+    let p = f.unsafePointee.parameters[0]
+    XCTAssertNotNil(Parameter.Reference(p.erased))
+    
+    let q = m.i64.unsafePointee.zero
+    XCTAssertNil(Parameter.Reference(q.erased))
   }
 
   func testEquality() {
