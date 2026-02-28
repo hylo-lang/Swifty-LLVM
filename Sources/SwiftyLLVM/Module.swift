@@ -22,7 +22,7 @@ public struct Module: ~Copyable {
     LLVMContextDispose(context)
   }
 
-  /// Creates an instance with given `name`.
+  /// Creates an instance with `name`.
   public init(_ name: String) {
     let c = LLVMContextCreate()!
     let m = LLVMModuleCreateWithNameInContext(name, c)!
@@ -155,7 +155,7 @@ public struct Module: ~Copyable {
     LLVMGetNamedFunction(llvmModule.raw, name).map { Function.UnsafeReference($0) }
   }
 
-  /// Returns a the global with given `name`, or `nil` if no such global exists.
+  /// Returns the global with given `name`, or `nil` if no such global exists.
   public func global(named name: String) -> GlobalVariable.UnsafeReference? {
     LLVMGetNamedGlobal(llvmModule.raw, name).map { GlobalVariable.UnsafeReference($0) }
   }
@@ -385,7 +385,7 @@ public struct Module: ~Copyable {
 
   /// Sets the initializer of `g` to `v`.
   ///
-  /// - Precondition: if `g` has type pointer-to-`T`, the `newValue`
+  /// - Requires: if `g` has type pointer-to-`T`, the `newValue`
   ///   must have type `T`.
   public mutating func setInitializer<V: IRValue>(
     _ newValue: V.UnsafeReference, for g: GlobalVariable.UnsafeReference
@@ -395,7 +395,7 @@ public struct Module: ~Copyable {
 
   /// Sets the preferred alignment of `v` to `a`.
   ///
-  /// - Requires: `a` is whole power of 2.
+  /// - Requires: `a` is a power of two.
   public mutating func setAlignment(_ a: Int, for v: Alloca.UnsafeReference) {
     LLVMSetAlignment(v.raw, UInt32(a))
   }
@@ -620,7 +620,7 @@ public struct Module: ~Copyable {
   ) -> BasicBlock.UnsafeReference? {
     LLVMGetFirstBasicBlock(f.raw).map { BasicBlock.UnsafeReference($0) }
   }
-  /// Inerts an `alloca` allocating memory on the stack a value of `type`, at the entry of `f`.
+  /// Inserts an `alloca` that allocates stack memory for a value of `type`, at the entry of `f`.
   ///
   /// - Requires: `f` has an entry block.
   public mutating func insertAlloca<T: IRType>(_ type: T.UnsafeReference, atEntryOf f: Function.UnsafeReference)
@@ -1064,20 +1064,20 @@ public struct Module: ~Copyable {
     ArrayType.create(count, element, in: &self)
   }
 
-  /// Creates or retrieves the `void` type, returning its ID.
+  /// Creates or retrieves the `void` type, returning a reference to it.
   public mutating func voidType() -> VoidType.UnsafeReference {
     return VoidType.create(in: &self)
   }
 
-  /// Creates a struct type with given field type IDs.
+  /// Creates a struct type with given field types.
   public mutating func structType(_ fields: [AnyType.UnsafeReference], packed: Bool = false)
     -> StructType.UnsafeReference
   {
     StructType.create(fields, packed: packed, in: &self)
   }
 
-  /// Creates a struct type with given field type IDs.
-  /// 
+  /// Creates a struct type with given field types.
+  ///
   /// Callable with a tuple of typed references: `structType((i64, i8, float))`.
   public mutating func structType<each T: IRType>(_ fields: (repeat UnsafeReference<each T>), packed: Bool = false)
     -> StructType.UnsafeReference
@@ -1089,7 +1089,7 @@ public struct Module: ~Copyable {
     return structType(erased, packed: packed)
   }
 
-  /// Creates a named struct type with given field type IDs.
+  /// Creates a named struct type with given field types.
   public mutating func structType(
     named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false
   )
@@ -1098,7 +1098,7 @@ public struct Module: ~Copyable {
     StructType.create(named: name, fields, packed: packed, in: &self)
   }
 
-  /// Creates a named struct type with given field type IDs.
+  /// Creates a named struct type with given field types.
   ///
   /// Callable with a tuple of typed references: `structType(named: "S", (i64, i8, float))`.
   public mutating func structType<each T: IRType>(
@@ -1125,7 +1125,7 @@ public struct Module: ~Copyable {
 
   /// Creates a constant struct of `type` in `module` aggregating `elements`.
   ///
-  /// - Requires: The type of `contents[i]` has the same type as the `i`-th element of `type`.
+  /// - Requires: The type of `elements[i]` is the same as the `i`-th field type of `type`.
   public mutating func structConstant<S: Sequence>(
     of type: StructType.UnsafeReference, aggregating elements: S
   ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
@@ -1165,7 +1165,7 @@ public struct Module: ~Copyable {
 
   /// Creates a constant array of `type`, filled with the contents of `elements`.
   ///
-  /// - Requires: The type of each element in `contents` is `type`.
+  /// - Requires: The type of each value in `elements` is `type`.
   public mutating func arrayConstant<T: IRType, S: Sequence>(
     of type: T.UnsafeReference, containing elements: S
   ) -> ArrayConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
@@ -1189,7 +1189,7 @@ public struct Module: ~Copyable {
     ArrayConstant.create(bytes: bytes, in: &self)
   }
 
-  /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
+  /// Creates a string constant from `text` in `module`, appending a null terminator iff
   /// `nullTerminated` is `true`.
   public mutating func stringConstant(_ text: String, nullTerminated: Bool = true)
     -> StringConstant.UnsafeReference

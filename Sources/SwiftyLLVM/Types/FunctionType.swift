@@ -11,7 +11,7 @@ public struct FunctionType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns the ID of a function type with given `parameters` and `returnType` in `module`.
+  /// Returns a reference to a function type with given `parameters` and `returnType` in `module`.
   ///
   /// The return type is `void` if `returnType` is passed `nil`.
   public static func create(
@@ -39,9 +39,9 @@ public struct FunctionType: IRType, Hashable {
     return handles.map { AnyType.UnsafeReference($0!) }
   }
 
-  /// Whether the function accepts a variable number of arguments
+  /// Whether the function accepts a variable number of arguments.
   ///
-  /// E.g. a function like `declare i1 @llvm.coro.suspend.retcon(...)`
+  /// E.g. a function like `declare i1 @llvm.coro.suspend.retcon(...)`.
   public var isVarArg: Bool {
     LLVMIsFunctionVarArg(llvm.raw) != 0
   }

@@ -3,7 +3,7 @@ internal import llvmc
 /// A read-only access to a block of memory.
 public struct MemoryBuffer: ~Copyable {
 
-  /// A pointer to a LLVM memory buffer wrapped by this instance.
+  /// A pointer to an LLVM memory buffer wrapped by this instance.
   let llvm: LLVMMemoryBufferRef
 
   /// `true` iff this instance is the owner of the memory pointed by `llvm`.
@@ -21,7 +21,7 @@ public struct MemoryBuffer: ~Copyable {
     self.isOwner = isOwned
   }
 
-  /// Creates an instance with given `name`, copying the bytes of `source`.
+  /// Creates an instance named `name`, copying the bytes of `source`.
   public init(copying source: UnsafeBufferPointer<Int8>, named name: String = "") {
     let handle = LLVMCreateMemoryBufferWithMemoryRangeCopy(source.baseAddress, source.count, name)
     self.init(handle!, owned: true)

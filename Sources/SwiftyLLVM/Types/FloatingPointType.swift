@@ -11,7 +11,7 @@ public struct FloatingPointType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns the type `half` in `module`
+  /// Returns the type `half` in `module`.
   public static func half(in module: inout Module) -> FloatingPointType.UnsafeReference {
     .init(LLVMHalfTypeInContext(module.context))
   }
@@ -21,12 +21,12 @@ public struct FloatingPointType: IRType, Hashable {
     .init(LLVMFloatTypeInContext(module.context))
   }
 
-  /// Returns the type `double` in `module`
+  /// Returns the type `double` in `module`.
   public static func double(in module: inout Module) -> FloatingPointType.UnsafeReference {
     .init(LLVMDoubleTypeInContext(module.context))
   }
 
-  /// Returns the type `fp128` in `module`
+  /// Returns the type `fp128` in `module`.
   public static func fp128(in module: inout Module) -> FloatingPointType.UnsafeReference {
     .init(LLVMFP128TypeInContext(module.context))
   }
