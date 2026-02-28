@@ -21,6 +21,7 @@ public struct ArrayConstant: IRValue, Hashable {
     return .init(LLVMConstArray(type.raw, &values, UInt32(values.count)))
   }
 
+  /// The number of elements in the array.
   public var count: Int {
     let type = LLVMTypeOf(self.llvm.raw)
     return Int(LLVMGetArrayLength(type))
@@ -39,8 +40,10 @@ public struct ArrayConstant: IRValue, Hashable {
 
 extension ArrayConstant: AggregateConstant {
 
+  /// The collection index type.
   public typealias Index = Int
 
+  /// The collection element type.
   public typealias Element = AnyValue.UnsafeReference
 
 }
