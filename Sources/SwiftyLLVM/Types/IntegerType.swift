@@ -9,7 +9,7 @@ public struct IntegerType: IRType, Hashable {
   /// Returns the ID of an integer type with given `bitWidth` in `module`.
   ///
   /// - Requires: `bitWidth` is greater than 0.
-  public static func create(_ bitWidth: Int, in module: inout Module) -> IntegerType.Reference {
+  public static func create(_ bitWidth: Int, in module: inout Module) -> IntegerType.UnsafeReference {
     .init(LLVMIntTypeInContext(module.context, UInt32(bitWidth)))
   }
 
@@ -25,13 +25,13 @@ public struct IntegerType: IRType, Hashable {
   /// sign-extending if needed to fit `self.bitWidth`.
   ///
   /// - Requires: `v` must be representable in `self.`
-  public func callAsFunction(_ v: Int) -> IntegerConstant.Reference {
+  public func callAsFunction(_ v: Int) -> IntegerConstant.UnsafeReference {
     constant(v)
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
   /// sign-extending if needed to fit `self.bitWidth`.
-  public func constant<T: BinaryInteger>(_ v: T) -> IntegerConstant.Reference {
+  public func constant<T: BinaryInteger>(_ v: T) -> IntegerConstant.UnsafeReference {
     .init(LLVMConstInt(llvm.raw, UInt64(truncatingIfNeeded: v), 0))
   }
 
@@ -44,7 +44,7 @@ public struct IntegerType: IRType, Hashable {
   public func constant(
     parsing text: String,
     radix: Int = 10
-  ) -> IntegerConstant.Reference {
+  ) -> IntegerConstant.UnsafeReference {
     return text.withCString { (s) in
       .init(LLVMConstIntOfStringAndSize(llvm.raw, s, UInt32(text.utf8.count), UInt8(radix))!)
     }
@@ -52,20 +52,20 @@ public struct IntegerType: IRType, Hashable {
 
   /// Returns a constant whose LLVM IR type is `self` and whose value's binary presentation is
   /// `words`, from least to most significant.
-  public func constant<Words: Collection<UInt64>>(words: Words) -> IntegerConstant.Reference {
+  public func constant<Words: Collection<UInt64>>(words: Words) -> IntegerConstant.UnsafeReference {
     let w = Array(words)
     return .init(LLVMConstIntOfArbitraryPrecision(llvm.raw, UInt32(w.count), w))
   }
 
   /// The zero value of this type.
-  public var zero: IntegerConstant.Reference {
+  public var zero: IntegerConstant.UnsafeReference {
     .init(LLVMConstNull(llvm.raw))
   }
 }
 
-extension Reference<IntegerType> {
+extension UnsafeReference<IntegerType> {
   /// Creates an instance with `t`, failing iff `t` isn't an integer type.
-  public init?(_ t: AnyType.Reference) {
+  public init?(_ t: AnyType.UnsafeReference) {
     guard LLVMGetTypeKind(t.llvm.raw) == LLVMIntegerTypeKind else { return nil }
     self.init(t.llvm)
   }

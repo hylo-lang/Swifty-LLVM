@@ -66,8 +66,8 @@ extension Module {
 
   /// Defines a function `main` that calls the coroutine created by `emitProjectDegrees`.
   private mutating func emitMain(
-    projectingDegreesWith projectDegrees: Function.Reference
-  ) throws -> Function.Reference {
+    projectingDegreesWith projectDegrees: Function.UnsafeReference
+  ) throws -> Function.UnsafeReference {
     let s = functionType(from: (), to: i32)
     let f = declareFunction("main", s)
 
@@ -86,7 +86,7 @@ extension Module {
     // %3 = call { ptr, ptr } %2(ptr %0, ptr %1)
     let prepare = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.prepare.retcon))
     let x2 = insertCall(prepare, on: (projectDegrees), at: endOf(b0))
-    let projectDegreesType: AnyType.Reference = projectDegrees.with{ $0.valueType }
+    let projectDegreesType: AnyType.UnsafeReference = projectDegrees.with{ $0.valueType }
     let x3 = insertCall(
       x2.erased, typed: projectDegreesType, on: (x0, x1), at: endOf(b0))
 
@@ -122,7 +122,7 @@ extension Module {
   }
 
   /// Defines a coroutine that projects the value in degrees of an angle passed in radians.
-  private mutating func emitProjectDegrees() throws -> Function.Reference {
+  private mutating func emitProjectDegrees() throws -> Function.UnsafeReference {
     // declare void @slide(ptr, i1 zeroext)
     let slide = declareFunction("slide", functionType(from: (ptr, i1)))
     let slideParameter1 = slide.with { $0.parameters[1] }
@@ -214,7 +214,7 @@ extension Module {
     return f
   }
 
-  private mutating func emitTestAtomics() throws -> Function.Reference {
+  private mutating func emitTestAtomics() throws -> Function.UnsafeReference {
     let s = functionType(from: ())
     let f = declareFunction("testAtomics", s)
 
@@ -222,7 +222,7 @@ extension Module {
 
     // %0 = alloca i64, align 8
     // %1 = alloca double, align 8
-    let x0: Alloca.Reference = insertAlloca(i64, at: endOf(b0))
+    let x0: Alloca.UnsafeReference = insertAlloca(i64, at: endOf(b0))
     let x1 = insertAlloca(double, at: endOf(b0))
     let pi = double.with { $0.constant(.pi) }
     let i64_11 = i64.with { $0.constant(11) }
