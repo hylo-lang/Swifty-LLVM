@@ -7,9 +7,9 @@ final class StructConstantTests: XCTestCase {
     var m = Module("foo")
     let i32 = m.integerType(32)
 
-    let t = m.structType([i32.erased, i32.erased])
+    let t = m.structType((i32, i32))
     let a = m.structConstant(
-      of: t, aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
+      of: t, aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)))
     XCTAssertEqual(a.unsafePointee.count, 2)
     XCTAssertEqual(StructType.Reference(a.unsafePointee.type), t)
     XCTAssertEqual(StructType(StructType.Reference(a.unsafePointee.type).unsafePointee), t.unsafePointee)
@@ -20,8 +20,8 @@ final class StructConstantTests: XCTestCase {
   func testInitFromValues() throws {
     var m = Module("foo")
     let i32 = m.integerType(32)
-
-    let a = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
+    
+    let a = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)))
     XCTAssertEqual(a.unsafePointee.count, 2)
     XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, false)
     XCTAssertEqual(IntegerConstant(a.unsafePointee[0].unsafePointee), i32.unsafePointee.constant(4).unsafePointee)
@@ -31,8 +31,8 @@ final class StructConstantTests: XCTestCase {
   func testInitFromValuesPacked() throws {
     var m = Module("foo")
     let i32 = m.integerType(32)
-
-    let a = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased], packed: true)
+    
+    let a = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)), packed: true)
     XCTAssertEqual(a.unsafePointee.count, 2)
     XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, true)
     XCTAssertEqual(IntegerConstant(a.unsafePointee[0].unsafePointee), i32.unsafePointee.constant(4).unsafePointee)
@@ -42,12 +42,12 @@ final class StructConstantTests: XCTestCase {
   func testEquality() {
     var m = Module("foo")
     let i32 = m.integerType(32)
-
-    let a = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
-    let b = m.structConstant(aggregating: [i32.unsafePointee.constant(4).erased, i32.unsafePointee.constant(2).erased])
+    
+    let a = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)))
+    let b = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)))
     XCTAssertEqual(a, b)
 
-    let c = m.structConstant(aggregating: [i32.unsafePointee.constant(2).erased, i32.unsafePointee.constant(4).erased])
+    let c = m.structConstant(aggregating: (i32.unsafePointee.constant(2), i32.unsafePointee.constant(4)))
     XCTAssertNotEqual(a, c)
   }
 
