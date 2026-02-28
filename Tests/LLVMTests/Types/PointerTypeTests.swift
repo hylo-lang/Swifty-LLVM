@@ -11,10 +11,12 @@ final class PointerTypeTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRType = m.pointerType().unsafePointee
-    XCTAssertNotNil(PointerType(t))
-    let u: any IRType = m.integerType(64).unsafePointee
-    XCTAssertNil(PointerType(u))
+    
+    let t = m.pointerType()
+    XCTAssertNotNil(PointerType.Reference(t.erased))
+    
+    let u = m.integerType(64)
+    XCTAssertNil(PointerType.Reference(u.erased))
   }
 
   func testEquality() {
