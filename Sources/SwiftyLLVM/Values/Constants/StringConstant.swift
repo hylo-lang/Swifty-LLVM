@@ -23,15 +23,6 @@ public struct StringConstant: IRValue, Hashable {
     }
   }
 
-  /// Creates an instance with `v`, failing iff `v` is not a constant string value.
-  public init?(_ v: any IRValue) {
-    if LLVMIsAConstantDataSequential(v.llvm.raw) != nil && LLVMIsConstantString(v.llvm.raw) != 0 {
-      self.llvm = v.llvm
-    } else {
-      return nil
-    }
-  }
-
   /// The value of this constant.
   public var value: String {
     .init(from: llvm) { (h, count) in
@@ -42,4 +33,15 @@ public struct StringConstant: IRValue, Hashable {
     } ?? ""
   }
 
+}
+
+extension Reference<StringConstant> {
+  /// Creates an instance with `v`, failing iff `v` is not a constant string value.
+  public init?(_ v: AnyValue.Reference) {
+    if LLVMIsAConstantDataSequential(v.llvm.raw) != nil && LLVMIsConstantString(v.llvm.raw) != 0 {
+      self.init(v.llvm)
+    } else {
+      return nil
+    }
+  }
 }

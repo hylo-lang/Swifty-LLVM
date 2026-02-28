@@ -43,16 +43,16 @@ final class IRValueTests: XCTestCase {
 
   func testEqualty() {
     var m = Module("foo")
-    let t = m.integerType(64).unsafePointee.null.unsafePointee
-    let u = m.integerType(32).unsafePointee.null.unsafePointee
+    let t = m.integerType(64).unsafePointee.null
+    let u = m.integerType(32).unsafePointee.null
 
-    XCTAssert(t == (t as any IRValue))
-    XCTAssert((t as any IRValue) == t)
-    XCTAssert((t as any IRValue) == (t as any IRValue))
+    XCTAssertEqual(t, t.erased)
+    XCTAssertEqual(t.erased, t)
+    XCTAssertEqual(t.erased, t.erased)
 
-    XCTAssert(t != (u as any IRValue))
-    XCTAssert((t as any IRValue) != u)
-    XCTAssert((t as any IRValue) != (u as any IRValue))
+    XCTAssertNotEqual(t, u.erased)
+    XCTAssertNotEqual(t.erased, u)
+    XCTAssertNotEqual(t.erased, u.erased)
   }
 
   func testStringConvertible() {

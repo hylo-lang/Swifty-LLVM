@@ -34,28 +34,28 @@ final class StructTypeTests: XCTestCase {
     var m = Module("foo")
     let t = m.integerType(64)
     let u = m.integerType(32)
-    let tType = t.unsafePointee
-    let uType = u.unsafePointee
+    
+    let s0 = m.structType([])
+    XCTAssertEqual(s0.unsafePointee.fields.count, 0)
 
-    let s0 = m.structType([]).unsafePointee
-    XCTAssertEqual(s0.fields.count, 0)
+    let s1 = m.structType((t))
+    XCTAssertEqual(s1.unsafePointee.fields.count, 1)
+    XCTAssert(s1.unsafePointee.fields[0] == t)
 
-    let s1 = m.structType((t)).unsafePointee
-    XCTAssertEqual(s1.fields.count, 1)
-    XCTAssert(s1.fields[0].unsafePointee == tType)
-
-    let s2 = m.structType((t, u)).unsafePointee
-    XCTAssertEqual(s2.fields.count, 2)
-    XCTAssert(s2.fields[0].unsafePointee == tType)
-    XCTAssert(s2.fields[1].unsafePointee == uType)
+    let s2 = m.structType((t, u))
+    XCTAssertEqual(s2.unsafePointee.fields.count, 2)
+    XCTAssert(s2.unsafePointee.fields[0] == t)
+    XCTAssert(s2.unsafePointee.fields[1] == u)
   }
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRType = m.structType([]).unsafePointee
-    XCTAssertNotNil(StructType(t))
-    let u: any IRType = m.integerType(64).unsafePointee
-    XCTAssertNil(StructType(u))
+    
+    let t = m.structType([])
+    XCTAssertNotNil(StructType.Reference(t.erased))
+
+    let u = m.integerType(64)
+    XCTAssertNil(StructType.Reference(u.erased))
   }
 
   func testEquality() {

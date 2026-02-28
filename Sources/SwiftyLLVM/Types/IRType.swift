@@ -31,39 +31,4 @@ extension IRType {
   /// The `null` instance of this type (e.g., the zero of `i32`).
   public var null: AnyValue.Reference { .init(LLVMConstNull(llvm.raw)) }
 
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == <R: IRType>(lhs: Self, rhs: R) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: any IRType, rhs: Self) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: Self, rhs: any IRType) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: any IRType, rhs: Self) -> Bool {
-    lhs.llvm != rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: Self, rhs: any IRType) -> Bool {
-    lhs.llvm != rhs.llvm
-  }
-
-}
-
-/// Returns `true` iff `lhs` is equal to `rhs`.
-public func == (lhs: any IRType, rhs: any IRType) -> Bool {
-  lhs.llvm == rhs.llvm
-}
-
-/// Returns `true` iff `lhs` is not equal to `rhs`.
-public func != (lhs: any IRType, rhs: any IRType) -> Bool {
-  lhs.llvm != rhs.llvm
 }

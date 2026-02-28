@@ -88,17 +88,17 @@ public struct Reference<T: LLVMEntity>: Hashable {
 /// Downcasting from erased reference.
 extension Reference {
   /// Downcasts an AnyType reference to the desired IRType reference.
-  public init(_ reference: Reference<AnyType>) where T: IRType {
+  public init(uncheckedFrom reference: Reference<AnyType>) where T: IRType {
     self.init(reference.llvm)
   }
 
   /// Downcasts an AnyValue reference to the desired IRValue reference.
-  public init(_ reference: Reference<AnyValue>) where T: IRValue {
+  public init(uncheckedFrom reference: Reference<AnyValue>) where T: IRValue {
     self.init(reference.llvm)
   }
 
   // Downcasts an AnyAttribute reference to a function attribute.
-  public init(_ reference: Reference<AnyAttribute>) where T: IRAttribute {
+  public init(uncheckedFrom reference: Reference<AnyAttribute>) where T: IRAttribute {
     self.init(reference.llvm)
   }
 }
@@ -155,4 +155,81 @@ extension Reference where T: IRAttribute {
 extension Reference where T == BasicBlock {
   /// Native handle to the LLVM basic block reference.
   var raw: LLVMBasicBlockRef { llvm.raw }
+}
+
+
+/// Returns `true` iff the given type references are equal.
+public func == (lhs: Reference<some IRType>, rhs: AnyType.Reference) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given type references are not equal.
+public func != (lhs: Reference<some IRType>, rhs: AnyType.Reference) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+/// Returns `true` iff the given type references are equal.
+public func == (lhs: AnyType.Reference, rhs: Reference<some IRType>) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given type references are not equal.
+public func != (lhs: AnyType.Reference, rhs: Reference<some IRType>) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+/// Returns `true` iff the given type references are equal.
+public func == (lhs: AnyType.Reference, rhs: AnyType.Reference) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given type references are not equal.
+public func != (lhs: AnyType.Reference, rhs: AnyType.Reference) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+
+/// Returns `true` iff the given type references are equal.
+public func == (lhs: Reference<some IRValue>, rhs: AnyValue.Reference) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given value references are not equal.
+public func != (lhs: Reference<some IRValue>, rhs: AnyValue.Reference) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+/// Returns `true` iff the given type references are equal.
+public func == (lhs: AnyValue.Reference, rhs: Reference<some IRValue>) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given value references are not equal.
+public func != (lhs: AnyValue.Reference, rhs: Reference<some IRValue>) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+/// Returns `true` iff the given type references are equal.
+public func == (lhs: AnyValue.Reference, rhs: AnyValue.Reference) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given value references are not equal.
+public func != (lhs: AnyValue.Reference, rhs: AnyValue.Reference) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+
+
+/// Returns `true` iff the given attribute references are equal.
+public func == (lhs: Reference<some IRAttribute>, rhs: AnyAttribute.Reference) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given attribute references are not equal.
+public func != (lhs: Reference<some IRAttribute>, rhs: AnyAttribute.Reference) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+/// Returns `true` iff the given attribute references are equal.
+public func == (lhs: AnyAttribute.Reference, rhs: Reference<some IRAttribute>) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given attribute references are not equal.
+public func != (lhs: AnyAttribute.Reference, rhs: Reference<some IRAttribute>) -> Bool {
+  lhs.llvm != rhs.llvm
+}
+/// Returns `true` iff the given attribute references are equal.
+public func == (lhs: AnyAttribute.Reference, rhs: AnyAttribute.Reference) -> Bool {
+  lhs.llvm == rhs.llvm
+}
+/// Returns `true` iff the given attribute references are not equal.
+public func != (lhs: AnyAttribute.Reference, rhs: AnyAttribute.Reference) -> Bool {
+  lhs.llvm != rhs.llvm
 }

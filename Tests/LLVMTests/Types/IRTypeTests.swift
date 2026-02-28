@@ -11,16 +11,16 @@ final class IRTypeTests: XCTestCase {
 
   func testEqualty() {
     var m = Module("foo")
-    let t = m.integerType(64).unsafePointee
-    let u = m.integerType(32).unsafePointee
+    let t = m.integerType(64)
+    let u = m.integerType(32)
 
-    XCTAssert(t == (t as (any IRType)))
-    XCTAssert((t as (any IRType)) == t)
-    XCTAssert((t as (any IRType)) == (t as (any IRType)))
+    XCTAssert(t == t.erased)
+    XCTAssert(t.erased == t)
+    XCTAssert(t.erased == t.erased)
 
-    XCTAssert(t != (u as (any IRType)))
-    XCTAssert((t as (any IRType)) != u)
-    XCTAssert((t as (any IRType)) != (u as (any IRType)))
+    XCTAssert(t != u.erased)
+    XCTAssert(u.erased != t)
+    XCTAssert(t.erased != u.erased)
   }
 
   func testStringConvertible() {

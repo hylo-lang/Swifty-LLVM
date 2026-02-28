@@ -32,15 +32,6 @@ public struct Function: Global, Callable, Hashable {
     return BasicBlock.Reference(LLVMGetEntryBasicBlock(llvm.raw))
   }
 
-  /// Creates an instance with `v`, failing iff `v` isn't a function.
-  public init?(_ v: any IRValue) {
-    if let h = LLVMIsAFunction(v.llvm.raw) {
-      self.llvm = .init(h)
-    } else {
-      return nil
-    }
-  }
-
 }
 
 extension Function {
@@ -111,4 +102,15 @@ extension Callable {
 
   /// The parameters of the function.
   public var parameters: Function.Parameters { .init(of: self) }
+}
+
+extension Reference<Function> {
+  /// Creates an instance with `v`, failing iff `v` isn't a function.
+  public init?(_ v: AnyValue.Reference) {
+    if let h = LLVMIsAFunction(v.llvm.raw) {
+      self.init(h)
+    } else {
+      return nil
+    }
+  }
 }

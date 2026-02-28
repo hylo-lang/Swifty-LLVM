@@ -16,13 +16,15 @@ public struct VoidType: IRType, Hashable {
     .init(LLVMVoidTypeInContext(module.context))
   }
 
+}
+
+extension Reference<VoidType> {
   /// Creates an instance with `t`, failing iff `t` isn't a void type.
-  public init?(_ t: any IRType) {
+  public init?(_ t: AnyType.Reference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMVoidTypeKind {
-      self.llvm = t.llvm
+      self.init(t.llvm)
     } else {
       return nil
     }
   }
-
 }

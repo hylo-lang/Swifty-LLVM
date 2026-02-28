@@ -13,12 +13,6 @@ public struct IntegerType: IRType, Hashable {
     .init(LLVMIntTypeInContext(module.context, UInt32(bitWidth)))
   }
 
-  /// Creates an instance with `t`, failing iff `t` isn't an integer type.
-  public init?(_ t: any IRType) {
-    guard LLVMGetTypeKind(t.llvm.raw) == LLVMIntegerTypeKind else { return nil }
-    self.llvm = t.llvm
-  }
-
   /// Creates an instance wrapping `handle`.
   public init(temporarilyWrapping handle: TypeRef) {
     self.llvm = handle
@@ -66,5 +60,13 @@ public struct IntegerType: IRType, Hashable {
   /// The zero value of this type.
   public var zero: IntegerConstant.Reference {
     .init(LLVMConstNull(llvm.raw))
+  }
+}
+
+extension Reference<IntegerType> {
+  /// Creates an instance with `t`, failing iff `t` isn't an integer type.
+  public init?(_ t: AnyType.Reference) {
+    guard LLVMGetTypeKind(t.llvm.raw) == LLVMIntegerTypeKind else { return nil }
+    self.init(t.llvm)
   }
 }

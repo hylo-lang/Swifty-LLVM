@@ -24,8 +24,8 @@ final class StructConstantTests: XCTestCase {
     let a = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)))
     XCTAssertEqual(a.unsafePointee.count, 2)
     XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, false)
-    XCTAssertEqual(IntegerConstant(a.unsafePointee[0].unsafePointee), i32.unsafePointee.constant(4).unsafePointee)
-    XCTAssertEqual(IntegerConstant(a.unsafePointee[1].unsafePointee), i32.unsafePointee.constant(2).unsafePointee)
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[0]), i32.unsafePointee.constant(4))
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[1]), i32.unsafePointee.constant(2))
   }
 
   func testInitFromValuesPacked() throws {
@@ -35,8 +35,8 @@ final class StructConstantTests: XCTestCase {
     let a = m.structConstant(aggregating: (i32.unsafePointee.constant(4), i32.unsafePointee.constant(2)), packed: true)
     XCTAssertEqual(a.unsafePointee.count, 2)
     XCTAssertEqual(try XCTUnwrap(StructType(a.unsafePointee.type.unsafePointee)).isPacked, true)
-    XCTAssertEqual(IntegerConstant(a.unsafePointee[0].unsafePointee), i32.unsafePointee.constant(4).unsafePointee)
-    XCTAssertEqual(IntegerConstant(a.unsafePointee[1].unsafePointee), i32.unsafePointee.constant(2).unsafePointee)
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[0]), i32.unsafePointee.constant(4))
+    XCTAssertEqual(IntegerConstant.Reference(a.unsafePointee[1]), i32.unsafePointee.constant(2))
   }
 
   func testEquality() {

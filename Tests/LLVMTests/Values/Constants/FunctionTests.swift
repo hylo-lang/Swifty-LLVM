@@ -70,8 +70,10 @@ final class FunctionTests: XCTestCase {
 
     m.appendBlock(to: f)
     let middle = f.unsafePointee.basicBlocks.index(after: f.unsafePointee.basicBlocks.startIndex)
-    XCTAssertEqual(f.unsafePointee.basicBlocks.index(after: middle), f.unsafePointee.basicBlocks.endIndex)
-    XCTAssertEqual(f.unsafePointee.basicBlocks.index(before: f.unsafePointee.basicBlocks.endIndex), middle)
+    XCTAssertEqual(
+      f.unsafePointee.basicBlocks.index(after: middle), f.unsafePointee.basicBlocks.endIndex)
+    XCTAssertEqual(
+      f.unsafePointee.basicBlocks.index(before: f.unsafePointee.basicBlocks.endIndex), middle)
   }
 
   func testAttributes() {
@@ -113,10 +115,12 @@ final class FunctionTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.declareFunction("fn", m.functionType(from: ())).unsafePointee
-    XCTAssertNotNil(Function(t))
-    let u: any IRValue = m.integerType(64).unsafePointee.zero.unsafePointee
-    XCTAssertNil(Function(u))
+
+    let t = m.declareFunction("fn", m.functionType(from: ()))
+    XCTAssertNotNil(Function.Reference(t.erased))
+
+    let u = m.integerType(64).unsafePointee.zero
+    XCTAssertNil(Function.Reference(u.erased))
   }
 
   func testEquality() {

@@ -41,12 +41,14 @@ final class IntegerConstantTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.integerType(64).unsafePointee.zero.unsafePointee
-    XCTAssertNotNil(IntegerConstant(t))
+    let i64 = m.integerType(64)
+    let t = i64.unsafePointee.zero
+    XCTAssertNotNil(IntegerConstant.Reference(t.erased))
+
     let ft = FloatingPointType.float(in: &m)
     let ty = ft.unsafePointee
-    let u: any IRValue = ty.zero.unsafePointee
-    XCTAssertNil(IntegerConstant(u))
+    let u = ty.zero
+    XCTAssertNil(IntegerConstant.Reference(u.erased))
   }
 
   func testEquality() {

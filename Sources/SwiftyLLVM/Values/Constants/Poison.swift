@@ -16,13 +16,15 @@ public struct Poison: IRValue, Hashable {
     .init(LLVMGetPoison(t.raw))
   }
 
+}
+
+extension Reference<Poison> {
   /// Creates an intance with `v`, failing iff `v` is not a poison value.
-  public init?(_ v: any IRValue) {
+  public init?(_ v: AnyValue.Reference) {
     if let h = LLVMIsAPoisonValue(v.llvm.raw) {
-      self.llvm = .init(h)
+      self.init(h)
     } else {
       return nil
     }
   }
-
 }
