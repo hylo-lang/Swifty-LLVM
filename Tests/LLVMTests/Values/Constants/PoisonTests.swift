@@ -5,12 +5,12 @@ final class PoisonTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.poisonValue(of: m.float).unsafePointee
+    
+    let t = m.poisonValue(of: m.float)
+    XCTAssertNotNil(Poison.Reference(t.erased))
 
-    XCTAssertNotNil(Poison(t))
-    let i64 = m.integerType(64)
-    let u: any IRValue = i64.unsafePointee.zero.unsafePointee
-    XCTAssertNil(Poison(u))
+    let u = m.i64.unsafePointee.zero
+    XCTAssertNil(Poison.Reference(u.erased))
   }
 
   func testEquality() {
@@ -21,6 +21,13 @@ final class PoisonTests: XCTestCase {
 
     let v = m.poisonValue(of: m.float)
     XCTAssertNotEqual(t, v)
+  }
+
+  func testIsConstant() {
+    var m = Module("foo")
+    
+    let t = m.poisonValue(of: m.float)
+    XCTAssertTrue(t.with{ p in p.isConstant})
   }
 
 }
