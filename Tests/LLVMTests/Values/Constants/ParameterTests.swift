@@ -17,7 +17,7 @@ final class ParameterTests: XCTestCase {
   func testIndexDynamic() {
     var m = Module("foo")
 
-    let f = m.declareFunction("fn", m.functionType(from: [m.i64.erased, m.i64.erased]))
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.unsafePointee.parameters[0].unsafePointee.index, 0)
     XCTAssertEqual(f.unsafePointee.parameters[1].unsafePointee.index, 1)
 
@@ -35,7 +35,7 @@ final class ParameterTests: XCTestCase {
   func testParentDynamic() {
     var m = Module("foo")
 
-    let f: Function.Reference = m.declareFunction("fn", m.functionType(from: [m.i64.erased, m.i64.erased]))
+    let f: Function.Reference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.unsafePointee.parameters[0].unsafePointee.parent, f.unsafePointee)
   }
   func testAttributes() throws {
@@ -59,9 +59,7 @@ final class ParameterTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let i64 = m.i64.erased
-
-    let f = m.declareFunction("fn", m.functionType(from: (i64)))
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
     let p: any IRValue = f.unsafePointee.parameters[0].unsafePointee
     XCTAssertNotNil(Parameter(p))
     let q: any IRValue = m.i64.unsafePointee.zero.unsafePointee
@@ -70,13 +68,12 @@ final class ParameterTests: XCTestCase {
 
   func testEquality() {
     var m = Module("foo")
-    let i64 = m.i64.erased
 
-    let p = m.declareFunction("fn", m.functionType(from: (i64))).unsafePointee.parameters[0]
-    let q = m.declareFunction("fn", m.functionType(from: (i64))).unsafePointee.parameters[0]
+    let p = m.declareFunction("fn", m.functionType(from: (m.i64))).unsafePointee.parameters[0]
+    let q = m.declareFunction("fn", m.functionType(from: (m.i64))).unsafePointee.parameters[0]
     XCTAssertEqual(p, q)
 
-    let r = m.declareFunction("fn1", m.functionType(from: (i64))).unsafePointee.parameters[0]
+    let r = m.declareFunction("fn1", m.functionType(from: (m.i64))).unsafePointee.parameters[0]
     XCTAssertNotEqual(p, r)
   }
 
