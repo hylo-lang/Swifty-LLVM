@@ -63,10 +63,12 @@ public enum IntegerPredicate: String, Hashable, Sendable {
 
 extension IntegerPredicate: LosslessStringConvertible {
 
+  /// Creates a predicate from its mnemonic.
   public init?(_ description: String) {
     self.init(rawValue: description)
   }
 
+  /// The mnemonic of this predicate.
   public var description: String { self.rawValue }
 
 }

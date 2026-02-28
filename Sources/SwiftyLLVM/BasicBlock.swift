@@ -10,6 +10,7 @@ public struct BasicBlock: Hashable, LLVMEntity {
     self.llvm = handle
   }
 
+  /// The name of the block, or `nil` if it is unnamed.
   public var name: String? {
     guard let s = LLVMGetBasicBlockName(llvm.raw) else { return nil }
     let n = String(cString: s)
@@ -19,6 +20,7 @@ public struct BasicBlock: Hashable, LLVMEntity {
 }
 
 extension BasicBlock: CustomStringConvertible {
+  /// A human-readable description of the block.
   public var description: String { name ?? "<unnamed>" }
 
 }

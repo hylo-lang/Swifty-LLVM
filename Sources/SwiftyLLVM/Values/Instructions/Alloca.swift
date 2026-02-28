@@ -11,6 +11,7 @@ public struct Alloca: IRValue {
     llvm = handle
   }
 
+  /// Inserts an `alloca` instruction of `type` at insertion point `p`.
   public static func insert<T: IRType>(
     _ type: T.UnsafeReference, at p: borrowing InsertionPoint, in module: inout Module
   )

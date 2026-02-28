@@ -83,8 +83,10 @@ extension StructType {
   /// A collection containing the fields of a struct type in LLVM IR.
   public struct Fields: BidirectionalCollection {
 
+    /// The collection index type.
     public typealias Index = Int
 
+    /// The collection element type.
     public typealias Element = AnyType.UnsafeReference
 
     /// The struct type containing the elements of the collection.
@@ -100,20 +102,25 @@ extension StructType {
       Int(LLVMCountStructElementTypes(parent.llvm.raw))
     }
 
+    /// The position of the first element.
     public var startIndex: Int { 0 }
 
+    /// The position one past the last element.
     public var endIndex: Int { count }
 
+    /// Returns the index immediately after `position`.
     public func index(after position: Int) -> Int {
       precondition(position < count, "index is out of bounds")
       return position + 1
     }
 
+    /// Returns the index immediately before `position`.
     public func index(before position: Int) -> Int {
       precondition(position > 0, "index is out of bounds")
       return position - 1
     }
 
+    /// The field type at `position`.
     public subscript(position: Int) -> AnyType.UnsafeReference {
       precondition(position >= 0 && position < count, "index is out of bounds")
       return .init(LLVMStructGetTypeAtIndex(parent.llvm.raw, UInt32(position)))
