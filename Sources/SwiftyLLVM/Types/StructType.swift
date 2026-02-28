@@ -40,15 +40,6 @@ public struct StructType: IRType, Hashable {
     return s
   }
 
-  /// Creates an instance with `t`, failing iff `t` isn't a struct type.
-  public init?(_ t: any IRType) {
-    if LLVMGetTypeKind(t.llvm.raw) == LLVMStructTypeKind {
-      self.llvm = t.llvm
-    } else {
-      return nil
-    }
-  }
-
   /// The name of the struct.
   public var name: String? {
     guard let s = LLVMGetStructName(llvm.raw) else { return nil }
@@ -74,6 +65,17 @@ public struct StructType: IRType, Hashable {
     StructConstant.create(aggregating: elements, in: &module)
   }
 
+}
+
+extension Reference<StructType> {
+  /// Creates an instance with `t`, failing iff `t` isn't a struct type.
+  public init?(_ t: AnyType.Reference) {
+    if LLVMGetTypeKind(t.llvm.raw) == LLVMStructTypeKind {
+      self.init(t.llvm)
+    } else {
+      return nil
+    }
+  }
 }
 
 extension StructType {

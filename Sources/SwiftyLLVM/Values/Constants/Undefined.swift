@@ -16,13 +16,15 @@ public struct Undefined: IRValue, Hashable {
     return .init(LLVMGetUndef(t.raw))
   }
 
+}
+
+extension Reference<Undefined> {
   /// Creates an instance with `v`, failing iff `v` is not an undefined value.
-  public init?(_ v: any IRValue) {
+  public init?(_ v: AnyValue.Reference) {
     if let h = LLVMIsAUndefValue(v.llvm.raw) {
-      self.llvm = .init(h)
+      self.init(h)
     } else {
       return nil
     }
   }
-
 }

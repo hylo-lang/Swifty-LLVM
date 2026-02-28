@@ -11,15 +11,6 @@ public struct IntegerConstant: IRValue, Hashable {
     self.llvm = handle
   }
 
-  /// Creates an instance with `v`, failing iff `v` isn't a constant integer value.
-  public init?(_ v: any IRValue) {
-    if let h = LLVMIsAConstantInt(v.llvm.raw) {
-      self.llvm = .init(h)
-    } else {
-      return nil
-    }
-  }
-
   /// The sign extended value of this constant.
   public var sext: Int64 {
     LLVMConstIntGetSExtValue(llvm.raw)
@@ -30,4 +21,15 @@ public struct IntegerConstant: IRValue, Hashable {
     LLVMConstIntGetZExtValue(llvm.raw)
   }
 
+}
+
+extension Reference<IntegerConstant> {
+  /// Creates an instance with `v`, failing iff `v` isn't a constant integer value.
+  public init?(_ v: AnyValue.Reference) {
+    if let h = LLVMIsAConstantInt(v.llvm.raw) {
+      self.init(h)
+    } else {
+      return nil
+    }
+  }
 }

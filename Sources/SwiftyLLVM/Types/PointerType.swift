@@ -11,15 +11,6 @@ public struct PointerType: IRType, Hashable {
     self.llvm = handle
   }
 
-  /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
-  public init?(_ t: any IRType) {
-    if LLVMGetTypeKind(t.llvm.raw) == LLVMPointerTypeKind {
-      self.llvm = t.llvm
-    } else {
-      return nil
-    }
-  }
-
   /// Returns the ID of an opaque pointer type in address space `s` in `module`.
   public static func create(inAddressSpace s: AddressSpace = .default, in module: inout Module)
     -> PointerType.Reference
@@ -30,4 +21,15 @@ public struct PointerType: IRType, Hashable {
   /// The address space of the pointer.
   public var addressSpace: AddressSpace { .init(LLVMGetPointerAddressSpace(llvm.raw)) }
 
+}
+
+extension Reference<PointerType> {
+  /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
+  public init?(_ t: AnyType.Reference) {
+    if LLVMGetTypeKind(t.llvm.raw) == LLVMPointerTypeKind {
+      self.init(t.llvm)
+    } else {
+      return nil
+    }
+  }
 }

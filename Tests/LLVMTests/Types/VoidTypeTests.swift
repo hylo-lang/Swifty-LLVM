@@ -11,10 +11,12 @@ final class VoidTypeTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRType = m.void.unsafePointee
-    XCTAssertNotNil(VoidType(t))
-    let u: any IRType = m.integerType(64).unsafePointee
-    XCTAssertNil(VoidType(u))
+
+    let t: VoidType.Reference = m.void
+    XCTAssertNotNil(VoidType.Reference(t.erased))
+    
+    let u = m.integerType(64)
+    XCTAssertNil(VoidType.Reference(u.erased))
   }
 
   func testEquality() {

@@ -39,39 +39,4 @@ extension IRValue {
   /// `true` iff this value is a terminator instruction.
   public var isTerminator: Bool { LLVMIsATerminatorInst(llvm.raw) != nil }
 
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == <R: IRValue>(lhs: Self, rhs: R) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: any IRValue, rhs: Self) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is equal to `rhs`.
-  public static func == (lhs: Self, rhs: any IRValue) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: any IRValue, rhs: Self) -> Bool {
-    lhs.llvm != rhs.llvm
-  }
-
-  /// Returns `true` iff `lhs` is not equal to `rhs`.
-  public static func != (lhs: Self, rhs: any IRValue) -> Bool {
-    lhs.llvm != rhs.llvm
-  }
-
-}
-
-/// Returns `true` iff `lhs` is equal to `rhs`.
-public func == (lhs: any IRValue, rhs: any IRValue) -> Bool {
-  lhs.llvm == rhs.llvm
-}
-
-/// Returns `true` iff `lhs` is not equal to `rhs`.
-public func != (lhs: any IRValue, rhs: any IRValue) -> Bool {
-  lhs.llvm != rhs.llvm
 }

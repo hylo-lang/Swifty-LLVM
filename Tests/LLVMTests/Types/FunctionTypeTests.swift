@@ -49,11 +49,11 @@ final class FunctionTypeTests: XCTestCase {
   func testConversion() {
     var m = Module("foo")
 
-    let t: any IRType = m.functionType(from: ()).unsafePointee
-    XCTAssertNotNil(FunctionType(t))
+    let t = m.functionType(from: ())
+    XCTAssertNotNil(FunctionType.Reference(t.erased))
 
-    let u: any IRType = m.integerType(64).unsafePointee
-    XCTAssertNil(FunctionType(u))
+    let u = m.integerType(64)
+    XCTAssertNil(FunctionType.Reference(u.erased))
   }
 
   func testEquality() {
