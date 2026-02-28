@@ -70,9 +70,15 @@ extension LLVMEntity {
   public typealias UnsafeReference = SwiftyLLVM.UnsafeReference<Self>
 }
 
+/// A non-owning reference to an LLVM-backed entity.
+///
+/// The lifetime of the pointee is managed by LLVM; Users must ensure the underlying object
+/// remains valid while accessing the pointee.
 public struct UnsafeReference<T: LLVMEntity>: Hashable {
+  /// The underlying native handle for the referenced entity.
   internal let llvm: T.Handle
 
+  /// Creates a reference from a raw entity handle.
   internal init(_ llvm: T.Handle) { self.llvm = llvm }
 
   /// Creates a temporary wrapper for the type.
@@ -80,6 +86,7 @@ public struct UnsafeReference<T: LLVMEntity>: Hashable {
   /// The caller must ensure that the wrapper doesn't become a dangling reference.
   public var pointee: T { T(temporarilyWrapping: llvm) }
 
+  /// Invokes `witness` with a temporary wrapper around this reference's pointee.
   public func with<R>(_ witness: (T) throws -> R) rethrows -> R {
     try witness(pointee)
   }
@@ -157,7 +164,6 @@ extension UnsafeReference where T == BasicBlock {
   var raw: LLVMBasicBlockRef { llvm.raw }
 }
 
-
 /// Returns `true` iff the given type references are equal.
 public func == (lhs: UnsafeReference<some IRType>, rhs: AnyType.UnsafeReference) -> Bool {
   lhs.llvm == rhs.llvm
@@ -207,7 +213,6 @@ public func == (lhs: AnyValue.UnsafeReference, rhs: AnyValue.UnsafeReference) ->
 public func != (lhs: AnyValue.UnsafeReference, rhs: AnyValue.UnsafeReference) -> Bool {
   lhs.llvm != rhs.llvm
 }
-
 
 /// Returns `true` iff the given attribute references are equal.
 public func == (lhs: UnsafeReference<some IRAttribute>, rhs: AnyAttribute.UnsafeReference) -> Bool {

@@ -43,6 +43,7 @@ extension IntrinsicFunction {
 
   /// The name of an intrinsic.
   @dynamicMemberLookup
+  /// Supports chained member syntax to construct dotted intrinsic names.
   public struct Name: Sendable {
 
     /// The value of this instance.

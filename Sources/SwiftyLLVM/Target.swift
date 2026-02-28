@@ -89,10 +89,12 @@ public struct Target {
 
 extension Target: Hashable {
 
+  /// Hashes this instance by its underlying LLVM target handle.
   public func hash(into hasher: inout Hasher) {
     hasher.combine(llvm)
   }
 
+  /// Returns `true` iff `lhs` and `rhs` wrap the same LLVM target.
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.llvm == rhs.llvm
   }
@@ -101,6 +103,7 @@ extension Target: Hashable {
 
 extension Target: CustomStringConvertible {
 
+  /// A textual description of the target from LLVM.
   public var description: String {
     .init(cString: LLVMGetTargetDescription(llvm))
   }

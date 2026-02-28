@@ -24,6 +24,7 @@ public struct Function: Global, Callable, Hashable {
     return handles.map({ BasicBlock.UnsafeReference($0!) })
   }
 
+  /// The parameters of the function.
   public var parameters: Function.Parameters { .init(of: self) }
 
   /// The function's entry block, if any.
@@ -56,8 +57,10 @@ extension Function {
   /// A collection containing the parameters of an LLVM IR function.
   public struct Parameters: BidirectionalCollection {
 
+    /// The collection index type.
     public typealias Index = Int
 
+    /// The collection element type.
     public typealias Element = Parameter.UnsafeReference
 
     /// The function containing the elements of the collection.
@@ -73,20 +76,25 @@ extension Function {
       Int(LLVMCountParams(parent.llvm.raw))
     }
 
+    /// The position of the first element.
     public var startIndex: Int { 0 }
 
+    /// The position past the last element.
     public var endIndex: Int { count }
 
+    /// Returns the index immediately after `position`.
     public func index(after position: Int) -> Int {
       precondition(position < count, "index is out of bounds")
       return position + 1
     }
 
+    /// Returns the index immediately before `position`.
     public func index(before position: Int) -> Int {
       precondition(position > 0, "index is out of bounds")
       return position - 1
     }
 
+    /// The parameter at `position`.
     public subscript(position: Int) -> Parameter.UnsafeReference {
       precondition(position >= 0 && position < count, "index is out of bounds")
       return .init(LLVMGetParam(parent.llvm.raw, UInt32(position)))

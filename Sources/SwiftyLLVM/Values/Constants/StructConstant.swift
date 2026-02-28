@@ -39,8 +39,10 @@ public struct StructConstant: IRValue, Hashable {
 
 extension StructConstant: AggregateConstant {
 
+  /// The collection index type.
   public typealias Index = Int
 
+  /// The collection element type.
   public typealias Element = AnyValue.UnsafeReference
 
 }

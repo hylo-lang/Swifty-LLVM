@@ -66,6 +66,7 @@ public struct DataLayout: ~Copyable {
 
 extension DataLayout {
 
+  /// The canonical LLVM data layout string.
   public var description: String {
     guard let s = LLVMCopyStringRepOfTargetData(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }

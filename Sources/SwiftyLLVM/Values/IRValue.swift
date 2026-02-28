@@ -9,10 +9,12 @@ public protocol IRValue: CustomStringConvertible, LLVMEntity where Handle == Val
 }
 
 extension IRValue {
+  /// Creates an instance wrapping `r`.
   public init(temporarilyWrapping r: Self.UnsafeReference) {
     self.init(temporarilyWrapping: r.raw)
   }
 
+  /// Creates an instance wrapping the native handle `r`.
   init(temporarilyWrapping r: LLVMValueRef) {
     self.init(temporarilyWrapping: ValueRef(r))
   }
