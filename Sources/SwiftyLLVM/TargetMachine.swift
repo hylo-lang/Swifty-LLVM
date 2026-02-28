@@ -11,7 +11,7 @@ public struct TargetMachine: ~Copyable {
   /// - Parameters:
   ///   - target: The platform for which code is generated.
   ///   - cpu: The type of CPU to target. Defaults to the CPU of the host machine.
-  ///   - features: The features a of the target.
+  ///   - features: The feature string of the target.
   ///   - optimization: The level of optimization used during code generation. Defaults to `.none`.
   ///   - relocation: The relocation model used during code generation. Defaults to `.default`.
   ///   - code: The code model used during code generation. Defaults to `.default`.

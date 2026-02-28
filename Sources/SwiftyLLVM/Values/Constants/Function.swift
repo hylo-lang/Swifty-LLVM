@@ -26,7 +26,7 @@ public struct Function: Global, Callable, Hashable {
 
   public var parameters: Function.Parameters { .init(of: self) }
 
-  /// The the function's entry, if any.
+  /// The function's entry block, if any.
   public var entry: BasicBlock.UnsafeReference? {
     guard LLVMCountBasicBlocks(llvm.raw) > 0 else { return nil }
     return BasicBlock.UnsafeReference(LLVMGetEntryBasicBlock(llvm.raw))
@@ -36,7 +36,7 @@ public struct Function: Global, Callable, Hashable {
 
 extension Function {
 
-  /// The return value of a LLVM IR function.
+  /// The return value of an LLVM IR function.
   public struct Return: Hashable {
 
     /// The function defining the return value.
@@ -53,7 +53,7 @@ extension Function {
 
 extension Function {
 
-  /// A collection containing the parameters of a LLVM IR function.
+  /// A collection containing the parameters of an LLVM IR function.
   public struct Parameters: BidirectionalCollection {
 
     public typealias Index = Int

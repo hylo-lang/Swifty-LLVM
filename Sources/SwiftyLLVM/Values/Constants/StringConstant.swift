@@ -11,7 +11,7 @@ public struct StringConstant: IRValue, Hashable {
     self.llvm = handle
   }
 
-  /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
+  /// Creates a string constant from `text` in `module`, appending a null terminator iff
   /// `nullTerminated` is `true`.
   public static func create(_ text: String, nullTerminated: Bool = true, in module: inout Module)
     -> StringConstant.UnsafeReference

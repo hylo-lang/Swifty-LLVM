@@ -13,7 +13,7 @@ public struct StructConstant: IRValue, Hashable {
 
   /// Creates a constant struct of `type` in `module` aggregating `elements`.
   ///
-  /// - Requires: The type of `contents[i]` has the same type as the `i`-th element of `type`.
+  /// - Requires: The type of `elements[i]` is the same as the `i`-th field type of `type`.
   public static func create<S: Sequence>(
     of type: StructType.UnsafeReference, aggregating elements: S, in module: inout Module
   ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
