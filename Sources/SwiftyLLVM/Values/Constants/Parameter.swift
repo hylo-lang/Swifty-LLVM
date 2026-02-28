@@ -1,7 +1,7 @@
 internal import llvmc
 internal import llvmshims
 
-/// A parameter in a LLVM IR function.
+/// A parameter in an LLVM IR function.
 public struct Parameter: IRValue {
 
   /// A handle to the LLVM object wrapped by this instance.
@@ -31,7 +31,7 @@ extension Parameter: Hashable {
     hasher.combine(llvm)
   }
 
-  /// Checks references equality of two Parameter wrappers.
+  /// Checks reference equality of two `Parameter` wrappers.
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.llvm == rhs.llvm
   }
@@ -39,7 +39,7 @@ extension Parameter: Hashable {
 }
 
 extension UnsafeReference<Parameter> {
-  /// Creates an intance with `v`, failing iff `v` is not a parameter.
+  /// Creates an instance with `v`, failing iff `v` is not a parameter.
   public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAArgument(v.llvm.raw) {
       self.init(h)

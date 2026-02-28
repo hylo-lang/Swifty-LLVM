@@ -11,7 +11,7 @@ public struct StructType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns the ID of a struct type with given `fields` in `module`, packed iff `packed` is `true`.
+  /// Returns a reference to a struct type with given `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
     _ fields: [AnyType.UnsafeReference],
     packed: Bool = false,
@@ -25,7 +25,7 @@ public struct StructType: IRType, Hashable {
     }
   }
 
-  /// Returns the ID of a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
+  /// Returns a reference to a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
   public static func create(
     named name: String,
     _ fields: [AnyType.UnsafeReference],
@@ -58,7 +58,7 @@ public struct StructType: IRType, Hashable {
   /// The fields of the struct.
   public var fields: Fields { .init(of: self) }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `parts`.
+  /// Returns a constant whose LLVM IR type is `self` and whose value aggregates `elements`.
   public func constant<S: Sequence>(
     aggregating elements: S, in module: inout Module
   ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {

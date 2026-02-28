@@ -24,7 +24,7 @@ public struct ArrayType: IRType, Hashable {
   /// The number of elements in instances of this type.
   public var count: Int { Int(LLVMGetArrayLength(llvm.raw)) }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `elements`.
+  /// Returns a constant whose LLVM IR type is `self` and whose value aggregates `elements`.
   public func constant<S: Sequence>(
     contentsOf elements: S, in module: inout Module
   ) -> ArrayConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
@@ -34,7 +34,7 @@ public struct ArrayType: IRType, Hashable {
 }
 
 extension UnsafeReference<ArrayType> {
-  /// Creates an instance with `t`, failing iff `t` isn't a void type.
+  /// Creates an instance with `t`, failing iff `t` isn't an array type.
   public init?(_ t: UnsafeReference<AnyType>) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMArrayTypeKind {
       self.init(t.llvm)

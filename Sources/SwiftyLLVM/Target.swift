@@ -5,7 +5,7 @@ public struct Target {
 
   /// The triple of the target.
   ///
-  /// A triple is a string  taking the form `<arch><sub>-<vendor>-<sys>-<abi>` where:
+  /// A triple is a string taking the form `<arch><sub>-<vendor>-<sys>-<abi>` where:
   /// * `arch` = `x86_64`, `i386`, `arm`, `thumb`, `mips`, etc.
   /// * `sub` = `v5`, `v6m`, `v7a`, `v7m`, etc.
   /// * `vendor` = `pc`, `apple`, `nvidia`, `ibm`, etc.

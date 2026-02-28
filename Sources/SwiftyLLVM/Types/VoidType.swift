@@ -11,7 +11,7 @@ public struct VoidType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns the ID of the void type in `module`.
+  /// Returns a reference to the `void` type in `module`.
   public static func create(in module: inout Module) -> VoidType.UnsafeReference {
     .init(LLVMVoidTypeInContext(module.context))
   }
