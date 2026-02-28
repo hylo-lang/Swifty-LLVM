@@ -28,15 +28,6 @@ public struct FunctionType: IRType, Hashable {
     }
   }
 
-  /// Creates an instance with `t`, failing iff `t` isn't a function type.
-  public init?(_ t: any IRType) {
-    if LLVMGetTypeKind(t.llvm.raw) == LLVMFunctionTypeKind {
-      self.llvm = t.llvm
-    } else {
-      return nil
-    }
-  }
-
   /// The return type of the function.
   public var returnType: AnyType.Reference { .init(LLVMGetReturnType(llvm.raw)) }
 
@@ -55,4 +46,15 @@ public struct FunctionType: IRType, Hashable {
     LLVMIsFunctionVarArg(llvm.raw) != 0
   }
 
+}
+
+extension Reference<FunctionType> {
+  /// Creates an instance with `t`, failing iff `t` isn't a function type.
+  public init?(_ t: AnyType.Reference) {
+    if LLVMGetTypeKind(t.llvm.raw) == LLVMFunctionTypeKind {
+      self.init(t.llvm)
+    } else {
+      return nil
+    }
+  }
 }

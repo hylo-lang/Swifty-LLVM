@@ -11,15 +11,6 @@ public struct ArrayType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Creates an instance with `t`, failing iff `t` isn't a void type.
-  public init?(_ t: any IRType) {
-    if LLVMGetTypeKind(t.llvm.raw) == LLVMArrayTypeKind {
-      self.llvm = t.llvm
-    } else {
-      return nil
-    }
-  }
-
   public static func create(_ count: Int, _ element: Reference<some IRType>, in module: inout Module)
     -> ArrayType.Reference
   {
@@ -40,4 +31,15 @@ public struct ArrayType: IRType, Hashable {
     ArrayConstant.create(of: ArrayType.Reference(llvm), containing: elements, in: &module)
   }
 
+}
+
+extension Reference<ArrayType> {
+  /// Creates an instance with `t`, failing iff `t` isn't a void type.
+  public init?(_ t: Reference<AnyType>) {
+    if LLVMGetTypeKind(t.llvm.raw) == LLVMArrayTypeKind {
+      self.init(t.llvm)
+    } else {
+      return nil
+    }
+  }
 }

@@ -29,25 +29,27 @@ final class FloatingPointConstantTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
+
     let ft = m.float
     let ty = ft.unsafePointee
-    let t: any IRValue = ty.zero.unsafePointee
-    XCTAssertNotNil(FloatingPointConstant(t))
+    XCTAssertNotNil(FloatingPointConstant.Reference(ty.zero.erased))
+    
     let i64 = m.integerType(64)
-    let u: any IRValue = i64.unsafePointee.zero.unsafePointee
-    XCTAssertNil(FloatingPointConstant(u))
+    let u = i64.unsafePointee.zero
+    XCTAssertNil(FloatingPointConstant.Reference(u.erased))
   }
 
   func testEquality() {
     var m = Module("foo")
     let ty = m.double
-    let tType = ty.unsafePointee
-    let t = tType.zero
-    let u = tType.zero
-    XCTAssertEqual(t.unsafePointee, u.unsafePointee)
+    let double = ty.unsafePointee
 
-    let v = tType.constant(4.2)
-    XCTAssertNotEqual(t.unsafePointee, v.unsafePointee)
+    let t = double.zero
+    let u = double.zero
+    XCTAssertEqual(t, u)
+
+    let v = double.constant(4.2)
+    XCTAssertNotEqual(t, v)
   }
 
 }

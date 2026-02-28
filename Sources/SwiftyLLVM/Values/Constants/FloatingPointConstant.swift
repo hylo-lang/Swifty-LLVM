@@ -11,15 +11,6 @@ public struct FloatingPointConstant: IRValue, Hashable {
     self.llvm = llvm
   }
 
-  /// Creates an instance with `v`, failing iff `v` isn't a constant floating-point number.
-  public init?(_ v: any IRValue) {
-    if let h = LLVMIsAConstantFP(v.llvm.raw) {
-      self.llvm = .init(h)
-    } else {
-      return nil
-    }
-  }
-
   /// A pair `(v, l)` where `v` is the value of this constant and `l` is `true` iff
   /// precision was lost in the conversion.
   public var value: (value: Double, lostPrecision: Bool) {
@@ -28,4 +19,15 @@ public struct FloatingPointConstant: IRValue, Hashable {
     return (v, l != 0)
   }
 
+}
+
+extension Reference<FloatingPointConstant> {
+  /// Creates an instance with `v`, failing iff `v` isn't a constant floating-point number.
+  public init?(_ v: AnyValue.Reference) {
+    if let h = LLVMIsAConstantFP(v.llvm.raw) {
+      self.init(h)
+    } else {
+      return nil
+    }
+  }
 }

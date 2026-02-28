@@ -11,8 +11,8 @@ final class ArrayTypeTests: XCTestCase {
 
   func testElement() {
     var m = Module("foo")
-    let i16 = m.integerType(16)
-    XCTAssertEqual(IntegerType(m.arrayType(8, i16).unsafePointee.element.unsafePointee), i16.unsafePointee)
+    let i16 = m.i16
+    XCTAssertEqual(IntegerType.Reference(m.arrayType(8, i16).unsafePointee.element), i16)
   }
 
   func testConversion() {

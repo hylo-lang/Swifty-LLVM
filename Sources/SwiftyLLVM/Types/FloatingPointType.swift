@@ -11,16 +11,6 @@ public struct FloatingPointType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Creates an instance with `t`, failing iff `t` isn't a floating point type.
-  public init?(_ t: any IRType) {
-    switch LLVMGetTypeKind(t.llvm.raw) {
-    case LLVMHalfTypeKind, LLVMFloatTypeKind, LLVMDoubleTypeKind, LLVMFP128TypeKind:
-      self.llvm = t.llvm
-    default:
-      return nil
-    }
-  }
-
   /// Returns the type `half` in `module`
   public static func half(in module: inout Module) -> FloatingPointType.Reference {
     .init(LLVMHalfTypeInContext(module.context))
@@ -69,4 +59,16 @@ public struct FloatingPointType: IRType, Hashable {
     .init(LLVMConstNull(llvm.raw))
   }
 
+}
+
+extension Reference<FloatingPointType> {
+  /// Creates an instance with `t`, failing iff `t` isn't a floating point type.
+  public init?(_ t: AnyType.Reference) {
+    switch LLVMGetTypeKind(t.llvm.raw) {
+    case LLVMHalfTypeKind, LLVMFloatTypeKind, LLVMDoubleTypeKind, LLVMFP128TypeKind:
+      self.init(t.llvm)
+    default:
+      return nil
+    }
+  }
 }

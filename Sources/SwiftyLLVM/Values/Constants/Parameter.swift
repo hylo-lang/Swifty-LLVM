@@ -12,15 +12,6 @@ public struct Parameter: IRValue {
     self.llvm = llvm
   }
 
-  /// Creates an intance with `v`, failing iff `v` is not a parameter.
-  public init?(_ v: any IRValue) {
-    if let h = LLVMIsAArgument(v.llvm.raw) {
-      self.llvm = .init(h)
-    } else {
-      return nil
-    }
-  }
-
   /// Temporary wrapper of the function containing the parameter.
   public var parent: Function { .init(temporarilyWrapping: LLVMGetParamParent(llvm.raw)) }
 
@@ -45,4 +36,15 @@ extension Parameter: Hashable {
     lhs.llvm == rhs.llvm
   }
 
+}
+
+extension Reference<Parameter> {
+  /// Creates an intance with `v`, failing iff `v` is not a parameter.
+  public init?(_ v: AnyValue.Reference) {
+    if let h = LLVMIsAArgument(v.llvm.raw) {
+      self.init(h)
+    } else {
+      return nil
+    }
+  }
 }
