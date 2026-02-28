@@ -82,29 +82,16 @@ public struct Module: ~Copyable {
 
   /// Runs standard optimization passes on `self` tuned for given `optimization` and `machine`.
   public mutating func runDefaultModulePasses(
-    optimization: OptimizationLevel = .none,
-    for machine: borrowing TargetMachine? = nil
+    optimization: OptimizationLevel = .none
   ) {
-    let o: SwiftyLLVMPassOptimizationLevel
-    switch optimization {
-    case .none:
-      o = SwiftyLLVMPassOptimizationLevelO0
-    case .less:
-      o = SwiftyLLVMPassOptimizationLevelO1
-    case .default:
-      o = SwiftyLLVMPassOptimizationLevelO2
-    case .aggressive:
-      o = SwiftyLLVMPassOptimizationLevelO3
-    }
+    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, nil, optimization.swiftyLLVM)
+  }
 
-    // https://forums.swift.org/t/how-can-i-borrow-with-conditional-binding/78759
-    switch machine {
-    case .some(let m):
-      SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, m.llvm, o)
-    case .none:
-      SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, nil, o)
-      break
-    }
+  public mutating func runDefaultModulePasses(
+    optimization: OptimizationLevel = .none,
+    for machine: borrowing TargetMachine
+  ) {
+    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, machine.llvm, optimization.swiftyLLVM)
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
@@ -182,12 +169,39 @@ public struct Module: ~Copyable {
     }
   }
 
+  /// Returns the intrinsic function with given `name`, specialized for `parameters`, or `nil` if no such
+  /// intrinsic exists.
+  /// 
+  /// You can call this with a tuple of typed references.
+  public mutating func intrinsic<each T: IRType>(named name: String, for parameters: (repeat Reference<each T>)
+  ) -> IntrinsicFunction.Reference? {
+    var erased = [AnyType.Reference]()
+    for p in repeat each parameters {
+      erased.append(p.erased)
+    }
+    return intrinsic(named: name, for: erased)
+  }
+  
   /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
   public mutating func intrinsic(
     named name: IntrinsicFunction.Name, for parameters: [AnyType.Reference] = []
   ) -> IntrinsicFunction.Reference? {
     intrinsic(named: name.value, for: parameters)
+  }
+
+  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
+  /// intrinsic exists.
+  ///
+  /// You can call this with a tuple of typed references.
+  public mutating func intrinsic<each T: IRType>(
+    named name: IntrinsicFunction.Name, for parameters: (repeat Reference<each T>)
+  ) -> IntrinsicFunction.Reference? {
+    var erased = [AnyType.Reference]()
+    for p in repeat each parameters {
+      erased.append(p.erased)
+    }
+    return intrinsic(named: name, for: erased)
   }
 
   /// Creates and returns a global variable with given `name` and `type`.
@@ -644,6 +658,19 @@ public struct Module: ~Copyable {
     return .init(handle)
   }
 
+  public mutating func insertGetElementPointer<V: IRValue, T: IRType, each I: IRValue>(
+    of base: V.Reference,
+    typed baseType: T.Reference,
+    indices: (repeat Reference<each I>),
+    at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    var erased = [AnyValue.Reference]()
+    for i in repeat each indices {
+      erased.append(i.erased)
+    }
+    return insertGetElementPointer(of: base, typed: baseType, indices: erased, at: p)
+  }
+
   public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType>(
     of base: V.Reference,
     typed baseType: T.Reference,
@@ -654,6 +681,20 @@ public struct Module: ~Copyable {
     let handle = LLVMBuildInBoundsGEP2(
       p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!
     return .init(handle)
+  }
+
+  public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType, each I: IRValue>(
+    of base: V.Reference,
+    typed baseType: T.Reference,
+    indices: (repeat Reference<each I>),
+    at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    var erased = [AnyValue.Reference]()
+    for i in repeat each indices {
+      erased.append(i.erased)
+    }
+    return insertGetElementPointerInBounds(
+      of: base, typed: baseType, indices: erased, at: p)
   }
 
   public mutating func insertGetStructElementPointer<V: IRValue>(
@@ -678,7 +719,8 @@ public struct Module: ~Copyable {
     _ value: V1.Reference, to location: V2.Reference, at p: borrowing InsertionPoint
   ) -> Instruction.Reference {
     let r = LLVMBuildStore(p.llvm, value.raw, location.raw)!
-    LLVMSetAlignment(r, UInt32(layout.preferredAlignment(of: value.unsafePointee.type.unsafePointee)))
+    LLVMSetAlignment(
+      r, UInt32(layout.preferredAlignment(of: value.with { $0.type })))
     return .init(r)
   }
 
@@ -788,6 +830,22 @@ public struct Module: ~Copyable {
   }
 
   @discardableResult
+  public mutating func insertSwitch<
+    V: IRValue, each C: IRValue
+  >(
+    on value: V.Reference,
+    cases: (repeat (Reference<each C>, BasicBlock.Reference)),
+    default defaultCase: BasicBlock.Reference,
+    at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    var erased = [(AnyValue.Reference, BasicBlock.Reference)]()
+    for (caseValue, destination) in repeat each cases {
+      erased.append((caseValue.erased, destination))
+    }
+    return insertSwitch(on: value, cases: erased, default: defaultCase, at: p)
+  }
+
+  @discardableResult
   public mutating func insertReturn(at p: borrowing InsertionPoint) -> Instruction.Reference {
     .init(LLVMBuildRetVoid(p.llvm)!)
   }
@@ -849,11 +907,16 @@ public struct Module: ~Copyable {
   }
 
   public mutating func insertIntToPtr<V: IRValue, T: IRType>(
-    _ source: V.Reference, to target: T.Reference? = nil,
+    _ source: V.Reference, to target: T.Reference,
     at p: borrowing InsertionPoint
   ) -> Instruction.Reference {
-    let t = target?.raw ?? ptr.raw
-    return .init(LLVMBuildIntToPtr(p.llvm, source.raw, t, "")!)
+    return .init(LLVMBuildIntToPtr(p.llvm, source.raw, target.raw, "")!)
+  }
+  public mutating func insertIntToPtr<V: IRValue>(
+    _ source: V.Reference,
+    at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    return insertIntToPtr(source, to: ptr, at: p)
   }
 
   public mutating func insertPtrToInt<V: IRValue, T: IRType>(
@@ -888,6 +951,18 @@ public struct Module: ~Copyable {
     return insertCall(callee.erased, typed: calleeTypeID, on: arguments, at: p)
   }
 
+  public mutating func insertCall<C: Callable, each A: IRValue>(
+    _ callee: C.Reference,
+    on arguments: (repeat Reference<each A>),
+    at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    var erased = [AnyValue.Reference]()
+    for a in repeat each arguments {
+      erased.append(a.erased)
+    }
+    return insertCall(callee, on: erased, at: p)
+  }
+
   public mutating func insertCall<T: IRType>(
     _ callee: AnyValue.Reference,
     typed calleeType: T.Reference,
@@ -910,6 +985,19 @@ public struct Module: ~Copyable {
     }
 
     return .init(LLVMBuildCall2(p.llvm, calleeType.raw, callee.raw, &a, UInt32(a.count), "")!)
+  }
+
+  public mutating func insertCall<T: IRType, each A: IRValue>(
+    _ callee: AnyValue.Reference,
+    typed calleeType: T.Reference,
+    on arguments: (repeat Reference<each A>),
+    at p: borrowing InsertionPoint
+  ) -> Instruction.Reference {
+    var erased = [AnyValue.Reference]()
+    for a in repeat each arguments {
+      erased.append(a.erased)
+    }
+    return insertCall(callee, typed: calleeType, on: erased, at: p)
   }
 
   public mutating func insertIntegerComparison<U: IRValue, V: IRValue>(
@@ -946,10 +1034,18 @@ public struct Module: ~Copyable {
   /// Creates a function type with given parameter and return types.
   ///
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the function type `(i64, i8) -> i8`.
-  public mutating func functionType(from: [AnyType.Reference], to: AnyType.Reference? = nil)
+  public mutating func functionType(from: [AnyType.Reference], to: Reference<some IRType>)
     -> FunctionType.Reference
   {
-    FunctionType.create(from: from, to: to, in: &self)
+    FunctionType.create(from: from, to: to.erased, in: &self)
+  }
+  /// Creates a function type with given parameter and return types.
+  ///
+  /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the function type `(i64, i8) -> i8`.
+  public mutating func functionType(from: [AnyType.Reference])
+    -> FunctionType.Reference
+  {
+    FunctionType.create(from: from, to: nil, in: &self)
   }
 
   /// Creates a function type with given parameter and return types.
@@ -959,11 +1055,9 @@ public struct Module: ~Copyable {
     from parameters: (repeat Reference<each T>), to returnType: R.Reference
   ) -> FunctionType.Reference {
     var erased = [AnyType.Reference]()
-    /// Map variadic tuple to array:
     for p in repeat each parameters {
       erased.append(p.erased)
     }
-
     return functionType(from: erased, to: returnType.erased)
   }
 
@@ -974,7 +1068,6 @@ public struct Module: ~Copyable {
     -> FunctionType.Reference
   {
     var erased = [AnyType.Reference]()
-    /// Map variadic tuple to array:
     for p in repeat each parameters {
       erased.append(p.erased)
     }
@@ -1000,6 +1093,19 @@ public struct Module: ~Copyable {
     StructType.create(fields, packed: packed, in: &self)
   }
 
+  /// Creates a struct type with given field type IDs.
+  /// 
+  /// Callable with a tuple of typed references: `structType((i64, i8, float))`.
+  public mutating func structType<each T: IRType>(_ fields: (repeat Reference<each T>), packed: Bool = false)
+    -> StructType.Reference
+  {
+    var erased = [AnyType.Reference]()
+    for f in repeat each fields {
+      erased.append(f.erased)
+    }
+    return structType(erased, packed: packed)
+  }
+
   /// Creates a named struct type with given field type IDs.
   public mutating func structType(
     named name: String, _ fields: [AnyType.Reference], packed: Bool = false
@@ -1008,6 +1114,21 @@ public struct Module: ~Copyable {
   {
     StructType.create(named: name, fields, packed: packed, in: &self)
   }
+
+  /// Creates a named struct type with given field type IDs.
+  ///
+  /// Callable with a tuple of typed references: `structType(named: "S", (i64, i8, float))`.
+  public mutating func structType<each T: IRType>(
+    named name: String, _ fields: (repeat Reference<each T>), packed: Bool = false
+  ) -> StructType.Reference {
+    var erased = [AnyType.Reference]()
+    for f in repeat each fields {
+      erased.append(f.erased)
+    }
+    return structType(named: name, erased, packed: packed)
+  }
+
+  
 
   /// Creates an instruction representing an undefined value of type `type`.
   public mutating func undefinedValue<T: IRType>(of type: T.Reference) -> Undefined.Reference {
@@ -1028,12 +1149,35 @@ public struct Module: ~Copyable {
     StructConstant.create(of: type, aggregating: elements, in: &self)
   }
 
+  /// Creates a constant struct of `type` in `module` aggregating `elements`.
+  public mutating func structConstant<each T: IRValue>(
+    of type: StructType.Reference, aggregating elements: (repeat Reference<each T>)
+  ) -> StructConstant.Reference {
+    var erased = [AnyValue.Reference]()
+    for e in repeat each elements {
+      erased.append(e.erased)
+    }
+    return structConstant(of: type, aggregating: erased)
+  }
+
   /// Creates a constant struct in `module` aggregating `elements`, packing them if
   /// `isPacked` is `true`.
   public mutating func structConstant<S: Sequence>(
     aggregating elements: S, packed isPacked: Bool = false
   ) -> StructConstant.Reference where S.Element == AnyValue.Reference {
     StructConstant.create(aggregating: elements, packed: isPacked, in: &self)
+  }
+
+  /// Creates a constant struct in `module` aggregating `elements`, packing them if
+  /// `isPacked` is `true`.
+  public mutating func structConstant<each T: IRValue>(
+    aggregating elements: (repeat Reference<each T>), packed isPacked: Bool = false
+  ) -> StructConstant.Reference {
+    var erased = [AnyValue.Reference]()
+    for e in repeat each elements {
+      erased.append(e.erased)
+    }
+    return structConstant(aggregating: erased, packed: isPacked)
   }
 
   /// Creates a constant array of `type`, filled with the contents of `elements`.
@@ -1043,6 +1187,17 @@ public struct Module: ~Copyable {
     of type: T.Reference, containing elements: S
   ) -> ArrayConstant.Reference where S.Element == AnyValue.Reference {
     ArrayConstant.create(of: type, containing: elements, in: &self)
+  }
+
+  /// Creates a constant array of `type`, filled with the contents of `elements`.
+  public mutating func arrayConstant<T: IRType, each U: IRValue>(
+    of type: T.Reference, containing elements: (repeat Reference<each U>)
+  ) -> ArrayConstant.Reference {
+    var erased = [AnyValue.Reference]()
+    for e in repeat each elements {
+      erased.append(e.erased)
+    }
+    return arrayConstant(of: type, containing: erased)
   }
 
   /// Creates a constant array of `i8` in `module`, filled with the contents of `bytes`.
@@ -1057,5 +1212,11 @@ public struct Module: ~Copyable {
     -> StringConstant.Reference
   {
     StringConstant.create(text, nullTerminated: nullTerminated, in: &self)
+  }
+
+  public var description: String {
+    guard let s = LLVMPrintModuleToString(module) else { return "" }
+    defer { LLVMDisposeMessage(s) }
+    return String(cString: s)
   }
 }

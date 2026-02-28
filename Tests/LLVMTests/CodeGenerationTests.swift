@@ -68,7 +68,7 @@ extension Module {
   private mutating func emitMain(
     projectingDegreesWith projectDegrees: Function.Reference
   ) throws -> Function.Reference {
-    let s = functionType(from: (), to: i32.erased)
+    let s = functionType(from: (), to: i32)
     let f = declareFunction("main", s)
 
     let b0 = appendBlock(named: "b0", to: f)
@@ -85,10 +85,10 @@ extension Module {
     // %2 = call ptr @llvm.coro.prepare.retcon(ptr @deg)
     // %3 = call { ptr, ptr } %2(ptr %0, ptr %1)
     let prepare = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.prepare.retcon))
-    let x2 = insertCall(prepare, on: [projectDegrees.erased], at: endOf(b0))
+    let x2 = insertCall(prepare, on: (projectDegrees), at: endOf(b0))
     let projectDegreesType: AnyType.Reference = projectDegrees.unsafePointee.valueType
     let x3 = insertCall(
-      x2.erased, typed: projectDegreesType, on: [x0.erased, x1.erased], at: endOf(b0))
+      x2.erased, typed: projectDegreesType, on: (x0, x1), at: endOf(b0))
 
     // %4 = extractvalue { ptr, ptr } %3, 1
     // %5 = load double, ptr %4, align 8
@@ -103,9 +103,9 @@ extension Module {
     // call void %7(ptr %0, i1 false
     let x7 = insertExtractValue(from: x3, at: 0, at: endOf(b0))
     let resumeType = functionType(from: (ptr, i1))
-    let i1False = i1.unsafePointee.constant(0).erased
+    let i1False = i1.unsafePointee.constant(0)
     _ = insertCall(
-      x7.erased, typed: resumeType, on: [x0.erased, i1False], at: endOf(b0))
+      x7.erased, typed: resumeType, on: (x0, i1False), at: endOf(b0))
 
     // %8 = load double, ptr %1, align 8
     // %9 = fcmp ueq double %8, 0.000000e+00
@@ -137,7 +137,7 @@ extension Module {
     // declare void @dealloc(ptr)
     let dealloc = declareFunction("dealloc", functionType(from: (ptr)))
     // define { ptr, ptr } @deg(ptr %0, ptr %1)
-    let pairOfPointers = structType([ptr.erased, ptr.erased]).erased
+    let pairOfPointers = structType((ptr, ptr))
     let s = functionType(from: (ptr, ptr), to: pairOfPointers)
     let f = declareFunction("deg", s)
     let r = try XCTUnwrap(f.unsafePointee.parameters.last)
@@ -149,24 +149,24 @@ extension Module {
     // %3 = call token @llvm.coro.id.retcon.once(
     //   i32 16, i32 8, ptr %0, ptr @slide, ptr @alloc, ptr @dealloc)
     let retconOnce = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.id.retcon.once))
-    let i32_16 = i32.unsafePointee.constant(16).erased
-    let i32_8 = i32.unsafePointee.constant(8).erased
+    let i32_16 = i32.unsafePointee.constant(16)
+    let i32_8 = i32.unsafePointee.constant(8)
     let frameBuffer = try XCTUnwrap(f.unsafePointee.parameters.first)
     let coroutineID = insertCall(
       retconOnce,
-      on: [
+      on: (
         i32_16,  // size of the frame buffer
         i32_8,  // alignment of the frame buffer
-        frameBuffer.erased,  // the frame buffer
-        slide.erased, alloc.erased, dealloc.erased,
-      ],
+        frameBuffer,  // the frame buffer
+        slide, alloc, dealloc
+      ),
       at: endOf(b0))
 
     // %4 = call ptr @llvm.coro.begin(token %3, ptr null)
     let begin = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.begin))
     let coroutineHandle = insertCall(
       begin,
-      on: [coroutineID.erased, ptr.unsafePointee.null.erased],
+      on: (coroutineID, ptr.unsafePointee.null),
       at: endOf(b0))
     let coroutineHandleID = coroutineHandle
 
@@ -181,8 +181,8 @@ extension Module {
 
     // %8 = call i1 (...) @llvm.coro.suspend.retcon.i1(ptr %2)
     let suspend = try XCTUnwrap(
-      intrinsic(named: IntrinsicFunction.llvm.coro.suspend.retcon, for: [i1.erased]))
-    _ = insertCall(suspend, on: [x0.erased], at: endOf(b0))
+      intrinsic(named: IntrinsicFunction.llvm.coro.suspend.retcon, for: (i1)))
+    _ = insertCall(suspend, on: (x0), at: endOf(b0))
 
     // %9 = load double, ptr %2, align 8
     // %10 = fmul double %9, 0x400921FB54442D18
@@ -201,11 +201,11 @@ extension Module {
     let end = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.end))
     _ = insertCall(
       end,
-      on: [
-        coroutineHandleID.erased,
-        i1.unsafePointee.constant(0).erased,
-        resultToken.erased,
-      ],
+      on: (
+        coroutineHandleID,
+        i1.unsafePointee.constant(0),
+        resultToken
+      ),
       at: endOf(b0))
 
     // unreachable

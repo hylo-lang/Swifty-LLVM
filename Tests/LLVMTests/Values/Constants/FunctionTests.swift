@@ -94,7 +94,7 @@ final class FunctionTests: XCTestCase {
 
   func testReturnAttributes() {
     var m = Module("foo")
-    let f = m.declareFunction("f", m.functionType(from: (), to: m.ptr.erased))
+    let f = m.declareFunction("f", m.functionType(from: (), to: m.ptr))
     let r = f.unsafePointee.returnValue
     let a = m.returnAttribute(.noalias)
     let b = m.returnAttribute(.dereferenceable_or_null, 8)

@@ -18,7 +18,7 @@ final class SwitchTests: XCTestCase {
 
     _ = m.insertSwitch(
       on: z,
-      cases: [(z.erased, c0), (o.erased, c1)],
+      cases: ((z, c0), (o, c1)),
       default: c2,
       at: m.endOf(b))
   }

@@ -13,9 +13,9 @@ final class ModuleTests: XCTestCase {
 
   func testTypeNamed() throws {
     var m = Module("foo")
-    let t = m.structType(named: "T", []).erased
+    let t = m.structType(named: "T", ())
     let u = try XCTUnwrap(m.type(named: "T"))
-    XCTAssert(t == u)
+    XCTAssert(t.erased == u)
     XCTAssertNil(m.type(named: "U"))
   }
 
@@ -55,7 +55,7 @@ final class ModuleTests: XCTestCase {
     var m = Module("foo")
     let i32 = m.integerType(32)
 
-    let f = m.declareFunction("main", m.functionType(from: (), to: i32.erased))
+    let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
     m.insertReturn(i32.unsafePointee.zero, at: m.endOf(b))
 
@@ -68,7 +68,7 @@ final class ModuleTests: XCTestCase {
     var m = Module("foo")
     let i32 = m.integerType(32)
 
-    let f = m.declareFunction("main", m.functionType(from: (), to: i32.erased))
+    let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
     m.insertReturn(m.i32.unsafePointee.zero, at: m.endOf(b))
 
