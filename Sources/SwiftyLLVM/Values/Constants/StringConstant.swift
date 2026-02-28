@@ -14,10 +14,10 @@ public struct StringConstant: IRValue, Hashable {
   /// Creates an instance with `text` in `module`, appending a null terminator to the string iff
   /// `nullTerminated` is `true`.
   public static func create(_ text: String, nullTerminated: Bool = true, in module: inout Module)
-    -> StringConstant.Reference
+    -> StringConstant.UnsafeReference
   {
     text.withCString { (s) in
-      StringConstant.Reference(
+      StringConstant.UnsafeReference(
         LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1)
       )
     }
@@ -35,9 +35,9 @@ public struct StringConstant: IRValue, Hashable {
 
 }
 
-extension Reference<StringConstant> {
+extension UnsafeReference<StringConstant> {
   /// Creates an instance with `v`, failing iff `v` is not a constant string value.
-  public init?(_ v: AnyValue.Reference) {
+  public init?(_ v: AnyValue.UnsafeReference) {
     if LLVMIsAConstantDataSequential(v.llvm.raw) != nil && LLVMIsConstantString(v.llvm.raw) != 0 {
       self.init(v.llvm)
     } else {

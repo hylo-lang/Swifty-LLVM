@@ -15,8 +15,8 @@ public struct ArrayConstant: IRValue, Hashable {
   ///
   /// - Requires: The type of each element in `contents` is `type`.
   public static func create<T: IRType, S: Sequence>(
-    of type: T.Reference, containing elements: S, in module: inout Module
-  ) -> ArrayConstant.Reference where S.Element == AnyValue.Reference {
+    of type: T.UnsafeReference, containing elements: S, in module: inout Module
+  ) -> ArrayConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
     var values = elements.map({ Optional.some($0.raw) })
     return .init(LLVMConstArray(type.raw, &values, UInt32(values.count)))
   }
@@ -28,10 +28,10 @@ public struct ArrayConstant: IRValue, Hashable {
 
   /// Creates a constant array of `i8` in `module`, filled with the contents of `bytes`.
   public static func create<S: Sequence>(bytes: S, in module: inout Module)
-    -> ArrayConstant.Reference where S.Element == UInt8
+    -> ArrayConstant.UnsafeReference where S.Element == UInt8
   {
     let i8 = module.i8
-    let byteConstants = bytes.map({ i8.unsafePointee.constant($0).erased })
+    let byteConstants = bytes.map({ i8.pointee.constant($0).erased })
     return ArrayConstant.create(of: i8, containing: byteConstants, in: &module)
   }
 
@@ -41,6 +41,6 @@ extension ArrayConstant: AggregateConstant {
 
   public typealias Index = Int
 
-  public typealias Element = AnyValue.Reference
+  public typealias Element = AnyValue.UnsafeReference
 
 }

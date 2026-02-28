@@ -12,15 +12,15 @@ public struct Undefined: IRValue, Hashable {
   }
 
   /// Creates and registers an undefined value of type `t` in `module`.
-  public static func create<T: IRType>(of t: T.Reference, in module: inout Module) -> Self.Reference {
+  public static func create<T: IRType>(of t: T.UnsafeReference, in module: inout Module) -> Self.UnsafeReference {
     return .init(LLVMGetUndef(t.raw))
   }
 
 }
 
-extension Reference<Undefined> {
+extension UnsafeReference<Undefined> {
   /// Creates an instance with `v`, failing iff `v` is not an undefined value.
-  public init?(_ v: AnyValue.Reference) {
+  public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAUndefValue(v.llvm.raw) {
       self.init(h)
     } else {

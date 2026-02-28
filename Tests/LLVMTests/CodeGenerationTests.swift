@@ -66,8 +66,8 @@ extension Module {
 
   /// Defines a function `main` that calls the coroutine created by `emitProjectDegrees`.
   private mutating func emitMain(
-    projectingDegreesWith projectDegrees: Function.Reference
-  ) throws -> Function.Reference {
+    projectingDegreesWith projectDegrees: Function.UnsafeReference
+  ) throws -> Function.UnsafeReference {
     let s = functionType(from: (), to: i32)
     let f = declareFunction("main", s)
 
@@ -80,13 +80,13 @@ extension Module {
     let x1 = insertAlloca(double, at: endOf(b0))
 
     // store double 0x400921FB54442D18, ptr %1, align 8
-    insertStore(double.unsafePointee.constant(.pi), to: x1, at: endOf(b0))
+    insertStore(double.pointee.constant(.pi), to: x1, at: endOf(b0))
 
     // %2 = call ptr @llvm.coro.prepare.retcon(ptr @deg)
     // %3 = call { ptr, ptr } %2(ptr %0, ptr %1)
     let prepare = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.prepare.retcon))
     let x2 = insertCall(prepare, on: (projectDegrees), at: endOf(b0))
-    let projectDegreesType: AnyType.Reference = projectDegrees.unsafePointee.valueType
+    let projectDegreesType: AnyType.UnsafeReference = projectDegrees.pointee.valueType
     let x3 = insertCall(
       x2.erased, typed: projectDegreesType, on: (x0, x1), at: endOf(b0))
 
@@ -96,14 +96,14 @@ extension Module {
     // store double %6, ptr %4, align 8
     let x4 = insertExtractValue(from: x3, at: 1, at: endOf(b0))
     let x5 = insertLoad(double, from: x4, at: endOf(b0))
-    let x6 = insertFSub(x5, double.unsafePointee.constant(180), at: endOf(b0))
+    let x6 = insertFSub(x5, double.pointee.constant(180), at: endOf(b0))
     insertStore(x6, to: x4, at: endOf(b0))
 
     // %7 = extractvalue { ptr, ptr } %3, 0
     // call void %7(ptr %0, i1 false
     let x7 = insertExtractValue(from: x3, at: 0, at: endOf(b0))
     let resumeType = functionType(from: (ptr, i1))
-    let i1False = i1.unsafePointee.constant(0)
+    let i1False = i1.pointee.constant(0)
     _ = insertCall(
       x7.erased, typed: resumeType, on: (x0, i1False), at: endOf(b0))
 
@@ -112,7 +112,7 @@ extension Module {
     // %10 = zext i1 %9 to i32
     let x8 = insertLoad(double, from: x1, at: endOf(b0))
     let x9 = insertFloatingPointComparison(
-      .ueq, x8, double.unsafePointee.constant(0), at: endOf(b0))
+      .ueq, x8, double.pointee.constant(0), at: endOf(b0))
     let xa = insertZeroExtend(x9, to: i32, at: endOf(b0))
 
     // ret i32 %10
@@ -122,10 +122,10 @@ extension Module {
   }
 
   /// Defines a coroutine that projects the value in degrees of an angle passed in radians.
-  private mutating func emitProjectDegrees() throws -> Function.Reference {
+  private mutating func emitProjectDegrees() throws -> Function.UnsafeReference {
     // declare void @slide(ptr, i1 zeroext)
     let slide = declareFunction("slide", functionType(from: (ptr, i1)))
-    let slideParameter1 = slide.unsafePointee.parameters[1]
+    let slideParameter1 = slide.pointee.parameters[1]
     addParameterAttribute(
       parameterAttribute(.zeroext),
       to: slideParameter1)
@@ -140,7 +140,7 @@ extension Module {
     let pairOfPointers = structType((ptr, ptr))
     let s = functionType(from: (ptr, ptr), to: pairOfPointers)
     let f = declareFunction("deg", s)
-    let r = try XCTUnwrap(f.unsafePointee.parameters.last)
+    let r = try XCTUnwrap(f.pointee.parameters.last)
     let b0 = appendBlock(named: "b0", to: f)
 
     // %2 = alloca double, align 8
@@ -149,9 +149,9 @@ extension Module {
     // %3 = call token @llvm.coro.id.retcon.once(
     //   i32 16, i32 8, ptr %0, ptr @slide, ptr @alloc, ptr @dealloc)
     let retconOnce = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.id.retcon.once))
-    let i32_16 = i32.unsafePointee.constant(16)
-    let i32_8 = i32.unsafePointee.constant(8)
-    let frameBuffer = try XCTUnwrap(f.unsafePointee.parameters.first)
+    let i32_16 = i32.pointee.constant(16)
+    let i32_8 = i32.pointee.constant(8)
+    let frameBuffer = try XCTUnwrap(f.pointee.parameters.first)
     let coroutineID = insertCall(
       retconOnce,
       on: (
@@ -166,7 +166,7 @@ extension Module {
     let begin = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.begin))
     let coroutineHandle = insertCall(
       begin,
-      on: (coroutineID, ptr.unsafePointee.null),
+      on: (coroutineID, ptr.pointee.null),
       at: endOf(b0))
     let coroutineHandleID = coroutineHandle
 
@@ -175,8 +175,8 @@ extension Module {
     // %7 = fdiv double %6, 0x400921FB54442D18
     // store double %7, ptr %2, align 8
     let x1 = insertLoad(double, from: r, at: endOf(b0))
-    let x2 = insertFMul(x1, double.unsafePointee.constant(180), at: endOf(b0))
-    let x3 = insertFDiv(x2, double.unsafePointee.constant(.pi), at: endOf(b0))
+    let x2 = insertFMul(x1, double.pointee.constant(180), at: endOf(b0))
+    let x3 = insertFDiv(x2, double.pointee.constant(.pi), at: endOf(b0))
     insertStore(x3, to: x0, at: endOf(b0))
 
     // %8 = call i1 (...) @llvm.coro.suspend.retcon.i1(ptr %2)
@@ -189,8 +189,8 @@ extension Module {
     // %11 = fdiv double %10, 1.800000e+02
     // store double %11, ptr %1, align 8
     let x4 = insertLoad(double, from: x0, at: endOf(b0))
-    let x5 = insertFMul(x4, double.unsafePointee.constant(.pi), at: endOf(b0))
-    let x6 = insertFDiv(x5, double.unsafePointee.constant(180), at: endOf(b0))
+    let x5 = insertFMul(x4, double.pointee.constant(.pi), at: endOf(b0))
+    let x6 = insertFDiv(x5, double.pointee.constant(180), at: endOf(b0))
     insertStore(x6, to: r, at: endOf(b0))
 
     // %12 = call token @llvm.coro.end.results()
@@ -203,7 +203,7 @@ extension Module {
       end,
       on: (
         coroutineHandleID,
-        i1.unsafePointee.constant(0),
+        i1.pointee.constant(0),
         resultToken
       ),
       at: endOf(b0))
@@ -214,7 +214,7 @@ extension Module {
     return f
   }
 
-  private mutating func emitTestAtomics() throws -> Function.Reference {
+  private mutating func emitTestAtomics() throws -> Function.UnsafeReference {
     let s = functionType(from: ())
     let f = declareFunction("testAtomics", s)
 
@@ -222,19 +222,19 @@ extension Module {
 
     // %0 = alloca i64, align 8
     // %1 = alloca double, align 8
-    let x0: Alloca.Reference = insertAlloca(i64, at: endOf(b0))
+    let x0: Alloca.UnsafeReference = insertAlloca(i64, at: endOf(b0))
     let x1 = insertAlloca(double, at: endOf(b0))
-    let pi = double.unsafePointee.constant(.pi)
-    let i64_11 = i64.unsafePointee.constant(11)
-    let i64_13 = i64.unsafePointee.constant(13)
-    let i64_17 = i64.unsafePointee.constant(17)
-    let i64_19 = i64.unsafePointee.constant(19)
-    let i64_23 = i64.unsafePointee.constant(23)
-    let i64_29 = i64.unsafePointee.constant(29)
-    let i64_31 = i64.unsafePointee.constant(31)
-    let i64_37 = i64.unsafePointee.constant(37)
-    let i64_41 = i64.unsafePointee.constant(41)
-    let i64_43 = i64.unsafePointee.constant(43)
+    let pi = double.pointee.constant(.pi)
+    let i64_11 = i64.pointee.constant(11)
+    let i64_13 = i64.pointee.constant(13)
+    let i64_17 = i64.pointee.constant(17)
+    let i64_19 = i64.pointee.constant(19)
+    let i64_23 = i64.pointee.constant(23)
+    let i64_29 = i64.pointee.constant(29)
+    let i64_31 = i64.pointee.constant(31)
+    let i64_37 = i64.pointee.constant(37)
+    let i64_41 = i64.pointee.constant(41)
+    let i64_43 = i64.pointee.constant(43)
 
     // store atomic double 0x400921FB54442D18, ptr %1 monotonic, align 8
     // store atomic double 0x400921FB54442D18, ptr %1 release, align 8

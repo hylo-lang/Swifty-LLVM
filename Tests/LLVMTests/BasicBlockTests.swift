@@ -8,16 +8,16 @@ final class BasicBlockTests: XCTestCase {
     let f = m.declareFunction("fn", m.functionType(from: ()))
 
     let b = m.appendBlock(named: "b", to: f)
-    XCTAssertEqual(b.unsafePointee.description, "b")
-    XCTAssertEqual(b.unsafePointee.name, "b")
+    XCTAssertEqual(b.pointee.description, "b")
+    XCTAssertEqual(b.pointee.name, "b")
   }
   func testEmptyNameDescription() {
     var m = Module("foo")
     let f = m.declareFunction("fn", m.functionType(from: ()))
 
     let b = m.appendBlock(to: f)
-    XCTAssertEqual(b.unsafePointee.description, "<unnamed>")
-    XCTAssertEqual(b.unsafePointee.name, nil)
+    XCTAssertEqual(b.pointee.description, "<unnamed>")
+    XCTAssertEqual(b.pointee.name, nil)
   }
 
   func testNamedBasicBlockLLCode() throws {
@@ -27,7 +27,7 @@ final class BasicBlockTests: XCTestCase {
     let b = m.appendBlock(named: "my_block", to: f)
 
     let double = m.insertAdd(
-      f.unsafePointee.parameters[0], f.unsafePointee.parameters[0], at: m.endOf(b))
+      f.pointee.parameters[0], f.pointee.parameters[0], at: m.endOf(b))
     m.insertReturn(double, at: m.endOf(b))
     XCTAssertEqual(
       m.llCode(),
@@ -50,7 +50,7 @@ final class BasicBlockTests: XCTestCase {
     let b = m.appendBlock(to: f)
 
     let double = m.insertAdd(
-      f.unsafePointee.parameters[0], f.unsafePointee.parameters[0], at: m.endOf(b))
+      f.pointee.parameters[0], f.pointee.parameters[0], at: m.endOf(b))
     m.insertReturn(double, at: m.endOf(b))
     XCTAssertEqual(
       m.llCode(),
@@ -74,11 +74,11 @@ final class BasicBlockTests: XCTestCase {
 
     m.insertBr(to: body, at: m.endOf(entry))
     let double = m.insertAdd(
-      f.unsafePointee.parameters[0], f.unsafePointee.parameters[0], at: m.endOf(body))
+      f.pointee.parameters[0], f.pointee.parameters[0], at: m.endOf(body))
     m.insertReturn(double, at: m.endOf(body))
 
-    XCTAssertEqual(entry.unsafePointee.name, nil)
-    XCTAssertEqual(body.unsafePointee.name, nil)
+    XCTAssertEqual(entry.pointee.name, nil)
+    XCTAssertEqual(body.pointee.name, nil)
 
     let ir = m.llCode()
     XCTAssertEqual(

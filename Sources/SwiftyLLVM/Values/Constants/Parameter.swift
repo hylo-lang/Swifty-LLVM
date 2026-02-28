@@ -38,9 +38,9 @@ extension Parameter: Hashable {
 
 }
 
-extension Reference<Parameter> {
+extension UnsafeReference<Parameter> {
   /// Creates an intance with `v`, failing iff `v` is not a parameter.
-  public init?(_ v: AnyValue.Reference) {
+  public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAArgument(v.llvm.raw) {
       self.init(h)
     } else {

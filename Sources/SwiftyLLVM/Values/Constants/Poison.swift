@@ -12,15 +12,15 @@ public struct Poison: IRValue, Hashable {
   }
 
   /// Creates and registers the poison value of `t` in `module`.
-  public static func create<T: IRType>(of t: T.Reference, in module: inout Module) -> Poison.Reference {
+  public static func create<T: IRType>(of t: T.UnsafeReference, in module: inout Module) -> Poison.UnsafeReference {
     .init(LLVMGetPoison(t.raw))
   }
 
 }
 
-extension Reference<Poison> {
+extension UnsafeReference<Poison> {
   /// Creates an intance with `v`, failing iff `v` is not a poison value.
-  public init?(_ v: AnyValue.Reference) {
+  public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAPoisonValue(v.llvm.raw) {
       self.init(h)
     } else {

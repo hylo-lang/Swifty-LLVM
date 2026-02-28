@@ -17,19 +17,19 @@ public struct Function: Global, Callable, Hashable {
   }
 
   /// The basic blocks of the function.
-  public var basicBlocks: [BasicBlock.Reference] {
+  public var basicBlocks: [BasicBlock.UnsafeReference] {
     let n = LLVMCountBasicBlocks(llvm.raw)
     var handles: [LLVMBasicBlockRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetBasicBlocks(llvm.raw, &handles)
-    return handles.map({ BasicBlock.Reference($0!) })
+    return handles.map({ BasicBlock.UnsafeReference($0!) })
   }
 
   public var parameters: Function.Parameters { .init(of: self) }
 
   /// The the function's entry, if any.
-  public var entry: BasicBlock.Reference? {
+  public var entry: BasicBlock.UnsafeReference? {
     guard LLVMCountBasicBlocks(llvm.raw) > 0 else { return nil }
-    return BasicBlock.Reference(LLVMGetEntryBasicBlock(llvm.raw))
+    return BasicBlock.UnsafeReference(LLVMGetEntryBasicBlock(llvm.raw))
   }
 
 }
@@ -58,7 +58,7 @@ extension Function {
 
     public typealias Index = Int
 
-    public typealias Element = Parameter.Reference
+    public typealias Element = Parameter.UnsafeReference
 
     /// The function containing the elements of the collection.
     private let parent: any Callable
@@ -87,7 +87,7 @@ extension Function {
       return position - 1
     }
 
-    public subscript(position: Int) -> Parameter.Reference {
+    public subscript(position: Int) -> Parameter.UnsafeReference {
       precondition(position >= 0 && position < count, "index is out of bounds")
       return .init(LLVMGetParam(parent.llvm.raw, UInt32(position)))
     }
@@ -104,9 +104,9 @@ extension Callable {
   public var parameters: Function.Parameters { .init(of: self) }
 }
 
-extension Reference<Function> {
+extension UnsafeReference<Function> {
   /// Creates an instance with `v`, failing iff `v` isn't a function.
-  public init?(_ v: AnyValue.Reference) {
+  public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAFunction(v.llvm.raw) {
       self.init(h)
     } else {

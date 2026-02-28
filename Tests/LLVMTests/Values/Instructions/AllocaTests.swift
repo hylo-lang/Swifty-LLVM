@@ -9,7 +9,7 @@ final class AllocaTests: XCTestCase {
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
     let i = m.insertAlloca(i64, at: m.endOf(b))
-    XCTAssert(i.unsafePointee.allocatedType == m.i64)
+    XCTAssert(i.pointee.allocatedType == m.i64)
   }
 
   func testConversion() {
@@ -19,10 +19,10 @@ final class AllocaTests: XCTestCase {
     let i64 = m.integerType(64)
 
     let i = m.insertAlloca(i64, at: m.endOf(b))
-    XCTAssertNotNil(Alloca.Reference(i.erased))
+    XCTAssertNotNil(Alloca.UnsafeReference(i.erased))
 
-    let u = m.i64.unsafePointee.zero
-    XCTAssertNil(Alloca.Reference(u.erased))
+    let u = m.i64.pointee.zero
+    XCTAssertNil(Alloca.UnsafeReference(u.erased))
   }
 
 }

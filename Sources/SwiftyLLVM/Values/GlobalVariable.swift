@@ -23,8 +23,8 @@ public struct GlobalVariable: Global {
   public var isExternallyInitialized: Bool { LLVMIsExternallyInitialized(llvm.raw) != 0 }
 
   /// The initial value of this global.
-  public var initializer: AnyValue.Reference? {
-    LLVMGetInitializer(llvm.raw).map(AnyValue.Reference.init(_:))
+  public var initializer: AnyValue.UnsafeReference? {
+    LLVMGetInitializer(llvm.raw).map(AnyValue.UnsafeReference.init(_:))
   }
 
 }
