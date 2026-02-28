@@ -963,17 +963,18 @@ public struct Module: ~Copyable {
     return insertCall(callee, on: erased, at: p)
   }
 
-  public mutating func insertCall<T: IRType>(
+  public mutating func insertCall(
     _ callee: AnyValue.Reference,
-    typed calleeType: T.Reference,
+    typed calleeType: AnyType.Reference,
     on arguments: [AnyValue.Reference],
     at p: borrowing InsertionPoint
   ) -> Instruction.Reference {
     var a = arguments.map({ $0.raw as Optional })
 
     // Debug: Print function type and arguments
-    let calleeTypeWrapper = calleeType.unsafePointee
-    if let funcType = FunctionType(calleeTypeWrapper) {
+    if let ft = FunctionType.Reference(calleeType) {
+      let funcType = ft.unsafePointee
+
       // Check if this is a problematic call (mismatched number of parameters when not vararg)
       if funcType.parameters.count != arguments.count && !funcType.isVarArg {
         let functionName = Function.Reference(callee.raw).unsafePointee.name
@@ -997,7 +998,7 @@ public struct Module: ~Copyable {
     for a in repeat each arguments {
       erased.append(a.erased)
     }
-    return insertCall(callee, typed: calleeType, on: erased, at: p)
+    return insertCall(callee, typed: calleeType.erased, on: erased, at: p)
   }
 
   public mutating func insertIntegerComparison<U: IRValue, V: IRValue>(

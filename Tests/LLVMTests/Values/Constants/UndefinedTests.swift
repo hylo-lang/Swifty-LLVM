@@ -6,10 +6,12 @@ final class UndefinedTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    let t: any IRValue = m.undefinedValue(of: m.float).unsafePointee
-    XCTAssertNotNil(Undefined(t))
-    let u: any IRValue = m.i64.unsafePointee.zero.unsafePointee
-    XCTAssertNil(Undefined(u))
+
+    let t = m.undefinedValue(of: m.float)
+    XCTAssertNotNil(Undefined.Reference(t.erased))
+
+    let u = m.i64.unsafePointee.zero
+    XCTAssertNil(Undefined.Reference(u.erased))
   }
 
   func testEquality() {

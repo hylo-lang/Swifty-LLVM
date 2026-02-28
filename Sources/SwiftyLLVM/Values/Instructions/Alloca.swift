@@ -11,15 +11,6 @@ public struct Alloca: IRValue {
     llvm = handle
   }
 
-  /// Creates an instance with `s`, failing iff `s` isn't an `alloca`
-  public init?(_ s: any IRValue) {
-    if let h = LLVMIsAAllocaInst(s.llvm.raw) {
-      self.llvm = .init(h)
-    } else {
-      return nil
-    }
-  }
-
   public static func insert<T: IRType>(
     _ type: T.Reference, at p: borrowing InsertionPoint, in module: inout Module
   )
@@ -34,4 +25,15 @@ public struct Alloca: IRValue {
   /// The preferred alignment of the allocated memory.
   public var alignment: Int { Int(LLVMGetAlignment(llvm.raw)) }
 
+}
+
+extension Reference<Alloca> {
+  /// Creates an instance with `s`, failing iff `s` isn't an `alloca`
+  public init?(_ s: AnyValue.Reference) {
+    if let h = LLVMIsAAllocaInst(s.llvm.raw) {
+      self.init(h)
+    } else {
+      return nil
+    }
+  }
 }
