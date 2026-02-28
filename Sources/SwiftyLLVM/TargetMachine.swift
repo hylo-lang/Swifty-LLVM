@@ -66,6 +66,7 @@ public struct TargetMachine: ~Copyable {
 
 extension TargetMachine {
 
+  /// The target triple of this machine.
   public var description: String { triple }
 
 }
