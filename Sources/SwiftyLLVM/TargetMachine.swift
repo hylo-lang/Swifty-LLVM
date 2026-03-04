@@ -32,6 +32,21 @@ public struct TargetMachine: @unchecked Sendable {
 
   }
 
+
+  public init(forRISCV target: Target) {
+  
+    let opts = LLVMCreateTargetMachineOptions();
+    defer { LLVMDisposeTargetMachineOptions(opts) }
+
+    LLVMTargetMachineOptionsSetCPU(opts, "generic-rv32");
+    LLVMTargetMachineOptionsSetFeatures(opts, "+m,+c");   // RV32IMC
+    LLVMTargetMachineOptionsSetABI(opts, "ilp32");
+    LLVMTargetMachineOptionsSetRelocMode(opts, LLVMRelocStatic);
+    LLVMTargetMachineOptionsSetCodeModel(opts, LLVMCodeModelDefault);
+
+    let tm = LLVMCreateTargetMachineWithOptions(target.llvm, "riscv32-none-elf", opts);
+    self.wrapped = .init(tm!, dispose: LLVMDisposeTargetMachine(_:))
+  }
   /// The triple of the machine.
   public var triple: String {
     guard let s = LLVMGetTargetMachineTriple(llvm) else { return "" }
