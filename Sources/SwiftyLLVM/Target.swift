@@ -85,6 +85,22 @@ public struct Target: @unchecked Sendable {
     LLVMInitializeNativeTarget()
   }()
 
+  /// Returns a RISCV target for the given triple.
+  public static func RISCV(triple: String) throws -> Target {
+    _ = initializeRISCV
+    return try .init(triple: triple)
+  }
+
+  /// The initialization of the RISCV target.
+  private static let initializeRISCV: Void = {
+    LLVMInitializeRISCVTargetInfo()
+    LLVMInitializeRISCVAsmParser()
+    LLVMInitializeRISCVAsmPrinter()
+    LLVMInitializeRISCVDisassembler()
+    LLVMInitializeRISCVTarget()
+    LLVMInitializeRISCVTargetMC()
+  }()
+
 }
 
 extension Target: Hashable {
