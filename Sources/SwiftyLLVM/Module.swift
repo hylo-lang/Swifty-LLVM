@@ -409,20 +409,40 @@ public struct Module: ~Copyable {
   /// The `ptr` type in the default address space.
   public private(set) lazy var ptr: PointerType.UnsafeReference = pointerType(inAddressSpace: .default)
 
-  /// The `half` type.
+  /// The 16-bit floating-point type `half`.
+  /// 
+  /// Represented as IEEE 754 binary16.
   public private(set) lazy var half: FloatingPointType.UnsafeReference = FloatingPointType.half(in: &self)
 
-  /// The `float` type.
-  public private(set) lazy var float: FloatingPointType.UnsafeReference = FloatingPointType.float(
-    in: &self)
+  /// The 16-bit "brain" floating-point type `bfloat`.
+  /// 
+  /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and 7 fraction bits.
+  public private(set) lazy var bfloat: FloatingPointType.UnsafeReference = FloatingPointType.bfloat(in: &self)
 
-  /// The `double` type.
-  public private(set) lazy var double: FloatingPointType.UnsafeReference = FloatingPointType.double(
-    in: &self)
+  /// The 32-bit floating-point type `float`.
+  /// 
+  /// Represented as IEEE 754 binary32.
+  public private(set) lazy var float: FloatingPointType.UnsafeReference = FloatingPointType.float(in: &self)
 
-  /// The `fp128` type.
-  public private(set) lazy var fp128: FloatingPointType.UnsafeReference = FloatingPointType.fp128(
-    in: &self)
+  /// The 64-bit floating-point type `double`.
+  /// 
+  /// Represented as IEEE 754 binary64.
+  public private(set) lazy var double: FloatingPointType.UnsafeReference = FloatingPointType.double(in: &self)
+
+  /// The 80-bit floating-point type `x86_fp80`.
+  ///
+  /// Represented as in X87.
+  public private(set) lazy var x86_fp80: FloatingPointType.UnsafeReference = FloatingPointType.x86_fp80(in: &self)
+
+  /// The 128-bit floating-point type `fp128`.
+  /// 
+  /// Represented as IEEE 754 binary128.
+  public private(set) lazy var fp128: FloatingPointType.UnsafeReference = FloatingPointType.fp128(in: &self)
+
+  /// The 128-bit floating-point type `ppc_fp128`.
+  /// 
+  /// Represented as the PowerPC double-double format, with two 64-bit IEEE 754 binary64 parts.
+  public private(set) lazy var ppc_fp128: FloatingPointType.UnsafeReference = FloatingPointType.ppc_fp128(in: &self)
 
   /// The 1-bit integer type.
   public private(set) lazy var i1: IntegerType.UnsafeReference = integerType(1)
