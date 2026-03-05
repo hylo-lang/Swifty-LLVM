@@ -7,11 +7,12 @@ final class FloatingPointTypeTests: XCTestCase {
   func testConversion() {
     var m = Module("foo")
 
-    let t0 = m.half.erased
-    let t1 = m.float.erased
-    let t2 = m.double.erased
-    let t3 = m.fp128.erased
-    for t in [t0, t1, t2, t3] {
+    let floatingPointTypes = [
+      m.half.erased, m.bfloat.erased, m.float.erased, m.double.erased,
+      m.x86_fp80.erased, m.fp128.erased, m.ppc_fp128.erased
+    ]
+
+    for t in floatingPointTypes {
       XCTAssertNotNil(FloatingPointType.UnsafeReference(t))
     }
 
@@ -23,6 +24,8 @@ final class FloatingPointTypeTests: XCTestCase {
     var m = Module("foo")
     let double = m.double.pointee
     let x = double(1)
+    XCTAssertEqual(x.pointee.type, m.double.erased)
+    XCTAssertTrue(x.pointee.isConstant)
     XCTAssertEqual(x.pointee.value.value, 1, accuracy: .ulpOfOne)
   }
 
@@ -30,10 +33,23 @@ final class FloatingPointTypeTests: XCTestCase {
     var m = Module("foo")
     let t = m.double.pointee
     let u = m.double.pointee
+    XCTAssertEqual(t, u)
     XCTAssertEqual(t.llvm, u.llvm)
 
     let v = m.float.pointee
+    XCTAssertNotEqual(t, v)
     XCTAssertNotEqual(t.llvm, v.llvm)
+  }
+
+  func testDistinctTypes() {
+    var m = Module("foo")
+    let types = [m.half, m.bfloat, m.float, m.double, m.x86_fp80, m.fp128, m.ppc_fp128]
+
+    for i in types.indices {
+      for j in types.indices where i != j {
+        XCTAssertNotEqual(types[i].llvm, types[j].llvm)
+      }
+    }
   }
 
 }
