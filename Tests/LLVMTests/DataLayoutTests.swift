@@ -87,5 +87,21 @@ final class DataLayoutTests: XCTestCase {
     assertAlignmentInvariants(m.fp128, in: layout)
   }
 
+  func testPointerSize() throws {
+    var m = Module("foo")
+    let layout = m.layout
+
+    XCTAssertEqual(layout.pointerSize, layout.storageSize(of: m.ptr))
+    XCTAssertEqual(layout.pointerSize, MemoryLayout<UnsafeRawPointer>.size)
+  }
+
+  func testPointerSizedIntegerType() throws {
+    let m = Module("foo")
+    let layout = m.layout
+
+    let intptr = layout.pointerSizedIntegerType
+    XCTAssertEqual(layout.storageSize(of: intptr), layout.pointerSize)
+    XCTAssertEqual(layout.storageSize(of: intptr), MemoryLayout<UnsafeRawPointer>.size)
+  }
 
 }

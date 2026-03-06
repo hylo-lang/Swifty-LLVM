@@ -76,6 +76,16 @@ public struct DataLayout: ~Copyable {
     Int(LLVMElementAtOffset(llvm, type.llvm.raw, UInt64(offset)))
   }
 
+  /// The size of pointers in bytes in the default address space.
+  public var pointerSize: Int {
+    Int(LLVMPointerSize(llvm))
+  }
+
+  /// An integer type with equal size to pointers in the default address space.
+  public var pointerSizedIntegerType: IntegerType.UnsafeReference {
+    .init(LLVMIntPtrType(llvm))
+  }
+
 }
 
 extension DataLayout {
