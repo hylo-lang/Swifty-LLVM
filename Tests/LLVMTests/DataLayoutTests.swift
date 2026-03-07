@@ -104,4 +104,16 @@ final class DataLayoutTests: XCTestCase {
     XCTAssertEqual(layout.storageSize(of: intptr), MemoryLayout<UnsafeRawPointer>.size)
   }
 
+  func testProgramAddressSpace() throws {
+    var m = Module("foo")
+    let layout = m.layout
+
+    XCTAssertEqual(layout.programAddressSpace, m.programAddressSpace)
+    XCTAssertEqual(m.functionPointer.pointee.addressSpace, layout.programAddressSpace)
+
+    // On the currently supported host platforms, function pointers are always in the default address space (arm64, amd64).
+    // This may not hold for other targets, but we need to build LLVM with support for other targets to test those.
+    XCTAssertEqual(layout.programAddressSpace.llvm, 0)
+  }
+
 }

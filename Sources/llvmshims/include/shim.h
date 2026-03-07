@@ -2,6 +2,7 @@
 #define SWIFTYLLVM_LLVMSHIMS_H
 
 #include "llvm-c/ExternC.h"
+#include "llvm-c/Target.h"
 #include "llvm-c/TargetMachine.h"
 
 LLVM_C_EXTERN_C_BEGIN
@@ -24,7 +25,10 @@ void SwiftyLLVMRunDefaultModulePasses(
     SwiftyLLVMPassOptimizationLevel optimization);
 
 /// Returns the index of the given argument, or -1 if the value is not an argument.
-long  SwiftyLLVMGetArgumentIndex(LLVMValueRef argument);
+long SwiftyLLVMGetArgumentIndex(LLVMValueRef argument);
+
+/// Returns the address space of function pointers in the given data layout.
+unsigned int SwiftyLLVMGetProgramAddressSpace(LLVMTargetDataRef dataLayout);
 
 LLVM_C_EXTERN_C_END
 

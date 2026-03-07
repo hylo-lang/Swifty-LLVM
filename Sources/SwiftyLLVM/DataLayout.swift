@@ -1,4 +1,5 @@
 internal import llvmc
+internal import llvmshims
 
 /// How data are represented in memory for a particular target machine.
 public struct DataLayout: ~Copyable {
@@ -84,6 +85,11 @@ public struct DataLayout: ~Copyable {
   /// An integer type with equal size to pointers in the default address space.
   public var pointerSizedIntegerType: IntegerType.UnsafeReference {
     .init(LLVMIntPtrType(llvm))
+  }
+
+  /// The address space in which function pointers are represented.
+  public var programAddressSpace: AddressSpace {
+    .init(SwiftyLLVMGetProgramAddressSpace(llvm))
   }
 
 }
