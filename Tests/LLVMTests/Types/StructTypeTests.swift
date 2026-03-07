@@ -1,5 +1,6 @@
-import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class StructTypeTests: XCTestCase {
 
@@ -27,14 +28,14 @@ final class StructTypeTests: XCTestCase {
     var m = Module("foo")
     let t = m.integerType(64)
     XCTAssert(m.structType((t, t), packed: true).pointee.isPacked)
-    XCTAssert(m.structType(named: "S", (t, t), packed: true).pointee.isPacked)
+    XCTAssert(m.createStructType(named: "S", [t.erased, t.erased], packed: true).pointee.isPacked)
   }
 
   func testFields() {
     var m = Module("foo")
     let t = m.integerType(64)
     let u = m.integerType(32)
-    
+
     let s0 = m.structType([])
     XCTAssertEqual(s0.pointee.fields.count, 0)
 
@@ -50,7 +51,7 @@ final class StructTypeTests: XCTestCase {
 
   func testConversion() {
     var m = Module("foo")
-    
+
     let t = m.structType([])
     XCTAssertNotNil(StructType.UnsafeReference(t.erased))
 
@@ -68,6 +69,51 @@ final class StructTypeTests: XCTestCase {
     XCTAssertEqual(s0, s1)
     let s2 = m.structType((u, t)).pointee
     XCTAssertNotEqual(s0, s2)
+  }
+
+  func testSameNamedStructTypeEqual() {
+    var m = Module("foo")
+    let t = m.integerType(64)
+    let u = m.integerType(32)
+
+    let s0 = m.structType(named: "S", (t, u)).pointee
+    let s1 = m.structType(named: "S", (t, u)).pointee
+    XCTAssertEqual(s0, s1)
+    XCTAssertEqual(s0.llvm, s1.llvm)
+  }
+
+  func testDifferentNameSameFieldsNotEqual() {
+    var m = Module("foo")
+    let t = m.integerType(64)
+    let u = m.integerType(32)
+
+    let s0 = m.structType(named: "S", (t, u)).pointee
+    let s1 = m.structType(named: "T", (t, u)).pointee
+
+    XCTAssertNotEqual(s0, s1)
+    XCTAssertNotEqual(s0.llvm, s1.llvm)
+
+    XCTAssertEqual(s0.fields[0].erased, t.erased)
+    XCTAssertEqual(s0.fields[1].erased, u.erased)
+
+    XCTAssertEqual(s1.fields[0].erased, t.erased)
+    XCTAssertEqual(s1.fields[1].erased, u.erased)
+  }
+
+  func testSameNameDifferentFields() {
+    var m = Module("foo")
+    let t = m.integerType(64).erased
+    let u = m.integerType(32).erased
+
+    let s0 = m.createStructType(named: "S", [t, u]).pointee
+    let s1 = m.createStructType(named: "S", [u, t]).pointee
+    XCTAssertNotEqual(s0, s1)
+
+    XCTAssertEqual(s0.fields[0].erased, t.erased)
+    XCTAssertEqual(s0.fields[1].erased, u.erased)
+
+    XCTAssertEqual(s1.fields[0].erased, u.erased)
+    XCTAssertEqual(s1.fields[1].erased, t.erased)
   }
 
 }
