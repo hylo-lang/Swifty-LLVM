@@ -8,8 +8,8 @@ extension Global {
   /// The LLVM IR "value type" of this global.
   ///
   /// This "value type" of a global differs from its formal type, which is always a pointer type.
-  public var valueType: IRType {
-    AnyType(LLVMGlobalGetValueType(llvm.raw))
+  public var valueType: AnyType.UnsafeReference {
+    .init(LLVMGlobalGetValueType(llvm.raw))
   }
 
   /// The linkage of this global.

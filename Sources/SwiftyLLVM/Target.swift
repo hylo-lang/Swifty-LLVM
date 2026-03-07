@@ -1,11 +1,11 @@
 internal import llvmc
 
 /// The specification of a platform on which code runs.
-public struct Target: @unchecked Sendable {
+public struct Target {
 
   /// The triple of the target.
   ///
-  /// A triple is a string  taking the form `<arch><sub>-<vendor>-<sys>-<abi>` where:
+  /// A triple is a string taking the form `<arch><sub>-<vendor>-<sys>-<abi>` where:
   /// * `arch` = `x86_64`, `i386`, `arm`, `thumb`, `mips`, etc.
   /// * `sub` = `v5`, `v6m`, `v7a`, `v7m`, etc.
   /// * `vendor` = `pc`, `apple`, `nvidia`, `ibm`, etc.
@@ -41,7 +41,7 @@ public struct Target: @unchecked Sendable {
   }
 
   /// Creates an instance representing the target associated with `machine`.
-  public init(of machine: TargetMachine) {
+  public init(of machine: borrowing TargetMachine) {
     let h = LLVMGetTargetMachineTarget(machine.llvm)
     self.init(wrapping: h!, for: machine.triple)
   }
@@ -89,10 +89,12 @@ public struct Target: @unchecked Sendable {
 
 extension Target: Hashable {
 
+  /// Hashes this instance by its underlying LLVM target handle.
   public func hash(into hasher: inout Hasher) {
     hasher.combine(llvm)
   }
 
+  /// Returns `true` iff `lhs` and `rhs` wrap the same LLVM target.
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.llvm == rhs.llvm
   }
@@ -101,6 +103,7 @@ extension Target: Hashable {
 
 extension Target: CustomStringConvertible {
 
+  /// A textual description of the target from LLVM.
   public var description: String {
     .init(cString: LLVMGetTargetDescription(llvm))
   }

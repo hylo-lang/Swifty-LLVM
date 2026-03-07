@@ -3,19 +3,25 @@ import XCTest
 
 final class MemoryBufferTests: XCTestCase {
 
-  func testInitCopyingData() {
+  func testInitCopyingData() throws {
     let s = "Hello, World!"
-    s.withCString({ (d) in
+    try s.withCString({ (d) in
       let b = MemoryBuffer(copying: .init(start: d, count: s.utf8.count))
-      XCTAssertEqual(s, String(decoding: b))
+      let decoded = try b.withUnsafeBytes({ (contents) in
+        try XCTUnwrap(contents.withMemoryRebound(to: UInt8.self, { (b) in String(bytes: b, encoding: .utf8) }))
+      })
+      XCTAssertEqual(s, decoded)
     })
   }
 
-  func testInitBorrowingData() {
+  func testInitBorrowingData() throws {
     let s = "Hello, World!"
-    s.withCString({ (d) in
-      MemoryBuffer.withInstanceBorrowing(.init(start: d, count: s.utf8.count), { (b) in
-        XCTAssertEqual(s, String(decoding: b))
+    try s.withCString({ (d) in
+      try MemoryBuffer.withInstanceBorrowing(.init(start: d, count: s.utf8.count), { (b) in
+        let decoded = try b.withUnsafeBytes({ (contents) in
+          try XCTUnwrap(contents.withMemoryRebound(to: UInt8.self, { (b) in String(bytes: b, encoding: .utf8) }))
+        })
+        XCTAssertEqual(s, decoded)
       })
     })
   }
@@ -26,18 +32,10 @@ final class MemoryBufferTests: XCTestCase {
     try s.write(to: f, atomically: true, encoding: .utf8)
 
     let b = try MemoryBuffer(contentsOf: f.path)
-    XCTAssertEqual(s, String(decoding: b))
-  }
-
-}
-
-extension String {
-
-  /// Creates an instance with the contents of `b`.
-  fileprivate init(decoding b: MemoryBuffer) {
-    self = b.withUnsafeBytes({ (contents) in
-      contents.withMemoryRebound(to: UInt8.self, { (b) in String(bytes: b, encoding: .utf8)! })
+    let decoded = try b.withUnsafeBytes({ (contents) in
+      try XCTUnwrap(contents.withMemoryRebound(to: UInt8.self, { (b) in String(bytes: b, encoding: .utf8) }))
     })
+    XCTAssertEqual(s, decoded)
   }
 
 }

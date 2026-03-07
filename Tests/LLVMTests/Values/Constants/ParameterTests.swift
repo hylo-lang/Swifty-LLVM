@@ -1,66 +1,81 @@
-import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class ParameterTests: XCTestCase {
 
   func testIndex() {
     var m = Module("foo")
-    let i64 = IntegerType(64, in: &m)
 
-    let f = m.declareFunction("fn", .init(from: [i64, i64], in: &m))
-    XCTAssertEqual(f.parameters[0].index, 0)
-    XCTAssertEqual(f.parameters[1].index, 1)
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    XCTAssertEqual(f.pointee.parameters[0].pointee.index, 0)
+    XCTAssertEqual(f.pointee.parameters[1].pointee.index, 1)
 
-    let p = Parameter(f.parameters[1] as IRValue)
-    XCTAssertEqual(p?.index, 1)
+    let p = Parameter.UnsafeReference(f.pointee.parameters[1].erased)
+    XCTAssertEqual(p?.pointee.index, 1)
+  }
+  func testIndexDynamic() {
+    var m = Module("foo")
+
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    XCTAssertEqual(f.pointee.parameters[0].pointee.index, 0)
+    XCTAssertEqual(f.pointee.parameters[1].pointee.index, 1)
+
+    let p = Parameter.UnsafeReference(f.pointee.parameters[1].erased)
+    XCTAssertEqual(p?.pointee.index, 1)
   }
 
   func testParent() {
     var m = Module("foo")
-    let i64 = IntegerType(64, in: &m)
 
-    let f = m.declareFunction("fn", .init(from: [i64, i64], in: &m))
-    XCTAssertEqual(f.parameters[0].parent, f)
+    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    XCTAssertEqual(f.pointee.parameters[0].pointee.parent, f.pointee)
   }
 
-  func testAttributes() {
+  func testParentDynamic() {
     var m = Module("foo")
-    let f = m.declareFunction("f", .init(from: [PointerType(in: &m)], in: &m))
-    let p = f.parameters[0]
-    let a = Parameter.Attribute(.nofree, in: &m)
-    let b = Parameter.Attribute(.dereferenceable_or_null, 8, in: &m)
 
-    m.addAttribute(a, to: p)
-    m.addAttribute(b, to: p)
-    XCTAssertEqual(p.attributes.count, 2)
-    XCTAssert(p.attributes.contains(a))
-    XCTAssert(p.attributes.contains(b))
+    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    XCTAssertEqual(f.pointee.parameters[0].pointee.parent, f.pointee)
+  }
+  func testAttributes() throws {
+    var m = Module("foo")
+    let f = m.declareFunction("f", m.functionType(from: (m.ptr)))
+    let p = f.pointee.parameters[0]
+    let a = m.parameterAttribute(.nofree)
+    let b = m.parameterAttribute(.dereferenceable_or_null, 8)
 
-    XCTAssertEqual(m.addAttribute(named: .nofree, to: p), a)
+    m.addParameterAttribute(a, to: p)
+    m.addParameterAttribute(b, to: p)
+    XCTAssertEqual(p.pointee.attributes.count, 2)
+    XCTAssert(p.pointee.attributes.contains(a))
+    XCTAssert(p.pointee.attributes.contains(b))
 
-    m.removeAttribute(a, from: p)
-    XCTAssertEqual(p.attributes, [b])
+    XCTAssertEqual(m.addParameterAttribute(named: .nofree, to: p), a)
+
+    m.removeParameterAttribute(a, from: p)
+    XCTAssertEqual(p.pointee.attributes, [b])
   }
 
   func testConversion() {
     var m = Module("foo")
-    let i64 = IntegerType(64, in: &m)
 
-    let p: IRValue = m.declareFunction("fn", .init(from: [i64], in: &m)).parameters[0]
-    XCTAssertNotNil(Parameter(p))
-    let q: IRValue = IntegerType(64, in: &m).zero
-    XCTAssertNil(Parameter(q))
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
+    let p = f.pointee.parameters[0]
+    XCTAssertNotNil(Parameter.UnsafeReference(p.erased))
+    
+    let q = m.i64.pointee.zero
+    XCTAssertNil(Parameter.UnsafeReference(q.erased))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let i64 = IntegerType(64, in: &m)
 
-    let p = m.declareFunction("fn", .init(from: [i64], in: &m)).parameters[0]
-    let q = m.declareFunction("fn", .init(from: [i64], in: &m)).parameters[0]
+    let p = m.declareFunction("fn", m.functionType(from: (m.i64))).pointee.parameters[0]
+    let q = m.declareFunction("fn", m.functionType(from: (m.i64))).pointee.parameters[0]
     XCTAssertEqual(p, q)
 
-    let r = m.declareFunction("fn1", .init(from: [i64], in: &m)).parameters[0]
+    let r = m.declareFunction("fn1", m.functionType(from: (m.i64))).pointee.parameters[0]
     XCTAssertNotEqual(p, r)
   }
 

@@ -5,34 +5,36 @@ final class ArrayTypeTests: XCTestCase {
 
   func testCount() {
     var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
-    XCTAssertEqual(ArrayType(8, i16, in: &m).count, 8)
+    let i16 = m.integerType(16)
+    XCTAssertEqual(m.arrayType(8, i16).pointee.count, 8)
   }
 
   func testElement() {
     var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
-    XCTAssertEqual(IntegerType(ArrayType(8, i16, in: &m).element), i16)
+    let i16 = m.i16
+    XCTAssertEqual(IntegerType.UnsafeReference(m.arrayType(8, i16).pointee.element), i16)
   }
 
   func testConversion() {
     var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
-    let t: IRType = ArrayType(8, i16, in: &m)
-    XCTAssertNotNil(ArrayType(t))
-    let u: IRType = IntegerType(64, in: &m)
-    XCTAssertNil(ArrayType(u))
+    let i16 = m.integerType(16)
+    
+    let t = m.arrayType(8, i16)
+    XCTAssertNotNil(ArrayType.UnsafeReference(t.erased))
+    
+    let u = m.integerType(64)
+    XCTAssertNil(ArrayType.UnsafeReference(u.erased))
   }
 
   func testEquality() {
     var m = Module("foo")
-    let i16 = IntegerType(16, in: &m)
+    let i16 = m.integerType(16)
 
-    let t = ArrayType(8, i16, in: &m)
-    let u = ArrayType(8, i16, in: &m)
+    let t = m.arrayType(8, i16).pointee
+    let u = m.arrayType(8, i16).pointee
     XCTAssertEqual(t, u)
 
-    let v = ArrayType(16, i16, in: &m)
+    let v = m.arrayType(16, i16).pointee
     XCTAssertNotEqual(t, v)
   }
 
