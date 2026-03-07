@@ -1176,14 +1176,14 @@ public struct Module: ~Copyable {
     return VoidType.create(in: &self)
   }
 
-  /// Creates a struct type with given field types.
+  /// Obtains or creates a struct type with given field types.
   public mutating func structType(_ fields: [AnyType.UnsafeReference], packed: Bool = false)
     -> StructType.UnsafeReference
   {
     StructType.create(fields, packed: packed, in: &self)
   }
 
-  /// Creates a struct type with given field types.
+  /// Creates or retrieves a struct type with given field types.
   ///
   /// Callable with a tuple of typed references: `structType((i64, i8, float))`.
   public mutating func structType<each T: IRType>(_ fields: (repeat UnsafeReference<each T>), packed: Bool = false)
@@ -1196,18 +1196,34 @@ public struct Module: ~Copyable {
     return structType(erased, packed: packed)
   }
 
-  /// Creates a named struct type with given field types.
-  public mutating func structType(
-    named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false
-  )
+  /// Creates or retrieves a named struct type with given field types.
+  /// 
+  /// Precondition: If a type already exists with the given `name` in the context, 
+  /// it must be an equivalent struct type as defined by the arguments.
+  /// 
+  /// Repeated calls with same arguments return the same struct type.
+  public mutating func structType(named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false)
     -> StructType.UnsafeReference
   {
-    StructType.create(named: name, fields, packed: packed, in: &self)
+    if let s = type(named: name) {
+      precondition(LLVMGetTypeKind(s.raw) == LLVMStructTypeKind, "Type named \(name) already exists but is not a struct type")
+      let existing = StructType.UnsafeReference(s.raw)
+      precondition(existing.pointee.isPacked == packed, "Struct type named \(name) already exists but has different packing")
+      precondition(existing.pointee.fields.count == fields.count, "Struct type named \(name) already exists but has different number of fields")
+      for (f1, f2) in zip(existing.pointee.fields, fields) {
+        precondition(f1 == f2, "Struct type named \(name) already exists but has different field types")
+      }
+      return existing
+    }
+    return createStructType(named: name, fields, packed: packed)
   }
 
-  /// Creates a named struct type with given field types.
-  ///
-  /// Callable with a tuple of typed references: `structType(named: "S", (i64, i8, float))`.
+  /// Creates or retrieves a named struct type with given field types.
+  /// 
+  /// Precondition: If a type already exists with the given `name` in the context, 
+  /// it must be an equivalent struct type as defined by the arguments.
+  /// 
+  /// Callable with a tuple of typed references: `structType(named: "MyStruct", (i64, i8, float))`.
   public mutating func structType<each T: IRType>(
     named name: String, _ fields: (repeat UnsafeReference<each T>), packed: Bool = false
   ) -> StructType.UnsafeReference {
@@ -1218,7 +1234,17 @@ public struct Module: ~Copyable {
     return structType(named: name, erased, packed: packed)
   }
 
-  
+  /// Creates a named struct type with given field types.
+  /// 
+  /// Repeated calls with same arguments return new struct types. 
+  /// Use `structType` to resolve to an existing struct if present.
+  internal mutating func createStructType(
+    named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false
+  )
+    -> StructType.UnsafeReference
+  {
+    StructType.create(named: name, fields, packed: packed, in: &self)
+  }
 
   /// Creates an instruction representing an undefined value of type `type`.
   public mutating func undefinedValue<T: IRType>(of type: T.UnsafeReference) -> Undefined.UnsafeReference {
