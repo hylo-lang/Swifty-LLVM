@@ -143,4 +143,64 @@ final class FunctionTests: XCTestCase {
     XCTAssertNotEqual(f, h)
   }
 
+  func testFunctionValueAsArgument() throws {
+    // Note: This test may fail on other targets where the program address space isn't the default one.
+    // In that case, adjust the test for the given platform.
+
+    // Equivalent Swift:
+    //
+    //     func identity(_ x: Int32) -> Int32 { x }
+    //     func apply(_ f: (Int32) -> Int32, _ x: Int32) -> Int32 { f(x) }
+    //     func main() -> Int32 { apply(identity, 42) }
+    var m = Module("foo")
+
+    let unaryI32FunctionType = m.functionType(from: (m.i32), to: m.i32)
+
+    let identity = m.declareFunction("identity", unaryI32FunctionType)
+    let identityEntry = m.appendBlock(to: identity)
+    m.insertReturn(identity.pointee.parameters[0], at: m.endOf(identityEntry))
+
+    let apply = m.declareFunction(
+      "apply", m.functionType(from: (m.functionPointer, m.i32), to: m.i32))
+    let applyEntry = m.appendBlock(to: apply)
+    let forwardedResult = m.insertCall(
+      apply.pointee.parameters[0].erased,
+      typed: unaryI32FunctionType,
+      on: (apply.pointee.parameters[1]),
+      at: m.endOf(applyEntry))
+    m.insertReturn(forwardedResult, at: m.endOf(applyEntry))
+
+    let main = m.declareFunction("main", m.functionType(from: (), to: m.i32))
+    let mainEntry = m.appendBlock(to: main)
+    let result = m.insertCall(
+      apply,
+      on: (identity, m.i32.pointee.constant(42)),
+      at: m.endOf(mainEntry))
+    m.insertReturn(result, at: m.endOf(mainEntry))
+
+    XCTAssertNoThrow(try m.verify())
+
+    XCTAssertEqual(
+      m.llCode(),
+      """
+      ; ModuleID = 'foo'
+      source_filename = "foo"
+
+      define i32 @identity(i32 %0) {
+        ret i32 %0
+      }
+
+      define i32 @apply(ptr %0, i32 %1) {
+        %3 = call i32 %0(i32 %1)
+        ret i32 %3
+      }
+
+      define i32 @main() {
+        %1 = call i32 @apply(ptr @identity, i32 42)
+        ret i32 %1
+      }
+
+      """)
+  }
+
 }

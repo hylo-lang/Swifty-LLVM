@@ -22,6 +22,8 @@
 #include "shim.h"
 #include "llvm-c/TargetMachine.h"
 #include "llvm/Passes/PassBuilder.h"
+#include "llvm/IR/DataLayout.h"
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -92,5 +94,10 @@ long SwiftyLLVMGetArgumentIndex(LLVMValueRef argument) {
   }
 
   return -1;
+}
+
+unsigned int SwiftyLLVMGetProgramAddressSpace(LLVMTargetDataRef dataLayout) {
+  llvm::DataLayout *td = llvm::unwrap(dataLayout);
+  return td->getProgramAddressSpace();
 }
 }
