@@ -409,6 +409,16 @@ public struct Module: ~Copyable {
   /// The `ptr` type in the default address space.
   public private(set) lazy var ptr: PointerType.UnsafeReference = pointerType(inAddressSpace: .default)
 
+  /// The address space in which function pointers are represented in the current data layout.
+  public var programAddressSpace: AddressSpace {
+    .init(SwiftyLLVMGetProgramAddressSpace(LLVMGetModuleDataLayout(llvmModule.raw)))
+  }
+
+  /// The pointer type with program address space according to the module's data layout.
+  public var functionPointer: PointerType.UnsafeReference {
+    mutating _read{ yield pointerType(inAddressSpace: programAddressSpace) }
+  }
+
   /// The 16-bit floating-point type `half`.
   /// 
   /// Represented as IEEE 754 binary16.
