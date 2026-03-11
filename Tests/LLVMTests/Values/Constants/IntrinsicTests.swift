@@ -4,14 +4,14 @@ import XCTest
 
 final class IntinsicTests: XCTestCase {
 
-  func testInit() {
-    var m = Module("foo")
+  func testInit() throws {
+    var m = try Module("foo")
     XCTAssertNotNil(m.intrinsic(named: IntrinsicFunction.llvm.trap))
     XCTAssertNil(m.intrinsic(named: IntrinsicFunction.llvm.does_not_exist))
   }
 
   func testIsOverloaded() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
 
     // llvm.va_start is overloaded for different address spaces.
     let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
@@ -27,13 +27,13 @@ final class IntinsicTests: XCTestCase {
   }
 
   func testName() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap, for: []))
     XCTAssertEqual(IntrinsicFunction(temporarilyWrapping: f.llvm).name, "llvm.trap")
   }
 
   func testEquality() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
 
     let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
     let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))

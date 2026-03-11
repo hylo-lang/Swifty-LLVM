@@ -3,8 +3,8 @@ import XCTest
 
 final class AttributeTests: XCTestCase {
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let a = m.functionAttribute(.cold)
     let b = m.functionAttribute(.cold)
     XCTAssertEqual(a, b)
@@ -13,8 +13,8 @@ final class AttributeTests: XCTestCase {
     XCTAssertNotEqual(a, c)
   }
 
-  func testValue() {
-    var m = Module("foo")
+  func testValue() throws {
+    var m = try Module("foo")
     let a = m.parameterAttribute(.dereferenceable_or_null, 64)
     XCTAssertEqual(a.pointee.value, 64)
   }

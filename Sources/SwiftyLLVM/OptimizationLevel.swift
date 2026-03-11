@@ -31,7 +31,7 @@ public enum OptimizationLevel: Hashable, Sendable {
   }
 
   /// The optimization level representation used by optimization passes exposed by the custom LLVM shims in SwiftyLLVM.
-  internal var swiftyLLVM: SwiftyLLVMPassOptimizationLevel {
+  internal var swiftyLLVMRepresentation: SwiftyLLVMPassOptimizationLevel {
     switch self {
     case .none:
       SwiftyLLVMPassOptimizationLevelO0
