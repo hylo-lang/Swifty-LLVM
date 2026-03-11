@@ -5,53 +5,47 @@ import XCTest
 final class DataLayoutTests: XCTestCase {
 
   func testBitWidth() throws {
-    var m = Module("foo")
-    let t = try TargetMachine(for: .host())
+    var m = try Module("foo")
 
     let i32 = m.integerType(32)
-    XCTAssertEqual(t.layout.bitWidth(of: i32), 32)
+    XCTAssertEqual(m.layout.bitWidth(of: i32), 32)
   }
 
   func testStorageSize() throws {
-    var m = Module("foo")
-    let t = try TargetMachine(for: .host())
+    var m = try Module("foo")
 
     let i32 = m.integerType(32)
-    XCTAssertEqual(t.layout.storageSize(of: i32), 4)
+    XCTAssertEqual(m.layout.storageSize(of: i32), 4)
   }
 
   func testStorageStride() throws {
-    var m = Module("foo")
-    let t = try TargetMachine(for: .host())
+    var m = try Module("foo")
 
     let i32 = m.integerType(32)
-    XCTAssertEqual(t.layout.storageStride(of: i32), 4)
+    XCTAssertEqual(m.layout.storageStride(of: i32), 4)
   }
 
   func testABIAlignment() throws {
-    var m = Module("foo")
-    let t = try TargetMachine(for: .host())
+    var m = try Module("foo")
 
     let i32 = m.integerType(32)
-    XCTAssertEqual(t.layout.abiAlignment(of: i32), 4)
+    XCTAssertEqual(m.layout.abiAlignment(of: i32), 4)
   }
 
   func testOffset() throws {
-    var m = Module("foo")
-    let t = try TargetMachine(for: .host())
+    var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
     let s = m.structType((i32, i32))
-    XCTAssertEqual(t.layout.offset(of: 1, in: s), 4)
+    XCTAssertEqual(m.layout.offset(of: 1, in: s), 4)
   }
 
   func testIndex() throws {
-    var m = Module("foo")
-    let t = try TargetMachine(for: .host())
+    var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
     let s = m.structType((i32, i32))
-    XCTAssertEqual(t.layout.index(at: 5, in: s), 1)
+    XCTAssertEqual(m.layout.index(at: 5, in: s), 1)
   }
 
   /// Asserts that for a given `type`
@@ -73,47 +67,43 @@ final class DataLayoutTests: XCTestCase {
   }
 
   func testAlignmentGuarantees() throws {
-    var m = Module("foo")
-    let layout = m.layout
+    var m = try Module("foo")
 
     for i in 1...128 {
-      assertAlignmentInvariants(m.integerType(i), in: layout)
+      assertAlignmentInvariants(m.integerType(i), in: m.layout)
     }
 
-    // assertAlignmentInvariants(m.void, in: layout)
-    assertAlignmentInvariants(m.half, in: layout)
-    assertAlignmentInvariants(m.float, in: layout)
-    assertAlignmentInvariants(m.double, in: layout)
-    assertAlignmentInvariants(m.fp128, in: layout)
+    // assertAlignmentInvariants(m.void, in: m.layout)
+    assertAlignmentInvariants(m.half, in: m.layout)
+    assertAlignmentInvariants(m.float, in: m.layout)
+    assertAlignmentInvariants(m.double, in: m.layout)
+    assertAlignmentInvariants(m.fp128, in: m.layout)
   }
 
   func testPointerSize() throws {
-    var m = Module("foo")
-    let layout = m.layout
+    var m = try Module("foo")
 
-    XCTAssertEqual(layout.pointerSize, layout.storageSize(of: m.ptr))
-    XCTAssertEqual(layout.pointerSize, MemoryLayout<UnsafeRawPointer>.size)
+    XCTAssertEqual(m.layout.pointerSize, m.layout.storageSize(of: m.ptr))
+    XCTAssertEqual(m.layout.pointerSize, MemoryLayout<UnsafeRawPointer>.size)
   }
 
   func testPointerSizedIntegerType() throws {
-    let m = Module("foo")
-    let layout = m.layout
+    let m = try Module("foo")
 
-    let intptr = layout.pointerSizedIntegerType
-    XCTAssertEqual(layout.storageSize(of: intptr), layout.pointerSize)
-    XCTAssertEqual(layout.storageSize(of: intptr), MemoryLayout<UnsafeRawPointer>.size)
+    let intptr = m.layout.pointerSizedIntegerType
+    XCTAssertEqual(m.layout.storageSize(of: intptr), m.layout.pointerSize)
+    XCTAssertEqual(m.layout.storageSize(of: intptr), MemoryLayout<UnsafeRawPointer>.size)
   }
 
   func testProgramAddressSpace() throws {
-    var m = Module("foo")
-    let layout = m.layout
+    var m = try Module("foo")
 
-    XCTAssertEqual(layout.programAddressSpace, m.programAddressSpace)
-    XCTAssertEqual(m.functionPointer.pointee.addressSpace, layout.programAddressSpace)
+    XCTAssertEqual(m.layout.programAddressSpace, m.programAddressSpace)
+    XCTAssertEqual(m.functionPointer.pointee.addressSpace, m.layout.programAddressSpace)
 
     // On the currently supported host platforms, function pointers are always in the default address space (arm64, amd64).
     // This may not hold for other targets, but we need to build LLVM with support for other targets to test those.
-    XCTAssertEqual(layout.programAddressSpace.llvm, 0)
+    XCTAssertEqual(m.layout.programAddressSpace.llvm, 0)
   }
 
 }

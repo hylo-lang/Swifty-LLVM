@@ -3,20 +3,20 @@ import XCTest
 
 final class StringConstantTests: XCTestCase {
 
-  func testInit() {
-    var m = Module("foo")
+  func testInit() throws {
+    var m = try Module("foo")
     let t = m.stringConstant("Bonjour!")
     XCTAssertEqual(t.pointee.value, "Bonjour!")
   }
 
-  func testInitWithoutNullTerminator() {
-    var m = Module("foo")
+  func testInitWithoutNullTerminator() throws {
+    var m = try Module("foo")
     let t = m.stringConstant("Bonjour!", nullTerminated: false)
     XCTAssertEqual(t.pointee.value, "Bonjour!")
   }
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
 
     let t = m.stringConstant("Bonjour!")
     XCTAssertNotNil(StringConstant.UnsafeReference(t.erased))
@@ -25,8 +25,8 @@ final class StringConstantTests: XCTestCase {
     XCTAssertNil(StringConstant.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
 
     let t = m.stringConstant("Bonjour!")
     let u = m.stringConstant("Bonjour!")

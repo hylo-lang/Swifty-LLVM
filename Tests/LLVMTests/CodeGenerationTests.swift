@@ -5,28 +5,28 @@ import XCTest
 final class CodeGenerationTests: XCTestCase {
 
   func testO0() throws {
-    var m = Module("math")
+    var m = try Module("math")
     try m.emitTest()
     m.runDefaultModulePasses(optimization: .none)
     XCTAssertNoThrow(try m.verify())
   }
 
   func testO1() throws {
-    var m = Module("math")
+    var m = try Module("math")
     try m.emitTest()
     m.runDefaultModulePasses(optimization: .less)
     XCTAssertNoThrow(try m.verify())
   }
 
   func testO2() throws {
-    var m = Module("math")
+    var m = try Module("math")
     try m.emitTest()
     m.runDefaultModulePasses(optimization: .default)
     XCTAssertNoThrow(try m.verify())
   }
 
   func testO3() throws {
-    var m = Module("math")
+    var m = try Module("math")
     try m.emitTest()
     m.runDefaultModulePasses(optimization: .aggressive)
     XCTAssertNoThrow(try m.verify())

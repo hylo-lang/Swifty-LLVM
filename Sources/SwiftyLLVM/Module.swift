@@ -7,13 +7,21 @@ public struct Module: ~Copyable {
   /// The context owning the contents of the LLVM module.
   let context: LLVMContextRef
 
+
   /// The LLVM module.
   let module: LLVMModuleRef
 
+  /// The target machine for which code is being generated in this LLVM module.
+  public let targetMachine: TargetMachine
+
+  /// The data layout of the module.
+  public var layout: DataLayout { _read { yield targetMachine.layout } }
+
   /// Creates an instance by taking ownership of `context` and `module`.
-  private init(context: LLVMContextRef, module: LLVMModuleRef) {
+  private init(targetMachine: consuming TargetMachine, context: LLVMContextRef, module: LLVMModuleRef) {
     self.context = context
     self.module = module
+    self.targetMachine = targetMachine
   }
 
   /// Dispose of the managed resources.
@@ -23,10 +31,10 @@ public struct Module: ~Copyable {
   }
 
   /// Creates an instance with `name`.
-  public init(_ name: String) {
+  public init(_ name: String, targetMachine: consuming TargetMachine = try! TargetMachine.host()) throws {
     let c = LLVMContextCreate()!
     let m = LLVMModuleCreateWithNameInContext(name, c)!
-    self.init(context: c, module: m)
+    self.init(targetMachine: targetMachine, context: c, module: m)
   }
 
   /// A handle to the LLVM object wrapped by this instance.
@@ -42,28 +50,8 @@ public struct Module: ~Copyable {
     }
   }
 
-  /// The data layout of the module.
-  public var layout: DataLayout {
-    get {
-      let s = LLVMGetDataLayoutStr(llvmModule.raw)
-      let h = LLVMCreateTargetData(s)
-      return .init(h!)
-    }
-    set {
-      LLVMSetDataLayout(llvmModule.raw, newValue.description)
-    }
-  }
-
   /// The target of the module.
-  public var target: Target? {
-    get {
-      guard let t = LLVMGetTarget(llvmModule.raw) else { return nil }
-      return try? Target(triple: .init(cString: t))
-    }
-    set {
-      LLVMSetTarget(llvmModule.raw, newValue?.triple)
-    }
-  }
+  public var target: Target { targetMachine.target }
 
   /// Verifies if the IR in `self` is well formed and throws an error if it isn't.
   public func verify() throws {
@@ -80,19 +68,11 @@ public struct Module: ~Copyable {
     }
   }
 
-  /// Runs standard optimization passes on `self` tuned for given `optimization` and `machine`.
-  public mutating func runDefaultModulePasses(
-    optimization: OptimizationLevel = .none
-  ) {
-    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, nil, optimization.swiftyLLVM)
-  }
-
   /// Runs the default LLVM module pass pipeline tuned for `optimization` and `machine`.
   public mutating func runDefaultModulePasses(
     optimization: OptimizationLevel = .none,
-    for machine: borrowing TargetMachine
   ) {
-    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, machine.llvm, optimization.swiftyLLVM)
+    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, targetMachine.llvm, optimization.swiftyLLVMRepresentation)
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.

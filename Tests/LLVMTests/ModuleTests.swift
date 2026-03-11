@@ -4,15 +4,15 @@ import XCTest
 
 final class ModuleTests: XCTestCase {
 
-  func testModuleName() {
-    var m = Module("foo")
+  func testModuleName() throws {
+    var m = try Module("foo")
     XCTAssertEqual(m.name, "foo")
     m.name = "bar"
     XCTAssertEqual(m.name, "bar")
   }
 
   func testTypeNamed() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let t = m.structType(named: "T", ())
     let u = try XCTUnwrap(m.type(named: "T"))
     XCTAssert(t.erased == u)
@@ -20,7 +20,7 @@ final class ModuleTests: XCTestCase {
   }
 
   func testFunctionNamed() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let f = m.declareFunction("fn", m.functionType(from: ()))
     let g = try XCTUnwrap(m.function(named: "fn"))
     XCTAssert(f == g)
@@ -28,14 +28,14 @@ final class ModuleTests: XCTestCase {
   }
 
   func testIntrinsicNamed() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
     let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
     XCTAssert(f == g)
   }
 
   func testGlobalNamed() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let x = m.declareGlobalVariable("gl", m.ptr)
     let y = try XCTUnwrap(m.global(named: "gl"))
     XCTAssert(x == y)
@@ -45,15 +45,15 @@ final class ModuleTests: XCTestCase {
     XCTAssert(x == z)
   }
 
-  func testAddGlobalVariable() {
-    var m = Module("foo")
+  func testAddGlobalVariable() throws {
+    var m = try Module("foo")
     let x = m.addGlobalVariable("g", m.ptr)
     let y = m.addGlobalVariable("g", m.ptr)
     XCTAssert(x != y)
   }
 
-  func testVerify() {
-    var m = Module("foo")
+  func testVerify() throws {
+    var m = try Module("foo")
     XCTAssertNoThrow(try m.verify())
 
     let f = m.declareFunction("fn", m.functionType(from: []))
@@ -62,28 +62,26 @@ final class ModuleTests: XCTestCase {
   }
 
   func testCompile() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let i32 = m.integerType(32)
 
     let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
     m.insertReturn(i32.pointee.zero, at: m.endOf(b))
 
-    let t = try TargetMachine(for: .host())
-    let a = try m.compile(.assembly, for: t)
+    let a = try m.compile(.assembly, for: m.targetMachine)
     XCTAssert(a.count != 0)
   }
 
   func testStandardModulePasses() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let i32 = m.integerType(32)
 
     let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
     m.insertReturn(m.i32.pointee.zero, at: m.endOf(b))
 
-    let h = try Target.host()
-    m.runDefaultModulePasses(for: TargetMachine(for: h))
+    m.runDefaultModulePasses()
   }
 
 }

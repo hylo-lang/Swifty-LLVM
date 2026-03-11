@@ -4,8 +4,8 @@ import XCTest
 
 final class SwitchTests: XCTestCase {
 
-  func testSwitch() {
-    var m = Module("foo")
+  func testSwitch() throws {
+    var m = try Module("foo")
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
 

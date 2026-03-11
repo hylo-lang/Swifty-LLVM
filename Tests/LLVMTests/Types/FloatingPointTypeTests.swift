@@ -4,8 +4,8 @@ import XCTest
 
 final class FloatingPointTypeTests: XCTestCase {
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
 
     let floatingPointTypes = [
       m.half.erased, m.bfloat.erased, m.float.erased, m.double.erased,
@@ -20,8 +20,8 @@ final class FloatingPointTypeTests: XCTestCase {
     XCTAssertNil(FloatingPointType.UnsafeReference(u))
   }
 
-  func testCallSyntax() {
-    var m = Module("foo")
+  func testCallSyntax() throws {
+    var m = try Module("foo")
     let double = m.double.pointee
     let x = double(1)
     XCTAssertEqual(x.pointee.type, m.double.erased)
@@ -29,8 +29,8 @@ final class FloatingPointTypeTests: XCTestCase {
     XCTAssertEqual(x.pointee.value.value, 1, accuracy: .ulpOfOne)
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let t = m.double.pointee
     let u = m.double.pointee
     XCTAssertEqual(t, u)
@@ -41,8 +41,8 @@ final class FloatingPointTypeTests: XCTestCase {
     XCTAssertNotEqual(t.llvm, v.llvm)
   }
 
-  func testDistinctTypes() {
-    var m = Module("foo")
+  func testDistinctTypes() throws {
+    var m = try Module("foo")
     let types = [m.half, m.bfloat, m.float, m.double, m.x86_fp80, m.fp128, m.ppc_fp128]
 
     for i in types.indices {

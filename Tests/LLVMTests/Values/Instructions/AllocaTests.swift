@@ -3,8 +3,8 @@ import XCTest
 
 final class AllocaTests: XCTestCase {
 
-  func testAllocatedType() {
-    var m = Module("foo")
+  func testAllocatedType() throws {
+    var m = try Module("foo")
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
@@ -12,8 +12,8 @@ final class AllocaTests: XCTestCase {
     XCTAssert(i.pointee.allocatedType == m.i64)
   }
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
