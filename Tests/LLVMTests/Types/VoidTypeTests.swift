@@ -3,14 +3,14 @@ import XCTest
 
 final class VoidTypeTests: XCTestCase {
 
-  func testBitWidth() {
-    var m = Module("foo")
+  func testBitWidth() throws {
+    var m = try Module("foo")
     XCTAssertEqual(m.integerType(64).pointee.bitWidth, 64)
     XCTAssertEqual(m.integerType(32).pointee.bitWidth, 32)
   }
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
 
     let t: VoidType.UnsafeReference = m.void
     XCTAssertNotNil(VoidType.UnsafeReference(t.erased))
@@ -19,8 +19,8 @@ final class VoidTypeTests: XCTestCase {
     XCTAssertNil(VoidType.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let t = m.void
     let u = m.void
     XCTAssertEqual(t, u)

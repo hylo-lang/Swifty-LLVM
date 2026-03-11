@@ -4,9 +4,8 @@ import XCTest
 final class TargetMachineTests: XCTestCase {
 
   func testTarget() throws {
-    let h = try Target.host()
-    let t = TargetMachine(for: h)
-    XCTAssertEqual(t.target, h)
+    let t = try TargetMachine(triple: Target.defaultTargetTriple)
+    XCTAssertEqual(t.triple, Target.defaultTargetTriple)
   }
 
 }

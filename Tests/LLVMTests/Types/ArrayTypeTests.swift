@@ -3,20 +3,20 @@ import XCTest
 
 final class ArrayTypeTests: XCTestCase {
 
-  func testCount() {
-    var m = Module("foo")
+  func testCount() throws {
+    var m = try Module("foo")
     let i16 = m.integerType(16)
     XCTAssertEqual(m.arrayType(8, i16).pointee.count, 8)
   }
 
-  func testElement() {
-    var m = Module("foo")
+  func testElement() throws {
+    var m = try Module("foo")
     let i16 = m.i16
     XCTAssertEqual(IntegerType.UnsafeReference(m.arrayType(8, i16).pointee.element), i16)
   }
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
     let i16 = m.integerType(16)
     
     let t = m.arrayType(8, i16)
@@ -26,8 +26,8 @@ final class ArrayTypeTests: XCTestCase {
     XCTAssertNil(ArrayType.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let i16 = m.integerType(16)
 
     let t = m.arrayType(8, i16).pointee

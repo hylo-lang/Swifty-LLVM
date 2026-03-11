@@ -3,8 +3,8 @@ import XCTest
 
 final class PoisonTests: XCTestCase {
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
     
     let t = m.poisonValue(of: m.float)
     XCTAssertNotNil(Poison.UnsafeReference(t.erased))
@@ -13,8 +13,8 @@ final class PoisonTests: XCTestCase {
     XCTAssertNil(Poison.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let t = m.poisonValue(of: m.double)
     let u = m.poisonValue(of: m.double)
     XCTAssertEqual(t, u)
@@ -23,8 +23,8 @@ final class PoisonTests: XCTestCase {
     XCTAssertNotEqual(t, v)
   }
 
-  func testIsConstant() {
-    var m = Module("foo")
+  func testIsConstant() throws {
+    var m = try Module("foo")
     
     let t = m.poisonValue(of: m.float)
     XCTAssertTrue(t.with{ p in p.isConstant})

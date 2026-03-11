@@ -12,11 +12,6 @@ public struct DataLayout: ~Copyable {
     self.llvm = llvm
   }
 
-  /// Creates an instance representing the data layout associated with `machine`.
-  public init(of machine: borrowing TargetMachine) {
-    self.llvm = LLVMCreateTargetDataLayout(machine.llvm)
-  }
-
   deinit {
     LLVMDisposeTargetData(llvm)
   }

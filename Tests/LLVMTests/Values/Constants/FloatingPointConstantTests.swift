@@ -3,32 +3,32 @@ import XCTest
 
 final class FloatingPointConstantTests: XCTestCase {
 
-  func testZero() {
-    var m = Module("foo")
+  func testZero() throws {
+    var m = try Module("foo")
     let t = m.double
     let ty = t.pointee
     let x = ty.zero
     XCTAssertEqual(x.pointee.value.value, 0.0, accuracy: .ulpOfOne)
   }
 
-  func testInitWithDouble() {
-    var m = Module("foo")
+  func testInitWithDouble() throws {
+    var m = try Module("foo")
     let t = m.double
     let ty = t.pointee
     let x = ty.constant(4.2)
     XCTAssertEqual(x.pointee.value.value, 4.2, accuracy: .ulpOfOne)
   }
 
-  func testInitWithText() {
-    var m = Module("foo")
+  func testInitWithText() throws {
+    var m = try Module("foo")
     let t = m.double
     let ty = t.pointee
     let x = ty.constant(parsing: "4.2")
     XCTAssertEqual(x.pointee.value.value, 4.2, accuracy: .ulpOfOne)
   }
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
 
     let ft = m.float
     let ty = ft.pointee
@@ -39,8 +39,8 @@ final class FloatingPointConstantTests: XCTestCase {
     XCTAssertNil(FloatingPointConstant.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let ty = m.double
     let double = ty.pointee
 
