@@ -4,8 +4,8 @@ import XCTest
 
 final class ParameterTests: XCTestCase {
 
-  func testIndex() {
-    var m = Module("foo")
+  func testIndex() throws {
+    var m = try Module("foo")
 
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.pointee.parameters[0].pointee.index, 0)
@@ -14,8 +14,8 @@ final class ParameterTests: XCTestCase {
     let p = Parameter.UnsafeReference(f.pointee.parameters[1].erased)
     XCTAssertEqual(p?.pointee.index, 1)
   }
-  func testIndexDynamic() {
-    var m = Module("foo")
+  func testIndexDynamic() throws {
+    var m = try Module("foo")
 
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.pointee.parameters[0].pointee.index, 0)
@@ -25,21 +25,21 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(p?.pointee.index, 1)
   }
 
-  func testParent() {
-    var m = Module("foo")
+  func testParent() throws {
+    var m = try Module("foo")
 
     let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.pointee.parameters[0].pointee.parent, f.pointee)
   }
 
-  func testParentDynamic() {
-    var m = Module("foo")
+  func testParentDynamic() throws {
+    var m = try Module("foo")
 
     let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.pointee.parameters[0].pointee.parent, f.pointee)
   }
   func testAttributes() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let f = m.declareFunction("f", m.functionType(from: (m.ptr)))
     let p = f.pointee.parameters[0]
     let a = m.parameterAttribute(.nofree)
@@ -57,8 +57,8 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(p.pointee.attributes, [b])
   }
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
 
     let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
     let p = f.pointee.parameters[0]
@@ -68,8 +68,8 @@ final class ParameterTests: XCTestCase {
     XCTAssertNil(Parameter.UnsafeReference(q.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
 
     let p = m.declareFunction("fn", m.functionType(from: (m.i64))).pointee.parameters[0]
     let q = m.declareFunction("fn", m.functionType(from: (m.i64))).pointee.parameters[0]

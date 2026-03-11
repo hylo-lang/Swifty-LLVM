@@ -3,30 +3,30 @@ import XCTest
 
 final class IRValueTests: XCTestCase {
 
-  func testName() {
-    var m = Module("foo")
+  func testName() throws {
+    var m = try Module("foo")
     let g = m.declareGlobalVariable("x", m.pointerType())
     XCTAssertEqual(g.pointee.name, "x")
     m.setName("y", for: g)
     XCTAssertEqual(g.pointee.name, "y")
   }
 
-  func testDescription() {
-    var m = Module("foo")
+  func testDescription() throws {
+    var m = try Module("foo")
     let g = m.declareGlobalVariable("x", m.pointerType())
     XCTAssertEqual(g.pointee.description, "@x = external global ptr")
     m.setName("y", for: g)
     XCTAssertEqual(g.pointee.description, "@y = external global ptr")
   }
 
-  func testIsNull() {
-    var m = Module("foo")
+  func testIsNull() throws {
+    var m = try Module("foo")
     XCTAssert(m.i64.pointee.null.pointee.isNull)
     XCTAssertFalse(m.i64.pointee.constant(42).pointee.isNull)
   }
 
-  func testIsConstant() {
-    var m = Module("foo")
+  func testIsConstant() throws {
+    var m = try Module("foo")
     let i64 = m.integerType(64)
     XCTAssert(i64.pointee.null.pointee.isConstant)
 
@@ -36,8 +36,8 @@ final class IRValueTests: XCTestCase {
     XCTAssertFalse(i.isConstant)
   }
 
-  func testIsTerminator() {
-    var m = Module("foo")
+  func testIsTerminator() throws {
+    var m = try Module("foo")
     let f = m.declareFunction("fn", m.functionType(from: ()))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
@@ -49,8 +49,8 @@ final class IRValueTests: XCTestCase {
     XCTAssert(j.pointee.isTerminator)
   }
 
-  func testEqualty() {
-    var m = Module("foo")
+  func testEqualty() throws {
+    var m = try Module("foo")
     let t = m.integerType(64).pointee.null
     let u = m.integerType(32).pointee.null
 
@@ -63,8 +63,8 @@ final class IRValueTests: XCTestCase {
     XCTAssertNotEqual(t.erased, u.erased)
   }
 
-  func testStringConvertible() {
-    var m = Module("foo")
+  func testStringConvertible() throws {
+    var m = try Module("foo")
     let t = m.integerType(64).pointee.null
     XCTAssertEqual("\(t)", "\(t)", "Unstable string representation!")
   }

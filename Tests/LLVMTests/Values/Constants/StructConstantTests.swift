@@ -3,8 +3,8 @@ import XCTest
 
 final class StructConstantTests: XCTestCase {
 
-  func testInitNamed() {
-    var m = Module("foo")
+  func testInitNamed() throws {
+    var m = try Module("foo")
     let i32 = m.integerType(32)
 
     let t = m.structType((i32, i32))
@@ -17,7 +17,7 @@ final class StructConstantTests: XCTestCase {
   }
 
   func testInitFromValues() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let i32 = m.integerType(32)
     
     let a = m.structConstant(aggregating: (i32.pointee.constant(4), i32.pointee.constant(2)))
@@ -28,7 +28,7 @@ final class StructConstantTests: XCTestCase {
   }
 
   func testInitFromValuesPacked() throws {
-    var m = Module("foo")
+    var m = try Module("foo")
     let i32 = m.integerType(32)
     
     let a = m.structConstant(aggregating: (i32.pointee.constant(4), i32.pointee.constant(2)), packed: true)
@@ -38,8 +38,8 @@ final class StructConstantTests: XCTestCase {
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.pointee[1]), i32.pointee.constant(2))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let i32 = m.integerType(32)
     
     let a = m.structConstant(aggregating: (i32.pointee.constant(4), i32.pointee.constant(2)))

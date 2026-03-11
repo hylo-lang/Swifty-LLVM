@@ -4,8 +4,8 @@ import XCTest
 
 final class StructTypeTests: XCTestCase {
 
-  func testInlineStruct() {
-    var m = Module("foo")
+  func testInlineStruct() throws {
+    var m = try Module("foo")
     let t = m.integerType(64)
     let s = m.structType((t, t)).pointee
     XCTAssert(s.isLiteral)
@@ -14,8 +14,8 @@ final class StructTypeTests: XCTestCase {
     XCTAssertNil(s.name)
   }
 
-  func testNamedStruct() {
-    var m = Module("foo")
+  func testNamedStruct() throws {
+    var m = try Module("foo")
     let t = m.integerType(64)
     let s = m.structType(named: "S", (t, t)).pointee
     XCTAssertFalse(s.isLiteral)
@@ -24,15 +24,15 @@ final class StructTypeTests: XCTestCase {
     XCTAssertEqual(s.name, "S")
   }
 
-  func testPackedStruct() {
-    var m = Module("foo")
+  func testPackedStruct() throws {
+    var m = try Module("foo")
     let t = m.integerType(64)
     XCTAssert(m.structType((t, t), packed: true).pointee.isPacked)
     XCTAssert(m.createStructType(named: "S", [t.erased, t.erased], packed: true).pointee.isPacked)
   }
 
-  func testFields() {
-    var m = Module("foo")
+  func testFields() throws {
+    var m = try Module("foo")
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -49,8 +49,8 @@ final class StructTypeTests: XCTestCase {
     XCTAssert(s2.pointee.fields[1] == u)
   }
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
 
     let t = m.structType([])
     XCTAssertNotNil(StructType.UnsafeReference(t.erased))
@@ -59,8 +59,8 @@ final class StructTypeTests: XCTestCase {
     XCTAssertNil(StructType.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
+  func testEquality() throws {
+    var m = try Module("foo")
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -71,8 +71,8 @@ final class StructTypeTests: XCTestCase {
     XCTAssertNotEqual(s0, s2)
   }
 
-  func testSameNamedStructTypeEqual() {
-    var m = Module("foo")
+  func testSameNamedStructTypeEqual() throws {
+    var m = try Module("foo")
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -82,8 +82,8 @@ final class StructTypeTests: XCTestCase {
     XCTAssertEqual(s0.llvm, s1.llvm)
   }
 
-  func testDifferentNameSameFieldsNotEqual() {
-    var m = Module("foo")
+  func testDifferentNameSameFieldsNotEqual() throws {
+    var m = try Module("foo")
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -100,8 +100,8 @@ final class StructTypeTests: XCTestCase {
     XCTAssertEqual(s1.fields[1].erased, u.erased)
   }
 
-  func testSameNameDifferentFields() {
-    var m = Module("foo")
+  func testSameNameDifferentFields() throws {
+    var m = try Module("foo")
     let t = m.integerType(64).erased
     let u = m.integerType(32).erased
 

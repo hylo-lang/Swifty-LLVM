@@ -1,33 +1,24 @@
+/// LLVM's backend descriptor, representing a target architecture family.
 internal import llvmc
 
-/// The specification of a platform on which code runs.
 public struct Target {
-
-  /// The triple of the target.
-  ///
-  /// A triple is a string taking the form `<arch><sub>-<vendor>-<sys>-<abi>` where:
-  /// * `arch` = `x86_64`, `i386`, `arm`, `thumb`, `mips`, etc.
-  /// * `sub` = `v5`, `v6m`, `v7a`, `v7m`, etc.
-  /// * `vendor` = `pc`, `apple`, `nvidia`, `ibm`, etc.
-  /// * `sys` = `none`, `linux`, `win32`, `darwin`, `cuda`, etc.
-  /// * `env` = `eabi`, `gnu`, `android`, `macho`, `elf`, etc.
-  ///
-  /// For example, `arm64-apple-darwin22.3.0`.
-  ///
-  /// - SeeAlso: https://clang.llvm.org/docs/CrossCompilation.html.
-  public let triple: String
 
   /// A handle to the LLVM object wrapped by this instance.
   internal let llvm: LLVMTargetRef
 
-  /// Creates an instance wrapping `llvm`, which represents the target associated with `triple`.
-  private init(wrapping llvm: LLVMTargetRef, for triple: String) {
-    self.triple = triple
+  /// Creates an instance wrapping `llvm`.
+  private init(wrapping llvm: LLVMTargetRef) {
     self.llvm = llvm
   }
 
-  /// Creates an instance from a triple.
-  public init(triple: String) throws {
+  /// Creates a wrapper for the target associated with `triple`.
+  public init(ofTriple triple: String) throws {
+    #if SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
+    _ = Target.initializeCrossCompilation
+    #else
+    _ = Target.initializeHost
+    #endif
+    
     var handle: LLVMTargetRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
     LLVMGetTargetFromTriple(triple, &handle, &error)
@@ -37,13 +28,12 @@ public struct Target {
       throw LLVMError(.init(cString: e))
     }
 
-    self.init(wrapping: handle!, for: triple)
+    self.init(wrapping: handle!)
   }
 
-  /// Creates an instance representing the target associated with `machine`.
+  /// Creates a wrapper for the target associated with `machine`.
   public init(of machine: borrowing TargetMachine) {
-    let h = LLVMGetTargetMachineTarget(machine.llvm)
-    self.init(wrapping: h!, for: machine.triple)
+    llvm = LLVMGetTargetMachineTarget(machine.llvm)!
   }
 
   /// The name of the target.
@@ -51,7 +41,6 @@ public struct Target {
     guard let s = LLVMGetTargetName(llvm) else { return "" }
     return .init(cString: s)
   }
-
 
   /// `true` if the target has a JIT.
   public var hasJIT: Bool {
@@ -63,18 +52,21 @@ public struct Target {
     LLVMTargetHasAsmBackend(llvm) != 0
   }
 
+  public static var defaultTargetTriple: String {
+    // Ensures LLVM targets are initialized.
+    _ = initializeHost
+
+    guard let s = LLVMGetDefaultTargetTriple() else { return "" }
+    defer { LLVMDisposeMessage(s) }
+    return .init(cString: s)
+  }
+
   /// Returns the target representing the machine host.
   public static func host() throws -> Target {
     // Ensures LLVM targets are initialized.
     _ = initializeHost
 
-    let triple = LLVMGetDefaultTargetTriple()
-    if let t = triple {
-      defer { LLVMDisposeMessage(t) }
-      return try .init(triple: .init(cString: t))
-    } else {
-      return try .init(triple: "")
-    }
+    return try .init(ofTriple: defaultTargetTriple)
   }
 
   /// The initialization of the native target.
@@ -85,8 +77,23 @@ public struct Target {
     LLVMInitializeNativeTarget()
   }()
 
-}
+  #if SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
+  /// The initialization of all targets for potential cross-compilation.
+  /// 
+  /// Set `SWIFTY_LLVM_CROSS_COMPILATION_ENABLED` to `true` using SPM
+  /// `swift build `
+  private static let initializeCrossCompilation: Void = {
+    // Note: this could be more granular, but for now we have two types 
+    // of LLVM distributables: one with only the native target, and one with all targets.
+    LLVMInitializeAllTargetInfos()
+    LLVMInitializeAllTargets()
+    LLVMInitializeAllTargetMCs()
+    LLVMInitializeAllAsmParsers()
+    LLVMInitializeAllAsmPrinters()
+  }()
+  #endif
 
+}
 extension Target: Hashable {
 
   /// Hashes this instance by its underlying LLVM target handle.
@@ -100,12 +107,12 @@ extension Target: Hashable {
   }
 
 }
-
 extension Target: CustomStringConvertible {
 
   /// A textual description of the target from LLVM.
   public var description: String {
-    .init(cString: LLVMGetTargetDescription(llvm))
+    guard let s = LLVMGetTargetDescription(llvm) else { return "" }
+    return .init(cString: s)
   }
 
 }
