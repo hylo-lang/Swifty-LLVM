@@ -1,35 +1,42 @@
+/// The settings necessary for code generation, including target information and compiler options.
 internal import llvmc
 
-/// The settings necessary for code generation, including target information and compiler options.
-public struct TargetMachine: @unchecked Sendable {
+public struct TargetMachine: ~Copyable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  private let wrapped: ManagedPointer<LLVMTargetMachineRef>
+  internal let llvm: LLVMTargetMachineRef
 
-  /// Creates an instance with given properties.
-  ///
-  /// - Parameters:
-  ///   - target: The platform for which code is generated.
-  ///   - cpu: The type of CPU to target. Defaults to the CPU of the host machine.
-  ///   - features: The features a of the target.
-  ///   - optimization: The level of optimization used during code generation. Defaults to `.none`.
-  ///   - relocation: The relocation model used during code generation. Defaults to `.default`.
-  ///   - code: The code model used during code generation. Defaults to `.default`.
-  public init(
-    for target: Target,
-    cpu: String = "",
-    features: String = "",
-    optimization: OptimizationLevel = .none,
-    relocation: RelocationModel = .default,
-    code: CodeModel = .default
-  ) {
-    let handle = LLVMCreateTargetMachine(
-      target.llvm, target.triple, cpu, features, optimization.codegen, relocation.llvm, code.llvm)
+  /// The data layout of the machine.
+  public let layout: DataLayout
 
-    self.wrapped = .init(
-      handle!,
-      dispose: LLVMDisposeTargetMachine(_:))
+  /// The target associated with the machine.
+  public let target: Target
 
+  /// Creates an instance with `options` for the specified `triple`.
+  public init(options: TargetMachineOptions = TargetMachineOptions(), triple: String) throws {
+    let target = try Target(ofTriple: triple)
+    self.init(target: target, options: options, triple: triple)
+  }
+
+  /// Creates an instance with `options` for the specified `triple`.
+  /// 
+  /// - Requires: `triple` corresponds to `target`.
+  public init(target: Target, options: TargetMachineOptions = TargetMachineOptions(), triple: String) {
+    precondition((try? Target(ofTriple: triple).llvm) == target.llvm, "The triple must correspond to the target.")
+
+    self.llvm = options.withLLVMOptions { o in
+      LLVMCreateTargetMachineWithOptions(target.llvm, triple, o)
+    }
+    self.target = target
+    self.layout = .init(LLVMCreateTargetDataLayout(self.llvm))
+  }
+
+  public static func host(options: TargetMachineOptions = .init()) throws -> TargetMachine {
+    return try TargetMachine(options: options, triple: Target.defaultTargetTriple)
+  }
+
+  deinit {
+    LLVMDisposeTargetMachine(llvm)
   }
 
   /// The triple of the machine.
@@ -53,23 +60,10 @@ public struct TargetMachine: @unchecked Sendable {
     return .init(cString: s)
   }
 
-  /// The target associated with the machine.
-  public var target: Target {
-    .init(of: self)
-  }
-
-  /// The data layout of the machine.
-  public var layout: DataLayout {
-    .init(of: self)
-  }
-
-  /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMTargetMachineRef { wrapped.llvm }
-
 }
+extension TargetMachine {
 
-extension TargetMachine: CustomStringConvertible {
-
+  /// The target triple of this machine.
   public var description: String { triple }
 
 }

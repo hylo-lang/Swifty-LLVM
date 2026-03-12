@@ -6,33 +6,38 @@ public struct StructType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Creates an instance with given `fields` in `module`, packed iff `packed` is `true`.
-  public init(_ fields: [IRType], packed: Bool = false, in module: inout Module) {
-    self.llvm = fields.withHandles { (f) in
-      .init(LLVMStructTypeInContext(module.context, f.baseAddress, UInt32(f.count), packed ? 1 : 0))
+  /// Creates an instance wrapping `llvm`.
+  public init(temporarilyWrapping llvm: TypeRef) {
+    self.llvm = llvm
+  }
+
+  /// Returns a reference to a struct type with given `fields` in `module`, packed iff `packed` is `true`.
+  public static func create(
+    _ fields: [AnyType.UnsafeReference],
+    packed: Bool = false,
+    in module: inout Module
+  ) -> StructType.UnsafeReference {
+    var f = fields.map({ Optional.some($0.raw) })
+    return f.withUnsafeMutableBufferPointer { p in
+      StructType.UnsafeReference(
+        LLVMStructTypeInContext(
+          module.context, p.baseAddress, UInt32(p.count), packed ? 1 : 0))
     }
   }
 
-  /// Creates a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
-  ///
-  /// A unique name is generated if `name` is empty or if `module` already contains a struct with
-  /// the same name.
-  public init(
-    named name: String, _ fields: [IRType], packed: Bool = false, in module: inout Module
-  ) {
-    self.llvm = .init(LLVMStructCreateNamed(module.context, name))
-    fields.withHandles { (f) in
-      LLVMStructSetBody(self.llvm.raw, f.baseAddress, UInt32(f.count), packed ? 1 : 0)
+  /// Returns a reference to a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
+  public static func create(
+    named name: String,
+    _ fields: [AnyType.UnsafeReference],
+    packed: Bool = false,
+    in module: inout Module
+  ) -> Self.UnsafeReference {
+    let s = StructType.UnsafeReference(LLVMStructCreateNamed(module.context, name))
+    var f = fields.map { Optional.some($0.raw) }
+    f.withUnsafeMutableBufferPointer { (types) in
+      LLVMStructSetBody(s.raw, types.baseAddress, UInt32(types.count), packed ? 1 : 0)
     }
-  }
-
-  /// Creates an instance with `t`, failing iff `t` isn't a struct type.
-  public init?(_ t: IRType) {
-    if LLVMGetTypeKind(t.llvm.raw) == LLVMStructTypeKind {
-      self.llvm = t.llvm
-    } else {
-      return nil
-    }
+    return s
   }
 
   /// The name of the struct.
@@ -53,23 +58,36 @@ public struct StructType: IRType, Hashable {
   /// The fields of the struct.
   public var fields: Fields { .init(of: self) }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value is aggregating `parts`.
+  /// Returns a constant whose LLVM IR type is `self` and whose value aggregates `elements`.
   public func constant<S: Sequence>(
     aggregating elements: S, in module: inout Module
-  ) -> StructConstant where S.Element == IRValue {
-    .init(of: self, aggregating: elements, in: &module)
+  ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
+    StructConstant.create(aggregating: elements, in: &module)
   }
 
+}
+
+extension UnsafeReference<StructType> {
+  /// Creates an instance with `t`, failing iff `t` isn't a struct type.
+  public init?(_ t: AnyType.UnsafeReference) {
+    if LLVMGetTypeKind(t.llvm.raw) == LLVMStructTypeKind {
+      self.init(t.llvm)
+    } else {
+      return nil
+    }
+  }
 }
 
 extension StructType {
 
   /// A collection containing the fields of a struct type in LLVM IR.
-  public struct Fields: BidirectionalCollection, Sendable {
+  public struct Fields: BidirectionalCollection {
 
+    /// The collection index type.
     public typealias Index = Int
 
-    public typealias Element = IRType
+    /// The collection element type.
+    public typealias Element = AnyType.UnsafeReference
 
     /// The struct type containing the elements of the collection.
     private let parent: StructType
@@ -84,23 +102,28 @@ extension StructType {
       Int(LLVMCountStructElementTypes(parent.llvm.raw))
     }
 
+    /// The position of the first element.
     public var startIndex: Int { 0 }
 
+    /// The position one past the last element.
     public var endIndex: Int { count }
 
+    /// Returns the index immediately after `position`.
     public func index(after position: Int) -> Int {
       precondition(position < count, "index is out of bounds")
       return position + 1
     }
 
+    /// Returns the index immediately before `position`.
     public func index(before position: Int) -> Int {
       precondition(position > 0, "index is out of bounds")
       return position - 1
     }
 
-    public subscript(position: Int) -> IRType {
+    /// The field type at `position`.
+    public subscript(position: Int) -> AnyType.UnsafeReference {
       precondition(position >= 0 && position < count, "index is out of bounds")
-      return AnyType(LLVMStructGetTypeAtIndex(parent.llvm.raw, UInt32(position)))
+      return .init(LLVMStructGetTypeAtIndex(parent.llvm.raw, UInt32(position)))
     }
 
   }

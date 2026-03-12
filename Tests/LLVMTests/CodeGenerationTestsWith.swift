@@ -2,7 +2,7 @@ import XCTest
 
 @testable import SwiftyLLVM
 
-final class CodeGenerationTests: XCTestCase {
+final class CodeGenerationTestsWith: XCTestCase {
 
   func testO0() throws {
     var m = try Module("math")

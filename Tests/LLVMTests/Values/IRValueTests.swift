@@ -1,61 +1,71 @@
-import SwiftyLLVM
+@testable import SwiftyLLVM
 import XCTest
 
 final class IRValueTests: XCTestCase {
 
-  func testName() {
-    var m = Module("foo")
-    let g = m.declareGlobalVariable("x", PointerType(in: &m))
-    XCTAssertEqual(g.name, "x")
+  func testName() throws {
+    var m = try Module("foo")
+    let g = m.declareGlobalVariable("x", m.pointerType())
+    XCTAssertEqual(g.unsafe[].name, "x")
     m.setName("y", for: g)
-    XCTAssertEqual(g.name, "y")
+    XCTAssertEqual(g.unsafe[].name, "y")
   }
 
-  func testIsNull() {
-    var m = Module("foo")
-    XCTAssert(IntegerType(64, in: &m).null.isNull)
-    XCTAssertFalse(IntegerType(64, in: &m).constant(42).isNull)
+  func testDescription() throws {
+    var m = try Module("foo")
+    let g = m.declareGlobalVariable("x", m.pointerType())
+    XCTAssertEqual(g.unsafe[].description, "@x = external global ptr")
+    m.setName("y", for: g)
+    XCTAssertEqual(g.unsafe[].description, "@y = external global ptr")
   }
 
-  func testIsConstant() {
-    var m = Module("foo")
-    XCTAssert(IntegerType(64, in: &m).null.isConstant)
+  func testIsNull() throws {
+    var m = try Module("foo")
+    XCTAssert(m.i64.unsafe[].null.unsafe[].isNull)
+    XCTAssertFalse(m.i64.unsafe[].constant(42).unsafe[].isNull)
+  }
 
-    let f = m.declareFunction("fn", .init(from: [], in: &m))
+  func testIsConstant() throws {
+    var m = try Module("foo")
+    let i64 = m.integerType(64)
+    XCTAssert(i64.unsafe[].null.unsafe[].isConstant)
+
+    let f = m.declareFunction("fn", m.functionType(from: ()))
     let b = m.appendBlock(to: f)
-    let i = m.insertAlloca(IntegerType(64, in: &m), at: m.endOf(b))
+    let i = m.insertAlloca(i64, at: m.endOf(b)).unsafe[]
     XCTAssertFalse(i.isConstant)
   }
 
-  func testIsTerminator() {
-    var m = Module("foo")
-    let f = m.declareFunction("fn", .init(from: [], in: &m))
+  func testIsTerminator() throws {
+    var m = try Module("foo")
+    let f = m.declareFunction("fn", m.functionType(from: ()))
     let b = m.appendBlock(to: f)
+    let i64 = m.integerType(64)
 
     let p = m.endOf(b)
-    let i = m.insertAlloca(IntegerType(64, in: &m), at: p)
+    let i = m.insertAlloca(i64, at: p).unsafe[]
     XCTAssertFalse(i.isTerminator)
     let j = m.insertReturn(at: p)
-    XCTAssert(j.isTerminator)
+    XCTAssert(j.unsafe[].isTerminator)
   }
 
-  func testEqualty() {
-    var m = Module("foo")
-    let t = IntegerType(64, in: &m).null
-    let u = IntegerType(32, in: &m).null
+  func testEqualty() throws {
+    var m = try Module("foo")
+    let t = m.integerType(64).unsafe[].null
+    let u = m.integerType(32).unsafe[].null
 
-    XCTAssert(t == (t as IRValue))
-    XCTAssert((t as IRValue) == t)
-    XCTAssert((t as IRValue) == (t as IRValue))
+    XCTAssertEqual(t, t.erased)
+    XCTAssertEqual(t.erased, t)
+    XCTAssertEqual(t.erased, t.erased)
 
-    XCTAssert(t != (u as IRValue))
-    XCTAssert((t as IRValue) != u)
-    XCTAssert((t as IRValue) != (u as IRValue))
+    XCTAssertNotEqual(t, u.erased)
+    XCTAssertNotEqual(t.erased, u)
+    XCTAssertNotEqual(t.erased, u.erased)
   }
 
-  func testStringConvertible() {
-    var m = Module("foo")
-    let t = IntegerType(64, in: &m).null
+  func testStringConvertible() throws {
+    var m = try Module("foo")
+    let t = m.integerType(64).unsafe[].null
     XCTAssertEqual("\(t)", "\(t)", "Unstable string representation!")
   }
 

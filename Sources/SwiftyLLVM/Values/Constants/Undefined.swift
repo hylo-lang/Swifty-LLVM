@@ -6,18 +6,25 @@ public struct Undefined: IRValue, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// Creates an undefined value of type `t`.
-  public init(of t: IRType) {
-    self.llvm = .init(LLVMGetUndef(t.llvm.raw))
+  /// Creates an instance wrapping `llvm`.
+  public init(temporarilyWrapping llvm: ValueRef) {
+    self.llvm = llvm
   }
 
+  /// Creates and registers an undefined value of type `t` in `module`.
+  public static func create<T: IRType>(of t: T.UnsafeReference, in module: inout Module) -> Self.UnsafeReference {
+    return .init(LLVMGetUndef(t.raw))
+  }
+
+}
+
+extension UnsafeReference<Undefined> {
   /// Creates an instance with `v`, failing iff `v` is not an undefined value.
-  public init?(_ v: IRValue) {
+  public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAUndefValue(v.llvm.raw) {
-      self.llvm = .init(h)
+      self.init(h)
     } else {
       return nil
     }
   }
-
 }

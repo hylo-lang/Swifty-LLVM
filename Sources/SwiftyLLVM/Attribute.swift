@@ -24,23 +24,22 @@ extension AttributeNameProtocol {
 }
 
 /// An attribute on a function, return value, or parameter in LLVM IR.
-public enum Attribute<T: AttributeHolder>: Hashable, Sendable {
+public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
+  /// The native handle wrapped by this attribute.
+  public typealias Handle = AttributeRef
+
+  /// Creates a target-independent attribute wrapping `llvm`.
+  public init(temporarilyWrapping handle: AttributeRef) {
+    precondition(LLVMIsEnumAttribute(handle.raw) != 0)
+    self = .targetIndependent(llvm: handle)
+  }
 
   /// A target-independent attribute.
   case targetIndependent(llvm: AttributeRef)
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMAttributeRef?) {
-    if LLVMIsEnumAttribute(llvm) != 0 {
-      self = .targetIndependent(llvm: .init(llvm!))
-    } else {
-      fatalError()
-    }
-  }
-
-  /// Creates a target-independent attribute with given `name` and optional `value` in `module`.
-  public init(_ name: T.AttributeName, _ value: UInt64 = 0, in module: inout Module) {
-    self = .targetIndependent(llvm: .init(LLVMCreateEnumAttribute(module.context, name.id, value)!))
+  /// Creates a target-independent attribute wrapping `llvm`.
+  static func wrapTargetIndependent(_ llvm: LLVMAttributeRef) -> Self {
+    return Self(temporarilyWrapping: AttributeRef(llvm))
   }
 
   /// The value of the attribute if it is target-independent.
@@ -53,11 +52,28 @@ public enum Attribute<T: AttributeHolder>: Hashable, Sendable {
   }
 
   /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMAttributeRef {
+  internal var llvm: AttributeRef {
     switch self {
     case .targetIndependent(let h):
-      return h.raw
+      return h
     }
   }
 
+}
+
+/// A type representing an LLVM IR attribute.
+public protocol IRAttribute: Hashable, LLVMEntity where Handle == AttributeRef {}
+
+extension Attribute: IRAttribute {
+}
+
+/// A type-erased LLVM IR attribute.
+public struct AnyAttribute: LLVMEntity, IRAttribute {
+  /// A handle to the LLVM object wrapped by this instance.
+  public let llvm: AttributeRef
+
+  /// Creates an instance wrapping `llvm`.
+  public init(temporarilyWrapping llvm: AttributeRef) {
+    self.llvm = llvm
+  }
 }

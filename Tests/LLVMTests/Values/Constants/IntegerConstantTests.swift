@@ -1,58 +1,64 @@
-import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class IntegerConstantTests: XCTestCase {
 
-  func testZero() {
-    var m = Module("foo")
-    let x = IntegerType(64, in: &m).zero
+  func testZero() throws {
+    var m = try Module("foo")
+    let x = m.integerType(64).unsafe[].zero.unsafe[]
     XCTAssertEqual(x.sext, 0)
     XCTAssertEqual(x.zext, 0)
   }
 
-  func testInitWithBitPattern() {
-    var m = Module("foo")
-    let x = IntegerType(8, in: &m).constant(255)
+  func testInitWithBitPattern() throws {
+    var m = try Module("foo")
+    let x = m.integerType(8).unsafe[].constant(255).unsafe[]
     XCTAssertEqual(x.sext, -1)
     XCTAssertEqual(x.zext, 255)
   }
 
-  func testInitWithSignedValue() {
-    var m = Module("foo")
-    let x = IntegerType(8, in: &m).constant(-128)
+  func testInitWithSignedValue() throws {
+    var m = try Module("foo")
+    let x = m.integerType(8).unsafe[].constant(-128).unsafe[]
     XCTAssertEqual(x.sext, -128)
     XCTAssertEqual(x.zext, 128)
   }
 
-  func testInitWithWords() {
-    var m = Module("foo")
-    let x = IntegerType(8, in: &m).constant(words: [255])
+  func testInitWithWords() throws {
+    var m = try Module("foo")
+    let x = m.integerType(8).unsafe[].constant(words: [255]).unsafe[]
     XCTAssertEqual(x.sext, -1)
     XCTAssertEqual(x.zext, 255)
   }
 
-  func testInitWithText() {
-    var m = Module("foo")
-    let x = IntegerType(8, in: &m).constant(parsing: "11111111", radix: 2)
+  func testInitWithText() throws {
+    var m = try Module("foo")
+    let x = m.integerType(8).unsafe[].constant(parsing: "11111111", radix: 2).unsafe[]
     XCTAssertEqual(x.sext, -1)
     XCTAssertEqual(x.zext, 255)
   }
 
-  func testConversion() {
-    var m = Module("foo")
-    let t: IRValue = IntegerType(64, in: &m).zero
-    XCTAssertNotNil(IntegerConstant(t))
-    let u: IRValue = FloatingPointType.float(in: &m).zero
-    XCTAssertNil(IntegerConstant(u))
+  func testConversion() throws {
+    var m = try Module("foo")
+    let i64 = m.integerType(64)
+    let t = i64.unsafe[].zero
+    XCTAssertNotNil(IntegerConstant.UnsafeReference(t.erased))
+
+    let ft = FloatingPointType.float(in: &m)
+    let ty = ft.unsafe[]
+    let u = ty.zero
+    XCTAssertNil(IntegerConstant.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
-    let t = IntegerType(64, in: &m).zero
-    let u = IntegerType(64, in: &m).zero
+  func testEquality() throws {
+    var m = try Module("foo")
+    let i64 = m.integerType(64).unsafe[]
+    let t = i64.zero
+    let u = i64.zero
     XCTAssertEqual(t, u)
 
-    let v = IntegerType(64, in: &m).constant(255)
+    let v = i64.constant(255)
     XCTAssertNotEqual(t, v)
   }
 
