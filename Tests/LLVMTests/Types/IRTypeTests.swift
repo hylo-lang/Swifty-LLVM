@@ -5,8 +5,8 @@ final class IRTypeTests: XCTestCase {
 
   func testIsSized() throws {
     var m = try Module("foo")
-    XCTAssert(m.integerType(64).pointee.isSized)
-    XCTAssertFalse(m.functionType(from: ()).pointee.isSized)
+    XCTAssert(m.integerType(64).unsafe[].isSized)
+    XCTAssertFalse(m.functionType(from: ()).unsafe[].isSized)
   }
 
   func testEqualty() throws {
@@ -25,7 +25,7 @@ final class IRTypeTests: XCTestCase {
 
   func testStringConvertible() throws {
     var m = try Module("foo")
-    let t = m.integerType(64).pointee
+    let t = m.integerType(64).unsafe[]
     XCTAssertEqual("\(t)", "\(t)", "Unstable string representation!")
   }
 

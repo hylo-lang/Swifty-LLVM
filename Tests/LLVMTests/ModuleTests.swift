@@ -67,7 +67,7 @@ final class ModuleTests: XCTestCase {
 
     let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
-    m.insertReturn(i32.pointee.zero, at: m.endOf(b))
+    m.insertReturn(i32.unsafe[].zero, at: m.endOf(b))
 
     let a = try m.compile(.assembly, for: m.targetMachine)
     XCTAssert(a.count != 0)
@@ -79,7 +79,7 @@ final class ModuleTests: XCTestCase {
 
     let f = m.declareFunction("main", m.functionType(from: (), to: i32))
     let b = m.appendBlock(to: f)
-    m.insertReturn(m.i32.pointee.zero, at: m.endOf(b))
+    m.insertReturn(m.i32.unsafe[].zero, at: m.endOf(b))
 
     m.runDefaultModulePasses()
   }

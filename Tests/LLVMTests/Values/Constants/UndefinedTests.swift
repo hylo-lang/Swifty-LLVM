@@ -10,7 +10,7 @@ final class UndefinedTests: XCTestCase {
     let t = m.undefinedValue(of: m.float)
     XCTAssertNotNil(Undefined.UnsafeReference(t.erased))
 
-    let u = m.i64.pointee.zero
+    let u = m.i64.unsafe[].zero
     XCTAssertNil(Undefined.UnsafeReference(u.erased))
   }
 

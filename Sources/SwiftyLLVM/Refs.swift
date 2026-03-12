@@ -81,15 +81,37 @@ public struct UnsafeReference<T: LLVMEntity>: Hashable {
   /// Creates a reference from a raw entity handle.
   internal init(_ llvm: T.Handle) { self.llvm = llvm }
 
+  /// A semantically transparent struct that allows exposing a named subscript `ref.unsafe[]`
+  public struct SubscriptablePointee {
+    /// The wrapped handle.
+    internal let llvm: T.Handle
+
+    /// Wraps a raw handle for temporary use. 
+    internal init(_ llvm: T.Handle) { self.llvm = llvm }
+
+    /// Dereferences the handle by wrapping it into its container type.
+    ///
+    /// Acts as the [] call operator, allowing us to write `ref.unsafe[]`.
+    public subscript() -> T {
+      _read { yield T(temporarilyWrapping: llvm) }
+      _modify {
+        var pointee = T(temporarilyWrapping: llvm)
+        yield &pointee
+      }
+    }
+  }
+
   /// Creates a temporary wrapper for the type.
   ///
   /// The caller must ensure that the wrapper doesn't become a dangling reference.
-  public var pointee: T { T(temporarilyWrapping: llvm) }
-
-  /// Invokes `witness` with a temporary wrapper around this reference's pointee.
-  public func with<R>(_ witness: (T) throws -> R) rethrows -> R {
-    try witness(pointee)
+  public var unsafe: SubscriptablePointee { 
+    _read { yield .init(llvm) }
+    _modify { 
+      var s = SubscriptablePointee(llvm)
+      yield &s
+    }
   }
+
 }
 
 /// Downcasting from erased reference.

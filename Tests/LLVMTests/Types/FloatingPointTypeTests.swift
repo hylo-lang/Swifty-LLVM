@@ -22,21 +22,21 @@ final class FloatingPointTypeTests: XCTestCase {
 
   func testCallSyntax() throws {
     var m = try Module("foo")
-    let double = m.double.pointee
+    let double = m.double.unsafe[]
     let x = double(1)
-    XCTAssertEqual(x.pointee.type, m.double.erased)
-    XCTAssertTrue(x.pointee.isConstant)
-    XCTAssertEqual(x.pointee.value.value, 1, accuracy: .ulpOfOne)
+    XCTAssertEqual(x.unsafe[].type, m.double.erased)
+    XCTAssertTrue(x.unsafe[].isConstant)
+    XCTAssertEqual(x.unsafe[].value.value, 1, accuracy: .ulpOfOne)
   }
 
   func testEquality() throws {
     var m = try Module("foo")
-    let t = m.double.pointee
-    let u = m.double.pointee
+    let t = m.double.unsafe[]
+    let u = m.double.unsafe[]
     XCTAssertEqual(t, u)
     XCTAssertEqual(t.llvm, u.llvm)
 
-    let v = m.float.pointee
+    let v = m.float.unsafe[]
     XCTAssertNotEqual(t, v)
     XCTAssertNotEqual(t.llvm, v.llvm)
   }

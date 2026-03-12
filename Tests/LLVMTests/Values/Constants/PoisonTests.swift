@@ -9,7 +9,7 @@ final class PoisonTests: XCTestCase {
     let t = m.poisonValue(of: m.float)
     XCTAssertNotNil(Poison.UnsafeReference(t.erased))
 
-    let u = m.i64.pointee.zero
+    let u = m.i64.unsafe[].zero
     XCTAssertNil(Poison.UnsafeReference(u.erased))
   }
 
@@ -27,7 +27,7 @@ final class PoisonTests: XCTestCase {
     var m = try Module("foo")
     
     let t = m.poisonValue(of: m.float)
-    XCTAssertTrue(t.with{ p in p.isConstant})
+    XCTAssertTrue(t.unsafe[].isConstant)
   }
 
 }

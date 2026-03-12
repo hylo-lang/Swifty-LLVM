@@ -6,13 +6,13 @@ final class StringConstantTests: XCTestCase {
   func testInit() throws {
     var m = try Module("foo")
     let t = m.stringConstant("Bonjour!")
-    XCTAssertEqual(t.pointee.value, "Bonjour!")
+    XCTAssertEqual(t.unsafe[].value, "Bonjour!")
   }
 
   func testInitWithoutNullTerminator() throws {
     var m = try Module("foo")
     let t = m.stringConstant("Bonjour!", nullTerminated: false)
-    XCTAssertEqual(t.pointee.value, "Bonjour!")
+    XCTAssertEqual(t.unsafe[].value, "Bonjour!")
   }
 
   func testConversion() throws {
@@ -21,7 +21,7 @@ final class StringConstantTests: XCTestCase {
     let t = m.stringConstant("Bonjour!")
     XCTAssertNotNil(StringConstant.UnsafeReference(t.erased))
 
-    let u = m.i64.pointee.zero
+    let u = m.i64.unsafe[].zero
     XCTAssertNil(StringConstant.UnsafeReference(u.erased))
   }
 
