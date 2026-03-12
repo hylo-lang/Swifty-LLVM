@@ -14,7 +14,12 @@ extension Global {
 
   /// The linkage of this global.
   public var linkage: Linkage {
-    .init(llvm: LLVMGetLinkage(llvm.raw))
+    get {
+      .init(llvm: LLVMGetLinkage(llvm.raw))
+    }
+    set {
+      LLVMSetLinkage(llvm.raw, newValue.llvm)
+    }
   }
 
 }
