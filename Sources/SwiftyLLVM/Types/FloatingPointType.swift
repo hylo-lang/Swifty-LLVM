@@ -1,6 +1,6 @@
-/// A floating-point type in LLVM IR.
 internal import llvmc
 
+/// A floating-point type in LLVM IR.
 public struct FloatingPointType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
@@ -50,7 +50,7 @@ public struct FloatingPointType: IRType, Hashable {
   }
 
   /// Returns the 128-bit floating-point type `ppc_fp128` in `module`.
-  /// 
+  ///
   /// Represented as the PowerPC double-double format, with two 64-bit IEEE 754 binary64 parts.
   public static func ppc_fp128(in module: inout Module) -> FloatingPointType.UnsafeReference {
     .init(LLVMPPCFP128TypeInContext(module.context))
