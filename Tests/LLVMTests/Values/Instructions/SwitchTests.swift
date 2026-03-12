@@ -12,7 +12,7 @@ final class SwitchTests: XCTestCase {
     let c0 = m.appendBlock(to: f)
     let c1 = m.appendBlock(to: f)
     let c2 = m.appendBlock(to: f)
-    let i16 = m.i16.pointee
+    let i16 = m.i16.unsafe[]
     let z = i16.constant(0)
     let o = i16.constant(1)
 

@@ -99,7 +99,7 @@ final class DataLayoutTests: XCTestCase {
     var m = try Module("foo")
 
     XCTAssertEqual(m.layout.programAddressSpace, m.programAddressSpace)
-    XCTAssertEqual(m.functionPointer.pointee.addressSpace, m.layout.programAddressSpace)
+    XCTAssertEqual(m.functionPointer.unsafe[].addressSpace, m.layout.programAddressSpace)
 
     // On the currently supported host platforms, function pointers are always in the default address space (arm64, amd64).
     // This may not hold for other targets, but we need to build LLVM with support for other targets to test those.
