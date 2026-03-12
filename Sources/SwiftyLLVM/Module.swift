@@ -193,7 +193,7 @@ public struct Module: ~Copyable {
     inAddressSpace s: AddressSpace = .default
   ) -> GlobalVariable.UnsafeReference {
     if let g = global(named: name) {
-      let existingType = g.pointee.valueType
+      let existingType = g.unsafe[].valueType
       precondition(existingType == type.erased)
       return g
     } else {
@@ -206,7 +206,7 @@ public struct Module: ~Copyable {
     -> Function.UnsafeReference
   {
     if let existing = function(named: name) {
-      let existingType = existing.pointee.valueType
+      let existingType = existing.unsafe[].valueType
       precondition(existingType == type.erased)
       return existing
     }
@@ -251,7 +251,7 @@ public struct Module: ~Copyable {
   public mutating func addParameterAttribute(
     _ a: Parameter.Attribute.UnsafeReference, to p: Parameter.UnsafeReference
   ) {
-    let parameter = p.pointee
+    let parameter = p.unsafe[]
     let i = UInt32(parameter.index + 1)
     LLVMAddAttributeAtIndex(parameter.parent.llvm.raw, i, a.raw)
   }
@@ -298,7 +298,7 @@ public struct Module: ~Copyable {
     _ attribute: Parameter.Attribute.UnsafeReference, from parameter: Parameter.UnsafeReference
   ) {
     let k = LLVMGetEnumAttributeKind(attribute.raw)
-    let p = parameter.pointee
+    let p = parameter.unsafe[]
     let i = UInt32(p.index + 1)
     LLVMRemoveEnumAttributeAtIndex(p.parent.llvm.raw, i, k)
   }
@@ -751,7 +751,7 @@ public struct Module: ~Copyable {
   ) -> Instruction.UnsafeReference {
     let r = LLVMBuildStore(p.llvm, value.raw, location.raw)!
     LLVMSetAlignment(
-      r, UInt32(layout.preferredAlignment(of: value.with { $0.type })))
+      r, UInt32(layout.preferredAlignment(of: value.unsafe[].type)))
     return .init(r)
   }
 
@@ -1012,7 +1012,7 @@ public struct Module: ~Copyable {
     on arguments: [AnyValue.UnsafeReference],
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
-    let calleeTypeID = callee.pointee.valueType
+    let calleeTypeID = callee.unsafe[].valueType
     return insertCall(callee.erased, typed: calleeTypeID, on: arguments, at: p)
   }
 
@@ -1042,11 +1042,11 @@ public struct Module: ~Copyable {
 
     // Debug: Print function type and arguments
     if let ft = FunctionType.UnsafeReference(calleeType) {
-      let funcType = ft.pointee
+      let funcType = ft.unsafe[]
 
       // Check if this is a problematic call (mismatched number of parameters when not vararg)
       if funcType.parameters.count != arguments.count && !funcType.isVarArg {
-        let functionName = Function.UnsafeReference(callee.raw).pointee.name
+        let functionName = Function.UnsafeReference(callee.raw).unsafe[].name
         var debugInfo = "Parameter count mismatch on LLVM function call: \(functionName)\n"
         debugInfo += "Expected parameters: \(funcType.parameters.count)\n"
         debugInfo += "Provided arguments: \(arguments.count)\n"
@@ -1081,7 +1081,7 @@ public struct Module: ~Copyable {
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
-    precondition(lhs.pointee.type == rhs.pointee.type)
+    precondition(lhs.unsafe[].type == rhs.unsafe[].type)
     return .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -1093,7 +1093,7 @@ public struct Module: ~Copyable {
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
-    precondition(lhs.pointee.type == rhs.pointee.type)
+    precondition(lhs.unsafe[].type == rhs.unsafe[].type)
     return .init(LLVMBuildFCmp(p.llvm, predicate.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -1198,9 +1198,9 @@ public struct Module: ~Copyable {
     if let s = type(named: name) {
       precondition(LLVMGetTypeKind(s.raw) == LLVMStructTypeKind, "Type named \(name) already exists but is not a struct type")
       let existing = StructType.UnsafeReference(s.raw)
-      precondition(existing.pointee.isPacked == packed, "Struct type named \(name) already exists but has different packing")
-      precondition(existing.pointee.fields.count == fields.count, "Struct type named \(name) already exists but has different number of fields")
-      for (f1, f2) in zip(existing.pointee.fields, fields) {
+      precondition(existing.unsafe[].isPacked == packed, "Struct type named \(name) already exists but has different packing")
+      precondition(existing.unsafe[].fields.count == fields.count, "Struct type named \(name) already exists but has different number of fields")
+      for (f1, f2) in zip(existing.unsafe[].fields, fields) {
         precondition(f1 == f2, "Struct type named \(name) already exists but has different field types")
       }
       return existing

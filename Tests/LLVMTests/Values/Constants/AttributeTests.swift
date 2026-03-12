@@ -16,7 +16,7 @@ final class AttributeTests: XCTestCase {
   func testValue() throws {
     var m = try Module("foo")
     let a = m.parameterAttribute(.dereferenceable_or_null, 64)
-    XCTAssertEqual(a.pointee.value, 64)
+    XCTAssertEqual(a.unsafe[].value, 64)
   }
 
 }

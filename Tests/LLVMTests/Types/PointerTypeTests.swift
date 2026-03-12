@@ -5,8 +5,8 @@ final class PointerTypeTests: XCTestCase {
 
   func testDefaultAddressSpace() throws {
     var m = try Module("foo")
-    XCTAssertEqual(m.pointerType().pointee.addressSpace, .default)
-    XCTAssertEqual(m.ptr.pointee.addressSpace, .default)
+    XCTAssertEqual(m.pointerType().unsafe[].addressSpace, .default)
+    XCTAssertEqual(m.ptr.unsafe[].addressSpace, .default)
   }
 
   func testConversion() throws {
@@ -21,8 +21,8 @@ final class PointerTypeTests: XCTestCase {
 
   func testEquality() throws {
     var m = try Module("foo")
-    let t = m.pointerType().pointee
-    let u = m.pointerType().pointee
+    let t = m.pointerType().unsafe[]
+    let u = m.pointerType().unsafe[]
     XCTAssertEqual(t, u)
   }
 

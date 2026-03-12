@@ -5,8 +5,8 @@ final class VoidTypeTests: XCTestCase {
 
   func testBitWidth() throws {
     var m = try Module("foo")
-    XCTAssertEqual(m.integerType(64).pointee.bitWidth, 64)
-    XCTAssertEqual(m.integerType(32).pointee.bitWidth, 32)
+    XCTAssertEqual(m.integerType(64).unsafe[].bitWidth, 64)
+    XCTAssertEqual(m.integerType(32).unsafe[].bitWidth, 32)
   }
 
   func testConversion() throws {

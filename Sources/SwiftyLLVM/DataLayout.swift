@@ -43,7 +43,7 @@ public struct DataLayout: ~Copyable {
   ///   - A power of 2.
   /// - Requires: `type` is sized (i.e. not void or a function type).
   public func abiAlignment(of type: UnsafeReference<some IRType>) -> Int {
-    precondition(type.pointee.isSized, "Cannot get alignment of unsized type.")
+    precondition(type.unsafe[].isSized, "Cannot get alignment of unsized type.")
     return Int(LLVMABIAlignmentOfType(llvm, type.raw))
   }
 
@@ -54,7 +54,7 @@ public struct DataLayout: ~Copyable {
   ///   - A power of 2.
   /// - Requires: `type` is sized (i.e. not void or a function type).
   public func preferredAlignment(of type: UnsafeReference<some IRType>) -> Int {
-    precondition(type.pointee.isSized, "Cannot get alignment of unsized type.")
+    precondition(type.unsafe[].isSized, "Cannot get alignment of unsized type.")
     return Int(LLVMPreferredAlignmentOfType(llvm, type.raw))
   }
 
