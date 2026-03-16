@@ -41,7 +41,8 @@ extension Parameter: AttributeHolder {
 
     /// Indicates that memory locations accessed via pointer values based on the argument or return
     /// value are not also accessed, during the execution of the function, via pointer values not
-    /// *based* on the argument or return value.
+    /// *based* on the argument or return value. This guarantee only holds for memory locations that
+    /// are modified, by any means, during the execution of the function.
     case noalias
 
     /// Indicates that the callee does not capture the pointer. This is not a valid attribute for
