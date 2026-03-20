@@ -13,7 +13,12 @@ public struct VoidType: IRType, Hashable {
 
   /// Returns a reference to the `void` type in `module`.
   public static func create(in module: inout Module) -> VoidType.UnsafeReference {
-    .init(LLVMVoidTypeInContext(module.context))
+    create(in: .init(module.context))
+  }
+
+  /// Returns a reference to the `void` type in `context`.
+  static func create(in context: ContextRef) -> VoidType.UnsafeReference {
+    .init(LLVMVoidTypeInContext(context.raw))
   }
 
 }
