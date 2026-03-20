@@ -10,7 +10,14 @@ public struct IntegerType: IRType, Hashable {
   ///
   /// - Requires: `bitWidth` is greater than 0.
   public static func create(_ bitWidth: Int, in module: inout Module) -> IntegerType.UnsafeReference {
-    .init(LLVMIntTypeInContext(module.context, UInt32(bitWidth)))
+    create(bitWidth, in: .init(module.context))
+  }
+
+  /// Returns a reference to an integer type with given `bitWidth` in `context`.
+  ///
+  /// - Requires: `bitWidth` is greater than 0.
+  static func create(_ bitWidth: Int, in context: ContextRef) -> IntegerType.UnsafeReference {
+    .init(LLVMIntTypeInContext(context.raw, UInt32(bitWidth)))
   }
 
   /// Creates an instance wrapping `handle`.

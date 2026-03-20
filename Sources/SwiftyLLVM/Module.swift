@@ -19,9 +19,29 @@ public struct Module: ~Copyable {
 
   /// Creates an instance by taking ownership of `context` and `module`.
   private init(targetMachine: consuming TargetMachine, context: LLVMContextRef, module: LLVMModuleRef) {
+    let contextRef = ContextRef(context)
+
     self.context = context
     self.module = module
     self.targetMachine = targetMachine
+    self.void = VoidType.create(in: contextRef)
+    self.ptr = PointerType.create(inAddressSpace: .default, in: contextRef)
+    self.half = FloatingPointType.half(in: contextRef)
+    self.bfloat = FloatingPointType.bfloat(in: contextRef)
+    self.float = FloatingPointType.float(in: contextRef)
+    self.double = FloatingPointType.double(in: contextRef)
+    self.x86_fp80 = FloatingPointType.x86_fp80(in: contextRef)
+    self.fp128 = FloatingPointType.fp128(in: contextRef)
+    self.ppc_fp128 = FloatingPointType.ppc_fp128(in: contextRef)
+    self.i1 = IntegerType.create(1, in: contextRef)
+    self.i8 = IntegerType.create(8, in: contextRef)
+    self.i16 = IntegerType.create(16, in: contextRef)
+    self.i32 = IntegerType.create(32, in: contextRef)
+    self.i64 = IntegerType.create(64, in: contextRef)
+    self.i128 = IntegerType.create(128, in: contextRef)
+    self.functionPointer = PointerType.create(
+      inAddressSpace: .init(SwiftyLLVMGetProgramAddressSpace(LLVMGetModuleDataLayout(module))),
+      in: contextRef)
   }
 
   /// Dispose of the managed resources.
@@ -383,11 +403,14 @@ public struct Module: ~Copyable {
 
   // MARK: Basic type instances
 
+  /// The LLVM context of this module wrapped as a SwiftyLLVM reference.
+  private var contextRef: ContextRef { .init(context) }
+
   /// The `void` type.
-  public private(set) lazy var void: VoidType.UnsafeReference = voidType()
+  public let void: VoidType.UnsafeReference
 
   /// The `ptr` type in the default address space.
-  public private(set) lazy var ptr: PointerType.UnsafeReference = pointerType(inAddressSpace: .default)
+  public let ptr: PointerType.UnsafeReference
 
   /// The address space in which function pointers are represented in the current data layout.
   public var programAddressSpace: AddressSpace {
@@ -395,62 +418,60 @@ public struct Module: ~Copyable {
   }
 
   /// The pointer type with program address space according to the module's data layout.
-  public var functionPointer: PointerType.UnsafeReference {
-    mutating _read{ yield pointerType(inAddressSpace: programAddressSpace) }
-  }
+  public let functionPointer: PointerType.UnsafeReference
 
   /// The 16-bit floating-point type `half`.
   /// 
   /// Represented as IEEE 754 binary16.
-  public private(set) lazy var half: FloatingPointType.UnsafeReference = FloatingPointType.half(in: &self)
+  public let half: FloatingPointType.UnsafeReference
 
   /// The 16-bit "brain" floating-point type `bfloat`.
   /// 
   /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and 7 fraction bits.
-  public private(set) lazy var bfloat: FloatingPointType.UnsafeReference = FloatingPointType.bfloat(in: &self)
+  public let bfloat: FloatingPointType.UnsafeReference
 
   /// The 32-bit floating-point type `float`.
   /// 
   /// Represented as IEEE 754 binary32.
-  public private(set) lazy var float: FloatingPointType.UnsafeReference = FloatingPointType.float(in: &self)
+  public let float: FloatingPointType.UnsafeReference
 
   /// The 64-bit floating-point type `double`.
   /// 
   /// Represented as IEEE 754 binary64.
-  public private(set) lazy var double: FloatingPointType.UnsafeReference = FloatingPointType.double(in: &self)
+  public let double: FloatingPointType.UnsafeReference
 
   /// The 80-bit floating-point type `x86_fp80`.
   ///
   /// Represented as in X87.
-  public private(set) lazy var x86_fp80: FloatingPointType.UnsafeReference = FloatingPointType.x86_fp80(in: &self)
+  public let x86_fp80: FloatingPointType.UnsafeReference
 
   /// The 128-bit floating-point type `fp128`.
   /// 
   /// Represented as IEEE 754 binary128.
-  public private(set) lazy var fp128: FloatingPointType.UnsafeReference = FloatingPointType.fp128(in: &self)
+  public let fp128: FloatingPointType.UnsafeReference
 
   /// The 128-bit floating-point type `ppc_fp128`.
   /// 
   /// Represented as the PowerPC double-double format, with two 64-bit IEEE 754 binary64 parts.
-  public private(set) lazy var ppc_fp128: FloatingPointType.UnsafeReference = FloatingPointType.ppc_fp128(in: &self)
+  public let ppc_fp128: FloatingPointType.UnsafeReference
 
   /// The 1-bit integer type.
-  public private(set) lazy var i1: IntegerType.UnsafeReference = integerType(1)
+  public let i1: IntegerType.UnsafeReference
 
   /// The 8-bit integer type.
-  public private(set) lazy var i8: IntegerType.UnsafeReference = integerType(8)
+  public let i8: IntegerType.UnsafeReference
 
   /// The 16-bit integer type.
-  public private(set) lazy var i16: IntegerType.UnsafeReference = integerType(16)
+  public let i16: IntegerType.UnsafeReference
 
   /// The 32-bit integer type.
-  public private(set) lazy var i32: IntegerType.UnsafeReference = integerType(32)
+  public let i32: IntegerType.UnsafeReference
 
   /// The 64-bit integer type.
-  public private(set) lazy var i64: IntegerType.UnsafeReference = integerType(64)
+  public let i64: IntegerType.UnsafeReference
 
   /// The 128-bit integer type.
-  public private(set) lazy var i128: IntegerType.UnsafeReference = integerType(128)
+  public let i128: IntegerType.UnsafeReference
 
   // MARK: Arithmetics
 
