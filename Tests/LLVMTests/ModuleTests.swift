@@ -69,7 +69,7 @@ final class ModuleTests: XCTestCase {
     let b = m.appendBlock(to: f)
     m.insertReturn(i32.unsafe[].zero, at: m.endOf(b))
 
-    let a = try m.compile(.assembly, for: m.targetMachine)
+    let a = try m.compile(.assembly)
     XCTAssert(a.count != 0)
   }
 
