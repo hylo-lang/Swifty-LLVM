@@ -114,14 +114,13 @@ public struct Module: ~Copyable {
     return String(cString: s!)
   }
 
-  /// Compiles this module for given `machine` and writes a result of kind `type` to `filepath`.
+  /// Compiles this module and writes a result of kind `type` to `filepath`.
   public func write(
     _ type: CodeGenerationResultType,
-    for machine: borrowing TargetMachine,
     to filepath: String
   ) throws {
     var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMTargetMachineEmitToFile(machine.llvm, llvmModule.raw, filepath, type.llvm, &error)
+    LLVMTargetMachineEmitToFile(targetMachine.llvm, llvmModule.raw, filepath, type.llvm, &error)
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
@@ -129,14 +128,13 @@ public struct Module: ~Copyable {
     }
   }
 
-  /// Compiles this module for given `machine` and returns a result of kind `type`.
+  /// Compiles this module to machine code and returns the result of kind `type`.
   public func compile(
-    _ type: CodeGenerationResultType,
-    for machine: borrowing TargetMachine
+    _ type: CodeGenerationResultType
   ) throws -> MemoryBuffer {
     var output: LLVMMemoryBufferRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMTargetMachineEmitToMemoryBuffer(machine.llvm, llvmModule.raw, type.llvm, &error, &output)
+    LLVMTargetMachineEmitToMemoryBuffer(targetMachine.llvm, llvmModule.raw, type.llvm, &error, &output)
 
     if let e = error {
       defer { LLVMDisposeMessage(e) }
