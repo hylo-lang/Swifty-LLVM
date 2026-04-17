@@ -20,7 +20,7 @@ final class IRValueTests: XCTestCase {
   }
 
   func testIsNull() throws {
-    var m = try Module("foo")
+    let m = try Module("foo")
     XCTAssert(m.i64.unsafe[].null.unsafe[].isNull)
     XCTAssertFalse(m.i64.unsafe[].constant(42).unsafe[].isNull)
   }
