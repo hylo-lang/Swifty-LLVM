@@ -8,7 +8,7 @@ public struct Instruction: IRValue, Hashable {
 
   /// Creates an instance wrapping `handle`.
   public init(temporarilyWrapping handle: ValueRef) {
-    llvm = handle
+    self.llvm = handle
   }
 
 }

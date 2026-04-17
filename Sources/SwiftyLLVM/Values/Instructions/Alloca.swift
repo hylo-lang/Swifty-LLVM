@@ -8,7 +8,7 @@ public struct Alloca: IRValue {
 
   /// Creates an instance wrapping `handle`.
   public init(temporarilyWrapping handle: ValueRef) {
-    llvm = handle
+    self.llvm = handle
   }
 
   /// Inserts an `alloca` instruction of `type` at insertion point `p`.
@@ -29,6 +29,7 @@ public struct Alloca: IRValue {
 }
 
 extension UnsafeReference<Alloca> {
+
   /// Creates an instance with `s`, failing iff `s` isn't an `alloca`
   public init?(_ s: AnyValue.UnsafeReference) {
     if let h = LLVMIsAAllocaInst(s.llvm.raw) {
@@ -37,4 +38,5 @@ extension UnsafeReference<Alloca> {
       return nil
     }
   }
+
 }

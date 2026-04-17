@@ -20,7 +20,7 @@ public struct GlobalVariable: Global {
   ///   whether a value is a constant user, as opposed to an instruction.
   public var isGlobalConstant: Bool { LLVMIsGlobalConstant(llvm.raw) != 0 }
 
-  /// `true` is this value is initialized externally.
+  /// `true` iff this value is initialized externally.
   public var isExternallyInitialized: Bool { LLVMIsExternallyInitialized(llvm.raw) != 0 }
 
   /// The initial value of this global.

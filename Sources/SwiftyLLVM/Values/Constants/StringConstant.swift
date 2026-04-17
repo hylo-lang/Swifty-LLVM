@@ -36,6 +36,7 @@ public struct StringConstant: IRValue, Hashable {
 }
 
 extension UnsafeReference<StringConstant> {
+
   /// Creates an instance with `v`, failing iff `v` is not a constant string value.
   public init?(_ v: AnyValue.UnsafeReference) {
     if LLVMIsAConstantDataSequential(v.llvm.raw) != nil && LLVMIsConstantString(v.llvm.raw) != 0 {
@@ -44,4 +45,5 @@ extension UnsafeReference<StringConstant> {
       return nil
     }
   }
+
 }

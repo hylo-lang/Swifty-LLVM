@@ -6,7 +6,7 @@ internal import llvmc
 /// `Parameter` are valid conforming types.
 public protocol AttributeHolder {
 
-  /// The name of targe-independent attributes for this holder.
+  /// The name of target-independent attributes for this holder.
   associatedtype AttributeName: AttributeNameProtocol
 
 }
@@ -25,6 +25,7 @@ extension AttributeNameProtocol {
 
 /// An attribute on a function, return value, or parameter in LLVM IR.
 public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
+
   /// The native handle wrapped by this attribute.
   public typealias Handle = AttributeRef
 
@@ -65,10 +66,12 @@ public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
 public protocol IRAttribute: Hashable, LLVMEntity where Handle == AttributeRef {}
 
 extension Attribute: IRAttribute {
+
 }
 
 /// A type-erased LLVM IR attribute.
 public struct AnyAttribute: LLVMEntity, IRAttribute {
+
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: AttributeRef
 
@@ -76,4 +79,5 @@ public struct AnyAttribute: LLVMEntity, IRAttribute {
   public init(temporarilyWrapping llvm: AttributeRef) {
     self.llvm = llvm
   }
+
 }

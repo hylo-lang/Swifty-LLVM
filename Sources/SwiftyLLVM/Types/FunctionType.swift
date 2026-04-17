@@ -49,6 +49,7 @@ public struct FunctionType: IRType, Hashable {
 }
 
 extension UnsafeReference<FunctionType> {
+
   /// Creates an instance with `t`, failing iff `t` isn't a function type.
   public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMFunctionTypeKind {
@@ -57,4 +58,5 @@ extension UnsafeReference<FunctionType> {
       return nil
     }
   }
+
 }

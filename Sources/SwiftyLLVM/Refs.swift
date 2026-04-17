@@ -1,4 +1,3 @@
-import Foundation
 internal import llvmc
 
 /// An LLVM type reference.
@@ -69,16 +68,20 @@ public struct AttributeRef: Hashable {
 
 /// A temporary wrapper view around a native handle managed by LLVM.
 public protocol LLVMEntity: ~Copyable {
+
   /// The native handle being wrapped by the entity, e.g. a pointer.
   associatedtype Handle: Hashable
 
   /// Wraps a handle for temporary use as an instance of `Self`.
   init(temporarilyWrapping handle: Handle)
+
 }
 
 extension LLVMEntity {
+
   /// A reference to Self. Pointees are owned by the LLVM module.
   public typealias UnsafeReference = SwiftyLLVM.UnsafeReference<Self>
+
 }
 
 /// A non-owning reference to an LLVM-backed entity.
@@ -86,6 +89,7 @@ extension LLVMEntity {
 /// The lifetime of the pointee is managed by LLVM; Users must ensure the underlying object
 /// remains valid while accessing the pointee.
 public struct UnsafeReference<T: LLVMEntity>: Hashable {
+
   /// The underlying native handle for the referenced entity.
   internal let llvm: T.Handle
 
@@ -94,6 +98,7 @@ public struct UnsafeReference<T: LLVMEntity>: Hashable {
 
   /// A semantically transparent struct that allows exposing a named subscript `ref.unsafe[]`
   public struct SubscriptablePointee {
+
     /// The wrapped handle.
     internal let llvm: T.Handle
 
@@ -110,6 +115,7 @@ public struct UnsafeReference<T: LLVMEntity>: Hashable {
         yield &pointee
       }
     }
+
   }
 
   /// Creates a temporary wrapper for the type.
@@ -121,12 +127,14 @@ public struct UnsafeReference<T: LLVMEntity>: Hashable {
       var s = SubscriptablePointee(llvm)
       yield &s
     }
+
   }
 
 }
 
 /// Downcasting from erased reference.
 extension UnsafeReference {
+
   /// Downcasts an AnyType reference to the desired IRType reference.
   public init(uncheckedFrom reference: UnsafeReference<AnyType>) where T: IRType {
     self.init(reference.llvm)
@@ -137,14 +145,16 @@ extension UnsafeReference {
     self.init(reference.llvm)
   }
 
-  // Downcasts an AnyAttribute reference to a function attribute.
+  /// Downcasts an AnyAttribute reference to a function attribute.
   public init(uncheckedFrom reference: UnsafeReference<AnyAttribute>) where T: IRAttribute {
     self.init(reference.llvm)
   }
+
 }
 
 /// Downcasting from native handle to the desired reference type.
 extension UnsafeReference {
+
   /// Downcasts a native handle to the desired IRType reference.
   init(_ reference: LLVMTypeRef) where T: IRType {
     self.init(TypeRef(reference))
@@ -159,42 +169,53 @@ extension UnsafeReference {
   init(_ reference: LLVMAttributeRef) where T: IRAttribute {
     self.init(AttributeRef(reference))
   }
+
 }
 
 extension UnsafeReference<BasicBlock> {
+
   /// Creates a BasicBlock reference from a native handle.
   init(_ reference: LLVMBasicBlockRef) {
     self.init(BasicBlockRef(reference))
   }
+
 }
 
 extension UnsafeReference where T: IRType {
+
   /// Type-erased reference to the IR type.
   public var erased: UnsafeReference<AnyType> { .init(llvm) }
 
   /// Native handle to the LLVM type reference.
   var raw: LLVMTypeRef { llvm.raw }
+
 }
 
 extension UnsafeReference where T: IRValue {
+
   /// Type-erased reference to the IR value.
   public var erased: UnsafeReference<AnyValue> { .init(llvm) }
 
   /// Native handle to the LLVM value reference.
   var raw: LLVMValueRef { llvm.raw }
+
 }
 
 extension UnsafeReference where T: IRAttribute {
+
   /// Type-erased reference to the IR attribute.
   public var erased: UnsafeReference<AnyAttribute> { .init(llvm) }
 
   /// Native handle to the LLVM attribute reference.
   var raw: LLVMAttributeRef { llvm.raw }
+
 }
 
 extension UnsafeReference where T == BasicBlock {
+
   /// Native handle to the LLVM basic block reference.
   var raw: LLVMBasicBlockRef { llvm.raw }
+
 }
 
 /// Returns `true` iff the given type references are equal.

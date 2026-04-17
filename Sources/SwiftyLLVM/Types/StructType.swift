@@ -61,6 +61,7 @@ public struct StructType: IRType, Hashable {
 }
 
 extension UnsafeReference<StructType> {
+
   /// Creates an instance with `t`, failing iff `t` isn't a struct type.
   public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMStructTypeKind {
@@ -69,6 +70,7 @@ extension UnsafeReference<StructType> {
       return nil
     }
   }
+
 }
 
 extension StructType {

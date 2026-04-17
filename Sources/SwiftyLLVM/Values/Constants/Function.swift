@@ -105,14 +105,17 @@ extension Function {
 }
 
 extension Callable {
+
   /// The return value of the function.
   public var returnValue: Function.Return { .init(self) }
 
   /// The parameters of the function.
   public var parameters: Function.Parameters { .init(of: self) }
+
 }
 
 extension UnsafeReference<Function> {
+
   /// Creates an instance with `v`, failing iff `v` isn't a function.
   public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAFunction(v.llvm.raw) {
@@ -121,4 +124,5 @@ extension UnsafeReference<Function> {
       return nil
     }
   }
+
 }

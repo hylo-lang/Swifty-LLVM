@@ -10,4 +10,5 @@ public struct AnyType: IRType, Hashable {
   public init(temporarilyWrapping handle: TypeRef) {
     self.llvm = handle
   }
+
 }

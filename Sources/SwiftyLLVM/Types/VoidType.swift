@@ -19,6 +19,7 @@ public struct VoidType: IRType, Hashable {
 }
 
 extension UnsafeReference<VoidType> {
+
   /// Creates an instance with `t`, failing iff `t` isn't a void type.
   public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMVoidTypeKind {
@@ -27,4 +28,5 @@ extension UnsafeReference<VoidType> {
       return nil
     }
   }
+
 }

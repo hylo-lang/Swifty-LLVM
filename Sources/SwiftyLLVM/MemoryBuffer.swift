@@ -62,4 +62,5 @@ public struct MemoryBuffer: ~Copyable {
     let start = LLVMGetBufferStart(llvm)
     return try action(.init(start: start, count: count))
   }
+
 }

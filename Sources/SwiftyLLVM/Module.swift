@@ -116,7 +116,7 @@ public struct Module: ~Copyable {
 
   /// Compiles this module and writes a result of kind `type` to `filepath`.
   public func write(
-    _ type: CodeGenerationResultType,
+    _ type: CodeGenerationKind,
     to filepath: String
   ) throws {
     var error: UnsafeMutablePointer<CChar>? = nil
@@ -130,7 +130,7 @@ public struct Module: ~Copyable {
 
   /// Compiles this module to machine code and returns the result of kind `type`.
   public func compile(
-    _ type: CodeGenerationResultType
+    _ type: CodeGenerationKind
   ) throws -> MemoryBuffer {
     var output: LLVMMemoryBufferRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
@@ -199,7 +199,7 @@ public struct Module: ~Copyable {
   ) -> GlobalVariable.UnsafeReference {
     guard let handle = LLVMAddGlobalInAddressSpace(llvmModule.raw, type.raw, name ?? "", s.llvm)
     else {
-      fatalError("Failed to add global variable '\(name ?? "")' in address space '\(s)'.")
+      unreachable("Failed to add global variable '\(name ?? "")' in address space '\(s)'.")
     }
     return GlobalVariable.UnsafeReference(handle)
   }
@@ -363,13 +363,13 @@ public struct Module: ~Copyable {
   }
 
   /// Sets the name of `v` to `n`.
-  public mutating func setName<V: IRValue>(_ n: String, for v: V.UnsafeReference) {
-    n.withCString({ LLVMSetValueName2(v.raw, $0, n.utf8.count) })
+  public mutating func setName<V: IRValue>(_ name: String, for v: V.UnsafeReference) {
+    name.withCString({ LLVMSetValueName2(v.raw, $0, name.utf8.count) })
   }
 
-  /// Sets the linkage of `g` to `l`.
-  public mutating func setLinkage<G: Global>(_ l: Linkage, for g: G.UnsafeReference) {
-    LLVMSetLinkage(g.raw, l.llvm)
+  /// Sets the linkage of `global` to `linkage`.
+  public mutating func setLinkage<G: Global>(_ l: Linkage, for global: G.UnsafeReference) {
+    LLVMSetLinkage(global.raw, l.llvm)
   }
 
   /// Configures whether `g` is a global constant.
@@ -1048,7 +1048,7 @@ public struct Module: ~Copyable {
     return insertCall(callee, on: erased, at: p)
   }
 
-  /// Inserts a call to `callee` with explicit `calleeType.
+  /// Inserts a call to `callee` with explicit `calleeType`.
   ///
   /// Validates argument count for non-variadic function types.
   public mutating func insertCall(
@@ -1076,7 +1076,7 @@ public struct Module: ~Copyable {
     return .init(LLVMBuildCall2(p.llvm, calleeType.raw, callee.raw, &a, UInt32(a.count), "")!)
   }
 
-  /// Inserts a call to `callee` with explicit `calleeType.
+  /// Inserts a call to `callee` with explicit `calleeType`.
   ///
   /// Validates argument count for non-variadic function types.
   public mutating func insertCall<T: IRType, each A: IRValue>(
@@ -1336,4 +1336,5 @@ public struct Module: ~Copyable {
 
   /// The LLVM IR string representation of this module.
   public var description: String { llCode() }
+
 }

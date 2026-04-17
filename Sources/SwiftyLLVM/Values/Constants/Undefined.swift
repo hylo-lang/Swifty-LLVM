@@ -19,6 +19,7 @@ public struct Undefined: IRValue, Hashable {
 }
 
 extension UnsafeReference<Undefined> {
+
   /// Creates an instance with `v`, failing iff `v` is not an undefined value.
   public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAUndefValue(v.llvm.raw) {
@@ -27,4 +28,5 @@ extension UnsafeReference<Undefined> {
       return nil
     }
   }
+
 }

@@ -68,12 +68,15 @@ public struct IntegerType: IRType, Hashable {
   public var zero: IntegerConstant.UnsafeReference {
     .init(LLVMConstNull(llvm.raw))
   }
+
 }
 
 extension UnsafeReference<IntegerType> {
+
   /// Creates an instance with `t`, failing iff `t` isn't an integer type.
   public init?(_ t: AnyType.UnsafeReference) {
     guard LLVMGetTypeKind(t.llvm.raw) == LLVMIntegerTypeKind else { return nil }
     self.init(t.llvm)
   }
+
 }

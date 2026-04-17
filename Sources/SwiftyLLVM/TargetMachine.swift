@@ -1,6 +1,6 @@
-/// The settings necessary for code generation, including target information and compiler options.
 internal import llvmc
 
+/// The settings necessary for code generation, including target information and compiler options.
 public struct TargetMachine: ~Copyable {
 
   /// A handle to the LLVM object wrapped by this instance.

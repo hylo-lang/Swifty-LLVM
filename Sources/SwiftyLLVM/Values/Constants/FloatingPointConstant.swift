@@ -22,6 +22,7 @@ public struct FloatingPointConstant: IRValue, Hashable {
 }
 
 extension UnsafeReference<FloatingPointConstant> {
+
   /// Creates an instance with `v`, failing iff `v` isn't a constant floating-point number.
   public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAConstantFP(v.llvm.raw) {
@@ -30,4 +31,5 @@ extension UnsafeReference<FloatingPointConstant> {
       return nil
     }
   }
+
 }
