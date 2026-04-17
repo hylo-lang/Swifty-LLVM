@@ -153,26 +153,26 @@ final class TargetTests: XCTestCase {
   }
 
   func testTargetSpecInvalidCPU() throws {
-    try XCTAssertThrowsError(
+    XCTAssertThrowsError(
       try TargetSpecification(target: .host(), cpu: "not_a_real_cpu_12345")
     ) { error in
       let e = error as? TargetSpecificationError
       XCTAssertEqual(
         e,
         TargetSpecificationError.invalidCPU(
-          "not_a_real_cpu_12345", triple: try Target.host().triple))
+          "not_a_real_cpu_12345", triple: Target.hostTriple))
     }
   }
 
   func testTargetSpecInvalidFeature() throws {
-    try XCTAssertThrowsError(
+    XCTAssertThrowsError(
       try TargetSpecification(target: .host(), features: "+not_a_real_feature_xyz")
     ) { error in
       let e = error as? TargetSpecificationError
       XCTAssertEqual(
         e,
         TargetSpecificationError.invalidFeature(
-          "not_a_real_feature_xyz", triple: try Target.host().triple))
+          "not_a_real_feature_xyz", triple: Target.hostTriple))
     }
   }
 
