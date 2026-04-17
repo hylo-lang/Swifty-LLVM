@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// A floating-point type in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#floating-point-types.
 public struct FloatingPointType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.

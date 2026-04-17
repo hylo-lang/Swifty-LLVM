@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// A global value in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#global-variables.
 public struct GlobalVariable: Global {
 
   /// A handle to the LLVM object wrapped by this instance.

@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// A poison value in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#poison-values.
 public struct Poison: IRValue, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.

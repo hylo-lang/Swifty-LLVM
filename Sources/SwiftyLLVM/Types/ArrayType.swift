@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// An array type in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#array-type.
 public struct ArrayType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.

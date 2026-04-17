@@ -6,6 +6,8 @@ extension Function: AttributeHolder {
   public typealias Attribute = SwiftyLLVM.Attribute<Function>
 
   /// The name of an attribute on a function in LLVM IR.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#function-attributes.
   public enum AttributeName: String, AttributeNameProtocol, Sendable {
 
     /// Indicates that the inliner should attempt to inline this function into callers whenever
