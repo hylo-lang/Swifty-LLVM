@@ -95,7 +95,7 @@ public enum Linkage: Sendable {
     case LLVMExternalWeakLinkage:
       self = .externWeak
     default:
-      fatalError("unsupported linkage type")
+      unimplemented("linkage type \(llvm)")
     }
   }
 

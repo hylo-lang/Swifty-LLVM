@@ -2,6 +2,7 @@ internal import llvmc
 
 /// A cursor specifying where IR instructions should be inserted.
 public struct InsertionPoint: ~Copyable {
+
   /// A handle to the LLVM object wrapped by this instance.
   internal let llvm: LLVMBuilderRef
 
@@ -13,4 +14,5 @@ public struct InsertionPoint: ~Copyable {
   deinit {
     LLVMDisposeBuilder(llvm)
   }
+
 }

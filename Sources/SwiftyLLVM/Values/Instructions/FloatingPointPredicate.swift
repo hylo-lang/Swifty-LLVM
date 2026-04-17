@@ -1,6 +1,6 @@
 internal import llvmc
 
-/// The predicate of an integer comparison.
+/// The predicate of a floating point comparison.
 ///
 /// - Note: Ordered means that neither operand is a QNAN while unordered means that either operand
 ///   may be a QNAN.
