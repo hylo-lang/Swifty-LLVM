@@ -4,6 +4,7 @@ internal import llvmc
 ///
 /// - Note: Ordered means that neither operand is a QNAN while unordered means that either operand
 ///   may be a QNAN.
+/// - See https://llvm.org/docs/LangRef.html#fcmp-instruction.
 public enum FloatingPointPredicate: String, Hashable, Sendable, CaseIterable {
 
   /// No comparison; always false.

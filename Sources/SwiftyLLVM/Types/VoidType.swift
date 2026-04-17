@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// A `void` type in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#void-type.
 public struct VoidType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
