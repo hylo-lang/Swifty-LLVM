@@ -2,6 +2,8 @@ internal import llvmc
 internal import llvmshims
 
 /// How data are represented in memory for a particular target machine.
+///
+/// - See https://llvm.org/docs/LangRef.html#data-layout.
 public struct DataLayout: ~Copyable {
 
   /// A handle to the LLVM object wrapped by this instance.
