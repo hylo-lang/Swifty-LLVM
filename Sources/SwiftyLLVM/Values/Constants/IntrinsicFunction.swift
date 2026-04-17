@@ -1,4 +1,3 @@
-import Foundation
 internal import llvmc
 
 /// An intrinsic function known to LLVM.
@@ -42,8 +41,9 @@ public struct IntrinsicFunction: Global, Callable, Hashable {
 extension IntrinsicFunction {
 
   /// The name of an intrinsic.
-  @dynamicMemberLookup
+  ///
   /// Supports chained member syntax to construct dotted intrinsic names.
+  @dynamicMemberLookup
   public struct Name: Sendable {
 
     /// The value of this instance.

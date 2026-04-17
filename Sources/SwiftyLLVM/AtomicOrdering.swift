@@ -61,7 +61,7 @@ public enum AtomicOrdering: Sendable {
     case LLVMAtomicOrderingSequentiallyConsistent:
       self = .sequentiallyConsistent
     default:
-      fatalError("unsupported atomic ordering")
+      unimplemented("atomic ordering \(llvm)")
     }
   }
 

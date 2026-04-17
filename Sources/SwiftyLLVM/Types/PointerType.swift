@@ -31,6 +31,7 @@ public struct PointerType: IRType, Hashable {
 }
 
 extension UnsafeReference<PointerType> {
+
   /// Creates an instance with `t`, failing iff `t` isn't a pointer type.
   public init?(_ t: AnyType.UnsafeReference) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMPointerTypeKind {
@@ -39,4 +40,5 @@ extension UnsafeReference<PointerType> {
       return nil
     }
   }
+
 }
