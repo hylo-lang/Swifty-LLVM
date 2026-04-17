@@ -58,13 +58,6 @@ public struct StructType: IRType, Hashable {
   /// The fields of the struct.
   public var fields: Fields { .init(of: self) }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value aggregates `elements`.
-  public func constant<S: Sequence>(
-    aggregating elements: S, in module: inout Module
-  ) -> StructConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
-    StructConstant.create(aggregating: elements, in: &module)
-  }
-
 }
 
 extension UnsafeReference<StructType> {

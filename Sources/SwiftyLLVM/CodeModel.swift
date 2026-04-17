@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// Constraints on address ranges that the program and its symbols may use.
-public enum CodeModel: Hashable, Sendable {
+public enum CodeModel: Hashable, Sendable, CaseIterable {
 
   /// The model default to the target for which code is being generated.
   case `default`

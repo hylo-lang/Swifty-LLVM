@@ -2,6 +2,9 @@ internal import llvmc
 internal import llvmshims
 
 /// A parameter in an LLVM IR function.
+/// 
+/// Equality is defined as reference equality on the underlying LLVM reference, which
+/// is unique for each function.
 public struct Parameter: IRValue {
 
   /// A handle to the LLVM object wrapped by this instance.

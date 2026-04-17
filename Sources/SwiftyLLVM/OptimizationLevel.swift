@@ -17,7 +17,7 @@ public enum OptimizationLevel: Hashable, Sendable {
   case aggressive
 
   /// The LLVM representation of this instance for code generation.
-  internal var codegen: LLVMCodeGenOptLevel {
+  internal var llvm: LLVMCodeGenOptLevel {
     switch self {
     case .none:
       return LLVMCodeGenLevelNone

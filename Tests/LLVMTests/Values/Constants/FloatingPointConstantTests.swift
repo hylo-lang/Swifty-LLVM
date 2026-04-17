@@ -4,7 +4,7 @@ import XCTest
 final class FloatingPointConstantTests: XCTestCase {
 
   func testZero() throws {
-    var m = try Module("foo")
+    let m = try Module("foo")
     let t = m.double
     let ty = t.unsafe[]
     let x = ty.zero
@@ -12,7 +12,7 @@ final class FloatingPointConstantTests: XCTestCase {
   }
 
   func testInitWithDouble() throws {
-    var m = try Module("foo")
+    let m = try Module("foo")
     let t = m.double
     let ty = t.unsafe[]
     let x = ty.constant(4.2)
@@ -20,7 +20,7 @@ final class FloatingPointConstantTests: XCTestCase {
   }
 
   func testInitWithText() throws {
-    var m = try Module("foo")
+    let m = try Module("foo")
     let t = m.double
     let ty = t.unsafe[]
     let x = ty.constant(parsing: "4.2")
@@ -40,7 +40,7 @@ final class FloatingPointConstantTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    let m = try Module("foo")
     let ty = m.double
     let double = ty.unsafe[]
 
