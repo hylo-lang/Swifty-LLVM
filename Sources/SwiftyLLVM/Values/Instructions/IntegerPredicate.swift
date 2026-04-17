@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// The predicate of an integer comparison.
+///
+/// - See https://llvm.org/docs/LangRef.html#icmp-instruction.
 public enum IntegerPredicate: String, Hashable, Sendable, CaseIterable {
 
   /// Values are equal.

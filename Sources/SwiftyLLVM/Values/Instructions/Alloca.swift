@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// LLVM's `alloca` instruction.
+///
+/// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
 public struct Alloca: IRValue {
 
   /// A handle to the LLVM object wrapped by this instance.

@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// A struct type in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#structure-type.
 public struct StructType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.

@@ -2,6 +2,8 @@ internal import llvmc
 internal import llvmshims
 
 /// The top-level structure in an LLVM program.
+///
+/// - See https://llvm.org/docs/LangRef.html#module-structure.
 public struct Module: ~Copyable {
 
   /// The context owning the contents of the LLVM module.
@@ -96,6 +98,8 @@ public struct Module: ~Copyable {
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
+  ///
+  /// - See https://llvm.org/docs/BitCodeFormat.html.
   public func writeBitcode(to filepath: String) throws {
     guard LLVMWriteBitcodeToFile(llvmModule.raw, filepath) == 0 else {
       throw LLVMError("write failure")
@@ -103,6 +107,8 @@ public struct Module: ~Copyable {
   }
 
   /// Returns the LLVM bitcode of this module.
+  ///
+  /// - See https://llvm.org/docs/BitCodeFormat.html.
   public func bitcode() -> MemoryBuffer {
     .init(LLVMWriteBitcodeToMemoryBuffer(llvmModule.raw), owned: true)
   }
@@ -192,6 +198,8 @@ public struct Module: ~Copyable {
   ///
   /// A unique name is generated if `name` is empty or if `self` already contains a global with
   /// the same name.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#global-variables.
   public mutating func addGlobalVariable<T: IRType>(
     _ name: String? = nil,
     _ type: T.UnsafeReference,
@@ -205,6 +213,8 @@ public struct Module: ~Copyable {
   }
 
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#global-variables.
   public mutating func declareGlobalVariable<T: IRType>(
     _ name: String,
     _ type: T.UnsafeReference,
@@ -220,6 +230,8 @@ public struct Module: ~Copyable {
   }
 
   /// Returns a function with given `name` and `type`, declaring it if it doesn't exist.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#functions.
   public mutating func declareFunction(_ name: String, _ type: FunctionType.UnsafeReference)
     -> Function.UnsafeReference
   {
@@ -474,6 +486,8 @@ public struct Module: ~Copyable {
   // MARK: Arithmetics
 
   /// Inserts an integer addition instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#add-instruction.
   public mutating func insertAdd<U: IRValue, V: IRValue>(
     overflow: OverflowBehavior = .ignore,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
@@ -490,6 +504,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a floating-point addition instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fadd-instruction.
   public mutating func insertFAdd<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -498,6 +514,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an integer subtraction instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#sub-instruction.
   public mutating func insertSub<U: IRValue, V: IRValue>(
     overflow: OverflowBehavior = .ignore,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
@@ -514,6 +532,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a floating-point subtraction instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fsub-instruction.
   public mutating func insertFSub<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -522,6 +542,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an integer multiplication instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#mul-instruction.
   public mutating func insertMul<U: IRValue, V: IRValue>(
     overflow: OverflowBehavior = .ignore,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
@@ -538,6 +560,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a floating-point multiplication instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fmul-instruction.
   public mutating func insertFMul<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -548,6 +572,7 @@ public struct Module: ~Copyable {
   /// Inserts an unsigned integer division instruction.
   ///
   /// - Requires: if `exact` is true, the dividend must be a perfect multiple of divisor (remainder is 0).
+  /// - See https://llvm.org/docs/LangRef.html#udiv-instruction.
   public mutating func insertUnsignedDiv<U: IRValue, V: IRValue>(
     exact: Bool = false,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
@@ -563,6 +588,7 @@ public struct Module: ~Copyable {
   /// Inserts a signed integer division instruction.
   ///
   /// - Requires: if `exact` is true, the dividend must be a perfect multiple of divisor (remainder is 0).
+  /// - See https://llvm.org/docs/LangRef.html#sdiv-instruction.
   public mutating func insertSignedDiv<U: IRValue, V: IRValue>(
     exact: Bool = false,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
@@ -576,6 +602,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a floating-point division instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fdiv-instruction.
   public mutating func insertFDiv<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -584,6 +612,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an unsigned integer remainder instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#urem-instruction.
   public mutating func insertUnsignedRem<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -592,6 +622,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a signed integer remainder instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#srem-instruction.
   public mutating func insertSignedRem<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -600,6 +632,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a floating-point remainder instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#frem-instruction.
   public mutating func insertFRem<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -608,6 +642,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a left-shift instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#shl-instruction.
   public mutating func insertShl<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -616,6 +652,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a logical right-shift instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#lshr-instruction.
   public mutating func insertLShr<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -624,6 +662,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an arithmetic right-shift instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#ashr-instruction.
   public mutating func insertAShr<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -632,6 +672,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a bitwise AND instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#and-instruction.
   public mutating func insertBitwiseAnd(
     _ lhs: UnsafeReference<some IRValue>, _ rhs: UnsafeReference<some IRValue>,
     at p: borrowing InsertionPoint
@@ -640,6 +682,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a bitwise OR instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#or-instruction.
   public mutating func insertBitwiseOr(
     _ lhs: UnsafeReference<some IRValue>, _ rhs: UnsafeReference<some IRValue>,
     at p: borrowing InsertionPoint
@@ -648,6 +692,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a bitwise XOR instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#xor-instruction.
   public mutating func insertBitwiseXor(
     _ lhs: UnsafeReference<some IRValue>, _ rhs: UnsafeReference<some IRValue>,
     at p: borrowing InsertionPoint
@@ -659,6 +705,8 @@ public struct Module: ~Copyable {
   // MARK: Memory
 
   /// Inserts a stack allocation instruction at insertion point `p`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
   public mutating func insertAlloca(
     _ type: UnsafeReference<some IRType>, at p: borrowing InsertionPoint
   )
@@ -676,6 +724,7 @@ public struct Module: ~Copyable {
   /// Inserts an `alloca` that allocates stack memory for a value of `type`, at the entry of `f`.
   ///
   /// - Requires: `f` has an entry block.
+  /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
   public mutating func insertAlloca<T: IRType>(_ type: T.UnsafeReference, atEntryOf f: Function.UnsafeReference)
     -> Alloca.UnsafeReference
   {
@@ -683,8 +732,9 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base`.
-  /// 
-  /// See https://llvm.org/docs/LangRef.html#getelementptr-instruction and https://llvm.org/docs/GetElementPtr.html.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
+  /// - See https://llvm.org/docs/GetElementPtr.html.
   public mutating func insertGetElementPointer<V: IRValue, T: IRType>(
     of base: V.UnsafeReference,
     typed baseType: T.UnsafeReference,
@@ -697,8 +747,9 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base`.
-  /// 
-  /// See https://llvm.org/docs/LangRef.html#getelementptr-instruction and https://llvm.org/docs/GetElementPtr.html.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
+  /// - See https://llvm.org/docs/GetElementPtr.html.
   public mutating func insertGetElementPointer<V: IRValue, T: IRType, each I: IRValue>(
     of base: V.UnsafeReference,
     typed baseType: T.UnsafeReference,
@@ -713,8 +764,9 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base` with additional in-bounds requirements.
-  /// 
-  /// See https://llvm.org/docs/LangRef.html#getelementptr-instruction and https://llvm.org/docs/GetElementPtr.html.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
+  /// - See https://llvm.org/docs/GetElementPtr.html.
   public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType>(
     of base: V.UnsafeReference,
     typed baseType: T.UnsafeReference,
@@ -728,8 +780,9 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base` with additional in-bounds requirements.
-  /// 
-  /// See https://llvm.org/docs/LangRef.html#getelementptr-instruction and https://llvm.org/docs/GetElementPtr.html.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
+  /// - See https://llvm.org/docs/GetElementPtr.html.
   public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType, each I: IRValue>(
     of base: V.UnsafeReference,
     typed baseType: T.UnsafeReference,
@@ -745,6 +798,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a struct element address computation for field `index`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
   public mutating func insertGetStructElementPointer<V: IRValue>(
     of base: V.UnsafeReference,
     typed baseType: StructType.UnsafeReference,
@@ -757,6 +812,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a typed load instruction from `source`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#load-instruction.
   public mutating func insertLoad<T: IRType, V: IRValue>(
     _ type: T.UnsafeReference, from source: V.UnsafeReference, at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
@@ -764,6 +821,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a store instruction with alignment based on the `value`'s type.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#store-instruction.
   @discardableResult
   public mutating func insertStore<V1: IRValue, V2: IRValue>(
     _ value: V1.UnsafeReference, to location: V2.UnsafeReference, at p: borrowing InsertionPoint
@@ -809,6 +868,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an atomic compare-exchange instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#cmpxchg-instruction.
   public mutating func insertAtomicCmpXchg<V1: IRValue, V2: IRValue, V3: IRValue>(
     _ atomic: V1.UnsafeReference,
     old: V2.UnsafeReference,
@@ -831,6 +892,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an atomic read-modify-write instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#atomicrmw-instruction.
   public mutating func insertAtomicRMW<V1: IRValue, V2: IRValue>(
     _ atomic: V1.UnsafeReference,
     operation: AtomicRMWBinOp,
@@ -847,6 +910,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a fence instruction with the given ordering and thread scope.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fence-instruction.
   @discardableResult
   public mutating func insertFence(
     _ ordering: AtomicOrdering, singleThread: Bool, at p: borrowing InsertionPoint
@@ -857,6 +922,8 @@ public struct Module: ~Copyable {
   // MARK: Terminators
 
   /// Inserts an unconditional branch to `destination`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#br-instruction.
   @discardableResult
   public mutating func insertBr(
     to destination: BasicBlock.UnsafeReference, at p: borrowing InsertionPoint
@@ -867,6 +934,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a conditional branch on `condition`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#br-instruction.
   @discardableResult
   public mutating func insertCondBr<V: IRValue>(
     if condition: V.UnsafeReference, then t: BasicBlock.UnsafeReference, else e: BasicBlock.UnsafeReference,
@@ -878,6 +947,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a `switch` terminator with `cases` and `defaultCase`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#switch-instruction.
   @discardableResult
   public mutating func insertSwitch<
     V: IRValue, C: Collection<(AnyValue.UnsafeReference, BasicBlock.UnsafeReference)>
@@ -894,6 +965,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a `switch` terminator with cases provided as a variadic tuple.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#switch-instruction.
   @discardableResult
   public mutating func insertSwitch<
     V: IRValue, each C: IRValue
@@ -911,12 +984,16 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a `ret void` terminator.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#ret-instruction.
   @discardableResult
   public mutating func insertReturn(at p: borrowing InsertionPoint) -> Instruction.UnsafeReference {
     .init(LLVMBuildRetVoid(p.llvm)!)
   }
 
   /// Inserts a `ret` terminator returning `value`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#ret-instruction.
   @discardableResult
   public mutating func insertReturn<V: IRValue>(
     _ value: V.UnsafeReference, at p: borrowing InsertionPoint
@@ -927,6 +1004,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an `unreachable` terminator.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#unreachable-instruction.
   @discardableResult
   public mutating func insertUnreachable(at p: borrowing InsertionPoint) -> Instruction.UnsafeReference {
     .init(LLVMBuildUnreachable(p.llvm)!)
@@ -960,6 +1039,8 @@ public struct Module: ~Copyable {
   // MARK: Conversions
 
   /// Inserts an integer truncation conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#trunc-to-instruction.
   public mutating func insertTrunc<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -968,6 +1049,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a sign-extension integer conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#sext-to-instruction.
   public mutating func insertSignExtend<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -976,6 +1059,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a zero-extension integer conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#zext-to-instruction.
   public mutating func insertZeroExtend<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -984,6 +1069,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an integer-to-pointer conversion with given `target` type.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#inttoptr-to-instruction.
   public mutating func insertIntToPtr<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -992,6 +1079,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts an integer-to-pointer conversion targeting the module's default pointer type.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#inttoptr-to-instruction.
   public mutating func insertIntToPtr<V: IRValue>(
     _ source: V.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -1000,6 +1089,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a pointer-to-integer conversion with given `target` integer type.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#ptrtoint-to-instruction.
   public mutating func insertPtrToInt<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -1008,6 +1099,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a floating-point truncation conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fptrunc-to-instruction.
   public mutating func insertFPTrunc<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -1016,6 +1109,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a floating-point extension conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fpext-to-instruction.
   public mutating func insertFPExtend<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
@@ -1026,6 +1121,8 @@ public struct Module: ~Copyable {
   // MARK: Others
 
   /// Inserts a call to `callee` with given arguments.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#call-instruction.
   public mutating func insertCall<C: Callable>(
     _ callee: C.UnsafeReference,
     on arguments: [AnyValue.UnsafeReference],
@@ -1036,6 +1133,8 @@ public struct Module: ~Copyable {
   }
 
   /// Inserts a call to `callee` with given arguments.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#call-instruction.
   public mutating func insertCall<C: Callable, each A: IRValue>(
     _ callee: C.UnsafeReference,
     on arguments: (repeat UnsafeReference<each A>),
@@ -1051,6 +1150,8 @@ public struct Module: ~Copyable {
   /// Inserts a call to `callee` with explicit `calleeType`.
   ///
   /// Validates argument count for non-variadic function types.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#call-instruction.
   public mutating func insertCall(
     _ callee: AnyValue.UnsafeReference,
     typed calleeType: AnyType.UnsafeReference,
@@ -1079,6 +1180,8 @@ public struct Module: ~Copyable {
   /// Inserts a call to `callee` with explicit `calleeType`.
   ///
   /// Validates argument count for non-variadic function types.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#call-instruction.
   public mutating func insertCall<T: IRType, each A: IRValue>(
     _ callee: AnyValue.UnsafeReference,
     typed calleeType: T.UnsafeReference,
@@ -1095,6 +1198,7 @@ public struct Module: ~Copyable {
   /// Inserts an integer comparison instruction.
   ///
   /// - Requires: `lhs` and `rhs` have the same type.
+  /// - See https://llvm.org/docs/LangRef.html#icmp-instruction.
   public mutating func insertIntegerComparison<U: IRValue, V: IRValue>(
     _ predicate: IntegerPredicate,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
@@ -1107,6 +1211,7 @@ public struct Module: ~Copyable {
   /// Inserts a floating-point comparison instruction.
   ///
   /// - Requires: `lhs` and `rhs` have the same type.
+  /// - See https://llvm.org/docs/LangRef.html#fcmp-instruction.
   public mutating func insertFloatingPointComparison<U: IRValue, V: IRValue>(
     _ predicate: FloatingPointPredicate,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
@@ -1119,11 +1224,15 @@ public struct Module: ~Copyable {
   // MARK: Type constructors
 
   /// Returns the integer type spanning `bitWidth` number of bits.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#integer-type.
   public mutating func integerType(_ bitWidth: Int) -> IntegerType.UnsafeReference {
     return IntegerType.create(bitWidth, in: &self)
   }
 
   /// Creates an opaque pointer type in the given address space.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#pointer-type.
   public mutating func pointerType(inAddressSpace s: AddressSpace = .default)
     -> PointerType.UnsafeReference
   {
@@ -1133,6 +1242,7 @@ public struct Module: ~Copyable {
   /// Creates a function type with given parameter and return types.
   ///
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the function type `(i64, i8) -> i8`.
+  /// - See https://llvm.org/docs/LangRef.html#function-type.
   public mutating func functionType(from: [AnyType.UnsafeReference], to: UnsafeReference<some IRType>)
     -> FunctionType.UnsafeReference
   {
@@ -1141,6 +1251,7 @@ public struct Module: ~Copyable {
   /// Creates a function type with given parameter and return types.
   ///
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the function type `(i64, i8) -> i8`.
+  /// - See https://llvm.org/docs/LangRef.html#function-type.
   public mutating func functionType(from: [AnyType.UnsafeReference])
     -> FunctionType.UnsafeReference
   {
@@ -1150,6 +1261,7 @@ public struct Module: ~Copyable {
   /// Creates a function type with given parameter and return types.
   ///
   /// - Example: `functionType(from: (i64, i8), to: i32)` creates the function type `(i64, i8) -> i32`.
+  /// - See https://llvm.org/docs/LangRef.html#function-type.
   public mutating func functionType<each T: IRType, R: IRType>(
     from parameters: (repeat UnsafeReference<each T>), to returnType: R.UnsafeReference
   ) -> FunctionType.UnsafeReference {
@@ -1163,6 +1275,7 @@ public struct Module: ~Copyable {
   /// Creates a function type with given parameter types and void as return type.
   ///
   /// - Example: `functionType(from: (i64, i8))` creates the function type `(i64, i8) -> void`.
+  /// - See https://llvm.org/docs/LangRef.html#function-type.
   public mutating func functionType<each T: IRType>(from parameters: (repeat UnsafeReference<each T>))
     -> FunctionType.UnsafeReference
   {
@@ -1174,6 +1287,8 @@ public struct Module: ~Copyable {
   }
 
   /// Creates an array type of `count` elements of `element`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#array-type.
   public mutating func arrayType<T: IRType>(_ count: Int, _ element: T.UnsafeReference)
     -> ArrayType.UnsafeReference
   {
@@ -1181,6 +1296,8 @@ public struct Module: ~Copyable {
   }
 
   /// Obtains or creates a struct type with given field types.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#structure-type.
   public mutating func structType(_ fields: [AnyType.UnsafeReference], packed: Bool = false)
     -> StructType.UnsafeReference
   {
@@ -1190,6 +1307,8 @@ public struct Module: ~Copyable {
   /// Creates or retrieves a struct type with given field types.
   ///
   /// Callable with a tuple of typed references: `structType((i64, i8, float))`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#structure-type.
   public mutating func structType<each T: IRType>(_ fields: (repeat UnsafeReference<each T>), packed: Bool = false)
     -> StructType.UnsafeReference
   {
@@ -1206,6 +1325,8 @@ public struct Module: ~Copyable {
   /// it must be an equivalent struct type as defined by the arguments.
   /// 
   /// Repeated calls with same arguments return the same struct type.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#structure-type.
   public mutating func structType(named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false)
     -> StructType.UnsafeReference
   {
@@ -1228,6 +1349,8 @@ public struct Module: ~Copyable {
   /// it must be an equivalent struct type as defined by the arguments.
   /// 
   /// Callable with a tuple of typed references: `structType(named: "MyStruct", (i64, i8, float))`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#structure-type.
   public mutating func structType<each T: IRType>(
     named name: String, _ fields: (repeat UnsafeReference<each T>), packed: Bool = false
   ) -> StructType.UnsafeReference {
@@ -1251,11 +1374,15 @@ public struct Module: ~Copyable {
   }
 
   /// Creates an instruction representing an undefined value of type `type`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#undefined-values.
   public mutating func undefinedValue<T: IRType>(of type: T.UnsafeReference) -> Undefined.UnsafeReference {
     Undefined.create(of: type, in: &self)
   }
 
   /// Creates an instruction representing a poison value of type `type`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#poison-values.
   public mutating func poisonValue<T: IRType>(of type: T.UnsafeReference) -> Poison.UnsafeReference {
     return Poison.create(of: type, in: &self)
   }

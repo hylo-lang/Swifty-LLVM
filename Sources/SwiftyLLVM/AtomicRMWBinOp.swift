@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// The type of an atomic read-modify-write binary operation.
+///
+/// - See https://llvm.org/docs/LangRef.html#atomicrmw-instruction.
 public enum AtomicRMWBinOp: Sendable, CaseIterable {
 
   /// Set the new value and return the one old.

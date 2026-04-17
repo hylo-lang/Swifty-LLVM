@@ -6,6 +6,8 @@ extension Parameter: AttributeHolder {
   public typealias Attribute = SwiftyLLVM.Attribute<Parameter>
 
   /// The name of an attribute on a parameter in LLVM IR.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#parameter-attributes.
   public enum AttributeName: String, AttributeNameProtocol, Sendable {
 
     /// Indicates to the code generator that the parameter or return value should be sign-extended

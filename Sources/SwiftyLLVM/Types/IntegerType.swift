@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// An integer type in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#integer-type.
 public struct IntegerType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.

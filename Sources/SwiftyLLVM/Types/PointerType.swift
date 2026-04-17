@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// A pointer type in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#pointer-type.
 public struct PointerType: IRType, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.

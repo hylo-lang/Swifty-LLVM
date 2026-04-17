@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// An undefined value in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#undefined-values.
 public struct Undefined: IRValue, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.

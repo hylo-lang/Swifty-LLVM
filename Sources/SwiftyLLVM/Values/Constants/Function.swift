@@ -1,6 +1,8 @@
 internal import llvmc
 
 /// A function in LLVM IR.
+///
+/// - See https://llvm.org/docs/LangRef.html#functions.
 public struct Function: Global, Callable, Hashable {
 
   /// A handle to the LLVM object wrapped by this instance.
