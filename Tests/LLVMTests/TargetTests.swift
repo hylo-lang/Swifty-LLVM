@@ -115,18 +115,24 @@ final class TargetTests: XCTestCase {
     XCTAssertEqual(try Backend.host(), try Backend.host())
   }
 
-  #if SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
-    func testBackendHashDifferent() throws {
+  func testBackendHashDifferent() throws {
+    #if !SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
+      throw XCTSkip()
+    #else
       XCTAssertNotEqual(
         try Backend(ofTriple: "arm64-apple-macos").hashValue,
         try Backend(ofTriple: "x86_64-apple-macos").hashValue)
-    }
+    #endif
+  }
 
-    func testBackendEqualityDifferent() throws {
+  func testBackendEqualityDifferent() throws {
+    #if !SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
+      throw XCTSkip()
+    #else
       XCTAssertNotEqual(
         try Backend(ofTriple: "arm64-apple-macos"), try Backend(ofTriple: "x86_64-apple-macos"))
-    }
-  #endif
+    #endif
+  }
 
   // MARK: - TargetSpecification
 
