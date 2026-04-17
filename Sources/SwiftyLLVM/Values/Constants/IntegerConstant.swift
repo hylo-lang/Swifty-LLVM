@@ -24,6 +24,7 @@ public struct IntegerConstant: IRValue, Hashable {
 }
 
 extension UnsafeReference<IntegerConstant> {
+
   /// Creates an instance with `v`, failing iff `v` isn't a constant integer value.
   public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAConstantInt(v.llvm.raw) {
@@ -32,4 +33,5 @@ extension UnsafeReference<IntegerConstant> {
       return nil
     }
   }
+
 }

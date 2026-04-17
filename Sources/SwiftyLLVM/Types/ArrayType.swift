@@ -30,6 +30,7 @@ public struct ArrayType: IRType, Hashable {
 }
 
 extension UnsafeReference<ArrayType> {
+
   /// Creates an instance with `t`, failing iff `t` isn't an array type.
   public init?(_ t: UnsafeReference<AnyType>) {
     if LLVMGetTypeKind(t.llvm.raw) == LLVMArrayTypeKind {
@@ -38,4 +39,5 @@ extension UnsafeReference<ArrayType> {
       return nil
     }
   }
+
 }

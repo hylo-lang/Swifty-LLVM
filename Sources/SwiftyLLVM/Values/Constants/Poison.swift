@@ -19,6 +19,7 @@ public struct Poison: IRValue, Hashable {
 }
 
 extension UnsafeReference<Poison> {
+
   /// Creates an instance with `v`, failing iff `v` is not a poison value.
   public init?(_ v: AnyValue.UnsafeReference) {
     if let h = LLVMIsAPoisonValue(v.llvm.raw) {
@@ -27,4 +28,5 @@ extension UnsafeReference<Poison> {
       return nil
     }
   }
+
 }
