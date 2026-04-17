@@ -156,7 +156,7 @@ final class TargetTests: XCTestCase {
     try XCTAssertThrowsError(
       try TargetSpecification(target: .host(), cpu: "not_a_real_cpu_12345")
     ) { error in
-      let e = try XCTUnwrap(error as? TargetSpecificationError)
+      let e = error as? TargetSpecificationError
       XCTAssertEqual(
         e,
         TargetSpecificationError.invalidCPU(
@@ -168,7 +168,7 @@ final class TargetTests: XCTestCase {
     try XCTAssertThrowsError(
       try TargetSpecification(target: .host(), features: "+not_a_real_feature_xyz")
     ) { error in
-      let e = try XCTUnwrap(error as? TargetSpecificationError)
+      let e = error as? TargetSpecificationError
       XCTAssertEqual(
         e,
         TargetSpecificationError.invalidFeature(
