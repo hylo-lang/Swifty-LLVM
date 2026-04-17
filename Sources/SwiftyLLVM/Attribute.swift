@@ -18,7 +18,7 @@ extension AttributeNameProtocol {
 
   /// The unique kind identifier corresponding to this name.
   internal var id: UInt32 {
-    return LLVMGetEnumAttributeKindForName(rawValue, rawValue.count)
+    LLVMGetEnumAttributeKindForName(rawValue, rawValue.count)
   }
 
 }
@@ -39,15 +39,15 @@ public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
 
   /// Creates a target-independent attribute wrapping `llvm`.
   static func wrapTargetIndependent(_ llvm: LLVMAttributeRef) -> Self {
-    return Self(temporarilyWrapping: AttributeRef(llvm))
+    Self(temporarilyWrapping: AttributeRef(llvm))
   }
 
   /// The value of the attribute if it is target-independent.
   public var value: UInt64? {
     if case .targetIndependent(let h) = self {
-      return LLVMGetEnumAttributeValue(h.raw)
+      LLVMGetEnumAttributeValue(h.raw)
     } else {
-      return nil
+      nil
     }
   }
 
@@ -55,7 +55,7 @@ public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
   internal var llvm: AttributeRef {
     switch self {
     case .targetIndependent(let h):
-      return h
+      h
     }
   }
 

@@ -9,51 +9,58 @@ public struct TargetMachine: ~Copyable {
   /// The data layout of the machine.
   public let layout: DataLayout
 
-  /// The target associated with the machine.
-  public let target: Target
+  /// The LLVM backend for this machine.
+  public let backend: Backend
 
-  /// Creates an instance with `options` for the specified `triple`.
-  public init(options: TargetMachineOptions = TargetMachineOptions(), triple: String) throws {
-    let target = try Target(ofTriple: triple)
-    self.init(target: target, options: options, triple: triple)
-  }
+  /// Creates an instance for the given target specification and codegen options.
+  public init(
+    target: TargetSpecification,
+    optimization: OptimizationLevel = .none,
+    relocation: RelocationModel = .default,
+    codeModel: CodeModel = .default
+  ) {
+    let o = LLVMCreateTargetMachineOptions()!
+    defer { LLVMDisposeTargetMachineOptions(o) }
 
-  /// Creates an instance with `options` for the specified `triple`.
-  /// 
-  /// - Requires: `triple` corresponds to `target`.
-  public init(target: Target, options: TargetMachineOptions = TargetMachineOptions(), triple: String) {
-    precondition((try? Target(ofTriple: triple).llvm) == target.llvm, "The triple must correspond to the target.")
+    LLVMTargetMachineOptionsSetCPU(o, target.cpu)
+    LLVMTargetMachineOptionsSetFeatures(o, target.features)
+    LLVMTargetMachineOptionsSetCodeGenOptLevel(o, optimization.llvm)
+    LLVMTargetMachineOptionsSetRelocMode(o, relocation.llvm)
+    LLVMTargetMachineOptionsSetCodeModel(o, codeModel.llvm)
 
-    self.llvm = options.withLLVMOptions { o in
-      LLVMCreateTargetMachineWithOptions(target.llvm, triple, o)
-    }
-    self.target = target
+    self.llvm = LLVMCreateTargetMachineWithOptions(target.target.backend.llvm, target.target.triple, o)
+    self.backend = target.target.backend
     self.layout = .init(LLVMCreateTargetDataLayout(self.llvm))
   }
 
-  public static func host(options: TargetMachineOptions = .init()) throws -> TargetMachine {
-    return try TargetMachine(options: options, triple: Target.defaultTargetTriple)
+  /// Creates a machine targeting the host with default codegen settings.
+  public static func host(
+    optimization: OptimizationLevel = .none,
+    relocation: RelocationModel = .default,
+    codeModel: CodeModel = .default
+  ) throws -> TargetMachine {
+    .init(target: try .host(), optimization: optimization, relocation: relocation, codeModel: codeModel)
   }
 
   deinit {
     LLVMDisposeTargetMachine(llvm)
   }
 
-  /// The triple of the machine.
+  /// The triple string of the machine.
   public var triple: String {
     guard let s = LLVMGetTargetMachineTriple(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }
     return .init(cString: s)
   }
 
-  /// The CPU of the machine.
+  /// The CPU name of the machine.
   public var cpu: String {
     guard let s = LLVMGetTargetMachineCPU(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }
     return .init(cString: s)
   }
 
-  /// The features of the machine.
+  /// The feature string of the machine.
   public var features: String {
     guard let s = LLVMGetTargetMachineFeatureString(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }
@@ -63,7 +70,7 @@ public struct TargetMachine: ~Copyable {
 }
 extension TargetMachine {
 
-  /// The target triple of this machine.
+  /// The target triple string of this machine.
   public var description: String { triple }
 
 }

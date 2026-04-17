@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// The settings of position-independent code (PIC) during code generation.
-public enum RelocationModel: Hashable, Sendable {
+public enum RelocationModel: Hashable, Sendable, CaseIterable {
 
   /// The model default to the target for which code is being generated.
   case `default`

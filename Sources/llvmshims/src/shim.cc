@@ -20,9 +20,13 @@
 // Used to create a fatal error in this file. Must preceed all other #includes
 
 #include "shim.h"
+#include "llvm-c/Core.h"
 #include "llvm-c/TargetMachine.h"
-#include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/MC/MCSubtargetInfo.h"
+#include "llvm/MC/TargetRegistry.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/TargetParser/SubtargetFeature.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -99,5 +103,56 @@ long SwiftyLLVMGetArgumentIndex(LLVMValueRef argument) {
 unsigned int SwiftyLLVMGetProgramAddressSpace(LLVMTargetDataRef dataLayout) {
   llvm::DataLayout *td = llvm::unwrap(dataLayout);
   return td->getProgramAddressSpace();
+}
+
+bool SwiftyLLVMIsCPUValid(LLVMTargetRef target, const char *triple,
+                          const char *cpu) {
+  assert(target && "target must not be null");
+  assert(triple && "triple must not be null");
+  assert(cpu && "cpu must not be null");
+
+  if (cpu[0] == '\0')
+    return 1;
+
+  auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target);
+  std::unique_ptr<llvm::MCSubtargetInfo> i(
+      llvmTarget->createMCSubtargetInfo(triple, "", ""));
+  assert(
+      i &&
+      "invalid triple: failed to create MCSubtargetInfo for validated triple");
+
+  return i->isCPUStringValid(cpu) ? 1 : 0;
+}
+
+char *SwiftyLLVMGetFirstInvalidFeature(LLVMTargetRef target, const char *triple,
+                                       const char *features) {
+  assert(target && "target must not be null");
+  assert(triple && "triple must not be null");
+  assert(features && "features must not be null");
+
+  if (features[0] == '\0')
+    return nullptr;
+
+  const auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target);
+  const auto subtarget = std::unique_ptr<llvm::MCSubtargetInfo>(
+      llvmTarget->createMCSubtargetInfo(triple, "", ""));
+  assert(subtarget && "failed to create MCSubtargetInfo for validated triple");
+
+  auto knownFeatures = subtarget->getAllProcessorFeatures();
+
+  std::vector<std::string> parts;
+  llvm::SubtargetFeatures::Split(parts, features);
+
+  auto it = llvm::find_if_not(parts, [&](const std::string &entry) {
+    const auto name = llvm::SubtargetFeatures::StripFlag(entry);
+    return llvm::any_of(knownFeatures, [&](const llvm::SubtargetFeatureKV &kv) {
+      return llvm::StringRef(kv.Key) == name;
+    });
+  });
+
+  if (it == parts.end())
+    return nullptr;
+
+  return LLVMCreateMessage(llvm::SubtargetFeatures::StripFlag(*it).str().c_str());
 }
 }

@@ -1,118 +1,77 @@
-/// LLVM's backend descriptor, representing a target architecture family.
 internal import llvmc
+internal import llvmshims
 
-public struct Target {
+/// A target triple string paired with its resolved LLVM backend.
+///
+/// Construction validates that LLVM has a backend for the given triple string.
+/// Instances are equal if they have the same normalized triple string.
+public struct Target: Hashable {
 
-  /// A handle to the LLVM object wrapped by this instance.
-  internal let llvm: LLVMTargetRef
+  /// The normalized triple string (e.g. "x86_64-unknown-linux-gnu").
+  public let triple: String
 
-  /// Creates an instance wrapping `llvm`.
-  private init(wrapping llvm: LLVMTargetRef) {
-    self.llvm = llvm
+  /// The LLVM backend for this triple.
+  public let backend: Backend
+
+  /// Creates an instance iff LLVM has a backend for `triple`.
+  public init(_ triple: String) throws {
+    let n = Target.normalizeTriple(triple)
+    self.triple = n
+    self.backend = try Backend(ofTriple: n)
   }
 
-  /// Creates a wrapper for the target associated with `triple`.
-  public init(ofTriple triple: String) throws {
-    #if SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
-    _ = Target.initializeCrossCompilation
-    #else
-    _ = Target.initializeHost
-    #endif
-    
-    var handle: LLVMTargetRef? = nil
-    var error: UnsafeMutablePointer<CChar>? = nil
-    LLVMGetTargetFromTriple(triple, &handle, &error)
-
-    if let e = error {
-      defer { LLVMDisposeMessage(e) }
-      throw LLVMError(.init(cString: e))
-    }
-
-    self.init(wrapping: handle!)
+  /// Returns the LLVM-normalized form of `triple`.
+  ///
+  /// Fills in omitted components so that equivalent triples
+  /// (e.g. "x86_64-linux-gnu" and "x86_64-unknown-linux-gnu") produce the same string.
+  public static func normalizeTriple(_ triple: String) -> String {
+    let p = LLVMNormalizeTargetTriple(triple)!
+    defer { LLVMDisposeMessage(p) }
+    return String(cString: p)
   }
 
-  /// Creates a wrapper for the target associated with `machine`.
-  public init(of machine: borrowing TargetMachine) {
-    llvm = LLVMGetTargetMachineTarget(machine.llvm)!
+  /// The triple for the host machine.
+  public static func host() throws -> Target {
+    try .init(hostTriple)
   }
 
-  /// The name of the target.
-  public var name: String {
-    guard let s = LLVMGetTargetName(llvm) else { return "" }
-    return .init(cString: s)
-  }
-
-  /// `true` if the target has a JIT.
-  public var hasJIT: Bool {
-    LLVMTargetHasJIT(llvm) != 0
-  }
-
-  /// `true` if the target has an assembly back-end.
-  public var hasAssemblyBackEnd: Bool {
-    LLVMTargetHasAsmBackend(llvm) != 0
-  }
-
-  public static var defaultTargetTriple: String {
-    // Ensures LLVM targets are initialized.
-    _ = initializeHost
+  /// The target triple string for the host machine.
+  public static var hostTriple: String {
+    // Ensure LLVM targets are initialized.
+    _ = Backend.initializeHost
 
     guard let s = LLVMGetDefaultTargetTriple() else { return "" }
     defer { LLVMDisposeMessage(s) }
     return .init(cString: s)
   }
 
-  /// Returns the target representing the machine host.
-  public static func host() throws -> Target {
-    // Ensures LLVM targets are initialized.
-    _ = initializeHost
-
-    return try .init(ofTriple: defaultTargetTriple)
+  /// Returns `true` iff `cpu` is a recognised CPU name for this triple,
+  /// or is empty (meaning generic).
+  public func isCPUValid(_ cpu: String) -> Bool {
+    SwiftyLLVMIsCPUValid(backend.llvm, triple, cpu)
   }
 
-  /// The initialization of the native target.
-  private static let initializeHost: Void = {
-    LLVMInitializeNativeAsmParser()
-    LLVMInitializeNativeAsmPrinter()
-    LLVMInitializeNativeDisassembler()
-    LLVMInitializeNativeTarget()
-  }()
+  /// Returns the first unrecognised feature in `features` for this triple,
+  /// or `nil` if all features are valid.
+  ///
+  /// An empty string always returns `nil`.
+  /// The format is a comma-separated list of "+feature" or "-feature" entries.
+  public func firstInvalidFeature(in features: String) -> String? {
+    guard let p = SwiftyLLVMGetFirstInvalidFeature(backend.llvm, triple, features) else {
+      return nil
+    }
+    defer { LLVMDisposeMessage(p) }
+    return String(cString: p)
+  }
 
-  #if SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
-  /// The initialization of all targets for potential cross-compilation.
-  /// 
-  /// Set `SWIFTY_LLVM_CROSS_COMPILATION_ENABLED` to `true` using SPM
-  /// `swift build `
-  private static let initializeCrossCompilation: Void = {
-    // Note: this could be more granular, but for now we have two types 
-    // of LLVM distributables: one with only the native target, and one with all targets.
-    LLVMInitializeAllTargetInfos()
-    LLVMInitializeAllTargets()
-    LLVMInitializeAllTargetMCs()
-    LLVMInitializeAllAsmParsers()
-    LLVMInitializeAllAsmPrinters()
-  }()
-  #endif
-
-}
-extension Target: Hashable {
-
-  /// Hashes this instance by its underlying LLVM target handle.
+  /// Hashes this instance by its normalized triple string.
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(llvm)
+    hasher.combine(triple)
   }
 
-  /// Returns `true` iff `lhs` and `rhs` wrap the same LLVM target.
+  /// Returns `true` if the normalized triple strings are equal.
   public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.llvm == rhs.llvm
-  }
-
-}
-extension Target: CustomStringConvertible {
-
-  /// A textual description of the target from LLVM.
-  public var description: String {
-    guard let s = LLVMGetTargetDescription(llvm) else { return "" }
-    return .init(cString: s)
+    lhs.triple == rhs.triple
   }
 
 }

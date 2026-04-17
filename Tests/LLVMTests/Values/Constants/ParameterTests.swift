@@ -68,7 +68,7 @@ final class ParameterTests: XCTestCase {
     XCTAssertNil(Parameter.UnsafeReference(q.erased))
   }
 
-  func testEquality() throws {
+  func testReferenceEquality() throws {
     var m = try Module("foo")
 
     let p = m.declareFunction("fn", m.functionType(from: (m.i64))).unsafe[].parameters[0]
@@ -77,6 +77,29 @@ final class ParameterTests: XCTestCase {
 
     let r = m.declareFunction("fn1", m.functionType(from: (m.i64))).unsafe[].parameters[0]
     XCTAssertNotEqual(p, r)
+  }
+
+  func testEquality() throws {
+    var m = try Module("foo")
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32)))
+
+    let p0a = f.unsafe[].parameters[0].unsafe[]
+    let p0b = f.unsafe[].parameters[0].unsafe[]
+    XCTAssertEqual(p0a, p0b)
+    XCTAssertEqual(p0a.hashValue, p0b.hashValue)
+  }
+
+  func testInequality() throws {
+    var m = try Module("foo")
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32)))
+
+    let p0 = f.unsafe[].parameters[0].unsafe[]
+    let p1 = f.unsafe[].parameters[1].unsafe[]
+    XCTAssertNotEqual(p0, p1)
+
+    let g = m.declareFunction("gn", m.functionType(from: (m.i64)))
+    let q0 = g.unsafe[].parameters[0].unsafe[]
+    XCTAssertNotEqual(p0, q0)
   }
 
 }
