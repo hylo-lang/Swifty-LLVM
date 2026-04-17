@@ -10,16 +10,6 @@ public protocol IRType: CustomStringConvertible, LLVMEntity where Handle == Type
 
 extension IRType {
 
-  /// Creates an instance wrapping `r`.
-  public init(temporarilyWrapping r: Self.UnsafeReference) {
-    self.init(temporarilyWrapping: r.raw)
-  }
-
-  /// Creates an instance wrapping the native handle `r`.
-  init(temporarilyWrapping r: LLVMTypeRef) {
-    self.init(temporarilyWrapping: TypeRef(r))
-  }
-
   /// A string representation of the type.
   public var description: String {
     guard let s = LLVMPrintTypeToString(llvm.raw) else { return "" }

@@ -81,7 +81,7 @@ final class DataLayoutTests: XCTestCase {
   }
 
   func testPointerSize() throws {
-    var m = try Module("foo")
+    let m = try Module("foo")
 
     XCTAssertEqual(m.layout.pointerSize, m.layout.storageSize(of: m.ptr))
     XCTAssertEqual(m.layout.pointerSize, MemoryLayout<UnsafeRawPointer>.size)
@@ -96,7 +96,7 @@ final class DataLayoutTests: XCTestCase {
   }
 
   func testProgramAddressSpace() throws {
-    var m = try Module("foo")
+    let m = try Module("foo")
 
     XCTAssertEqual(m.layout.programAddressSpace, m.programAddressSpace)
     XCTAssertEqual(m.functionPointer.unsafe[].addressSpace, m.layout.programAddressSpace)

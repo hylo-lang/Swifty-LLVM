@@ -38,6 +38,26 @@ final class FunctionTests: XCTestCase {
     XCTAssert(f2.unsafe[].parameters[1].unsafe[].type == u.erased)
   }
 
+  func testParametersIteration() throws {
+    var m = try Module("foo")
+    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32, m.double)))
+    let params = f.unsafe[].parameters
+
+    XCTAssertEqual(params.startIndex, 0)
+    XCTAssertEqual(params.endIndex, 3)
+    XCTAssertEqual(params.count, 3)
+
+    let types = params.map({ $0.unsafe[].type })
+    XCTAssert(types[0] == m.i64.erased)
+    XCTAssert(types[1] == m.i32.erased)
+    XCTAssert(types[2] == m.double.erased)
+
+    let reversed = params.reversed().map({ $0.unsafe[].type })
+    XCTAssert(reversed[0] == m.double.erased)
+    XCTAssert(reversed[1] == m.i32.erased)
+    XCTAssert(reversed[2] == m.i64.erased)
+  }
+
   func testBasicBlocks() throws {
     var m = try Module("foo")
 

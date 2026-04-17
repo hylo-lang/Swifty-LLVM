@@ -35,6 +35,23 @@ final class ArrayConstantTests: XCTestCase {
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][2]), i8.unsafe[].constant(2))
   }
 
+  func testIteration() throws {
+    var m = try Module("foo")
+    let i32 = m.integerType(32)
+
+    let elements = (0 ..< 5).map({ i32.unsafe[].constant($0) })
+    let a = m.arrayConstant(of: i32, containing: elements.map(\.erased))
+
+    XCTAssertEqual(a.unsafe[].startIndex, 0)
+    XCTAssertEqual(a.unsafe[].endIndex, 5)
+
+    let forward = a.unsafe[].map({ IntegerConstant.UnsafeReference($0) })
+    XCTAssertEqual(forward, elements)
+
+    let backward = a.unsafe[].reversed().map({ IntegerConstant.UnsafeReference($0) })
+    XCTAssertEqual(backward, elements.reversed())
+  }
+
   func testEquality() throws {
     var m = try Module("foo")
     let i32 = m.integerType(32)

@@ -71,7 +71,7 @@ public struct Module: ~Copyable {
   }
 
   /// The target of the module.
-  public var target: Target { targetMachine.target }
+  public var target: Backend { targetMachine.backend }
 
   /// Verifies if the IR in `self` is well formed and throws an error if it isn't.
   public func verify() throws {
@@ -1178,11 +1178,6 @@ public struct Module: ~Copyable {
     -> ArrayType.UnsafeReference
   {
     ArrayType.create(count, element, in: &self)
-  }
-
-  /// Creates or retrieves the `void` type, returning a reference to it.
-  public mutating func voidType() -> VoidType.UnsafeReference {
-    return VoidType.create(in: &self)
   }
 
   /// Obtains or creates a struct type with given field types.

@@ -114,12 +114,13 @@ jobs:
         fail_ci_if_error: true
 
   native-spm:
-    name: "SPM: ${{ matrix.os }}/${{ matrix.spm_configuration }}"
+    name: "SPM: ${{ matrix.os }}/${{ matrix.spm_configuration }}${{ matrix.cross_compilation && '/cross' || '' }}"
     strategy:
       fail-fast: false
       matrix:
         os: [macos-15, ubuntu-24.04, windows-2025]
         spm_configuration: [debug, release]
+        cross_compilation: [true, false]
 
         include:
           - spm_configuration: debug
@@ -175,7 +176,7 @@ jobs:
             ${{ matrix.os }}-${{ matrix.spm_configuration }}-spm-
 
       - name: Build and Test via SPM
-        run: swift test -v ${{ matrix.swift_test_options }} -c ${{ matrix.spm_configuration }}
+        run: swift test -v ${{ matrix.swift_test_options }} ${{ matrix.cross_compilation && '-Xswiftc -DSWIFTY_LLVM_CROSS_COMPILATION_ENABLED' || '' }} -c ${{ matrix.spm_configuration }}
         working-directory: Swifty-LLVM
 
   native-cmake:
