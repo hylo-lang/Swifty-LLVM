@@ -32,10 +32,7 @@ final class MemoryBufferTests: XCTestCase {
     try s.write(to: f, atomically: true, encoding: .utf8)
 
     let b = try MemoryBuffer(contentsOf: f.path)
-    let decoded = try b.withUnsafeBytes({ (contents) in
-      try XCTUnwrap(contents.withMemoryRebound(to: UInt8.self, { (b) in String(bytes: b, encoding: .utf8) }))
-    })
-    XCTAssertEqual(s, decoded)
+    XCTAssertEqual(s, b.utf8Decoded)
   }
 
 }
