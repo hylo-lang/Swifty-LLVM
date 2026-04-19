@@ -1,4 +1,5 @@
 internal import llvmc
+import Foundation
 
 /// A read-only access to a block of memory.
 public struct MemoryBuffer: ~Copyable {
@@ -63,4 +64,14 @@ public struct MemoryBuffer: ~Copyable {
     return try action(.init(start: start, count: count))
   }
 
+  /// The contents of the buffer as a utf8-decoded string, or `nil` if the buffer is not valid utf8.
+  ///
+  /// - Complexity: O(count).
+  public var utf8Decoded: String? {
+    withUnsafeBytes({ bytes in
+      bytes.withMemoryRebound(to: UInt8.self, { (b) in
+        String(bytes: b, encoding: .utf8)
+      })
+    })
+  }
 }
