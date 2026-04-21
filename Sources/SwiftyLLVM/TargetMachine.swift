@@ -33,8 +33,17 @@ public struct TargetMachine: ~Copyable {
     self.layout = .init(LLVMCreateTargetDataLayout(self.llvm))
   }
 
-  /// Creates a machine targeting the host with default codegen settings.
+  /// Creates a target machine targeting the host with generic CPU and features.
   public static func host(
+    optimization: OptimizationLevel = .none,
+    relocation: RelocationModel = .default,
+    codeModel: CodeModel = .default
+  ) throws -> TargetMachine {
+    .init(target: try .host(), optimization: optimization, relocation: relocation, codeModel: codeModel)
+  }
+
+  /// Creates a target machine targeting the host with detected native CPU and features.
+  public static func native(
     optimization: OptimizationLevel = .none,
     relocation: RelocationModel = .default,
     codeModel: CodeModel = .default
