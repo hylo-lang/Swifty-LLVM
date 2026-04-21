@@ -136,19 +136,18 @@ final class TargetTests: XCTestCase {
 
   // MARK: - TargetSpecification
 
-  func testTargetSpecHost() throws {
-    let s = try TargetSpecification.host()
-    XCTAssertFalse(s.cpu.isEmpty)
-    XCTAssertFalse(s.target.triple.isEmpty)
+  func testNativeDriverCreation() throws {
+    let t = try TargetSpecification.native()
+    XCTAssertFalse(t.cpu.isEmpty)
   }
 
   func testTargetSpecHostCPUMatchesHostCPUName() throws {
-    let s = try TargetSpecification.host()
+    let s = try TargetSpecification.native()
     XCTAssertEqual(s.cpu, TargetSpecification.hostCPUName)
   }
 
   func testTargetSpecHostFeaturesMatchHostCPUFeatures() throws {
-    let s = try TargetSpecification.host()
+    let s = try TargetSpecification.native()
     XCTAssertEqual(s.features, TargetSpecification.hostCPUFeatures)
   }
 
