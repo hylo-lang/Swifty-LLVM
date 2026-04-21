@@ -54,8 +54,16 @@ public struct TargetSpecification: Equatable {
     self.features = features
   }
 
-  /// The host machine's native target, with detected CPU and features.
+  /// The host machine's native target, with generic CPU and features.
   public static func host() throws -> TargetSpecification {
+    try .init(
+      target: .host(),
+      cpu: "",
+      features: "")
+  }
+
+  /// The host machine's native target, with detected native CPU and features.
+  public static func native() throws -> TargetSpecification {
     try .init(
       target: .host(),
       cpu: hostCPUName,
