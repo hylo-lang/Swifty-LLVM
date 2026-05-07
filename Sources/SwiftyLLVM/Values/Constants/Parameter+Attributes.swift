@@ -6,6 +6,8 @@ extension Parameter: AttributeHolder {
   public typealias Attribute = SwiftyLLVM.Attribute<Parameter>
 
   /// The name of an attribute on a parameter in LLVM IR.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#parameter-attributes.
   public enum AttributeName: String, AttributeNameProtocol, Sendable {
 
     /// Indicates to the code generator that the parameter or return value should be sign-extended
@@ -41,7 +43,8 @@ extension Parameter: AttributeHolder {
 
     /// Indicates that memory locations accessed via pointer values based on the argument or return
     /// value are not also accessed, during the execution of the function, via pointer values not
-    /// *based* on the argument or return value.
+    /// *based* on the argument or return value. This guarantee only holds for memory locations that
+    /// are modified, by any means, during the execution of the function.
     case noalias
 
     /// Indicates that the callee does not capture the pointer. This is not a valid attribute for
@@ -88,12 +91,12 @@ extension Parameter: AttributeHolder {
   }
 
   /// The attributes of the parameter.
-  public var attributes: [Attribute] {
+  public var attributes: [Attribute.UnsafeReference] {
     let i = UInt32(index + 1)
     let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, i)
     var handles: [LLVMAttributeRef?] = .init(repeating: nil, count: Int(n))
     LLVMGetAttributesAtIndex(parent.llvm.raw, i, &handles)
-    return handles.map(Attribute.init(_:))
+    return handles.map { Attribute.UnsafeReference($0!) }
   }
 
 }

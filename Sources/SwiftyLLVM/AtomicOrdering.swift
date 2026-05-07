@@ -2,7 +2,8 @@ internal import llvmc
 
 /// The ordering for an atomic operation.
 ///
-/// See https://en.cppreference.com/w/cpp/atomic/memory_order
+/// - See https://llvm.org/docs/LangRef.html#atomic-memory-ordering-constraints.
+/// - See https://en.cppreference.com/w/cpp/atomic/memory_order.
 public enum AtomicOrdering: Sendable {
 
   /// A load or a store operation that is not atomic.
@@ -61,7 +62,7 @@ public enum AtomicOrdering: Sendable {
     case LLVMAtomicOrderingSequentiallyConsistent:
       self = .sequentiallyConsistent
     default:
-      fatalError("unsupported atomic ordering")
+      unimplemented("atomic ordering \(llvm)")
     }
   }
 

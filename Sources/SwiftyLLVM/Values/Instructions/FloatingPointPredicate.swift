@@ -1,10 +1,11 @@
 internal import llvmc
 
-/// The predicate of an integer comparison.
+/// The predicate of a floating point comparison.
 ///
 /// - Note: Ordered means that neither operand is a QNAN while unordered means that either operand
 ///   may be a QNAN.
-public enum FloatingPointPredicate: String, Hashable, Sendable {
+/// - See https://llvm.org/docs/LangRef.html#fcmp-instruction.
+public enum FloatingPointPredicate: String, Hashable, Sendable, CaseIterable {
 
   /// No comparison; always false.
   case alwaysFalse = "false"
@@ -96,10 +97,12 @@ public enum FloatingPointPredicate: String, Hashable, Sendable {
 
 extension FloatingPointPredicate: LosslessStringConvertible {
 
+  /// Creates a predicate from its mnemonic.
   public init?(_ description: String) {
     self.init(rawValue: description)
   }
 
+  /// The mnemonic of this predicate.
   public var description: String { self.rawValue }
 
 }

@@ -1,7 +1,9 @@
 internal import llvmc
 
 /// The predicate of an integer comparison.
-public enum IntegerPredicate: String, Hashable, Sendable {
+///
+/// - See https://llvm.org/docs/LangRef.html#icmp-instruction.
+public enum IntegerPredicate: String, Hashable, Sendable, CaseIterable {
 
   /// Values are equal.
   case eq
@@ -63,10 +65,12 @@ public enum IntegerPredicate: String, Hashable, Sendable {
 
 extension IntegerPredicate: LosslessStringConvertible {
 
+  /// Creates a predicate from its mnemonic.
   public init?(_ description: String) {
     self.init(rawValue: description)
   }
 
+  /// The mnemonic of this predicate.
   public var description: String { self.rawValue }
 
 }

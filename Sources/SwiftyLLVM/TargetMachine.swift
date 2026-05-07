@@ -1,75 +1,85 @@
 internal import llvmc
 
 /// The settings necessary for code generation, including target information and compiler options.
-public struct TargetMachine: @unchecked Sendable {
+public struct TargetMachine: ~Copyable {
 
   /// A handle to the LLVM object wrapped by this instance.
-  private let wrapped: ManagedPointer<LLVMTargetMachineRef>
+  internal let llvm: LLVMTargetMachineRef
 
-  /// Creates an instance with given properties.
-  ///
-  /// - Parameters:
-  ///   - target: The platform for which code is generated.
-  ///   - cpu: The type of CPU to target. Defaults to the CPU of the host machine.
-  ///   - features: The features a of the target.
-  ///   - optimization: The level of optimization used during code generation. Defaults to `.none`.
-  ///   - relocation: The relocation model used during code generation. Defaults to `.default`.
-  ///   - code: The code model used during code generation. Defaults to `.default`.
+  /// The data layout of the machine.
+  public let layout: DataLayout
+
+  /// The LLVM backend for this machine.
+  public let backend: Backend
+
+  /// Creates an instance for the given target specification and codegen options.
   public init(
-    for target: Target,
-    cpu: String = "",
-    features: String = "",
+    target: TargetSpecification,
     optimization: OptimizationLevel = .none,
     relocation: RelocationModel = .default,
-    code: CodeModel = .default
+    codeModel: CodeModel = .default
   ) {
-    let handle = LLVMCreateTargetMachine(
-      target.llvm, target.triple, cpu, features, optimization.codegen, relocation.llvm, code.llvm)
+    let o = LLVMCreateTargetMachineOptions()!
+    defer { LLVMDisposeTargetMachineOptions(o) }
 
-    self.wrapped = .init(
-      handle!,
-      dispose: LLVMDisposeTargetMachine(_:))
+    LLVMTargetMachineOptionsSetCPU(o, target.cpu)
+    LLVMTargetMachineOptionsSetFeatures(o, target.features)
+    LLVMTargetMachineOptionsSetCodeGenOptLevel(o, optimization.llvm)
+    LLVMTargetMachineOptionsSetRelocMode(o, relocation.llvm)
+    LLVMTargetMachineOptionsSetCodeModel(o, codeModel.llvm)
 
+    self.llvm = LLVMCreateTargetMachineWithOptions(target.target.backend.llvm, target.target.triple, o)
+    self.backend = target.target.backend
+    self.layout = .init(LLVMCreateTargetDataLayout(self.llvm))
   }
 
-  /// The triple of the machine.
+  /// Creates a target machine targeting the host with generic CPU and features.
+  public static func host(
+    optimization: OptimizationLevel = .none,
+    relocation: RelocationModel = .default,
+    codeModel: CodeModel = .default
+  ) throws -> TargetMachine {
+    .init(target: try .host(), optimization: optimization, relocation: relocation, codeModel: codeModel)
+  }
+
+  /// Creates a target machine targeting the host with detected native CPU and features.
+  public static func native(
+    optimization: OptimizationLevel = .none,
+    relocation: RelocationModel = .default,
+    codeModel: CodeModel = .default
+  ) throws -> TargetMachine {
+    .init(target: try .host(), optimization: optimization, relocation: relocation, codeModel: codeModel)
+  }
+
+  deinit {
+    LLVMDisposeTargetMachine(llvm)
+  }
+
+  /// The triple string of the machine.
   public var triple: String {
     guard let s = LLVMGetTargetMachineTriple(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }
     return .init(cString: s)
   }
 
-  /// The CPU of the machine.
+  /// The CPU name of the machine.
   public var cpu: String {
     guard let s = LLVMGetTargetMachineCPU(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }
     return .init(cString: s)
   }
 
-  /// The features of the machine.
+  /// The feature string of the machine.
   public var features: String {
     guard let s = LLVMGetTargetMachineFeatureString(llvm) else { return "" }
     defer { LLVMDisposeMessage(s) }
     return .init(cString: s)
   }
 
-  /// The target associated with the machine.
-  public var target: Target {
-    .init(of: self)
-  }
-
-  /// The data layout of the machine.
-  public var layout: DataLayout {
-    .init(of: self)
-  }
-
-  /// A handle to the LLVM object wrapped by this instance.
-  internal var llvm: LLVMTargetMachineRef { wrapped.llvm }
-
 }
+extension TargetMachine {
 
-extension TargetMachine: CustomStringConvertible {
-
+  /// The target triple string of this machine.
   public var description: String { triple }
 
 }

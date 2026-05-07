@@ -6,18 +6,9 @@ public struct IntegerConstant: IRValue, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
-    self.llvm = .init(llvm)
-  }
-
-  /// Creates an instance with `v`, failing iff `v` isn't a constant integer value.
-  public init?(_ v: IRValue) {
-    if let h = LLVMIsAConstantInt(v.llvm.raw) {
-      self.llvm = .init(h)
-    } else {
-      return nil
-    }
+  /// Creates an instance wrapping `handle`.
+  public init(temporarilyWrapping handle: ValueRef) {
+    self.llvm = handle
   }
 
   /// The sign extended value of this constant.
@@ -28,6 +19,19 @@ public struct IntegerConstant: IRValue, Hashable {
   /// The zero extended value of this constant.
   public var zext: UInt64 {
     LLVMConstIntGetZExtValue(llvm.raw)
+  }
+
+}
+
+extension UnsafeReference<IntegerConstant> {
+
+  /// Creates an instance with `v`, failing iff `v` isn't a constant integer value.
+  public init?(_ v: AnyValue.UnsafeReference) {
+    if let h = LLVMIsAConstantInt(v.llvm.raw) {
+      self.init(h)
+    } else {
+      return nil
+    }
   }
 
 }

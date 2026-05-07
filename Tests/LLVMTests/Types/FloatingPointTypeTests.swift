@@ -1,37 +1,55 @@
-import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class FloatingPointTypeTests: XCTestCase {
 
-  func testConversion() {
-    var m = Module("foo")
+  func testConversion() throws {
+    var m = try Module("foo")
 
-    let t0: IRType = FloatingPointType.half(in: &m)
-    let t1: IRType = FloatingPointType.float(in: &m)
-    let t2: IRType = FloatingPointType.double(in: &m)
-    let t3: IRType = FloatingPointType.fp128(in: &m)
-    for t in [t0, t1, t2, t3] {
-      XCTAssertNotNil(FloatingPointType(t))
+    let floatingPointTypes = [
+      m.half.erased, m.bfloat.erased, m.float.erased, m.double.erased,
+      m.x86_fp80.erased, m.fp128.erased, m.ppc_fp128.erased
+    ]
+
+    for t in floatingPointTypes {
+      XCTAssertNotNil(FloatingPointType.UnsafeReference(t))
     }
 
-    let u: IRType = IntegerType(64, in: &m)
-    XCTAssertNil(FloatingPointType(u))
+    let u = m.integerType(64).erased
+    XCTAssertNil(FloatingPointType.UnsafeReference(u))
   }
 
-  func testCallSyntax() {
-    var m = Module("foo")
-    let double = FloatingPointType.double(in: &m)
-    XCTAssertEqual(double(1).value.value, 1, accuracy: .ulpOfOne)
+  func testCallSyntax() throws {
+    let m = try Module("foo")
+    let double = m.double.unsafe[]
+    let x = double(1)
+    XCTAssertEqual(x.unsafe[].type, m.double.erased)
+    XCTAssertTrue(x.unsafe[].isConstant)
+    XCTAssertEqual(x.unsafe[].value.value, 1, accuracy: .ulpOfOne)
   }
 
-  func testEquality() {
-    var m = Module("foo")
-    let t = FloatingPointType.double(in: &m)
-    let u = FloatingPointType.double(in: &m)
+  func testEquality() throws {
+    let m = try Module("foo")
+    let t = m.double.unsafe[]
+    let u = m.double.unsafe[]
     XCTAssertEqual(t, u)
+    XCTAssertEqual(t.llvm, u.llvm)
 
-    let v = FloatingPointType.float(in: &m)
+    let v = m.float.unsafe[]
     XCTAssertNotEqual(t, v)
+    XCTAssertNotEqual(t.llvm, v.llvm)
+  }
+
+  func testDistinctTypes() throws {
+    let m = try Module("foo")
+    let types = [m.half, m.bfloat, m.float, m.double, m.x86_fp80, m.fp128, m.ppc_fp128]
+
+    for i in types.indices {
+      for j in types.indices where i != j {
+        XCTAssertNotEqual(types[i].llvm, types[j].llvm)
+      }
+    }
   }
 
 }

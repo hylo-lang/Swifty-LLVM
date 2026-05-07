@@ -1,23 +1,26 @@
-import SwiftyLLVM
 import XCTest
+
+@testable import SwiftyLLVM
 
 final class UndefinedTests: XCTestCase {
 
-  func testConversion() {
-    var m = Module("foo")
-    let t: IRValue = Undefined(of: FloatingPointType.float(in: &m))
-    XCTAssertNotNil(Undefined(t))
-    let u: IRValue = IntegerType(64, in: &m).zero
-    XCTAssertNil(Undefined(u))
+  func testConversion() throws {
+    var m = try Module("foo")
+
+    let t = m.undefinedValue(of: m.float)
+    XCTAssertNotNil(Undefined.UnsafeReference(t.erased))
+
+    let u = m.i64.unsafe[].zero
+    XCTAssertNil(Undefined.UnsafeReference(u.erased))
   }
 
-  func testEquality() {
-    var m = Module("foo")
-    let t = Undefined(of: FloatingPointType.double(in: &m))
-    let u = Undefined(of: FloatingPointType.double(in: &m))
+  func testEquality() throws {
+    var m = try Module("foo")
+    let t = m.undefinedValue(of: m.double)
+    let u = m.undefinedValue(of: m.double)
     XCTAssertEqual(t, u)
 
-    let v = Undefined(of: FloatingPointType.float(in: &m))
+    let v = m.undefinedValue(of: m.float)
     XCTAssertNotEqual(t, v)
   }
 

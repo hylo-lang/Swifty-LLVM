@@ -1,14 +1,16 @@
 internal import llvmc
 
 /// A global value in LLVM IR.
-public struct GlobalVariable: Global, Sendable {
+///
+/// - See https://llvm.org/docs/LangRef.html#global-variables.
+public struct GlobalVariable: Global {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
 
-  /// Creates an instance wrapping `llvm`.
-  internal init(_ llvm: LLVMValueRef) {
-    self.llvm = .init(llvm)
+  /// Creates an instance wrapping `handle`.
+  public init(temporarilyWrapping handle: ValueRef) {
+    self.llvm = handle
   }
 
   /// `true` if this value is constant.
@@ -20,10 +22,12 @@ public struct GlobalVariable: Global, Sendable {
   ///   whether a value is a constant user, as opposed to an instruction.
   public var isGlobalConstant: Bool { LLVMIsGlobalConstant(llvm.raw) != 0 }
 
-  /// `true` is this value is initialized externally.
+  /// `true` iff this value is initialized externally.
   public var isExternallyInitialized: Bool { LLVMIsExternallyInitialized(llvm.raw) != 0 }
 
   /// The initial value of this global.
-  public var initializer: IRValue? { LLVMGetInitializer(llvm.raw).map(AnyValue.init(_:)) }
+  public var initializer: AnyValue.UnsafeReference? {
+    LLVMGetInitializer(llvm.raw).map(AnyValue.UnsafeReference.init(_:))
+  }
 
 }

@@ -1,7 +1,9 @@
 internal import llvmc
 
 /// The type of an atomic read-modify-write binary operation.
-public enum AtomicRMWBinOp: Sendable {
+///
+/// - See https://llvm.org/docs/LangRef.html#atomicrmw-instruction.
+public enum AtomicRMWBinOp: Sendable, CaseIterable {
 
   /// Set the new value and return the one old.
   case xchg
@@ -19,21 +21,20 @@ public enum AtomicRMWBinOp: Sendable {
   case xor
   /// Sets the value if it's greater than the original using a signed comparison and return the old one.
   case max
-  /// Sets the value if it's Smaller than the original using a signed comparison and return the old one.
+  /// Sets the value if it's smaller than the original using a signed comparison and return the old one.
   case min
   /// Sets the value if it's greater than the original using an unsigned comparison and return the old one.
   case uMax
-  /// Sets the value if it's greater than the  original using an unsigned comparison and return  the old one.
+  /// Sets the value if it's smaller than the original using an unsigned comparison and return the old one.
   case uMin
-  /// Add a floating point value and return the  old one.
+  /// Adds a floating-point value and returns the old one.
   case fAdd
-  /// Subtract a floating point value and return the old one.
+  /// Subtracts a floating-point value and returns the old one.
   case fSub
-  /// Sets the value if it's greater than the original using an floating point comparison and return the old one.
+  /// Sets the value if it's greater than the original using a floating-point comparison and returns the old one.
   case fMax
-  /// Sets the value if it's smaller than the original using an floating point comparison and return the old one.
+  /// Sets the value if it's smaller than the original using a floating-point comparison and return the old one.
   case fMin
-
 
   /// Creates an instance from its LLVM representation.
   internal init(llvm: LLVMAtomicRMWBinOp) {
@@ -69,7 +70,7 @@ public enum AtomicRMWBinOp: Sendable {
     case LLVMAtomicRMWBinOpFMin:
       self = .fMin
     default:
-      fatalError("unsupported atomic RMW binary operation")
+      unimplemented("atomic RMW binary operation \(llvm)")
     }
   }
 

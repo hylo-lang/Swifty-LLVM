@@ -4,6 +4,7 @@ internal import llvmc
 ///
 /// - Note: It is illegal for a global variable or function declaration to have any linkage type
 ///   other than `external` or `extern_weak`.
+/// - See https://llvm.org/docs/LangRef.html#linkage-types.
 public enum Linkage: Sendable {
 
   /// The name is externally visible; it participates in linkage and can be used to resolve
@@ -95,7 +96,7 @@ public enum Linkage: Sendable {
     case LLVMExternalWeakLinkage:
       self = .externWeak
     default:
-      fatalError("unsupported linkage type")
+      unimplemented("linkage type \(llvm)")
     }
   }
 
