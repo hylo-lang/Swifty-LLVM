@@ -95,12 +95,11 @@ func windowsLinkerSettings() -> [LinkerSetting] {
 
   let libs = pkgConfigValues(in: t, for: "Libs")
   return libs.compactMap { (lib) -> LinkerSetting? in
-    if !lib.starts(with: "-l") && lib.first != "-" { return nil }
+    if !lib.starts(with: "-l") && (lib.first == "-") { return nil }
 
     let rest = lib.dropFirst(lib.first == "-" ? 2 : 0)
-    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" }).map {
-      rest.index(after: $0)
-    } ?? rest.startIndex
+    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
+      .map { rest.index(after: $0) } ?? rest.startIndex
 
     let s = rest[afterSlashes...].droppingSuffix(".lib")
     return LinkerSetting.linkedLibrary(String(s))
