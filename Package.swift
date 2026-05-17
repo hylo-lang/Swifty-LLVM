@@ -137,28 +137,10 @@ func readProcessOutput(executable: String, arguments: [String]) -> String {
   return String(data: data, encoding: .utf8)!
 }
 
-/// Returns the flags for linking zstd on macOS.
-///
-/// LLVM requires zstd, which is a dependency, to be linked dynamically. This function returns the
-/// flags instructing the linker to do so.
-///
-/// This function does not work on Windows, as zstd does not include a pkg-config file on that
-/// platform. It is also not reliable on Linux yet because zstd generates wrong pkgconfig. TL;DR:
-/// libzstd.pc contains a non-architecture specific library directory on Linux.
-/// See https://github.com/facebook/zstd/issues/4488
-///
-/// The returned flaga are only needed on macOS. Windows and Linux link zstd already.
-func zstdLinkerFlagsForMacOS() -> String {
-  let r =  readProcessOutput(
-    executable: findExecutableOnPath(name: "pkg-config")!,
-    arguments: ["libzstd", "--libs-only-L"])
-  return r.trimmingCharacters(in: .whitespacesAndNewlines)
-}
-
 let llvmLinkerSettings =
   osIsWindows
   ? windowsLinkerSettings()
-  : [.unsafeFlags([zstdLinkerFlagsForMacOS()], .when(platforms: [.macOS]))]
+  : []
 
 // MARK: Package manifest
 
