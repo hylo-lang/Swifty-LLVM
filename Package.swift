@@ -6,9 +6,9 @@ import Foundation
 import PackageDescription
 
 #if os(Windows)
-let osIsWindows = true
+  let osIsWindows = true
 #else
-let osIsWindows = false
+  let osIsWindows = false
 #endif
 
 /// The text used to separate elements of the PATH environment variable.
@@ -91,11 +91,11 @@ func readProcessOutput(executable: String, arguments: [String]) -> String? {
 /// The returned flags are only needed on macOS. Windows and Linux link zstd already.
 func zstdLinkerFlagsForMacOS() -> String {
   if let executable = findExecutableOnPath(name: "pkg-config"),
-  let ls = readProcessOutput(
+  let libraries = readProcessOutput(
     executable: executable,
     arguments: ["libzstd", "--libs-only-L"])
     {
-    return ls.trimmingCharacters(in: .whitespacesAndNewlines)
+    return libraries.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 
   // Fallback: search common directories where zstd may be installed.
@@ -115,9 +115,11 @@ func zstdLinkerFlagsForMacOS() -> String {
 }
 
 #if os(macOS)
-let llvmLinkerSettings: [LinkerSetting] = [.unsafeFlags([zstdLinkerFlagsForMacOS()], .when(platforms: [.macOS]))]
+  let llvmLinkerSettings: [LinkerSetting] = [
+    .unsafeFlags([zstdLinkerFlagsForMacOS()], .when(platforms: [.macOS]))
+  ]
 #else
-let llvmLinkerSettings: [LinkerSetting] = []
+  let llvmLinkerSettings: [LinkerSetting] = []
 #endif
 
 // MARK: Package manifest
