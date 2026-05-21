@@ -53,7 +53,8 @@ func findExecutableOnPath(name: String) -> String? {
   return nil
 }
 
-/// Returns the contents written to the standard output by `executable` ran with `arguments`.
+/// Returns the contents written to the standard output by `executable` ran with `arguments`, or
+/// `nil` on failure.
 func readProcessOutput(executable: String, arguments: [String]) -> String? {
   let process = Process()
   process.executableURL = URL(fileURLWithPath: executable)
