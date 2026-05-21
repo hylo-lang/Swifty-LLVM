@@ -29,10 +29,10 @@ func pkgConfigContents(_ package: String) -> String? {
 
 /// Returns the un-quoted, un-escaped elements in the remainder of the (logical) lines beginning
 /// with `"\(key): "` in `pcContents`, which are the contents of a pkg-config file.
-func pkgConfigValues(in pcContents: String, for key: String) -> [String] {
+func pkgConfigValues(in pcContents: String, for key: String) throws -> [String] {
   let keyPattern = NSRegularExpression.escapedPattern(for: key)
   let lineHeadersPattern = #"(?m)(?<!\\[\r]?[\n])^[ \t]*"# + keyPattern + #"[ \t]*:[ \t]*"#
-  let lineHeaders = pcContents.matches(forRegex: lineHeadersPattern).joined().compactMap { $0 }
+  let lineHeaders = try pcContents.matches(forRegex: lineHeadersPattern).joined().compactMap { $0 }
 
   var r: [String] = []
   for h in lineHeaders {
@@ -69,8 +69,8 @@ extension String {
 
   /// Returns, for each match of the valid regular expression `pattern`, the given match `groups`
   /// in the same order in which they were passed.
-  func matches(forRegex pattern: String, groups: [Int] = [0]) -> [[Substring?]] {
-    let r = try! NSRegularExpression(pattern: pattern)
+  func matches(forRegex pattern: String, groups: [Int] = [0]) throws -> [[Substring?]] {
+    let r = try NSRegularExpression(pattern: pattern)
     return r.matches(in: self, range: NSRange(startIndex..<endIndex, in: self)).map { m in
       groups.map { g in Range(m.range(at: g), in: self).map { self[ $0 ] } }
     }
@@ -87,31 +87,45 @@ extension Substring {
 
 }
 
+extension Optional {
+
+  /// Returns the value wrapped in `optional` or calls `trap` if `optional` is `nil`.
+  public static func ?? (optional: Self, trap: @autoclosure () -> Never) -> Wrapped {
+    if let wrapped = optional { wrapped } else { trap() }
+  }
+
+}
+
 // MARK: Helpers for getting flags and other settings
 
 /// Returns the linker needed for building on Windows.
 func windowsLinkerSettings() -> [LinkerSetting] {
-  guard let t = pkgConfigContents("llvm") else { return [] }
+  let t = pkgConfigContents("llvm") ??
+    fatalError("Didn't find llvm.pc in any of the locations of PKG_CONFIG_PATH.")
 
-  let libs = pkgConfigValues(in: t, for: "Libs")
-  return libs.compactMap { (lib) -> LinkerSetting? in
-    if !lib.starts(with: "-l") && (lib.first == "-") { return nil }
+  do {
+    let libs = try pkgConfigValues(in: t, for: "Libs")
+    return libs.compactMap { (lib) -> LinkerSetting? in
+      if !lib.starts(with: "-l") && (lib.first == "-") { return nil }
 
-    let rest = lib.dropFirst(lib.first == "-" ? 2 : 0)
-    let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
-      .map { rest.index(after: $0) } ?? rest.startIndex
+      let rest = lib.dropFirst(lib.first == "-" ? 2 : 0)
+      let afterSlashes = rest.lastIndex(where: { $0 == "/" || $0 == "\\" })
+        .map { rest.index(after: $0) } ?? rest.startIndex
 
-    let s = rest[afterSlashes...].droppingSuffix(".lib")
-    return LinkerSetting.linkedLibrary(String(s))
+      let s = rest[afterSlashes...].droppingSuffix(".lib")
+      return LinkerSetting.linkedLibrary(String(s))
+    }
+  } catch {
+    fatalError("Failed to acquire pkg-config values. Error: \(error)")
   }
 }
 
 /// Returns the path to an executable named `name` or `name.exe` if one can be found at one of the
 /// locations in the PATH environment variable; otherwise, returns `nil`.
 func findExecutableOnPath(name: String) -> String? {
-  guard let path = ProcessInfo.processInfo.environment["PATH"] else { 
-    fatalError("No PATH environment variable found")
-  }
+  let path = ProcessInfo.processInfo.environment["PATH"] 
+    ?? fatalError("No PATH environment variable found")
+
   let executableFileName = osIsWindows ? "\(name).exe" : name
 
   let locations = path.split(separator: pathSeparator)
@@ -123,18 +137,28 @@ func findExecutableOnPath(name: String) -> String? {
 }
 
 /// Returns the contents written to the standard output by `executable` ran with `arguments`.
-func readProcessOutput(executable: String, arguments: [String]) -> String {
+func readProcessOutput(executable: String, arguments: [String]) -> String? {
   let process = Process()
   process.executableURL = URL(fileURLWithPath: executable)
   process.arguments = arguments
 
   let pipe = Pipe()
   process.standardOutput = pipe
-  try! process.run()
+  do {
+    try process.run()
+  } catch {
+    print("Failed to run process. Error: \(error)")
+    return nil
+  }
   process.waitUntilExit()
 
+  guard process.terminationStatus == 0 else {
+    print("Process terminated with status \(process.terminationStatus)")
+    return nil
+  }
+
   let data = pipe.fileHandleForReading.readDataToEndOfFile()
-  return String(data: data, encoding: .utf8)!
+  return String(data: data, encoding: .utf8) ?? fatalError("Failed to read process output")
 }
 
 /// Returns the flags for linking zstd on macOS.
@@ -147,12 +171,30 @@ func readProcessOutput(executable: String, arguments: [String]) -> String {
 /// libzstd.pc contains a non-architecture specific library directory on Linux.
 /// See https://github.com/facebook/zstd/issues/4488
 ///
-/// The returned flaga are only needed on macOS. Windows and Linux link zstd already.
+/// The returned flags are only needed on macOS. Windows and Linux link zstd already.
 func zstdLinkerFlagsForMacOS() -> String {
-  let r =  readProcessOutput(
-    executable: findExecutableOnPath(name: "pkg-config")!,
-    arguments: ["libzstd", "--libs-only-L"])
-  return r.trimmingCharacters(in: .whitespacesAndNewlines)
+  if let executable = findExecutableOnPath(name: "pkg-config"),
+    let ls = readProcessOutput(
+      executable: executable,
+      arguments: ["libzstd", "--libs-only-L"])
+  {
+    return ls.trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
+  // Fallback: search common directories where zstd may be installed.
+  let commonPaths = [
+    "/opt/local/lib",  // MacPorts
+    "/opt/homebrew/lib",  // Homebrew (Apple Silicon)
+    "/usr/local/lib",  // Homebrew (Intel)
+  ]
+  for path in commonPaths {
+    if FileManager.default.fileExists(atPath: "\(path)/libzstd.dylib")
+      || FileManager.default.fileExists(atPath: "\(path)/libzstd.a")
+    {
+      return "-L\(path)"
+    }
+  }
+  fatalError("Failed to find zstd library both via pkg-config and common paths.")
 }
 
 let llvmLinkerSettings =
