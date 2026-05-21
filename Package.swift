@@ -95,7 +95,7 @@ func zstdLinkerFlagsForMacOS() -> String {
   let libraries = readProcessOutput(
     executable: executable,
     arguments: ["libzstd", "--libs-only-L"])
-    {
+  {
     return libraries.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 
@@ -116,9 +116,7 @@ func zstdLinkerFlagsForMacOS() -> String {
 }
 
 #if os(macOS)
-  let llvmLinkerSettings: [LinkerSetting] = [
-    .unsafeFlags([zstdLinkerFlagsForMacOS()], .when(platforms: [.macOS]))
-  ]
+  let llvmLinkerSettings: [LinkerSetting] = [.unsafeFlags([zstdLinkerFlagsForMacOS()])]
 #else
   let llvmLinkerSettings: [LinkerSetting] = []
 #endif
