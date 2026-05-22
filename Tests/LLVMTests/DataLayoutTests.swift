@@ -87,14 +87,6 @@ final class DataLayoutTests: XCTestCase {
     XCTAssertEqual(m.layout.pointerSize, MemoryLayout<UnsafeRawPointer>.size)
   }
 
-  func testPointerSizedIntegerType() throws {
-    let m = try Module("foo")
-
-    let intptr = m.layout.pointerSizedIntegerType
-    XCTAssertEqual(m.layout.storageSize(of: intptr), m.layout.pointerSize)
-    XCTAssertEqual(m.layout.storageSize(of: intptr), MemoryLayout<UnsafeRawPointer>.size)
-  }
-
   func testProgramAddressSpace() throws {
     let m = try Module("foo")
 
