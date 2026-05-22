@@ -1298,9 +1298,9 @@ public struct Module: ~Copyable {
   /// Obtains or creates a struct type with given field types.
   ///
   /// - See https://llvm.org/docs/LangRef.html#structure-type.
-  public mutating func structType(_ fields: [AnyType.UnsafeReference], packed: Bool = false)
-    -> StructType.UnsafeReference
-  {
+  public mutating func structType(
+    _ fields: [AnyType.UnsafeReference], packed: Bool = false
+  ) -> StructType.UnsafeReference {
     StructType.create(fields, packed: packed, in: &self)
   }
 
@@ -1309,9 +1309,9 @@ public struct Module: ~Copyable {
   /// Callable with a tuple of typed references: `structType((i64, i8, float))`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#structure-type.
-  public mutating func structType<each T: IRType>(_ fields: (repeat UnsafeReference<each T>), packed: Bool = false)
-    -> StructType.UnsafeReference
-  {
+  public mutating func structType<each T: IRType>(
+    _ fields: (repeat UnsafeReference<each T>), packed: Bool = false
+  ) -> StructType.UnsafeReference {
     var erased = [AnyType.UnsafeReference]()
     for f in repeat each fields {
       erased.append(f.erased)
@@ -1327,20 +1327,32 @@ public struct Module: ~Copyable {
   /// Repeated calls with same arguments return the same struct type.
   ///
   /// - See https://llvm.org/docs/LangRef.html#structure-type.
-  public mutating func structType(named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false)
-    -> StructType.UnsafeReference
-  {
+  public mutating func structType(
+    named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false
+  ) -> StructType.UnsafeReference {
     if let s = type(named: name) {
-      precondition(LLVMGetTypeKind(s.raw) == LLVMStructTypeKind, "Type named \(name) already exists but is not a struct type")
+      precondition(
+        LLVMGetTypeKind(s.raw) == LLVMStructTypeKind,
+        "type named \(name) already exists but is not a struct type")
+
       let existing = StructType.UnsafeReference(s.raw)
-      precondition(existing.unsafe[].isPacked == packed, "Struct type named \(name) already exists but has different packing")
-      precondition(existing.unsafe[].fields.count == fields.count, "Struct type named \(name) already exists but has different number of fields")
+      precondition(
+        existing.unsafe[].isPacked == packed,
+        "struct type named \(name) already exists but has different packing")
+      precondition(
+        existing.unsafe[].fields.count == fields.count,
+        "struct type named \(name) already exists but has different number of fields")
+
       for (f1, f2) in zip(existing.unsafe[].fields, fields) {
-        precondition(f1 == f2, "Struct type named \(name) already exists but has different field types")
+        precondition(
+          f1 == f2,
+          "struct type named \(name) already exists but has different field types")
       }
+
       return existing
+    } else {
+      return createStructType(named: name, fields, packed: packed)
     }
-    return createStructType(named: name, fields, packed: packed)
   }
 
   /// Creates or retrieves a named struct type with given field types.
@@ -1361,15 +1373,31 @@ public struct Module: ~Copyable {
     return structType(named: name, erased, packed: packed)
   }
 
+  /// Creates or retrieves an opaque struct.
+  public mutating func opaqueStructType(named name: String) -> StructType.UnsafeReference {
+    if let s = type(named: name) {
+      precondition(
+        LLVMGetTypeKind(s.raw) == LLVMStructTypeKind,
+        "type named \(name) already exists but is not a struct type")
+
+      let existing = StructType.UnsafeReference(s.raw)
+      precondition(
+        existing.unsafe[].isOpaque,
+        "struct type named \(name) already exists but is not opaque")
+
+      return existing
+    } else {
+      return StructType.createOpaque(named: name, in: &self)
+    }
+  }
+
   /// Creates a named struct type with given field types.
   /// 
   /// Repeated calls with same arguments return new struct types. 
   /// Use `structType` to resolve to an existing struct if present.
   internal mutating func createStructType(
     named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false
-  )
-    -> StructType.UnsafeReference
-  {
+  ) -> StructType.UnsafeReference {
     StructType.create(named: name, fields, packed: packed, in: &self)
   }
 
