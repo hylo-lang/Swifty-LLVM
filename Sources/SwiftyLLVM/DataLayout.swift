@@ -36,8 +36,6 @@ public struct DataLayout: ~Copyable {
     return (storageSize(of: type) + align - 1) / align * align
   }
 
-  
-
   /// The alignment of `type`'s instances in bytes as specified by the target ABI.
   /// 
   /// - Guarantees:
@@ -79,14 +77,14 @@ public struct DataLayout: ~Copyable {
     Int(LLVMPointerSize(llvm))
   }
 
-  /// An integer type with equal size to pointers in the default address space.
-  public var pointerSizedIntegerType: IntegerType.UnsafeReference {
-    .init(LLVMIntPtrType(llvm))
-  }
-
   /// The address space in which function pointers are represented.
   public var programAddressSpace: AddressSpace {
     .init(SwiftyLLVMGetProgramAddressSpace(llvm))
+  }
+
+  /// Returns an integer type with equal size to pointers in the default address space.
+  internal func pointerSizedIntegerType(in context: ContextRef) -> IntegerType.UnsafeReference {
+    .init(LLVMIntPtrTypeInContext(context.raw, llvm))
   }
 
 }

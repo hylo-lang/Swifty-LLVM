@@ -19,6 +19,13 @@ final class ModuleTests: XCTestCase {
     XCTAssertNil(m.type(named: "U"))
   }
 
+  func testPointerSizedInteger() throws {
+    let m = try Module("foo")
+    let t = m.iptr
+    XCTAssertEqual(m.layout.storageSize(of: t), m.layout.pointerSize)
+    XCTAssertEqual(m.layout.storageSize(of: t), MemoryLayout<UnsafeRawPointer>.size)
+  }
+
   func testFunctionNamed() throws {
     var m = try Module("foo")
     let f = m.declareFunction("fn", m.functionType(from: ()))
