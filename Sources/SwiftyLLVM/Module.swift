@@ -41,6 +41,7 @@ public struct Module: ~Copyable {
     self.i32 = IntegerType.create(32, in: contextRef)
     self.i64 = IntegerType.create(64, in: contextRef)
     self.i128 = IntegerType.create(128, in: contextRef)
+    self.iptr = self.targetMachine.layout.pointerSizedIntegerType(in: contextRef)
     self.functionPointer = PointerType.create(
       inAddressSpace: .init(SwiftyLLVMGetProgramAddressSpace(LLVMGetModuleDataLayout(module))),
       in: contextRef)
@@ -482,6 +483,9 @@ public struct Module: ~Copyable {
 
   /// The 128-bit integer type.
   public let i128: IntegerType.UnsafeReference
+
+  /// An integer type with equal size to pointers in the default address space.
+  public let iptr: IntegerType.UnsafeReference
 
   // MARK: Arithmetics
 
