@@ -1,7 +1,7 @@
 extension String {
 
   /// Creates an instance calling `getter` on `llvm` to read its value.
-  init?<T>(
+  public init?<T>(
     from llvm: T,
     readingWith getter: (T, UnsafeMutablePointer<Int>?) -> UnsafePointer<CChar>?
   ) {
