@@ -13,10 +13,9 @@ public struct StructType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns a reference to a struct type with given `fields` in `module`, packed iff `packed` is `true`.
+  /// Returns a struct type having `fields` in `module`, optionally `packed`.
   public static func create(
-    _ fields: [AnyType.UnsafeReference],
-    packed: Bool = false,
+    _ fields: [AnyType.UnsafeReference], packed: Bool = false,
     in module: inout Module
   ) -> StructType.UnsafeReference {
     var f = fields.map({ Optional.some($0.raw) })
@@ -27,11 +26,9 @@ public struct StructType: IRType, Hashable {
     }
   }
 
-  /// Returns a reference to a struct with given `name` and `fields` in `module`, packed iff `packed` is `true`.
+  /// Returns a struct type named `name` and having `fields` in `module`, optionally `packed`.
   public static func create(
-    named name: String,
-    _ fields: [AnyType.UnsafeReference],
-    packed: Bool = false,
+    named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false,
     in module: inout Module
   ) -> Self.UnsafeReference {
     let s = StructType.UnsafeReference(LLVMStructCreateNamed(module.context, name))
@@ -40,6 +37,13 @@ public struct StructType: IRType, Hashable {
       LLVMStructSetBody(s.raw, types.baseAddress, UInt32(types.count), packed ? 1 : 0)
     }
     return s
+  }
+
+  /// Returns an opaque struct type named `name` in `module`.
+  public static func createOpaque(
+    named name: String, in module: inout Module
+  ) -> Self.UnsafeReference {
+    StructType.UnsafeReference(LLVMStructCreateNamed(module.context, name))
   }
 
   /// The name of the struct.

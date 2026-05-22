@@ -31,6 +31,11 @@ final class StructTypeTests: XCTestCase {
     XCTAssert(m.createStructType(named: "S", [t.erased, t.erased], packed: true).unsafe[].isPacked)
   }
 
+  func testOpaqueStruct() throws {
+    var m = try Module("foo")
+    XCTAssert(m.opaqueStructType(named: "S").unsafe[].isOpaque)
+  }
+
   func testFields() throws {
     var m = try Module("foo")
     let t = m.integerType(64)
