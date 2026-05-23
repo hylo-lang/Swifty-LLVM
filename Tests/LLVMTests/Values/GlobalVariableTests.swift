@@ -5,7 +5,7 @@ import XCTest
 final class GlobalVariableTests: XCTestCase {
 
   func testIsGlobalConstant() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let g = m.declareGlobalVariable("gl", m.ptr)
     XCTAssertFalse(g.unsafe[].isGlobalConstant)
     m.setGlobalConstant(true, for: g)
@@ -13,7 +13,7 @@ final class GlobalVariableTests: XCTestCase {
   }
 
   func testIsExternallyInitialized() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let g = m.declareGlobalVariable("gl", m.ptr)
     XCTAssertFalse(g.unsafe[].isExternallyInitialized)
     m.setExternallyInitialized(true, for: g)
@@ -21,14 +21,21 @@ final class GlobalVariableTests: XCTestCase {
   }
 
   func testLinkage() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let g = m.declareGlobalVariable("gl", m.ptr)
     m.setLinkage(.private, for: g)
     XCTAssertEqual(g.unsafe[].linkage, .private)
   }
 
+  func testAddressSpace() throws {
+    var m = try Module("foo", targetMachine: .host())
+    let s = AddressSpace(1)
+    let g = m.addGlobalVariable("gl", m.ptr, inAddressSpace: s)
+    XCTAssertEqual(g.unsafe[].addressSpace, s)
+  }
+
   func testInitializer() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i8id = m.integerType(8)
     let i8 = i8id.unsafe[]
     let g = m.declareGlobalVariable("x", i8id)

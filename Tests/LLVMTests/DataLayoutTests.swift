@@ -5,28 +5,28 @@ import XCTest
 final class DataLayoutTests: XCTestCase {
 
   func testBitWidth() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
     XCTAssertEqual(m.layout.bitWidth(of: i32), 32)
   }
 
   func testStorageSize() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
     XCTAssertEqual(m.layout.storageSize(of: i32), 4)
   }
 
   func testStorageStride() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
     XCTAssertEqual(m.layout.storageStride(of: i32), 4)
   }
 
   func testABIAlignment() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
     XCTAssertEqual(m.layout.abiAlignment(of: i32), 4)
@@ -67,7 +67,7 @@ final class DataLayoutTests: XCTestCase {
   }
 
   func testAlignmentGuarantees() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     for i in 1...128 {
       assertAlignmentInvariants(m.integerType(i), in: m.layout)
@@ -81,14 +81,14 @@ final class DataLayoutTests: XCTestCase {
   }
 
   func testPointerSize() throws {
-    let m = try Module("foo")
+    let m = try Module("foo", targetMachine: .host())
 
     XCTAssertEqual(m.layout.pointerSize, m.layout.storageSize(of: m.ptr))
     XCTAssertEqual(m.layout.pointerSize, MemoryLayout<UnsafeRawPointer>.size)
   }
 
   func testProgramAddressSpace() throws {
-    let m = try Module("foo")
+    let m = try Module("foo", targetMachine: .host())
 
     XCTAssertEqual(m.layout.programAddressSpace, m.programAddressSpace)
     XCTAssertEqual(m.functionPointer.unsafe[].addressSpace, m.layout.programAddressSpace)

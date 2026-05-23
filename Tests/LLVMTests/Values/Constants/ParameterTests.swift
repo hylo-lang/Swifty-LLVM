@@ -5,7 +5,7 @@ import XCTest
 final class ParameterTests: XCTestCase {
 
   func testIndex() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].index, 0)
@@ -15,7 +15,7 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(p?.unsafe[].index, 1)
   }
   func testIndexDynamic() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].index, 0)
@@ -26,20 +26,20 @@ final class ParameterTests: XCTestCase {
   }
 
   func testParent() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].parent, f.unsafe[])
   }
 
   func testParentDynamic() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].parent, f.unsafe[])
   }
   func testAttributes() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("f", m.functionType(from: (m.ptr)))
     let p = f.unsafe[].parameters[0]
     let a = m.parameterAttribute(.nofree)
@@ -58,7 +58,7 @@ final class ParameterTests: XCTestCase {
   }
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
     let p = f.unsafe[].parameters[0]
@@ -69,7 +69,7 @@ final class ParameterTests: XCTestCase {
   }
 
   func testReferenceEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let p = m.declareFunction("fn", m.functionType(from: (m.i64))).unsafe[].parameters[0]
     let q = m.declareFunction("fn", m.functionType(from: (m.i64))).unsafe[].parameters[0]
@@ -80,7 +80,7 @@ final class ParameterTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32)))
 
     let p0a = f.unsafe[].parameters[0].unsafe[]
@@ -90,7 +90,7 @@ final class ParameterTests: XCTestCase {
   }
 
   func testInequality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32)))
 
     let p0 = f.unsafe[].parameters[0].unsafe[]

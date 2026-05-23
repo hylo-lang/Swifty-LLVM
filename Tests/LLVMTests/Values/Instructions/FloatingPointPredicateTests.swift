@@ -12,7 +12,7 @@ final class FloatingPointPredicateTests: XCTestCase {
   }
 
   func testAllPredicatesVerification() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     for p in FloatingPointPredicate.allCases {
       let f = m.declareFunction("f_\(p)", m.functionType(from: (m.double, m.double), to: m.i1))

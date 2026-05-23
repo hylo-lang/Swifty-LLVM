@@ -1,3 +1,10 @@
 ---
 BasedOnStyle: LLVM
 IndentWidth: 2
+ContinuationIndentWidth: 2
+ColumnLimit: 100
+BreakAfterReturnType: None
+PenaltyReturnTypeOnItsOwnLine: 1000000
+BinPackParameters: true
+AlignAfterOpenBracket: BlockIndent
+BreakTemplateDeclarations: Yes

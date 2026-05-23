@@ -23,6 +23,7 @@
 #include "llvm-c/Core.h"
 #include "llvm-c/TargetMachine.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/IR/GlobalValue.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/PassBuilder.h"
@@ -34,11 +35,12 @@
 
 using namespace llvm;
 
-template <typename T, typename U> T *unsafe_as(U *s) {
+template <typename T, typename U>
+auto unsafe_as(U *s) -> T * {
   return static_cast<T *>(static_cast<void *>(s));
 }
 
-llvm::OptimizationLevel as_llvm(SwiftyLLVMPassOptimizationLevel x) {
+auto as_llvm(SwiftyLLVMPassOptimizationLevel x) -> llvm::OptimizationLevel {
   switch (x) {
   case SwiftyLLVMPassOptimizationLevelO0:
     return llvm::OptimizationLevel::O0;
@@ -60,9 +62,9 @@ llvm::OptimizationLevel as_llvm(SwiftyLLVMPassOptimizationLevel x) {
 
 extern "C" {
 
-void SwiftyLLVMRunDefaultModulePasses(
-    LLVMModuleRef self, LLVMTargetMachineRef t,
-    SwiftyLLVMPassOptimizationLevel optimization) {
+auto SwiftyLLVMRunDefaultModulePasses(
+  LLVMModuleRef self, LLVMTargetMachineRef t, SwiftyLLVMPassOptimizationLevel optimization
+) -> void {
   // Create the analysis managers.
   LoopAnalysisManager lam;
   FunctionAnalysisManager fam;
@@ -90,7 +92,7 @@ void SwiftyLLVMRunDefaultModulePasses(
   mpm.run(*unwrap(self), mam);
 }
 
-long SwiftyLLVMGetArgumentIndex(LLVMValueRef argument) {
+auto SwiftyLLVMGetArgumentIndex(LLVMValueRef argument) -> long {
   llvm::Value *v = llvm::unwrap(argument);
 
   if (llvm::Argument *Arg = llvm::dyn_cast<llvm::Argument>(v)) {
@@ -100,32 +102,34 @@ long SwiftyLLVMGetArgumentIndex(LLVMValueRef argument) {
   return -1;
 }
 
-unsigned int SwiftyLLVMGetProgramAddressSpace(LLVMTargetDataRef dataLayout) {
+auto SwiftyLLVMGetProgramAddressSpace(LLVMTargetDataRef dataLayout) -> unsigned int {
   llvm::DataLayout *td = llvm::unwrap(dataLayout);
   return td->getProgramAddressSpace();
 }
 
-bool SwiftyLLVMIsCPUValid(LLVMTargetRef target, const char *triple,
-                          const char *cpu) {
-  assert(target && "target must not be null");
-  assert(triple && "triple must not be null");
-  assert(cpu && "cpu must not be null");
+auto SwiftyLLVMGetGlobalValueAddressSpace(LLVMValueRef global) -> unsigned int {
+  assert(global && "`global` must not be null");
+  return llvm::cast<llvm::GlobalValue>(llvm::unwrap(global))->getAddressSpace();
+}
+
+auto SwiftyLLVMIsCPUValid(LLVMTargetRef target, const char *triple, const char *cpu) -> bool {
+  assert(target && "`target` must not be null");
+  assert(triple && "`triple` must not be null");
+  assert(cpu && "`cpu` must not be null");
 
   if (cpu[0] == '\0')
     return 1;
 
   auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target);
-  std::unique_ptr<llvm::MCSubtargetInfo> i(
-      llvmTarget->createMCSubtargetInfo(triple, "", ""));
-  assert(
-      i &&
-      "invalid triple: failed to create MCSubtargetInfo for validated triple");
+  std::unique_ptr<llvm::MCSubtargetInfo> i(llvmTarget->createMCSubtargetInfo(triple, "", ""));
+  assert(i && "invalid triple: failed to create MCSubtargetInfo for validated triple");
 
   return i->isCPUStringValid(cpu) ? 1 : 0;
 }
 
-char *SwiftyLLVMGetFirstInvalidFeature(LLVMTargetRef target, const char *triple,
-                                       const char *features) {
+auto SwiftyLLVMGetFirstInvalidFeature(
+  LLVMTargetRef target, const char *triple, const char *features
+) -> char * {
   assert(target && "target must not be null");
   assert(triple && "triple must not be null");
   assert(features && "features must not be null");
@@ -134,8 +138,8 @@ char *SwiftyLLVMGetFirstInvalidFeature(LLVMTargetRef target, const char *triple,
     return nullptr;
 
   const auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target);
-  const auto subtarget = std::unique_ptr<llvm::MCSubtargetInfo>(
-      llvmTarget->createMCSubtargetInfo(triple, "", ""));
+  const auto subtarget =
+    std::unique_ptr<llvm::MCSubtargetInfo>(llvmTarget->createMCSubtargetInfo(triple, "", ""));
   assert(subtarget && "failed to create MCSubtargetInfo for validated triple");
 
   auto knownFeatures = subtarget->getAllProcessorFeatures();
@@ -155,4 +159,5 @@ char *SwiftyLLVMGetFirstInvalidFeature(LLVMTargetRef target, const char *triple,
 
   return LLVMCreateMessage(llvm::SubtargetFeatures::StripFlag(*it).str().c_str());
 }
-}
+
+} // extern "C"

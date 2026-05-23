@@ -138,6 +138,7 @@ public struct FloatingPointType: IRType, Hashable {
   }
 
 }
+
 extension UnsafeReference<FloatingPointType> {
 
   /// Creates an instance with `t`, failing iff `t` isn't a floating point type.

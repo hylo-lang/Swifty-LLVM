@@ -39,25 +39,25 @@ public enum IntegerPredicate: String, Hashable, Sendable, CaseIterable {
   internal var llvm: LLVMIntPredicate {
     switch self {
     case .eq:
-      return LLVMIntEQ
+      LLVMIntEQ
     case .ne:
-      return LLVMIntNE
+      LLVMIntNE
     case .ugt:
-      return LLVMIntUGT
+      LLVMIntUGT
     case .uge:
-      return LLVMIntUGE
+      LLVMIntUGE
     case .ult:
-      return LLVMIntULT
+      LLVMIntULT
     case .ule:
-      return LLVMIntULE
+      LLVMIntULE
     case .sgt:
-      return LLVMIntSGT
+      LLVMIntSGT
     case .sge:
-      return LLVMIntSGE
+      LLVMIntSGE
     case .slt:
-      return LLVMIntSLT
+      LLVMIntSLT
     case .sle:
-      return LLVMIntSLE
+      LLVMIntSLE
     }
   }
 

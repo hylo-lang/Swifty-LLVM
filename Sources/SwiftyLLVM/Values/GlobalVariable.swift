@@ -1,4 +1,5 @@
 internal import llvmc
+internal import llvmshims
 
 /// A global value in LLVM IR.
 ///
@@ -28,6 +29,11 @@ public struct GlobalVariable: Global {
   /// The initial value of this global.
   public var initializer: AnyValue.UnsafeReference? {
     LLVMGetInitializer(llvm.raw).map(AnyValue.UnsafeReference.init(_:))
+  }
+
+  /// The address space of this global.
+  public var addressSpace: AddressSpace {
+    .init(SwiftyLLVMGetGlobalValueAddressSpace(llvm.raw))
   }
 
 }

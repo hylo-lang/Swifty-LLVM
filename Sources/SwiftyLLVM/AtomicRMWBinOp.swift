@@ -5,7 +5,7 @@ internal import llvmc
 /// - See https://llvm.org/docs/LangRef.html#atomicrmw-instruction.
 public enum AtomicRMWBinOp: Sendable, CaseIterable {
 
-  /// Set the new value and return the one old.
+  /// Set the new value and return the old one.
   case xchg
 
   /// Add a value and return the old one.

@@ -4,13 +4,13 @@ import XCTest
 final class PointerTypeTests: XCTestCase {
 
   func testDefaultAddressSpace() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     XCTAssertEqual(m.pointerType().unsafe[].addressSpace, .default)
     XCTAssertEqual(m.ptr.unsafe[].addressSpace, .default)
   }
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     
     let t = m.pointerType()
     XCTAssertNotNil(PointerType.UnsafeReference(t.erased))
@@ -20,7 +20,7 @@ final class PointerTypeTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.pointerType().unsafe[]
     let u = m.pointerType().unsafe[]
     XCTAssertEqual(t, u)

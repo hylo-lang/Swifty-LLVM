@@ -7,7 +7,7 @@ internal func unreachable(
   fatalError(message(), file: file, line: line)
 }
 
-/// Reports that a feature is not yet implemented at halts the program's execution.
+/// Reports that a feature is not yet implemented and halts the program's execution.
 internal func unimplemented(
   _ feature: @autoclosure () -> String? = nil,
   file: StaticString = #file,

@@ -4,7 +4,7 @@ import XCTest
 final class AllocaTests: XCTestCase {
 
   func testAllocatedType() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
@@ -13,7 +13,7 @@ final class AllocaTests: XCTestCase {
   }
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)

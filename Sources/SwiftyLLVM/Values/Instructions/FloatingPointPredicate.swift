@@ -59,37 +59,37 @@ public enum FloatingPointPredicate: String, Hashable, Sendable, CaseIterable {
   internal var llvm: LLVMRealPredicate {
     switch self {
     case .alwaysFalse:
-      return LLVMRealPredicateFalse
+      LLVMRealPredicateFalse
     case .alwaysTrue:
-      return LLVMRealPredicateTrue
+      LLVMRealPredicateTrue
     case .oeq:
-      return LLVMRealOEQ
+      LLVMRealOEQ
     case .one:
-      return LLVMRealONE
+      LLVMRealONE
     case .ogt:
-      return LLVMRealOGT
+      LLVMRealOGT
     case .oge:
-      return LLVMRealOGE
+      LLVMRealOGE
     case .olt:
-      return LLVMRealOLT
+      LLVMRealOLT
     case .ole:
-      return LLVMRealOLE
+      LLVMRealOLE
     case .ord:
-      return LLVMRealORD
+      LLVMRealORD
     case .ueq:
-      return LLVMRealUEQ
+      LLVMRealUEQ
     case .une:
-      return LLVMRealUNE
+      LLVMRealUNE
     case .ugt:
-      return LLVMRealUGT
+      LLVMRealUGT
     case .uge:
-      return LLVMRealUGE
+      LLVMRealUGE
     case .ult:
-      return LLVMRealULT
+      LLVMRealULT
     case .ule:
-      return LLVMRealULE
+      LLVMRealULE
     case .uno:
-      return LLVMRealUNO
+      LLVMRealUNO
     }
   }
 

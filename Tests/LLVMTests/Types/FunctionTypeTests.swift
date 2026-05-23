@@ -4,32 +4,32 @@ import XCTest
 final class FunctionTypeTests: XCTestCase {
 
   func testDefaultReturnType() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.functionType(from: ())
     XCTAssert(f.unsafe[].returnType == m.void.erased)
   }
   func testDefaultReturnTypeDynamic() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.functionType(from: [])
     XCTAssert(f.unsafe[].returnType == m.void.erased)
   }
 
   func testReturnType() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.i64
     let f = m.functionType(from: (), to: t)
     XCTAssert(f.unsafe[].returnType == t.erased)
   }
 
   func testReturnTypeDynamic() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.i64
     let f = m.functionType(from: [], to: t.erased)
     XCTAssert(f.unsafe[].returnType == t.erased)
   }
 
   func testParameters() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -47,7 +47,7 @@ final class FunctionTypeTests: XCTestCase {
   }
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let t = m.functionType(from: ())
     XCTAssertNotNil(FunctionType.UnsafeReference(t.erased))
@@ -57,7 +57,7 @@ final class FunctionTypeTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.i64
     let u = m.i32
 

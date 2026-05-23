@@ -19,7 +19,7 @@ public struct Alloca: IRValue {
   )
     -> Alloca.UnsafeReference
   {
-    return Alloca.UnsafeReference(LLVMBuildAlloca(p.llvm, type.raw, "")!)
+    Alloca.UnsafeReference(LLVMBuildAlloca(p.llvm, type.raw, "")!)
   }
 
   /// The type of the value allocated by the instruction.
@@ -32,7 +32,7 @@ public struct Alloca: IRValue {
 
 extension UnsafeReference<Alloca> {
 
-  /// Creates an instance with `s`, failing iff `s` isn't an `alloca`
+  /// Creates an instance with `s`, failing iff `s` isn't an `alloca`.
   public init?(_ s: AnyValue.UnsafeReference) {
     if let h = LLVMIsAAllocaInst(s.llvm.raw) {
       self.init(h)

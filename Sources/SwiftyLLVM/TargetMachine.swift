@@ -80,6 +80,7 @@ public struct TargetMachine: ~Copyable {
   }
 
 }
+
 extension TargetMachine {
 
   /// The target triple string of this machine.

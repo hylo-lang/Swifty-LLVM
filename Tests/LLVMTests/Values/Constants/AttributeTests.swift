@@ -4,7 +4,7 @@ import XCTest
 final class AttributeTests: XCTestCase {
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let a = m.functionAttribute(.cold)
     let b = m.functionAttribute(.cold)
     XCTAssertEqual(a, b)
@@ -14,7 +14,7 @@ final class AttributeTests: XCTestCase {
   }
 
   func testValue() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let a = m.parameterAttribute(.dereferenceable_or_null, 64)
     XCTAssertEqual(a.unsafe[].value, 64)
   }

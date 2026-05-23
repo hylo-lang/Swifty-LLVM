@@ -10,7 +10,7 @@ public enum OptimizationLevel: Hashable, Sendable {
   /// Moderate optimization (a.k.a. `O1`).
   case less
 
-  /// Full optimization  (a.k.a. `O2`).
+  /// Full optimization (a.k.a. `O2`).
   case `default`
 
   /// Full optimization with aggressive inlining and vectorization (a.k.a. `O3`).
@@ -20,13 +20,13 @@ public enum OptimizationLevel: Hashable, Sendable {
   internal var llvm: LLVMCodeGenOptLevel {
     switch self {
     case .none:
-      return LLVMCodeGenLevelNone
+      LLVMCodeGenLevelNone
     case .less:
-      return LLVMCodeGenLevelLess
+      LLVMCodeGenLevelLess
     case .default:
-      return LLVMCodeGenLevelDefault
+      LLVMCodeGenLevelDefault
     case .aggressive:
-      return LLVMCodeGenLevelAggressive
+      LLVMCodeGenLevelAggressive
     }
   }
 
