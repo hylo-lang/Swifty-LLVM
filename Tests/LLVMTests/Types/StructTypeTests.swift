@@ -36,6 +36,12 @@ final class StructTypeTests: XCTestCase {
     XCTAssert(m.opaqueStructType(named: "S").unsafe[].isOpaque)
   }
 
+  func testRepeatedCallEquality() throws {
+    var m = try Module("foo")
+    XCTAssertEqual(m.opaqueStructType(named: "S"), m.opaqueStructType(named: "S"))
+    XCTAssertNotEqual(m.opaqueStructType(named: "A"), m.opaqueStructType(named: "B"))
+  }
+
   func testFields() throws {
     var m = try Module("foo")
     let t = m.integerType(64)
