@@ -26,7 +26,7 @@ public struct FunctionType: IRType, Hashable {
     var mutableParameters = parameters.map { Optional.some($0.raw) }
 
     return mutableParameters.withUnsafeMutableBufferPointer { f in
-      return FunctionType.UnsafeReference(LLVMFunctionType(r.raw, f.baseAddress, UInt32(f.count), 0))
+      FunctionType.UnsafeReference(LLVMFunctionType(r.raw, f.baseAddress, UInt32(f.count), 0))
     }
   }
 

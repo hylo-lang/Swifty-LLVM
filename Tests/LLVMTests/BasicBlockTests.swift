@@ -17,7 +17,7 @@ final class BasicBlockTests: XCTestCase {
 
     let b = m.appendBlock(to: f)
     XCTAssertEqual(b.unsafe[].description, "<unnamed>")
-    XCTAssertEqual(b.unsafe[].name, nil)
+    XCTAssertNil(b.unsafe[].name)
   }
 
   func testNamedBasicBlockLLCode() throws {
@@ -77,8 +77,8 @@ final class BasicBlockTests: XCTestCase {
       f.unsafe[].parameters[0], f.unsafe[].parameters[0], at: m.endOf(body))
     m.insertReturn(double, at: m.endOf(body))
 
-    XCTAssertEqual(entry.unsafe[].name, nil)
-    XCTAssertEqual(body.unsafe[].name, nil)
+    XCTAssertNil(entry.unsafe[].name)
+    XCTAssertNil(body.unsafe[].name)
 
     let ir = m.llCode()
     XCTAssertEqual(

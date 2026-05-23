@@ -28,7 +28,8 @@ public struct TargetMachine: ~Copyable {
     LLVMTargetMachineOptionsSetRelocMode(o, relocation.llvm)
     LLVMTargetMachineOptionsSetCodeModel(o, codeModel.llvm)
 
-    self.llvm = LLVMCreateTargetMachineWithOptions(target.target.backend.llvm, target.target.triple, o)
+    self.llvm = LLVMCreateTargetMachineWithOptions(
+      target.target.backend.llvm, target.target.triple, o)
     self.backend = target.target.backend
     self.layout = .init(LLVMCreateTargetDataLayout(self.llvm))
   }
@@ -39,7 +40,8 @@ public struct TargetMachine: ~Copyable {
     relocation: RelocationModel = .default,
     codeModel: CodeModel = .default
   ) throws -> TargetMachine {
-    .init(target: try .host(), optimization: optimization, relocation: relocation, codeModel: codeModel)
+    .init(target: try .host(), optimization: optimization, relocation: relocation,
+      codeModel: codeModel)
   }
 
   /// Creates a target machine targeting the host with detected native CPU and features.
@@ -48,7 +50,8 @@ public struct TargetMachine: ~Copyable {
     relocation: RelocationModel = .default,
     codeModel: CodeModel = .default
   ) throws -> TargetMachine {
-    .init(target: try .native(), optimization: optimization, relocation: relocation, codeModel: codeModel)
+    .init(target: try .native(), optimization: optimization, relocation: relocation,
+      codeModel: codeModel)
   }
 
   deinit {

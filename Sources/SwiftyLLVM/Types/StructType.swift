@@ -13,7 +13,7 @@ public struct StructType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns a struct type having `fields` in `module`, optionally `packed`.
+  /// Returns an unnamed struct type having `fields` in `module`, optionally `packed`.
   public static func create(
     _ fields: [AnyType.UnsafeReference], packed: Bool = false,
     in module: inout Module
@@ -26,7 +26,7 @@ public struct StructType: IRType, Hashable {
     }
   }
 
-  /// Returns a struct type named `name` and having `fields` in `module`, optionally `packed`.
+  /// Returns a struct type named `name` having `fields` in `module`, optionally `packed`.
   public static func create(
     named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false,
     in module: inout Module

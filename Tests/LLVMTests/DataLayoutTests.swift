@@ -93,8 +93,8 @@ final class DataLayoutTests: XCTestCase {
     XCTAssertEqual(m.layout.programAddressSpace, m.programAddressSpace)
     XCTAssertEqual(m.functionPointer.unsafe[].addressSpace, m.layout.programAddressSpace)
 
-    // On the currently supported host platforms, function pointers are always in the default address space (arm64, amd64).
-    // This may not hold for other targets, but we need to build LLVM with support for other targets to test those.
+    // On the currently supported *host* platforms, function pointers are always in the default
+    // address space (arm64, amd64).
     XCTAssertEqual(m.layout.programAddressSpace.llvm, 0)
   }
 

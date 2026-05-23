@@ -127,7 +127,6 @@ public struct UnsafeReference<T: LLVMEntity>: Hashable {
       var s = SubscriptablePointee(llvm)
       yield &s
     }
-
   }
 
 }

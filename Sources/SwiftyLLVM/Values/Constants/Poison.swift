@@ -14,7 +14,9 @@ public struct Poison: IRValue, Hashable {
   }
 
   /// Creates the poison value of type `t` in `module`.
-  public static func create<T: IRType>(of t: T.UnsafeReference, in module: inout Module) -> Poison.UnsafeReference {
+  public static func create<T: IRType>(
+    of t: T.UnsafeReference, in module: inout Module
+  ) -> Poison.UnsafeReference {
     .init(LLVMGetPoison(t.raw))
   }
 

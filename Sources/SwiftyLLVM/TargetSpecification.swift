@@ -32,7 +32,8 @@ public struct TargetSpecification: Equatable {
   /// The target triple.
   public let target: Target
 
-  /// The LLVM CPU name that's valid for `target`. An empty string means the architecture's generic baseline.
+  /// The LLVM CPU name that's valid for `target`. An empty string means the architecture's generic
+  /// baseline.
   public let cpu: String
 
   /// The LLVM CPU feature string. An empty string means no additional features.
