@@ -14,16 +14,16 @@ public struct PointerType: IRType, Hashable {
   }
 
   /// Returns a reference to an opaque pointer type in address space `s` in `module`.
-  public static func create(inAddressSpace s: AddressSpace = .default, in module: inout Module)
-    -> PointerType.UnsafeReference
-  {
+  public static func create(
+    inAddressSpace s: AddressSpace = .default, in module: inout Module
+  ) -> PointerType.UnsafeReference {
     create(inAddressSpace: s, in: .init(module.context))
   }
 
   /// Returns a reference to an opaque pointer type in address space `s` in `context`.
-  static func create(inAddressSpace s: AddressSpace = .default, in context: ContextRef)
-    -> PointerType.UnsafeReference
-  {
+  static func create(
+    inAddressSpace s: AddressSpace = .default, in context: ContextRef
+  ) -> PointerType.UnsafeReference {
     .init(LLVMPointerTypeInContext(context.raw, s.llvm))
   }
 
