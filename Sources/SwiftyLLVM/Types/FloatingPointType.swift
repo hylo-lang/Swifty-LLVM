@@ -25,14 +25,16 @@ public struct FloatingPointType: IRType, Hashable {
 
   /// Returns the 16-bit "brain" floating-point type `bfloat` in `module`.
   ///
-  /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and 7 fraction bits.
+  /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and
+  /// 7 fraction bits.
   public static func bfloat(in module: inout Module) -> FloatingPointType.UnsafeReference {
     bfloat(in: .init(module.context))
   }
 
   /// Returns the 16-bit "brain" floating-point type `bfloat` in `context`.
   ///
-  /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and 7 fraction bits.
+  /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and
+  /// 7 fraction bits.
   static func bfloat(in context: ContextRef) -> FloatingPointType.UnsafeReference {
     .init(LLVMBFloatTypeInContext(context.raw))
   }

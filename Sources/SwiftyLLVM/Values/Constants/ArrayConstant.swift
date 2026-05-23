@@ -13,10 +13,13 @@ public struct ArrayConstant: IRValue, Hashable {
 
   /// Creates a constant array of `type` in `module`, filled with the contents of `elements`.
   ///
-  /// - Requires: The type of each element in `elements` is `type`.
+  /// - Requires: 
+  ///   - The type of each element in `elements` is `type`.
+  ///   - The context of `type` matches the context of `module`.
   public static func create<T: IRType, S: Sequence>(
     of type: T.UnsafeReference, containing elements: S, in module: inout Module
   ) -> ArrayConstant.UnsafeReference where S.Element == AnyValue.UnsafeReference {
+    assert(LLVMGetTypeContext(type.raw) == module.context)
     var values = elements.map({ Optional.some($0.raw) })
     return .init(LLVMConstArray(type.raw, &values, UInt32(values.count)))
   }

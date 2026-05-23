@@ -22,7 +22,7 @@ final class StructConstantTests: XCTestCase {
     
     let a = m.structConstant(aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)))
     XCTAssertEqual(a.unsafe[].count, 2)
-    XCTAssertEqual(try XCTUnwrap(StructType.UnsafeReference(a.unsafe[].type)).unsafe[].isPacked, false)
+    XCTAssertFalse(try XCTUnwrap(StructType.UnsafeReference(a.unsafe[].type)).unsafe[].isPacked)
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][0]), i32.unsafe[].constant(4))
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][1]), i32.unsafe[].constant(2))
   }
@@ -31,9 +31,11 @@ final class StructConstantTests: XCTestCase {
     var m = try Module("foo")
     let i32 = m.integerType(32)
     
-    let a = m.structConstant(aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)), packed: true)
+    let a = m.structConstant(
+      aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)),
+      packed: true)
     XCTAssertEqual(a.unsafe[].count, 2)
-    XCTAssertEqual(try XCTUnwrap(StructType.UnsafeReference(a.unsafe[].type)).unsafe[].isPacked, true)
+    XCTAssertTrue(try XCTUnwrap(StructType.UnsafeReference(a.unsafe[].type)).unsafe[].isPacked)
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][0]), i32.unsafe[].constant(4))
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][1]), i32.unsafe[].constant(2))
   }

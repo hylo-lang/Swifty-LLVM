@@ -11,7 +11,9 @@ public struct IntegerType: IRType, Hashable {
   /// Returns a reference to an integer type with given `bitWidth` in `module`.
   ///
   /// - Requires: `bitWidth` is greater than 0.
-  public static func create(_ bitWidth: Int, in module: inout Module) -> IntegerType.UnsafeReference {
+  public static func create(
+    _ bitWidth: Int, in module: inout Module
+  ) -> IntegerType.UnsafeReference {
     create(bitWidth, in: .init(module.context))
   }
 

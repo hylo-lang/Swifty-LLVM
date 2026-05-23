@@ -14,8 +14,10 @@ public struct Undefined: IRValue, Hashable {
   }
 
   /// Creates and registers an undefined value of type `t` in `module`.
-  public static func create<T: IRType>(of t: T.UnsafeReference, in module: inout Module) -> Self.UnsafeReference {
-    return .init(LLVMGetUndef(t.raw))
+  public static func create<T: IRType>(
+    of t: T.UnsafeReference, in module: inout Module
+  ) -> Self.UnsafeReference {
+    .init(LLVMGetUndef(t.raw))
   }
 
 }
