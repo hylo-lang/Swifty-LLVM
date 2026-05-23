@@ -48,7 +48,7 @@ public struct TargetMachine: ~Copyable {
     relocation: RelocationModel = .default,
     codeModel: CodeModel = .default
   ) throws -> TargetMachine {
-    .init(target: try .host(), optimization: optimization, relocation: relocation, codeModel: codeModel)
+    .init(target: try .native(), optimization: optimization, relocation: relocation, codeModel: codeModel)
   }
 
   deinit {
