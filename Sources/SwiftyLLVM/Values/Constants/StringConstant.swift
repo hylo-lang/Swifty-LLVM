@@ -13,9 +13,9 @@ public struct StringConstant: IRValue, Hashable {
 
   /// Creates a string constant from `text` in `module`, appending a null terminator iff
   /// `nullTerminated` is `true`.
-  public static func create(_ text: String, nullTerminated: Bool = true, in module: inout Module)
-    -> StringConstant.UnsafeReference
-  {
+  public static func create(
+    _ text: String, nullTerminated: Bool = true, in module: inout Module
+  ) -> StringConstant.UnsafeReference {
     text.withCString { (s) in
       StringConstant.UnsafeReference(
         LLVMConstStringInContext(module.context, s, UInt32(text.utf8.count), nullTerminated ? 0 : 1)

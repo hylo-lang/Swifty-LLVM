@@ -147,11 +147,9 @@ public struct Module: ~Copyable {
   public func verify() throws {
     var message: UnsafeMutablePointer<CChar>? = nil
     defer { LLVMDisposeMessage(message) }
-    let status = withUnsafeMutablePointer(
-      to: &message,
-      { (m) in
-        LLVMVerifyModule(llvmModule.raw, LLVMReturnStatusAction, m)
-      })
+    let status = withUnsafeMutablePointer(to: &message, { (m) in
+      LLVMVerifyModule(llvmModule.raw, LLVMReturnStatusAction, m)
+    })
 
     if status != 0 {
       throw LLVMError(.init(cString: message!))
@@ -300,11 +298,13 @@ public struct Module: ~Copyable {
   }
 
   /// Returns a function with given `name` and `type`, declaring it if it doesn't exist.
+  /// 
+  /// - Requires: If function with `name` already exists, it is of type `type`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#functions.
-  public mutating func declareFunction(_ name: String, _ type: FunctionType.UnsafeReference)
-    -> Function.UnsafeReference
-  {
+  public mutating func declareFunction(
+    _ name: String, _ type: FunctionType.UnsafeReference
+  ) -> Function.UnsafeReference {
     if let existing = function(named: name) {
       let existingType = existing.unsafe[].valueType
       precondition(existingType == type.erased)
@@ -424,9 +424,9 @@ public struct Module: ~Copyable {
   ///
   /// A unique name is generated if `n` is empty or if `f` already contains a block named `n`.
   @discardableResult
-  public mutating func appendBlock(named n: String? = nil, to f: Function.UnsafeReference)
-    -> BasicBlock.UnsafeReference
-  {
+  public mutating func appendBlock(
+    named n: String? = nil, to f: Function.UnsafeReference
+  ) -> BasicBlock.UnsafeReference {
     .init(LLVMAppendBasicBlockInContext(context, f.raw, n ?? ""))
   }
 
@@ -940,9 +940,7 @@ public struct Module: ~Copyable {
   @discardableResult
   public mutating func insertBr(
     to destination: BasicBlock.UnsafeReference, at p: borrowing InsertionPoint
-  )
-    -> Instruction.UnsafeReference
-  {
+  ) -> Instruction.UnsafeReference {
     .init(LLVMBuildBr(p.llvm, destination.raw)!)
   }
 
@@ -1012,9 +1010,7 @@ public struct Module: ~Copyable {
   @discardableResult
   public mutating func insertReturn<V: IRValue>(
     _ value: V.UnsafeReference, at p: borrowing InsertionPoint
-  )
-    -> Instruction.UnsafeReference
-  {
+  ) -> Instruction.UnsafeReference {
     .init(LLVMBuildRet(p.llvm, value.raw)!)
   }
 
@@ -1168,7 +1164,9 @@ public struct Module: ~Copyable {
 
   /// Inserts a call to `callee` with explicit `calleeType`.
   ///
-  /// Validates argument count for non-variadic function types.
+  /// - Requires: 
+  ///   - argument count must match the function type, unless it's variadic.
+  ///   - `callee` is of a callable type.
   ///
   /// - See https://llvm.org/docs/LangRef.html#call-instruction.
   public mutating func insertCall(
@@ -1179,10 +1177,9 @@ public struct Module: ~Copyable {
   ) -> Instruction.UnsafeReference {
     var a = arguments.map({ $0.raw as Optional })
 
-    // Report function type and arguments on mismatched argument count on non-variadic functions.
     if let f = FunctionType.UnsafeReference(calleeType)?.unsafe[] {
       if f.parameters.count != arguments.count && !f.isVarArg {
-        let functionName = Function.UnsafeReference(callee.raw).unsafe[].name
+        let functionName = Function.UnsafeReference(callee)!.unsafe[].name
         var debugInfo = "Parameter count mismatch on LLVM function call: \(functionName)\n"
         debugInfo += "Expected parameters: \(f.parameters.count)\n"
         debugInfo += "Provided arguments: \(arguments.count)\n"
@@ -1249,9 +1246,9 @@ public struct Module: ~Copyable {
   /// Creates an opaque pointer type in the given address space.
   ///
   /// - See https://llvm.org/docs/LangRef.html#pointer-type.
-  public mutating func pointerType(inAddressSpace s: AddressSpace = .default)
-    -> PointerType.UnsafeReference
-  {
+  public mutating func pointerType(
+    inAddressSpace s: AddressSpace = .default
+  ) -> PointerType.UnsafeReference {
     PointerType.create(inAddressSpace: s, in: &self)
   }
 
@@ -1271,9 +1268,9 @@ public struct Module: ~Copyable {
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the
   ///   function type `(i64, i8) -> i8`.
   /// - See https://llvm.org/docs/LangRef.html#function-type.
-  public mutating func functionType(from: [AnyType.UnsafeReference])
-    -> FunctionType.UnsafeReference
-  {
+  public mutating func functionType(
+    from: [AnyType.UnsafeReference]
+  ) -> FunctionType.UnsafeReference {
     FunctionType.create(from: from, to: nil, in: &self)
   }
 
@@ -1309,9 +1306,9 @@ public struct Module: ~Copyable {
   /// Creates an array type of `count` elements of `element`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#array-type.
-  public mutating func arrayType<T: IRType>(_ count: Int, _ element: T.UnsafeReference)
-    -> ArrayType.UnsafeReference
-  {
+  public mutating func arrayType<T: IRType>(
+    _ count: Int, _ element: T.UnsafeReference
+  ) -> ArrayType.UnsafeReference {
     ArrayType.create(count, element, in: &self)
   }
 
@@ -1505,9 +1502,9 @@ public struct Module: ~Copyable {
 
   /// Creates a string constant from `text` in `module`, appending a null terminator iff
   /// `nullTerminated` is `true`.
-  public mutating func stringConstant(_ text: String, nullTerminated: Bool = true)
-    -> StringConstant.UnsafeReference
-  {
+  public mutating func stringConstant(
+    _ text: String, nullTerminated: Bool = true
+  ) -> StringConstant.UnsafeReference {
     StringConstant.create(text, nullTerminated: nullTerminated, in: &self)
   }
 

@@ -110,9 +110,7 @@ public struct FloatingPointType: IRType, Hashable {
   }
 
   /// Returns a constant whose LLVM IR type is `self` and whose value is `v`.
-  public func callAsFunction(_ v: Double)
-    -> FloatingPointConstant.UnsafeReference
-  {
+  public func callAsFunction(_ v: Double) -> FloatingPointConstant.UnsafeReference {
     constant(v)
   }
 
@@ -124,9 +122,7 @@ public struct FloatingPointType: IRType, Hashable {
   /// Returns a constant whose LLVM IR type is `self` and whose value is parsed from `text`.
   ///
   /// Zero is returned if `text` is not a valid floating-point value.
-  public func constant(parsing text: String)
-    -> FloatingPointConstant.UnsafeReference
-  {
+  public func constant(parsing text: String) -> FloatingPointConstant.UnsafeReference {
     text.withCString({
       .init(LLVMConstRealOfStringAndSize(llvm.raw, $0, UInt32(text.utf8.count))!)
     })

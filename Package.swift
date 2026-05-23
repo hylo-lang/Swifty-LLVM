@@ -92,9 +92,9 @@ func readProcessOutput(executable: String, arguments: [String]) -> String? {
 /// The returned flags are only needed on macOS. Windows and Linux link zstd already.
 func zstdLinkerFlagsForMacOS() -> String {
   if let executable = findExecutableOnPath(name: "pkg-config"),
-  let libraries = readProcessOutput(
-    executable: executable,
-    arguments: ["libzstd", "--libs-only-L"])
+    let libraries = readProcessOutput(
+      executable: executable,
+      arguments: ["libzstd", "--libs-only-L"])
   {
     return libraries.trimmingCharacters(in: .whitespacesAndNewlines)
   }
@@ -108,7 +108,7 @@ func zstdLinkerFlagsForMacOS() -> String {
   for path in commonPaths {
     if FileManager.default.fileExists(atPath: "\(path)/libzstd.dylib")
     || FileManager.default.fileExists(atPath: "\(path)/libzstd.a")
-      {
+    {
       return "-L\(path)"
     }
   }
