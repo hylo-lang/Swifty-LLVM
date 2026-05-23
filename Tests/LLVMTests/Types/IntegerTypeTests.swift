@@ -4,7 +4,7 @@ import XCTest
 final class IntegerTypeTests: XCTestCase {
 
   func testBitWidth() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i64 = m.integerType(64)
     let i32 = m.integerType(32)
     XCTAssertEqual(i64.unsafe[].bitWidth, 64)
@@ -12,13 +12,13 @@ final class IntegerTypeTests: XCTestCase {
   }
 
   func testCallSyntax() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i64 = m.integerType(64)
     XCTAssertEqual(i64.unsafe[](1).unsafe[].sext, 1)
   }
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     
     let i64 = m.integerType(64)
     XCTAssertNotNil(IntegerType.UnsafeReference(i64.erased))
@@ -28,7 +28,7 @@ final class IntegerTypeTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i64 = m.integerType(64)
     let t = i64.unsafe[]
     let u = i64.unsafe[]

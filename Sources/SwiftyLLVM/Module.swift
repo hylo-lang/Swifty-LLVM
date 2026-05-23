@@ -18,6 +18,72 @@ public struct Module: ~Copyable {
   /// The data layout of the module.
   public var layout: DataLayout { _read { yield targetMachine.layout } }
 
+  /// The `void` type.
+  public let void: VoidType.UnsafeReference
+
+  /// The `ptr` type in the default address space.
+  public let ptr: PointerType.UnsafeReference
+
+  /// The pointer type with program address space according to the module's data layout.
+  public let functionPointer: PointerType.UnsafeReference
+
+  /// The 16-bit floating-point type `half`.
+  /// 
+  /// Represented as IEEE 754 binary16.
+  public let half: FloatingPointType.UnsafeReference
+
+  /// The 16-bit "brain" floating-point type `bfloat`.
+  /// 
+  /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and
+  /// 7 fraction bits.
+  public let bfloat: FloatingPointType.UnsafeReference
+
+  /// The 32-bit floating-point type `float`.
+  /// 
+  /// Represented as IEEE 754 binary32.
+  public let float: FloatingPointType.UnsafeReference
+
+  /// The 64-bit floating-point type `double`.
+  /// 
+  /// Represented as IEEE 754 binary64.
+  public let double: FloatingPointType.UnsafeReference
+
+  /// The 80-bit floating-point type `x86_fp80`.
+  ///
+  /// Represented as in X87.
+  public let x86_fp80: FloatingPointType.UnsafeReference
+
+  /// The 128-bit floating-point type `fp128`.
+  /// 
+  /// Represented as IEEE 754 binary128.
+  public let fp128: FloatingPointType.UnsafeReference
+
+  /// The 128-bit floating-point type `ppc_fp128`.
+  /// 
+  /// Represented as the PowerPC double-double format, with two 64-bit IEEE 754 binary64 parts.
+  public let ppc_fp128: FloatingPointType.UnsafeReference
+
+  /// The 1-bit integer type.
+  public let i1: IntegerType.UnsafeReference
+
+  /// The 8-bit integer type.
+  public let i8: IntegerType.UnsafeReference
+
+  /// The 16-bit integer type.
+  public let i16: IntegerType.UnsafeReference
+
+  /// The 32-bit integer type.
+  public let i32: IntegerType.UnsafeReference
+
+  /// The 64-bit integer type.
+  public let i64: IntegerType.UnsafeReference
+
+  /// The 128-bit integer type.
+  public let i128: IntegerType.UnsafeReference
+
+  /// An integer type with equal size to pointers in the default address space.
+  public let iptr: IntegerType.UnsafeReference
+
   /// Creates an instance by taking ownership of `context` and `module`.
   private init(
     targetMachine: consuming TargetMachine, context: LLVMContextRef, module: LLVMModuleRef
@@ -55,9 +121,7 @@ public struct Module: ~Copyable {
   }
 
   /// Creates an instance with `name`.
-  public init(
-    _ name: String, targetMachine: consuming TargetMachine = try! TargetMachine.host()
-  ) throws {
+  public init(_ name: String, targetMachine: consuming TargetMachine) {
     let c = LLVMContextCreate()!
     let m = LLVMModuleCreateWithNameInContext(name, c)!
     self.init(targetMachine: targetMachine, context: c, module: m)
@@ -218,6 +282,8 @@ public struct Module: ~Copyable {
 
   /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
   ///
+  /// - Requires: `type` and address space `s` are consistent with existing variable, if present.
+  ///
   /// - See https://llvm.org/docs/LangRef.html#global-variables.
   public mutating func declareGlobalVariable<T: IRType>(
     _ name: String,
@@ -225,8 +291,8 @@ public struct Module: ~Copyable {
     inAddressSpace s: AddressSpace = .default
   ) -> GlobalVariable.UnsafeReference {
     if let g = global(named: name) {
-      let existingType = g.unsafe[].valueType
-      precondition(existingType == type.erased)
+      precondition(g.unsafe[].valueType == type.erased)
+      precondition(g.unsafe[].addressSpace == s)
       return g
     } else {
       return addGlobalVariable(name, type, inAddressSpace: s)
@@ -316,6 +382,7 @@ public struct Module: ~Copyable {
     addReturnAttribute(a, to: f)
     return a
   }
+
   /// Adds the attribute named `n` to `p`, and returns it.
   @discardableResult
   public mutating func addParameterAttribute(
@@ -425,81 +492,13 @@ public struct Module: ~Copyable {
     LLVMSetAlignment(v.raw, UInt32(a))
   }
 
-  // MARK: Basic type instances
-
   /// The LLVM context of this module wrapped as a SwiftyLLVM reference.
   private var contextRef: ContextRef { .init(context) }
-
-  /// The `void` type.
-  public let void: VoidType.UnsafeReference
-
-  /// The `ptr` type in the default address space.
-  public let ptr: PointerType.UnsafeReference
 
   /// The address space in which function pointers are represented in the current data layout.
   public var programAddressSpace: AddressSpace {
     .init(SwiftyLLVMGetProgramAddressSpace(LLVMGetModuleDataLayout(llvmModule.raw)))
   }
-
-  /// The pointer type with program address space according to the module's data layout.
-  public let functionPointer: PointerType.UnsafeReference
-
-  /// The 16-bit floating-point type `half`.
-  /// 
-  /// Represented as IEEE 754 binary16.
-  public let half: FloatingPointType.UnsafeReference
-
-  /// The 16-bit "brain" floating-point type `bfloat`.
-  /// 
-  /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and
-  /// 7 fraction bits.
-  public let bfloat: FloatingPointType.UnsafeReference
-
-  /// The 32-bit floating-point type `float`.
-  /// 
-  /// Represented as IEEE 754 binary32.
-  public let float: FloatingPointType.UnsafeReference
-
-  /// The 64-bit floating-point type `double`.
-  /// 
-  /// Represented as IEEE 754 binary64.
-  public let double: FloatingPointType.UnsafeReference
-
-  /// The 80-bit floating-point type `x86_fp80`.
-  ///
-  /// Represented as in X87.
-  public let x86_fp80: FloatingPointType.UnsafeReference
-
-  /// The 128-bit floating-point type `fp128`.
-  /// 
-  /// Represented as IEEE 754 binary128.
-  public let fp128: FloatingPointType.UnsafeReference
-
-  /// The 128-bit floating-point type `ppc_fp128`.
-  /// 
-  /// Represented as the PowerPC double-double format, with two 64-bit IEEE 754 binary64 parts.
-  public let ppc_fp128: FloatingPointType.UnsafeReference
-
-  /// The 1-bit integer type.
-  public let i1: IntegerType.UnsafeReference
-
-  /// The 8-bit integer type.
-  public let i8: IntegerType.UnsafeReference
-
-  /// The 16-bit integer type.
-  public let i16: IntegerType.UnsafeReference
-
-  /// The 32-bit integer type.
-  public let i32: IntegerType.UnsafeReference
-
-  /// The 64-bit integer type.
-  public let i64: IntegerType.UnsafeReference
-
-  /// The 128-bit integer type.
-  public let i128: IntegerType.UnsafeReference
-
-  /// An integer type with equal size to pointers in the default address space.
-  public let iptr: IntegerType.UnsafeReference
 
   // MARK: Arithmetics
 
@@ -718,8 +717,7 @@ public struct Module: ~Copyable {
     _ lhs: UnsafeReference<some IRValue>, _ rhs: UnsafeReference<some IRValue>,
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
-    let handle = LLVMBuildXor(p.llvm, lhs.raw, rhs.raw, "")!
-    return .init(handle)
+    .init(LLVMBuildXor(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
   // MARK: Memory
@@ -739,6 +737,7 @@ public struct Module: ~Copyable {
   ) -> BasicBlock.UnsafeReference? {
     LLVMGetFirstBasicBlock(f.raw).map { BasicBlock.UnsafeReference($0) }
   }
+
   /// Inserts an `alloca` that allocates stack memory for a value of `type`, at the entry of `f`.
   ///
   /// - Requires: `f` has an entry block.
@@ -760,8 +759,7 @@ public struct Module: ~Copyable {
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
     var i = indices.map({ Optional.some($0.raw) })
-    let handle = LLVMBuildGEP2(p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!
-    return .init(handle)
+    return .init(LLVMBuildGEP2(p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!)
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base`.
@@ -793,9 +791,7 @@ public struct Module: ~Copyable {
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
     var i = indices.map({ Optional.some($0.raw) })
-    let handle = LLVMBuildInBoundsGEP2(
-      p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!
-    return .init(handle)
+    return .init(LLVMBuildInBoundsGEP2(p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!)
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base` with
@@ -826,9 +822,7 @@ public struct Module: ~Copyable {
     index: Int,
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
-    let handle = LLVMBuildStructGEP2(
-      p.llvm, baseType.raw, base.raw, UInt32(index), "")!
-    return .init(handle)
+    .init(LLVMBuildStructGEP2(p.llvm, baseType.raw, base.raw, UInt32(index), "")!)
   }
 
   /// Inserts a typed load instruction from `source`.
@@ -848,8 +842,7 @@ public struct Module: ~Copyable {
     _ value: V1.UnsafeReference, to location: V2.UnsafeReference, at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
     let r = LLVMBuildStore(p.llvm, value.raw, location.raw)!
-    LLVMSetAlignment(
-      r, UInt32(layout.preferredAlignment(of: value.unsafe[].type)))
+    LLVMSetAlignment(r, UInt32(layout.preferredAlignment(of: value.unsafe[].type)))
     return .init(r)
   }
 
@@ -902,9 +895,7 @@ public struct Module: ~Copyable {
     singleThread: Bool,
     at p: borrowing InsertionPoint
   ) -> Instruction.UnsafeReference {
-    let handle = LLVMBuildAtomicCmpXchg(
-      p.llvm, atomic.raw, old.raw, new.raw,
-      successOrdering.llvm,
+    let handle = LLVMBuildAtomicCmpXchg(p.llvm, atomic.raw, old.raw, new.raw, successOrdering.llvm,
       failureOrdering.llvm, singleThread ? 1 : 0)!
     let i = Instruction.UnsafeReference(handle)
     if weak {
@@ -1188,15 +1179,12 @@ public struct Module: ~Copyable {
   ) -> Instruction.UnsafeReference {
     var a = arguments.map({ $0.raw as Optional })
 
-    // Debug: Print function type and arguments
-    if let ft = FunctionType.UnsafeReference(calleeType) {
-      let funcType = ft.unsafe[]
-
-      // Check if this is a problematic call (mismatched number of parameters when not vararg)
-      if funcType.parameters.count != arguments.count && !funcType.isVarArg {
+    // Report function type and arguments on mismatched argument count on non-variadic functions.
+    if let f = FunctionType.UnsafeReference(calleeType)?.unsafe[] {
+      if f.parameters.count != arguments.count && !f.isVarArg {
         let functionName = Function.UnsafeReference(callee.raw).unsafe[].name
         var debugInfo = "Parameter count mismatch on LLVM function call: \(functionName)\n"
-        debugInfo += "Expected parameters: \(funcType.parameters.count)\n"
+        debugInfo += "Expected parameters: \(f.parameters.count)\n"
         debugInfo += "Provided arguments: \(arguments.count)\n"
         preconditionFailure(debugInfo)
       }
@@ -1277,6 +1265,7 @@ public struct Module: ~Copyable {
   ) -> FunctionType.UnsafeReference {
     FunctionType.create(from: from, to: to.erased, in: &self)
   }
+
   /// Creates a function type with given parameter and return types.
   ///
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the

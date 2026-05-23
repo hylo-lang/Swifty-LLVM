@@ -70,19 +70,19 @@ public enum AtomicOrdering: Sendable {
   internal var llvm: LLVMAtomicOrdering {
     switch self {
     case .notAtomic:
-      return LLVMAtomicOrderingNotAtomic
+      LLVMAtomicOrderingNotAtomic
     case .unordered:
-      return LLVMAtomicOrderingUnordered
+      LLVMAtomicOrderingUnordered
     case .monotonic:
-      return LLVMAtomicOrderingMonotonic
+      LLVMAtomicOrderingMonotonic
     case .acquire:
-      return LLVMAtomicOrderingAcquire
+      LLVMAtomicOrderingAcquire
     case .release:
-      return LLVMAtomicOrderingRelease
+      LLVMAtomicOrderingRelease
     case .acquireRelease:
-      return LLVMAtomicOrderingAcquireRelease
+      LLVMAtomicOrderingAcquireRelease
     case .sequentiallyConsistent:
-      return LLVMAtomicOrderingSequentiallyConsistent
+      LLVMAtomicOrderingSequentiallyConsistent
     }
   }
 

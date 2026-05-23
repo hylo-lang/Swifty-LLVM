@@ -11,7 +11,7 @@ final class AtomicRMWBinOpTests: XCTestCase {
   }
 
   func testIntegerOperations() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     for op in [AtomicRMWBinOp.xchg, .add, .sub, .and, .nand, .or, .xor, .max, .min, .uMax, .uMin] {
       let f = m.declareFunction("f_\(op)", m.functionType(from: (m.ptr, m.i64), to: m.i64))
@@ -27,7 +27,7 @@ final class AtomicRMWBinOpTests: XCTestCase {
   }
 
   func testFloatingPointOperations() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     for op in [AtomicRMWBinOp.xchg, .fAdd, .fSub, .fMax, .fMin] {
       let f = m.declareFunction("f_\(op)", m.functionType(from: (m.ptr, m.double), to: m.double))

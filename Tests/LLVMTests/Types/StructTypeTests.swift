@@ -5,7 +5,7 @@ import XCTest
 final class StructTypeTests: XCTestCase {
 
   func testInlineStruct() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     let s = m.structType((t, t)).unsafe[]
     XCTAssert(s.isLiteral)
@@ -15,7 +15,7 @@ final class StructTypeTests: XCTestCase {
   }
 
   func testNamedStruct() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     let s = m.structType(named: "S", (t, t)).unsafe[]
     XCTAssertFalse(s.isLiteral)
@@ -25,25 +25,25 @@ final class StructTypeTests: XCTestCase {
   }
 
   func testPackedStruct() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     XCTAssert(m.structType((t, t), packed: true).unsafe[].isPacked)
     XCTAssert(m.createStructType(named: "S", [t.erased, t.erased], packed: true).unsafe[].isPacked)
   }
 
   func testOpaqueStruct() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     XCTAssert(m.opaqueStructType(named: "S").unsafe[].isOpaque)
   }
 
   func testRepeatedCallEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     XCTAssertEqual(m.opaqueStructType(named: "S"), m.opaqueStructType(named: "S"))
     XCTAssertNotEqual(m.opaqueStructType(named: "A"), m.opaqueStructType(named: "B"))
   }
 
   func testFields() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -61,7 +61,7 @@ final class StructTypeTests: XCTestCase {
   }
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let t = m.structType([])
     XCTAssertNotNil(StructType.UnsafeReference(t.erased))
@@ -71,7 +71,7 @@ final class StructTypeTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -83,7 +83,7 @@ final class StructTypeTests: XCTestCase {
   }
 
   func testSameNamedStructTypeEqual() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -94,7 +94,7 @@ final class StructTypeTests: XCTestCase {
   }
 
   func testDifferentNameSameFieldsNotEqual() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     let u = m.integerType(32)
 
@@ -112,7 +112,7 @@ final class StructTypeTests: XCTestCase {
   }
 
   func testSameNameDifferentFields() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64).erased
     let u = m.integerType(32).erased
 

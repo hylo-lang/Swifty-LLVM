@@ -4,7 +4,7 @@ import XCTest
 final class ArrayConstantTests: XCTestCase {
 
   func testInit() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
 
     let a = m.arrayConstant(
@@ -15,7 +15,7 @@ final class ArrayConstantTests: XCTestCase {
   }
 
   func testInitTuple() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let a = m.arrayConstant(
       of: m.i32,
@@ -27,7 +27,7 @@ final class ArrayConstantTests: XCTestCase {
   }
 
   func testInitFromBytes() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let i8 = m.integerType(8)
     let a = m.arrayConstant(bytes: [0, 1, 2, 3, 4])
@@ -37,7 +37,7 @@ final class ArrayConstantTests: XCTestCase {
   }
 
   func testIteration() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
 
     let elements = (0 ..< 5).map({ i32.unsafe[].constant($0) })
@@ -54,7 +54,7 @@ final class ArrayConstantTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
 
     let a = m.arrayConstant(

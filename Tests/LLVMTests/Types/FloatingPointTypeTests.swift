@@ -5,7 +5,7 @@ import XCTest
 final class FloatingPointTypeTests: XCTestCase {
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let floatingPointTypes = [
       m.half.erased, m.bfloat.erased, m.float.erased, m.double.erased,
@@ -21,7 +21,7 @@ final class FloatingPointTypeTests: XCTestCase {
   }
 
   func testCallSyntax() throws {
-    let m = try Module("foo")
+    let m = try Module("foo", targetMachine: .host())
     let double = m.double.unsafe[]
     let x = double(1)
     XCTAssertEqual(x.unsafe[].type, m.double.erased)
@@ -30,7 +30,7 @@ final class FloatingPointTypeTests: XCTestCase {
   }
 
   func testEquality() throws {
-    let m = try Module("foo")
+    let m = try Module("foo", targetMachine: .host())
     let t = m.double.unsafe[]
     let u = m.double.unsafe[]
     XCTAssertEqual(t, u)
@@ -42,7 +42,7 @@ final class FloatingPointTypeTests: XCTestCase {
   }
 
   func testDistinctTypes() throws {
-    let m = try Module("foo")
+    let m = try Module("foo", targetMachine: .host())
     let types = [m.half, m.bfloat, m.float, m.double, m.x86_fp80, m.fp128, m.ppc_fp128]
 
     for i in types.indices {

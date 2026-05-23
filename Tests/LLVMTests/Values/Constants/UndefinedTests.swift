@@ -5,7 +5,7 @@ import XCTest
 final class UndefinedTests: XCTestCase {
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let t = m.undefinedValue(of: m.float)
     XCTAssertNotNil(Undefined.UnsafeReference(t.erased))
@@ -15,7 +15,7 @@ final class UndefinedTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.undefinedValue(of: m.double)
     let u = m.undefinedValue(of: m.double)
     XCTAssertEqual(t, u)

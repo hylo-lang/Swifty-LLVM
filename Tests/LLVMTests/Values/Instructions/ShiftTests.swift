@@ -5,7 +5,7 @@ import XCTest
 final class ShiftTests: XCTestCase {
 
   func testShl() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -16,7 +16,7 @@ final class ShiftTests: XCTestCase {
   }
 
   func testLShr() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -27,7 +27,7 @@ final class ShiftTests: XCTestCase {
   }
 
   func testAShr() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]

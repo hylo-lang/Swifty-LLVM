@@ -4,7 +4,7 @@ import XCTest
 final class StructConstantTests: XCTestCase {
 
   func testInitNamed() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
 
     let t = m.structType((i32, i32))
@@ -17,7 +17,7 @@ final class StructConstantTests: XCTestCase {
   }
 
   func testInitFromValues() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
     
     let a = m.structConstant(aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)))
@@ -28,7 +28,7 @@ final class StructConstantTests: XCTestCase {
   }
 
   func testInitFromValuesPacked() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
     
     let a = m.structConstant(
@@ -41,7 +41,7 @@ final class StructConstantTests: XCTestCase {
   }
 
   func testIteration() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
 
     let elements = (0 ..< 4).map({ i32.unsafe[].constant($0) })
@@ -59,7 +59,7 @@ final class StructConstantTests: XCTestCase {
   }
 
   func testEmptyStructIteration() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.structType(())
     let a = m.structConstant(of: t, aggregating: ())
 
@@ -69,7 +69,7 @@ final class StructConstantTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
     
     let a = m.structConstant(aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)))

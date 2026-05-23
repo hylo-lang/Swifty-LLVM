@@ -5,7 +5,7 @@ import XCTest
 final class FunctionTests: XCTestCase {
 
   func testWellFormed() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: ()))
     XCTAssert(f.unsafe[].isWellFormed())
     m.appendBlock(to: f)
@@ -13,7 +13,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testEntry() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: ()))
     XCTAssertNil(f.unsafe[].entry)
     m.appendBlock(to: f)
@@ -21,7 +21,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testParameters() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.i64
     let u = m.i32
 
@@ -39,7 +39,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testParametersIteration() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32, m.double)))
     let params = f.unsafe[].parameters
 
@@ -59,7 +59,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testBasicBlocks() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let f = m.declareFunction("f", m.functionType(from: ()))
     XCTAssertEqual(f.unsafe[].basicBlocks.count, 0)
@@ -76,7 +76,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testBasicBlockIndices() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("f", m.functionType(from: ()))
     XCTAssertEqual(f.unsafe[].basicBlocks.startIndex, f.unsafe[].basicBlocks.endIndex)
 
@@ -97,7 +97,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testAttributes() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("f", m.functionType(from: ()))
     let a = m.functionAttribute(.alwaysinline)
     let b = m.functionAttribute(.hot)
@@ -115,7 +115,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testReturnAttributes() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("f", m.functionType(from: (), to: m.ptr))
     let r = f.unsafe[].returnValue
     let a = m.returnAttribute(.noalias)
@@ -134,7 +134,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let t = m.declareFunction("fn", m.functionType(from: ()))
     XCTAssertNotNil(Function.UnsafeReference(t.erased))
@@ -144,7 +144,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: ()))
     let g = m.declareFunction("fn", m.functionType(from: ()))
     XCTAssertEqual(f, g)
@@ -154,7 +154,7 @@ final class FunctionTests: XCTestCase {
   }
 
   func testReturnEquality() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: ())).unsafe[].returnValue
     let g = m.declareFunction("fn", m.functionType(from: ())).unsafe[].returnValue
     XCTAssertEqual(f, g)
@@ -173,7 +173,7 @@ final class FunctionTests: XCTestCase {
     //     func identity(_ x: Int32) -> Int32 { x }
     //     func apply(_ f: (Int32) -> Int32, _ x: Int32) -> Int32 { f(x) }
     //     func main() -> Int32 { apply(identity, 42) }
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let unaryI32FunctionType = m.functionType(from: (m.i32), to: m.i32)
 

@@ -12,7 +12,7 @@ final class IntegerPredicateTests: XCTestCase {
   }
 
   func testAllPredicatesVerification() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     for p in IntegerPredicate.allCases {
       let f = m.declareFunction("f_\(p)", m.functionType(from: (m.i32, m.i32), to: m.i1))

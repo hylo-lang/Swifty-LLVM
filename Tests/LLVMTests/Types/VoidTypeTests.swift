@@ -4,7 +4,7 @@ import XCTest
 final class VoidTypeTests: XCTestCase {
 
   func testConversion() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
 
     let t: VoidType.UnsafeReference = m.void
     XCTAssertNotNil(VoidType.UnsafeReference(t.erased))
@@ -14,7 +14,7 @@ final class VoidTypeTests: XCTestCase {
   }
 
   func testEquality() throws {
-    let m = try Module("foo")
+    let m = try Module("foo", targetMachine: .host())
     let t = m.void
     let u = m.void
     XCTAssertEqual(t, u)

@@ -5,7 +5,7 @@ import XCTest
 final class IntegerArithmeticTests: XCTestCase {
 
   func testIntegerAdd() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -19,7 +19,7 @@ final class IntegerArithmeticTests: XCTestCase {
   }
 
   func testIntegerSub() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -33,7 +33,7 @@ final class IntegerArithmeticTests: XCTestCase {
   }
 
   func testIntegerMul() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -47,7 +47,7 @@ final class IntegerArithmeticTests: XCTestCase {
   }
 
   func testUnsignedDiv() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -60,7 +60,7 @@ final class IntegerArithmeticTests: XCTestCase {
   }
 
   func testSignedDiv() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -73,7 +73,7 @@ final class IntegerArithmeticTests: XCTestCase {
   }
 
   func testUnsignedRem() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
@@ -84,7 +84,7 @@ final class IntegerArithmeticTests: XCTestCase {
   }
 
   func testSignedRem() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]

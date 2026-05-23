@@ -4,7 +4,7 @@ import XCTest
 final class IRValueTests: XCTestCase {
 
   func testName() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let g = m.declareGlobalVariable("x", m.pointerType())
     XCTAssertEqual(g.unsafe[].name, "x")
     m.setName("y", for: g)
@@ -12,7 +12,7 @@ final class IRValueTests: XCTestCase {
   }
 
   func testDescription() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let g = m.declareGlobalVariable("x", m.pointerType())
     XCTAssertEqual(g.unsafe[].description, "@x = external global ptr")
     m.setName("y", for: g)
@@ -20,13 +20,13 @@ final class IRValueTests: XCTestCase {
   }
 
   func testIsNull() throws {
-    let m = try Module("foo")
+    let m = try Module("foo", targetMachine: .host())
     XCTAssert(m.i64.unsafe[].null.unsafe[].isNull)
     XCTAssertFalse(m.i64.unsafe[].constant(42).unsafe[].isNull)
   }
 
   func testIsConstant() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let i64 = m.integerType(64)
     XCTAssert(i64.unsafe[].null.unsafe[].isConstant)
 
@@ -37,7 +37,7 @@ final class IRValueTests: XCTestCase {
   }
 
   func testIsTerminator() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: ()))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
@@ -50,7 +50,7 @@ final class IRValueTests: XCTestCase {
   }
 
   func testEqualty() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64).unsafe[].null
     let u = m.integerType(32).unsafe[].null
 
@@ -64,7 +64,7 @@ final class IRValueTests: XCTestCase {
   }
 
   func testStringConvertible() throws {
-    var m = try Module("foo")
+    var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64).unsafe[].null
     XCTAssertEqual("\(t)", "\(t)", "Unstable string representation!")
   }

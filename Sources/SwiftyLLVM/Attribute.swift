@@ -65,9 +65,7 @@ public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
 /// A type representing an LLVM IR attribute.
 public protocol IRAttribute: Hashable, LLVMEntity where Handle == AttributeRef {}
 
-extension Attribute: IRAttribute {
-
-}
+extension Attribute: IRAttribute {}
 
 /// A type-erased LLVM IR attribute.
 public struct AnyAttribute: LLVMEntity, IRAttribute {
