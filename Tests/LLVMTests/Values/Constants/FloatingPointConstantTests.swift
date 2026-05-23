@@ -33,7 +33,7 @@ final class FloatingPointConstantTests: XCTestCase {
     let ft = m.float
     let ty = ft.unsafe[]
     XCTAssertNotNil(FloatingPointConstant.UnsafeReference(ty.zero.erased))
-    
+
     let i64 = m.integerType(64)
     let u = i64.unsafe[].zero
     XCTAssertNil(FloatingPointConstant.UnsafeReference(u.erased))

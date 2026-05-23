@@ -121,7 +121,7 @@ extension Module {
     return f
   }
 
-  /// Defines a coroutine that projects the value in degrees of an angle passed in radians.
+  /// Defines a coroutine that projects the value in degrees of an angle in radians.
   private mutating func emitProjectDegrees() throws -> Function.UnsafeReference {
     // declare void @slide(ptr, i1 zeroext)
     let slide = declareFunction("slide", functionType(from: (ptr, i1)))

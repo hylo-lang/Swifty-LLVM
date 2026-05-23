@@ -13,7 +13,7 @@ public struct ArrayConstant: IRValue, Hashable {
 
   /// Creates a constant array of `type` in `module`, filled with the contents of `elements`.
   ///
-  /// - Requires: 
+  /// - Requires:
   ///   - The type of each element in `elements` is `type`.
   ///   - The context of `type` matches the context of `module`.
   public static func create<T: IRType, S: Sequence>(

@@ -13,7 +13,7 @@ public struct VoidType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns a reference to the `void` type in `context`.
+  /// Returns the `void` type in `context`.
   static func create(in context: ContextRef) -> VoidType.UnsafeReference {
     .init(LLVMVoidTypeInContext(context.raw))
   }

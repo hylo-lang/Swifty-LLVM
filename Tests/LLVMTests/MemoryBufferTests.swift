@@ -21,8 +21,8 @@ final class MemoryBufferTests: XCTestCase {
     try s.withCString({ (d) in
       try MemoryBuffer.withInstanceBorrowing(.init(start: d, count: s.utf8.count), { (b) in
         let decoded = try b.withUnsafeBytes({ (contents) in
-          try XCTUnwrap(contents.withMemoryRebound(to: UInt8.self, { 
-            (b) in String(bytes: b, encoding: .utf8) 
+          try XCTUnwrap(contents.withMemoryRebound(to: UInt8.self, {
+            (b) in String(bytes: b, encoding: .utf8)
           }))
         })
         XCTAssertEqual(s, decoded)

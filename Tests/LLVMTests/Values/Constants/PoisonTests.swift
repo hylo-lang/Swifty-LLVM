@@ -5,7 +5,7 @@ final class PoisonTests: XCTestCase {
 
   func testConversion() throws {
     var m = try Module("foo", targetMachine: .host())
-    
+
     let t = m.poisonValue(of: m.float)
     XCTAssertNotNil(Poison.UnsafeReference(t.erased))
 
@@ -25,7 +25,7 @@ final class PoisonTests: XCTestCase {
 
   func testIsConstant() throws {
     var m = try Module("foo", targetMachine: .host())
-    
+
     let t = m.poisonValue(of: m.float)
     XCTAssertTrue(t.unsafe[].isConstant)
   }

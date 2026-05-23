@@ -76,9 +76,9 @@ jobs:
 
           LLVM_DIR="$(llvm-config --prefix)/lib/cmake/llvm"
 
-          [ -f "$LLVM_DIR/LLVMConfig.cmake" ] || 
-          (echo "LLVMConfig.cmake not found in '$LLVM_DIR'. Available files are:"; 
-          ls "$LLVM_DIR"; 
+          [ -f "$LLVM_DIR/LLVMConfig.cmake" ] ||
+          (echo "LLVMConfig.cmake not found in '$LLVM_DIR'. Available files are:";
+          ls "$LLVM_DIR";
           exit 1)
 
           cmake -GNinja -S . -B .cmake-build
@@ -265,9 +265,9 @@ jobs:
 
           LLVM_DIR="${{ steps.get-llvm.outputs.llvmCmakeDirectory }}"
 
-          [ -f "$LLVM_DIR/LLVMConfig.cmake" ] || 
-          (echo "LLVMConfig.cmake not found in '$LLVM_DIR'. Available files are:"; 
-          ls "$LLVM_DIR"; 
+          [ -f "$LLVM_DIR/LLVMConfig.cmake" ] ||
+          (echo "LLVMConfig.cmake not found in '$LLVM_DIR'. Available files are:";
+          ls "$LLVM_DIR";
           exit 1)
 
           cmake -G '${{ matrix.cmake_generator }}'

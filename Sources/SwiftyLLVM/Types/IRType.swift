@@ -17,7 +17,7 @@ extension IRType {
     return String(cString: s)
   }
 
-  /// `true` if the size of the type is known.
+  /// `true` iff the size of the type is known.
   public var isSized: Bool { LLVMTypeIsSized(llvm.raw) != 0 }
 
   /// The `null` instance of this type (e.g., the zero of `i32`).

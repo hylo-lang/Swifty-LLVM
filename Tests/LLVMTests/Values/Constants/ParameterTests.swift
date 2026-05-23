@@ -63,7 +63,7 @@ final class ParameterTests: XCTestCase {
     let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
     let p = f.unsafe[].parameters[0]
     XCTAssertNotNil(Parameter.UnsafeReference(p.erased))
-    
+
     let q = m.i64.unsafe[].zero
     XCTAssertNil(Parameter.UnsafeReference(q.erased))
   }

@@ -295,7 +295,7 @@
 - [ ] LLVMIsAValueAsMetadata
 - [ ] LLVMIsAMDString
 
-#### Usage 
+#### Usage
 
 - [ ] LLVMGetFirstUse
 - [ ] LLVMGetNextUse
@@ -406,16 +406,16 @@
 
 ##### Scalar Constants
 
-- [x] LLVMConstInt 
+- [x] LLVMConstInt
 
   `IntegerType.constant(_:)`
- 
+
 - [x] LLVMConstIntOfArbitraryPrecision
 
   `IntegerType.constant(words:)`
 
 - [ ] LLVMConstIntOfString
-- [x] LLVMConstIntOfStringAndSize 
+- [x] LLVMConstIntOfStringAndSize
 
   `IntegerType.constant(_:radix:)`
 

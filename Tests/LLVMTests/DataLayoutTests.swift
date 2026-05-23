@@ -48,7 +48,7 @@ final class DataLayoutTests: XCTestCase {
     XCTAssertEqual(m.layout.index(at: 5, in: s), 1)
   }
 
-  /// Asserts that for a given `type`
+  /// Asserts that in `type`:
   ///  - The preferred alignment >= ABI alignment.
   ///  - The ABI alignment is a power of 2.
   ///  - The preferred alignment is a power of 2.

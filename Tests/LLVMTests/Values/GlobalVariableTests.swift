@@ -45,7 +45,7 @@ final class GlobalVariableTests: XCTestCase {
     let z = i8.zero
     m.setInitializer(z, for: g)
     let gv1 = g.unsafe[]
-    
+
     let i = try XCTUnwrap(gv1.initializer)
     XCTAssertEqual(IntegerConstant.UnsafeReference(i), i8.zero)
   }

@@ -25,7 +25,7 @@ extension Optional {
 
 // MARK: Helpers for getting flags and other settings
 
-/// Returns the value of the environment variable with given key.
+/// Returns the value of the environment variable `k`.
 ///
 /// On Windows, comparison is case-insensitive.
 func environmentEntry(forKey k: String) -> String? {

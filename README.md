@@ -39,18 +39,18 @@ assert-enabled LLVM builds preinstalled in `/opt/llvm-Debug` and
 
    (on Windows substitute your shell's line continuation character
    for `\` or just remove the line breaks and backslashes).
-    
+
    If you want to run tests, add `-DBUILD_TESTING=1`.
-    
+
    **Note:** on macOS, if you are not using your Xcode's default
    toolchain, [you may need `-D CMAKE_Swift_COMPILER=swiftc`](https://gitlab.kitware.com/cmake/cmake/-/issues/25750)
    to prevent CMake from using Xcode's default `swift`.
-   
+
    If this command fails it could be because you have an LLVM without
    CMake support installed; we suggest you try one of
    [these](https://github.com/hylo-lang/llvm-build) packages instead.
 
-2. **Build**: 
+2. **Build**:
 
    ```
    cmake --build <build-directory>

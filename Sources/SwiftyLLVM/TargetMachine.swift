@@ -12,7 +12,7 @@ public struct TargetMachine: ~Copyable {
   /// The LLVM backend for this machine.
   public let backend: Backend
 
-  /// Creates an instance for the given target specification and codegen options.
+  /// Creates an instance for `target` and code generation options.
   public init(
     target: TargetSpecification,
     optimization: OptimizationLevel = .none,

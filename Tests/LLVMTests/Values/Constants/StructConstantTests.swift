@@ -19,7 +19,7 @@ final class StructConstantTests: XCTestCase {
   func testInitFromValues() throws {
     var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
-    
+
     let a = m.structConstant(aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)))
     XCTAssertEqual(a.unsafe[].count, 2)
     XCTAssertFalse(try XCTUnwrap(StructType.UnsafeReference(a.unsafe[].type)).unsafe[].isPacked)
@@ -30,7 +30,7 @@ final class StructConstantTests: XCTestCase {
   func testInitFromValuesPacked() throws {
     var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
-    
+
     let a = m.structConstant(
       aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)),
       packed: true)
@@ -71,7 +71,7 @@ final class StructConstantTests: XCTestCase {
   func testEquality() throws {
     var m = try Module("foo", targetMachine: .host())
     let i32 = m.integerType(32)
-    
+
     let a = m.structConstant(aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)))
     let b = m.structConstant(aggregating: (i32.unsafe[].constant(4), i32.unsafe[].constant(2)))
     XCTAssertEqual(a, b)

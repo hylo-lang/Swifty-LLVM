@@ -49,7 +49,7 @@ final class IRValueTests: XCTestCase {
     XCTAssert(j.unsafe[].isTerminator)
   }
 
-  func testEqualty() throws {
+  func testEquality() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64).unsafe[].null
     let u = m.integerType(32).unsafe[].null

@@ -48,6 +48,8 @@ extension Function: AttributeHolder {
   }
 
   /// The attributes of the function.
+  ///
+  /// Complexity: O(attributes.count)
   public var attributes: [AnyAttribute.UnsafeReference] {
     let i = UInt32(bitPattern: Int32(LLVMAttributeFunctionIndex))
     let n = LLVMGetAttributeCountAtIndex(llvm.raw, i)

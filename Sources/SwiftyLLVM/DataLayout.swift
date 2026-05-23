@@ -37,7 +37,7 @@ public struct DataLayout: ~Copyable {
   }
 
   /// The alignment of `type`'s instances in bytes as specified by the target ABI.
-  /// 
+  ///
   /// - Guarantees:
   ///   - Less than or equal to the preferred alignment.
   ///   - A power of 2.
@@ -48,7 +48,7 @@ public struct DataLayout: ~Copyable {
   }
 
   /// The alignment of `type`'s instances in bytes when it's most efficient to access values.
-  /// 
+  ///
   /// - Guarantees:
   ///   - Greater than or equal to the ABI alignment.
   ///   - A power of 2.
@@ -58,14 +58,14 @@ public struct DataLayout: ~Copyable {
     return Int(LLVMPreferredAlignmentOfType(llvm, type.raw))
   }
 
-  /// Returns the offset in bytes of the element at given `index`.
+  /// Returns the offset in bytes of the element at `index`.
   ///
   /// - Requires: `index` is a valid element index in `type`.
   public func offset(of index: Int, in type: StructType.UnsafeReference) -> Int {
     Int(LLVMOffsetOfElement(llvm, type.llvm.raw, UInt32(index)))
   }
 
-  /// Returns the index of the element containing the byte at given `offset`.
+  /// Returns the index of the element containing the byte at `offset`.
   ///
   /// - Requires: `offset` is a valid byte offset in `type`.
   public func index(at offset: Int, in type: StructType.UnsafeReference) -> Int {

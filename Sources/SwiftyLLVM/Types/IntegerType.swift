@@ -8,18 +8,14 @@ public struct IntegerType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
-  /// Returns a reference to an integer type with given `bitWidth` in `module`.
-  ///
-  /// - Requires: `bitWidth` is greater than 0.
+  /// Returns an integer type with `bitWidth` in `module`.
   public static func create(
     _ bitWidth: Int, in module: inout Module
   ) -> IntegerType.UnsafeReference {
     create(bitWidth, in: .init(module.context))
   }
 
-  /// Returns a reference to an integer type with given `bitWidth` in `context`.
-  ///
-  /// - Requires: `bitWidth` is greater than 0.
+  /// Returns an integer type with `bitWidth` in `context`.
   static func create(_ bitWidth: Int, in context: ContextRef) -> IntegerType.UnsafeReference {
     .init(LLVMIntTypeInContext(context.raw, UInt32(bitWidth)))
   }
@@ -46,8 +42,7 @@ public struct IntegerType: IRType, Hashable {
     .init(LLVMConstInt(llvm.raw, UInt64(truncatingIfNeeded: v), 0))
   }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value is parsed from `text` with
-  /// given `radix`.
+  /// Returns a constant of type `self`, with value parsed from `text` with `radix`.
   ///
   /// Zero is returned if `text` is not a valid integer value.
   ///

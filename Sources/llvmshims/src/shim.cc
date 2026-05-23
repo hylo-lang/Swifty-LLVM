@@ -35,11 +35,6 @@
 
 using namespace llvm;
 
-template <typename T, typename U>
-auto unsafe_as(U *s) -> T * {
-  return static_cast<T *>(static_cast<void *>(s));
-}
-
 auto as_llvm(SwiftyLLVMPassOptimizationLevel x) -> llvm::OptimizationLevel {
   switch (x) {
   case SwiftyLLVMPassOptimizationLevelO0:
@@ -72,7 +67,7 @@ auto SwiftyLLVMRunDefaultModulePasses(
   ModuleAnalysisManager mam;
 
   // Create a new pass manager builder.
-  PassBuilder p(unsafe_as<llvm::TargetMachine>(t));
+  PassBuilder p(reinterpret_cast<llvm::TargetMachine *>(t)); // Un-erase opaque pointer.
 
   // Register all the basic analyses with the managers.
   p.registerModuleAnalyses(mam);
@@ -120,7 +115,7 @@ auto SwiftyLLVMIsCPUValid(LLVMTargetRef target, const char *triple, const char *
   if (cpu[0] == '\0')
     return 1;
 
-  auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target);
+  auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target); // Un-erase opaque pointer.
   std::unique_ptr<llvm::MCSubtargetInfo> i(llvmTarget->createMCSubtargetInfo(triple, "", ""));
   assert(i && "invalid triple: failed to create MCSubtargetInfo for validated triple");
 
@@ -137,7 +132,7 @@ auto SwiftyLLVMGetFirstInvalidFeature(
   if (features[0] == '\0')
     return nullptr;
 
-  const auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target);
+  const auto *llvmTarget = reinterpret_cast<llvm::Target *>(target); // Un-erase opaque pointer.
   const auto subtarget =
     std::unique_ptr<llvm::MCSubtargetInfo>(llvmTarget->createMCSubtargetInfo(triple, "", ""));
   assert(subtarget && "failed to create MCSubtargetInfo for validated triple");

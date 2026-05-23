@@ -9,6 +9,7 @@ public enum TargetSpecificationError: Error, CustomStringConvertible, Equatable 
   /// A feature is not recognised for the target architecture.
   case invalidFeature(String, triple: String)
 
+  /// The error message.
   public var description: String {
     switch self {
     case .invalidCPU(let cpu, let triple):
@@ -26,7 +27,7 @@ public enum TargetSpecificationError: Error, CustomStringConvertible, Equatable 
 /// by the triple), so these three values form a validation group.
 ///
 /// The initialiser validates the CPU and features against the target's processor
-/// table and throws `TargetSpecError` if either is unrecognised.
+/// table and throws `TargetSpecificationError` if either is unrecognised.
 public struct TargetSpecification: Equatable {
 
   /// The target triple.

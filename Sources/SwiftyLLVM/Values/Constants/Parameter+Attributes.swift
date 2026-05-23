@@ -91,6 +91,8 @@ extension Parameter: AttributeHolder {
   }
 
   /// The attributes of the parameter.
+  ///
+  /// Complexity: O(attributes.count)
   public var attributes: [Attribute.UnsafeReference] {
     let i = UInt32(index + 1)
     let n = LLVMGetAttributeCountAtIndex(parent.llvm.raw, i)

@@ -30,6 +30,8 @@ public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
   public typealias Handle = AttributeRef
 
   /// Creates a target-independent attribute wrapping `llvm`.
+  ///
+  /// - Requires: `handle` is an enum attribute.
   public init(temporarilyWrapping handle: AttributeRef) {
     precondition(LLVMIsEnumAttribute(handle.raw) != 0)
     self = .targetIndependent(llvm: handle)
@@ -62,7 +64,7 @@ public enum Attribute<T: AttributeHolder>: Hashable, LLVMEntity {
 
 }
 
-/// A type representing an LLVM IR attribute.
+/// An LLVM IR attribute.
 public protocol IRAttribute: Hashable, LLVMEntity where Handle == AttributeRef {}
 
 extension Attribute: IRAttribute {}
