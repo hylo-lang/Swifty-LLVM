@@ -166,7 +166,7 @@ final class FunctionTests: XCTestCase {
   func testFunctionValueAsArgument() throws {
     // Note: This test may fail on other targets where the program address space isn't the
     // default one.
-    // In that case, adjust the test for the given platform.
+    // In that case, adjust the test for the new platform.
 
     // Equivalent Swift:
     //

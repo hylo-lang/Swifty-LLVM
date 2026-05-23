@@ -11,10 +11,10 @@ final class PointerTypeTests: XCTestCase {
 
   func testConversion() throws {
     var m = try Module("foo", targetMachine: .host())
-    
+
     let t = m.pointerType()
     XCTAssertNotNil(PointerType.UnsafeReference(t.erased))
-    
+
     let u = m.integerType(64)
     XCTAssertNil(PointerType.UnsafeReference(u.erased))
   }

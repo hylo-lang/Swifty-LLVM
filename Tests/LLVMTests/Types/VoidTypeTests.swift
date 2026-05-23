@@ -8,7 +8,7 @@ final class VoidTypeTests: XCTestCase {
 
     let t: VoidType.UnsafeReference = m.void
     XCTAssertNotNil(VoidType.UnsafeReference(t.erased))
-    
+
     let u = m.integerType(64)
     XCTAssertNil(VoidType.UnsafeReference(u.erased))
   }

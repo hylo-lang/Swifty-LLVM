@@ -18,10 +18,10 @@ final class ArrayTypeTests: XCTestCase {
   func testConversion() throws {
     var m = try Module("foo", targetMachine: .host())
     let i16 = m.integerType(16)
-    
+
     let t = m.arrayType(8, i16)
     XCTAssertNotNil(ArrayType.UnsafeReference(t.erased))
-    
+
     let u = m.integerType(64)
     XCTAssertNil(ArrayType.UnsafeReference(u.erased))
   }

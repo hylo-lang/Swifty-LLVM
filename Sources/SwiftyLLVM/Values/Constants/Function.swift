@@ -19,6 +19,8 @@ public struct Function: Global, Callable, Hashable {
   }
 
   /// The basic blocks of the function.
+  ///
+  /// Complexity: O(basicBlocks.count)
   public var basicBlocks: [BasicBlock.UnsafeReference] {
     let n = LLVMCountBasicBlocks(llvm.raw)
     var handles: [LLVMBasicBlockRef?] = .init(repeating: nil, count: Int(n))
@@ -45,7 +47,7 @@ extension Function {
     /// The function defining the return value.
     public let parent: Function
 
-    /// Creates an instance representing the return value of `parent`.
+    /// Creates a return value corresponding to the `parent` function.
     fileprivate init(_ parent: some Callable) {
       self.parent = Function(temporarilyWrapping: parent.llvm)
     }
@@ -68,9 +70,9 @@ extension Function {
     /// The function containing the elements of the collection.
     private let parent: any Callable
 
-    /// Creates a collection containing the parameters of `f`.
-    fileprivate init(of f: any Callable) {
-      self.parent = f
+    /// Creates a collection containing the parameters of the `parent` function.
+    fileprivate init(of parent: any Callable) {
+      self.parent = parent
     }
 
     /// The number of parameters in the collection.

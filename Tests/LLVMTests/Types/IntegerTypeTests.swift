@@ -19,7 +19,7 @@ final class IntegerTypeTests: XCTestCase {
 
   func testConversion() throws {
     var m = try Module("foo", targetMachine: .host())
-    
+
     let i64 = m.integerType(64)
     XCTAssertNotNil(IntegerType.UnsafeReference(i64.erased))
 

@@ -28,23 +28,23 @@ public struct Module: ~Copyable {
   public let functionPointer: PointerType.UnsafeReference
 
   /// The 16-bit floating-point type `half`.
-  /// 
+  ///
   /// Represented as IEEE 754 binary16.
   public let half: FloatingPointType.UnsafeReference
 
   /// The 16-bit "brain" floating-point type `bfloat`.
-  /// 
+  ///
   /// Represented as truncated IEEE 754 binary32, with 1 sign bit, 8 exponent bits and
   /// 7 fraction bits.
   public let bfloat: FloatingPointType.UnsafeReference
 
   /// The 32-bit floating-point type `float`.
-  /// 
+  ///
   /// Represented as IEEE 754 binary32.
   public let float: FloatingPointType.UnsafeReference
 
   /// The 64-bit floating-point type `double`.
-  /// 
+  ///
   /// Represented as IEEE 754 binary64.
   public let double: FloatingPointType.UnsafeReference
 
@@ -54,12 +54,12 @@ public struct Module: ~Copyable {
   public let x86_fp80: FloatingPointType.UnsafeReference
 
   /// The 128-bit floating-point type `fp128`.
-  /// 
+  ///
   /// Represented as IEEE 754 binary128.
   public let fp128: FloatingPointType.UnsafeReference
 
   /// The 128-bit floating-point type `ppc_fp128`.
-  /// 
+  ///
   /// Represented as the PowerPC double-double format, with two 64-bit IEEE 754 binary64 parts.
   public let ppc_fp128: FloatingPointType.UnsafeReference
 
@@ -216,22 +216,22 @@ public struct Module: ~Copyable {
     return .init(output!, owned: true)
   }
 
-  /// Returns the type with given `name`, or `nil` if no such type exists.
+  /// Returns the type named `name`, or `nil` if no such type exists.
   public func type(named name: String) -> AnyType.UnsafeReference? {
     LLVMGetTypeByName2(context, name).map { AnyType.UnsafeReference($0) }
   }
 
-  /// Returns the reference to a function with given `name`, or `nil` if no such function exists.
+  /// Returns the function named `name`, or `nil` if no such function exists.
   public func function(named name: String) -> Function.UnsafeReference? {
     LLVMGetNamedFunction(llvmModule.raw, name).map { Function.UnsafeReference($0) }
   }
 
-  /// Returns the global with given `name`, or `nil` if no such global exists.
+  /// Returns the global named `name`, or `nil` if no such global exists.
   public func global(named name: String) -> GlobalVariable.UnsafeReference? {
     LLVMGetNamedGlobal(llvmModule.raw, name).map { GlobalVariable.UnsafeReference($0) }
   }
 
-  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
+  /// Returns the intrinsic named `name` specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
   public mutating func intrinsic(
     named name: IntrinsicFunction.Name, for parameters: [AnyType.UnsafeReference] = []
@@ -246,7 +246,7 @@ public struct Module: ~Copyable {
     }
   }
 
-  /// Returns the intrinsic with given `name`, specialized for `parameters`, or `nil` if no such
+  /// Returns the intrinsic named `name` specialized for `parameters`, or `nil` if no such
   /// intrinsic exists.
   ///
   /// You can call this with a tuple of typed references.
@@ -260,7 +260,7 @@ public struct Module: ~Copyable {
     return intrinsic(named: name, for: erased)
   }
 
-  /// Creates and returns a global variable with given `name` and `type`.
+  /// Creates and returns a global variable with `name` and `type`.
   ///
   /// A unique name is generated if `name` is empty or if `self` already contains a global with
   /// the same name.
@@ -278,7 +278,7 @@ public struct Module: ~Copyable {
     return GlobalVariable.UnsafeReference(handle)
   }
 
-  /// Returns a global variable with given `name` and `type`, declaring it if it doesn't exist.
+  /// Returns a global variable with `name` and `type`, declaring it if it doesn't exist.
   ///
   /// - Requires: `type` and address space `s` are consistent with existing variable, if present.
   ///
@@ -297,8 +297,8 @@ public struct Module: ~Copyable {
     }
   }
 
-  /// Returns a function with given `name` and `type`, declaring it if it doesn't exist.
-  /// 
+  /// Returns a function with `name` and `type`, declaring it if it doesn't exist.
+  ///
   /// - Requires: If function with `name` already exists, it is of type `type`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#functions.
@@ -314,24 +314,21 @@ public struct Module: ~Copyable {
     return Function.UnsafeReference(LLVMAddFunction(llvmModule.raw, name, type.raw)!)
   }
 
-  /// Creates a target-independent function attribute with given `name` and optional `value` in
-  /// `module`.
+  /// Creates a target-independent function attribute with `name` and optional `value` in `module`.
   public mutating func functionAttribute(
     _ name: Function.AttributeName, _ value: UInt64 = 0
   ) -> Function.Attribute.UnsafeReference {
     .init(LLVMCreateEnumAttribute(context, name.id, value))
   }
 
-  /// Creates a target-independent parameter attribute with given `name` and optional `value` in
-  /// `module`.
+  /// Creates a target-independent parameter attribute with `name` and optional `value` in `module`.
   public mutating func parameterAttribute(
     _ name: Parameter.AttributeName, _ value: UInt64 = 0
   ) -> Parameter.Attribute.UnsafeReference {
     .init(LLVMCreateEnumAttribute(context, name.id, value))
   }
 
-  /// Creates a target-independent return attribute with given `name` and optional `value` in
-  /// `module`.
+  /// Creates a target-independent return attribute with `name` and optional `value` in `module`.
   public mutating func returnAttribute(
     _ name: Function.Return.AttributeName, _ value: UInt64 = 0
   ) -> Function.Return.Attribute.UnsafeReference {
@@ -875,8 +872,8 @@ public struct Module: ~Copyable {
   }
 
   /// Marks atomic instruction `i` as single-thread scoped.
-  /// 
-  /// Effectively, `i` will only need to synchronize with 
+  ///
+  /// Effectively, `i` will only need to synchronize with
   /// signal handlers/interrupts executing on the same thread.
   public mutating func setAtomicSingleThread(for i: Instruction.UnsafeReference) {
     LLVMSetAtomicSingleThread(i.raw, 1)
@@ -922,7 +919,7 @@ public struct Module: ~Copyable {
       )!)
   }
 
-  /// Inserts a fence instruction with the given ordering and thread scope.
+  /// Inserts a fence instruction with the `ordering` and thread scope.
   ///
   /// - See https://llvm.org/docs/LangRef.html#fence-instruction.
   @discardableResult
@@ -1028,7 +1025,7 @@ public struct Module: ~Copyable {
 
   /// Inserts an `extractvalue` instruction that extracts the value of a member field from an
   /// aggregate value.
-  /// 
+  ///
   /// - See https://llvm.org/docs/LangRef.html#extractvalue-instruction.
   public mutating func insertExtractValue<V: IRValue>(
     from whole: V.UnsafeReference,
@@ -1040,7 +1037,7 @@ public struct Module: ~Copyable {
 
   /// Inserts an `insertvalue` instruction that inserts a value into a member field in an
   /// aggregate value.
-  /// 
+  ///
   /// - See https://llvm.org/docs/LangRef.html#insertvalue-instruction.
   public mutating func insertInsertValue<V1: IRValue, V2: IRValue>(
     _ part: V1.UnsafeReference,
@@ -1083,7 +1080,7 @@ public struct Module: ~Copyable {
     .init(LLVMBuildZExt(p.llvm, source.raw, target.raw, "")!)
   }
 
-  /// Inserts an integer-to-pointer conversion with given `target` type.
+  /// Inserts an integer-to-pointer conversion with `target` pointer type.
   ///
   /// - See https://llvm.org/docs/LangRef.html#inttoptr-to-instruction.
   public mutating func insertIntToPtr<V: IRValue, T: IRType>(
@@ -1103,7 +1100,7 @@ public struct Module: ~Copyable {
     insertIntToPtr(source, to: ptr, at: p)
   }
 
-  /// Inserts a pointer-to-integer conversion with given `target` integer type.
+  /// Inserts a pointer-to-integer conversion to `target` integer type.
   ///
   /// - See https://llvm.org/docs/LangRef.html#ptrtoint-to-instruction.
   public mutating func insertPtrToInt<V: IRValue, T: IRType>(
@@ -1135,7 +1132,7 @@ public struct Module: ~Copyable {
 
   // MARK: Others
 
-  /// Inserts a call to `callee` with given arguments.
+  /// Inserts a call to `callee`, passing `arguments`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#call-instruction.
   public mutating func insertCall<C: Callable>(
@@ -1147,7 +1144,7 @@ public struct Module: ~Copyable {
     return insertCall(callee.erased, typed: calleeTypeID, on: arguments, at: p)
   }
 
-  /// Inserts a call to `callee` with given arguments.
+  /// Inserts a call to `callee`, passing `arguments`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#call-instruction.
   public mutating func insertCall<C: Callable, each A: IRValue>(
@@ -1162,9 +1159,9 @@ public struct Module: ~Copyable {
     return insertCall(callee, on: erased, at: p)
   }
 
-  /// Inserts a call to `callee` with explicit `calleeType`.
+  /// Inserts a call to `callee` with explicit `calleeType`, passing `arguments`.
   ///
-  /// - Requires: 
+  /// - Requires:
   ///   - argument count must match the function type, unless it's variadic.
   ///   - `callee` is of a callable type.
   ///
@@ -1243,7 +1240,7 @@ public struct Module: ~Copyable {
     IntegerType.create(bitWidth, in: &self)
   }
 
-  /// Creates an opaque pointer type in the given address space.
+  /// Creates an opaque pointer type in address space `s`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#pointer-type.
   public mutating func pointerType(
@@ -1252,7 +1249,7 @@ public struct Module: ~Copyable {
     PointerType.create(inAddressSpace: s, in: &self)
   }
 
-  /// Creates a function type with given parameter and return types.
+  /// Creates a function type with parameter and return types.
   ///
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the
   ///   function type `(i64, i8) -> i8`.
@@ -1263,7 +1260,7 @@ public struct Module: ~Copyable {
     FunctionType.create(from: from, to: to.erased, in: &self)
   }
 
-  /// Creates a function type with given parameter and return types.
+  /// Creates a function type with parameter and return types.
   ///
   /// - Example: `functionType(from: [i64.erased, i8.erased], to: i8.erased)` creates the
   ///   function type `(i64, i8) -> i8`.
@@ -1274,7 +1271,7 @@ public struct Module: ~Copyable {
     FunctionType.create(from: from, to: nil, in: &self)
   }
 
-  /// Creates a function type with given parameter and return types.
+  /// Creates a function type with parameter and return types.
   ///
   /// - Example: `functionType(from: (i64, i8), to: i32)` creates the function type
   ///   `(i64, i8) -> i32`.
@@ -1289,7 +1286,7 @@ public struct Module: ~Copyable {
     return functionType(from: erased, to: returnType.erased)
   }
 
-  /// Creates a function type with given parameter types and void as return type.
+  /// Creates a void function type with parameters.
   ///
   /// - Example: `functionType(from: (i64, i8))` creates the function type `(i64, i8) -> void`.
   /// - See https://llvm.org/docs/LangRef.html#function-type.
@@ -1312,7 +1309,7 @@ public struct Module: ~Copyable {
     ArrayType.create(count, element, in: &self)
   }
 
-  /// Obtains or creates a struct type with given field types.
+  /// Creates or retrieves a struct type with `fields`, optionally `packed`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#structure-type.
   public mutating func structType(
@@ -1321,7 +1318,7 @@ public struct Module: ~Copyable {
     StructType.create(fields, packed: packed, in: &self)
   }
 
-  /// Creates or retrieves a struct type with given field types.
+  /// Creates or retrieves a struct type with `fields`, optionally `packed`.
   ///
   /// Callable with a tuple of typed references: `structType((i64, i8, float))`.
   ///
@@ -1336,11 +1333,11 @@ public struct Module: ~Copyable {
     return structType(erased, packed: packed)
   }
 
-  /// Creates or retrieves a named struct type with given field types.
-  /// 
-  /// Precondition: If a type already exists with the given `name` in the context, 
-  /// it must be an equivalent struct type as defined by the arguments.
-  /// 
+  /// Creates or retrieves a named struct type with `fields`, optionally `packed`.
+  ///
+  /// - Requires: If a type with `name` already exists in the context,
+  ///   it must be an equivalent struct type as defined by the arguments.
+  ///
   /// Repeated calls with same arguments return the same struct type.
   ///
   /// - See https://llvm.org/docs/LangRef.html#structure-type.
@@ -1370,11 +1367,11 @@ public struct Module: ~Copyable {
     }
   }
 
-  /// Creates or retrieves a named struct type with given field types.
-  /// 
-  /// Precondition: If a type already exists with the given `name` in the context, 
-  /// it must be an equivalent struct type as defined by the arguments.
-  /// 
+  /// Creates or retrieves a named struct type with `fields`, optionally `packed`.
+  ///
+  /// - Requires: If a type already exists with the `name` in the context,
+  ///   it must be an equivalent struct type as defined by the arguments.
+  ///
   /// Callable with a tuple of typed references: `structType(named: "MyStruct", (i64, i8, float))`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#structure-type.
@@ -1406,9 +1403,9 @@ public struct Module: ~Copyable {
     }
   }
 
-  /// Creates a named struct type with given field types.
-  /// 
-  /// Repeated calls with same arguments return new struct types. 
+  /// Creates a named struct type with `fields`, optionally `packed`.
+  ///
+  /// Repeated calls with same arguments return new struct types.
   /// Use `structType` to resolve to an existing struct if present.
   internal mutating func createStructType(
     named name: String, _ fields: [AnyType.UnsafeReference], packed: Bool = false
@@ -1416,7 +1413,7 @@ public struct Module: ~Copyable {
     StructType.create(named: name, fields, packed: packed, in: &self)
   }
 
-  /// Creates an instruction representing an undefined value of type `type`.
+  /// Creates an undefined value of type `type`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#undefined-values.
   public mutating func undefinedValue<T: IRType>(
@@ -1425,7 +1422,7 @@ public struct Module: ~Copyable {
     Undefined.create(of: type, in: &self)
   }
 
-  /// Creates an instruction representing a poison value of type `type`.
+  /// Creates a poison value of type `type`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#poison-values.
   public mutating func poisonValue<T: IRType>(

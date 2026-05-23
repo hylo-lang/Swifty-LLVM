@@ -4,7 +4,7 @@ public struct AddressSpace: Hashable, Sendable {
   /// The LLVM representation of this instance.
   public let llvm: UInt32
 
-  /// Creates an instance with given `rawValue`.
+  /// Creates an instance with `rawValue`.
   internal init(_ rawValue: UInt32) {
     self.llvm = rawValue
   }

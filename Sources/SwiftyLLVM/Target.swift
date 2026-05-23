@@ -3,7 +3,8 @@ internal import llvmshims
 
 /// A target triple string paired with its resolved LLVM backend.
 ///
-/// Construction validates that LLVM has a backend for the given triple string.
+/// - Invariant: `backend` corresponds to `triple`.
+/// 
 /// Instances are equal if they have the same normalized triple string.
 public struct Target: Hashable {
 
@@ -51,10 +52,8 @@ public struct Target: Hashable {
     SwiftyLLVMIsCPUValid(backend.llvm, triple, cpu)
   }
 
-  /// Returns the first unrecognised feature in `features` for this triple,
-  /// or `nil` if all features are valid.
+  /// Returns the first unrecognised feature in `features` for this triple, if any.
   ///
-  /// An empty string always returns `nil`.
   /// The format is a comma-separated list of "+feature" or "-feature" entries.
   public func firstInvalidFeature(in features: String) -> String? {
     guard let p = SwiftyLLVMGetFirstInvalidFeature(backend.llvm, triple, features) else {
@@ -69,7 +68,7 @@ public struct Target: Hashable {
     hasher.combine(triple)
   }
 
-  /// Returns `true` if the normalized triple strings are equal.
+  /// Returns `true` iff the normalized triple strings are equal.
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.triple == rhs.triple
   }

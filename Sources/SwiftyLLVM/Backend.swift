@@ -1,7 +1,7 @@
 internal import llvmc
 internal import llvmshims
 
-/// LLVM's backend descriptor, representing a target architecture family.
+/// LLVM's backend descriptor for a target architecture family.
 ///
 /// Instances are wrapping eternal immutable LLVM target objects, so they are safe to use
 /// across multiple threads, and can be compared for equality by their handle.
@@ -22,7 +22,7 @@ public struct Backend {
     #else
     _ = Backend.initializeHost
     #endif
-    
+
     var handle: LLVMTargetRef? = nil
     var error: UnsafeMutablePointer<CChar>? = nil
     LLVMGetTargetFromTriple(triple, &handle, &error)
@@ -41,17 +41,17 @@ public struct Backend {
     return .init(cString: s)
   }
 
-  /// `true` if the target has a JIT.
+  /// `true` iff the target has a JIT.
   public var hasJIT: Bool {
     LLVMTargetHasJIT(llvm) != 0
   }
 
-  /// `true` if the target has an assembly back-end.
+  /// `true` iff the target has an assembly back-end.
   public var hasAssemblyBackEnd: Bool {
     LLVMTargetHasAsmBackend(llvm) != 0
   }
 
-  /// Returns the target representing the machine host.
+  /// Returns the backend for the host.
   public static func host() throws -> Backend {
     // Ensures LLVM targets are initialized.
     _ = initializeHost
@@ -69,11 +69,11 @@ public struct Backend {
 
   #if SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
   /// The initialization of all targets for potential cross-compilation.
-  /// 
+  ///
   /// Set `SWIFTY_LLVM_CROSS_COMPILATION_ENABLED` to `true` using SPM
   /// `swift build -Xswiftc -DSWIFTY_LLVM_CROSS_COMPILATION_ENABLED`
   private static let initializeCrossCompilation: Void = {
-    // Note: this could be more granular, but for now we have two types 
+    // Note: this could be more granular, but for now we have two types
     // of LLVM distributables: one with only the native target, and one with all targets.
     LLVMInitializeAllTargetInfos()
     LLVMInitializeAllTargets()

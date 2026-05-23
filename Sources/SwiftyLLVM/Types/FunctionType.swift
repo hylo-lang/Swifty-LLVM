@@ -13,9 +13,9 @@ public struct FunctionType: IRType, Hashable {
     self.llvm = llvm
   }
 
-  /// Returns a reference to a function type with given `parameters` and `returnType` in `module`.
+  /// Returns a function type with `parameters` and `returnType` in `module`.
   ///
-  /// The return type is `void` if `returnType` is passed `nil`.
+  /// The return type is `void` if `returnType` is `nil`.
   public static func create(
     from parameters: [AnyType.UnsafeReference],
     to returnType: AnyType.UnsafeReference? = nil,
@@ -34,6 +34,8 @@ public struct FunctionType: IRType, Hashable {
   public var returnType: AnyType.UnsafeReference { .init(LLVMGetReturnType(llvm.raw)) }
 
   /// The parameters of the function.
+  ///
+  /// Complexity: O(parameters.count)
   public var parameters: [AnyType.UnsafeReference] {
     let n = LLVMCountParamTypes(llvm.raw)
     var handles: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
@@ -41,7 +43,7 @@ public struct FunctionType: IRType, Hashable {
     return handles.map { AnyType.UnsafeReference($0!) }
   }
 
-  /// Whether the function accepts a variable number of arguments.
+  /// `true` iff the function accepts a variable number of arguments.
   ///
   /// E.g. a function like `declare i1 @llvm.coro.suspend.retcon(...)`.
   public var isVarArg: Bool {
