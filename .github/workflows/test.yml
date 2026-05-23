@@ -25,6 +25,15 @@ env:
   HYLO_LLVM_VERSION: '20.1.6'
 
 jobs:
+  line-length:
+    name: "Line length"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check max line length of 100 characters
+        run: "! grep -rnE --include=*.swift --exclude-dir=cmake.* --exclude-dir=.build '.{101,}' ."
+
   dev-container:
     name: "Ubuntu dev container/${{matrix.build-system}}/${{ matrix.cmake_build_type }}"
     strategy:
