@@ -268,8 +268,8 @@ extension Module {
     let _ = insertAtomicRMW(
       x1, operation: .xchg, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
     let _ = insertAtomicRMW(
-      x1, operation: .xchg, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
-    )
+      x1, operation: .xchg, value: pi, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
     let _ = insertAtomicRMW(
       x1, operation: .xchg, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
       at: endOf(b0))
@@ -340,8 +340,8 @@ extension Module {
     let _ = insertAtomicRMW(
       x1, operation: .fSub, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
     let _ = insertAtomicRMW(
-      x1, operation: .fSub, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
-    )
+      x1, operation: .fSub, value: pi, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
     let _ = insertAtomicRMW(
       x1, operation: .fSub, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
       at: endOf(b0))
@@ -394,8 +394,8 @@ extension Module {
     let _ = insertAtomicRMW(
       x1, operation: .fMax, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
     let _ = insertAtomicRMW(
-      x1, operation: .fMax, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
-    )
+      x1, operation: .fMax, value: pi, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
     let _ = insertAtomicRMW(
       x1, operation: .fMax, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
       at: endOf(b0))
@@ -448,8 +448,8 @@ extension Module {
     let _ = insertAtomicRMW(
       x1, operation: .fMin, value: pi, ordering: .release, singleThread: false, at: endOf(b0))
     let _ = insertAtomicRMW(
-      x1, operation: .fMin, value: pi, ordering: .acquireRelease, singleThread: false, at: endOf(b0)
-    )
+      x1, operation: .fMin, value: pi, ordering: .acquireRelease, singleThread: false,
+      at: endOf(b0))
     let _ = insertAtomicRMW(
       x1, operation: .fMin, value: pi, ordering: .sequentiallyConsistent, singleThread: false,
       at: endOf(b0))
