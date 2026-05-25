@@ -3,7 +3,7 @@ internal import llvmc
 /// LLVM's `alloca` instruction.
 ///
 /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
-public struct Alloca: IRValue {
+public struct Alloca: IRInstruction {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef

@@ -3,7 +3,7 @@ internal import llvmc
 /// LLVM's `store` instruction.
 ///
 /// - See https://llvm.org/docs/LangRef.html#store-instruction.
-public struct Store: IRValue {
+public struct Store: IRInstruction {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
