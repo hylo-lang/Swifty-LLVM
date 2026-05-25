@@ -391,6 +391,8 @@
 - [x] LLVMGetAlignment
 
   `Alloca.alignment`
+  `Load.alignment`
+  `Store.alignment`
 
 - [x] LLVMSetAlignment
 
