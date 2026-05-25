@@ -489,6 +489,13 @@ public struct Module: ~Copyable {
     LLVMSetAlignment(v.raw, UInt32(a))
   }
 
+  /// Sets the preferred alignment of `v` to `a`.
+  ///
+  /// - Requires: `a` is a power of two.
+  public mutating func setAlignment(_ a: Int, for v: Store.UnsafeReference) {
+    LLVMSetAlignment(v.raw, UInt32(a))
+  }
+
   /// The LLVM context of this module wrapped as a SwiftyLLVM reference.
   private var contextRef: ContextRef { .init(context) }
 
@@ -836,17 +843,33 @@ public struct Module: ~Copyable {
   /// - See https://llvm.org/docs/LangRef.html#store-instruction.
   @discardableResult
   public mutating func insertStore<V1: IRValue, V2: IRValue>(
-    _ value: V1.UnsafeReference, to location: V2.UnsafeReference, at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
-    let r = LLVMBuildStore(p.llvm, value.raw, location.raw)!
-    LLVMSetAlignment(r, UInt32(layout.preferredAlignment(of: value.unsafe[].type)))
-    return .init(r)
+    _ value: V1.UnsafeReference, to location: V2.UnsafeReference,
+    at p: borrowing InsertionPoint
+  ) -> Store.UnsafeReference {
+    let a = layout.preferredAlignment(of: value.unsafe[].type)
+    return insertStore(value, to: location, alignedAt: a, at: p)
+  }
+
+  /// Inserts a store instruction with the given alignment.
+  ///
+  /// Overestimating the alignment results in undefined behavior. Underestimating the alignment may
+  /// produce less efficient code. An alignment of 1 is always safe.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#store-instruction.
+  @discardableResult
+  public mutating func insertStore<V1: IRValue, V2: IRValue>(
+    _ value: V1.UnsafeReference, to location: V2.UnsafeReference, alignedAt alignment: Int,
+    at p: borrowing InsertionPoint
+  ) -> Store.UnsafeReference {
+    Store.insert(value, to: location, alignedAt: alignment, at: p, in: &self)
   }
 
   // MARK: Atomics
 
   /// Sets the memory ordering of atomic instruction `i`.
-  public mutating func setOrdering(_ ordering: AtomicOrdering, for i: Instruction.UnsafeReference) {
+  public mutating func setOrdering(
+    _ ordering: AtomicOrdering, for i: Instruction.UnsafeReference
+  ) {
     LLVMSetOrdering(i.raw, ordering.llvm)
   }
 

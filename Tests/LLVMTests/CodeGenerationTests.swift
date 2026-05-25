@@ -240,11 +240,11 @@ extension Module {
     // store atomic double 0x400921FB54442D18, ptr %1 release, align 8
     // store atomic double 0x400921FB54442D18, ptr %1 seq_cst, align 8
     let s1 = insertStore(pi, to: x1, at: endOf(b0))
-    setOrdering(.monotonic, for: s1)
+    setOrdering(.monotonic, for: .init(uncheckedFrom: s1.erased))
     let s2 = insertStore(pi, to: x1, at: endOf(b0))
-    setOrdering(.release, for: s2)
+    setOrdering(.release, for: .init(uncheckedFrom: s2.erased))
     let s3 = insertStore(pi, to: x1, at: endOf(b0))
-    setOrdering(.sequentiallyConsistent, for: s3)
+    setOrdering(.sequentiallyConsistent, for: .init(uncheckedFrom: s3.erased))
 
     // %2 = load atomic double, ptr %1 monotonic, align 8
     // %3 = load atomic double, ptr %1 acquire, align 8
