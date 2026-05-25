@@ -28,7 +28,7 @@ public struct Load: IRValue {
 
 extension UnsafeReference<Load> {
 
-  /// Creates an instance with `s`, failing iff `s` isn't a `store`.
+  /// Creates an instance with `s`, failing iff `s` isn't a `load`.
   public init?(_ s: AnyValue.UnsafeReference) {
     if let h = LLVMIsALoadInst(s.llvm.raw) {
       self.init(h)
