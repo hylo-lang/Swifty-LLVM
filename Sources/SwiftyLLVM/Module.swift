@@ -428,7 +428,7 @@ public struct Module: ~Copyable {
   }
 
   /// Returns an insertion pointing before `i`.
-  public mutating func before(_ i: Instruction.UnsafeReference) -> InsertionPoint {
+  public mutating func before<I: IRInstruction>(_ i: UnsafeReference<I>) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
     LLVMPositionBuilderBefore(h, i.raw)
     return InsertionPoint(sinking: h)
@@ -437,7 +437,7 @@ public struct Module: ~Copyable {
   /// Returns an insertion point at the start of `b`.
   public mutating func startOf(_ b: BasicBlock.UnsafeReference) -> InsertionPoint {
     if let h = LLVMGetFirstInstruction(b.raw) {
-      before(Instruction.UnsafeReference(h))
+      before(AnyInstruction.UnsafeReference(h))
     } else {
       endOf(b)
     }
@@ -520,7 +520,7 @@ public struct Module: ~Copyable {
     overflow: OverflowBehavior = .ignore,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     switch overflow {
     case .ignore:
       .init(LLVMBuildAdd(p.llvm, lhs.raw, rhs.raw, "")!)
@@ -537,7 +537,7 @@ public struct Module: ~Copyable {
   public mutating func insertFAdd<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFAdd(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -548,7 +548,7 @@ public struct Module: ~Copyable {
     overflow: OverflowBehavior = .ignore,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     switch overflow {
     case .ignore:
       .init(LLVMBuildSub(p.llvm, lhs.raw, rhs.raw, "")!)
@@ -565,7 +565,7 @@ public struct Module: ~Copyable {
   public mutating func insertFSub<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFSub(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -576,7 +576,7 @@ public struct Module: ~Copyable {
     overflow: OverflowBehavior = .ignore,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     switch overflow {
     case .ignore:
       .init(LLVMBuildMul(p.llvm, lhs.raw, rhs.raw, "")!)
@@ -593,7 +593,7 @@ public struct Module: ~Copyable {
   public mutating func insertFMul<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFMul(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -606,7 +606,7 @@ public struct Module: ~Copyable {
     exact: Bool = false,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     if exact {
       .init(LLVMBuildExactUDiv(p.llvm, lhs.raw, rhs.raw, "")!)
     } else {
@@ -623,7 +623,7 @@ public struct Module: ~Copyable {
     exact: Bool = false,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     if exact {
       .init(LLVMBuildExactSDiv(p.llvm, lhs.raw, rhs.raw, "")!)
     } else {
@@ -637,7 +637,7 @@ public struct Module: ~Copyable {
   public mutating func insertFDiv<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFDiv(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -647,7 +647,7 @@ public struct Module: ~Copyable {
   public mutating func insertUnsignedRem<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildURem(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -657,7 +657,7 @@ public struct Module: ~Copyable {
   public mutating func insertSignedRem<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildSRem(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -667,7 +667,7 @@ public struct Module: ~Copyable {
   public mutating func insertFRem<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFRem(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -677,7 +677,7 @@ public struct Module: ~Copyable {
   public mutating func insertShl<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildShl(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -687,7 +687,7 @@ public struct Module: ~Copyable {
   public mutating func insertLShr<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildLShr(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -697,7 +697,7 @@ public struct Module: ~Copyable {
   public mutating func insertAShr<U: IRValue, V: IRValue>(
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildAShr(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -707,7 +707,7 @@ public struct Module: ~Copyable {
   public mutating func insertBitwiseAnd(
     _ lhs: UnsafeReference<some IRValue>, _ rhs: UnsafeReference<some IRValue>,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildAnd(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -717,7 +717,7 @@ public struct Module: ~Copyable {
   public mutating func insertBitwiseOr(
     _ lhs: UnsafeReference<some IRValue>, _ rhs: UnsafeReference<some IRValue>,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildOr(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -727,7 +727,7 @@ public struct Module: ~Copyable {
   public mutating func insertBitwiseXor(
     _ lhs: UnsafeReference<some IRValue>, _ rhs: UnsafeReference<some IRValue>,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildXor(p.llvm, lhs.raw, rhs.raw, "")!)
   }
 
@@ -768,7 +768,7 @@ public struct Module: ~Copyable {
     typed baseType: T.UnsafeReference,
     indices: [AnyValue.UnsafeReference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var i = indices.map({ Optional.some($0.raw) })
     return .init(LLVMBuildGEP2(p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!)
   }
@@ -782,7 +782,7 @@ public struct Module: ~Copyable {
     typed baseType: T.UnsafeReference,
     indices: (repeat UnsafeReference<each I>),
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for i in repeat each indices {
       erased.append(i.erased)
@@ -800,7 +800,7 @@ public struct Module: ~Copyable {
     typed baseType: T.UnsafeReference,
     indices: [AnyValue.UnsafeReference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var i = indices.map({ Optional.some($0.raw) })
     return .init(LLVMBuildInBoundsGEP2(p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!)
   }
@@ -815,7 +815,7 @@ public struct Module: ~Copyable {
     typed baseType: T.UnsafeReference,
     indices: (repeat UnsafeReference<each I>),
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for i in repeat each indices {
       erased.append(i.erased)
@@ -832,7 +832,7 @@ public struct Module: ~Copyable {
     typed baseType: StructType.UnsafeReference,
     index: Int,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildStructGEP2(p.llvm, baseType.raw, base.raw, UInt32(index), "")!)
   }
 
@@ -874,29 +874,29 @@ public struct Module: ~Copyable {
   // MARK: Atomics
 
   /// Sets the memory ordering of atomic instruction `i`.
-  public mutating func setOrdering(
-    _ ordering: AtomicOrdering, for i: Instruction.UnsafeReference
+  public mutating func setOrdering<I: IRInstruction>(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
   ) {
     LLVMSetOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the success ordering on compare-exchange instruction `i`.
-  public mutating func setCmpXchgSuccessOrdering(
-    _ ordering: AtomicOrdering, for i: Instruction.UnsafeReference
+  public mutating func setCmpXchgSuccessOrdering<I: IRInstruction>(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
   ) {
     LLVMSetCmpXchgSuccessOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the failure ordering on compare-exchange instruction `i`.
-  public mutating func setCmpXchgFailureOrdering(
-    _ ordering: AtomicOrdering, for i: Instruction.UnsafeReference
+  public mutating func setCmpXchgFailureOrdering<I: IRInstruction>(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
   ) {
     LLVMSetCmpXchgFailureOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the atomic read-modify-write operation kind of instruction `i`.
-  public mutating func setAtomicRMWBinOp(
-    _ binOp: AtomicRMWBinOp, for i: Instruction.UnsafeReference
+  public mutating func setAtomicRMWBinOp<I: IRInstruction>(
+    _ binOp: AtomicRMWBinOp, for i: UnsafeReference<I>
   ) {
     LLVMSetAtomicRMWBinOp(i.raw, binOp.llvm)
   }
@@ -905,7 +905,7 @@ public struct Module: ~Copyable {
   ///
   /// Effectively, `i` will only need to synchronize with
   /// signal handlers/interrupts executing on the same thread.
-  public mutating func setAtomicSingleThread(for i: Instruction.UnsafeReference) {
+  public mutating func setAtomicSingleThread<I: IRInstruction>(for i: UnsafeReference<I>) {
     LLVMSetAtomicSingleThread(i.raw, 1)
   }
 
@@ -921,10 +921,10 @@ public struct Module: ~Copyable {
     weak: Bool,
     singleThread: Bool,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     let handle = LLVMBuildAtomicCmpXchg(p.llvm, atomic.raw, old.raw, new.raw, successOrdering.llvm,
       failureOrdering.llvm, singleThread ? 1 : 0)!
-    let i = Instruction.UnsafeReference(handle)
+    let i = AnyInstruction.UnsafeReference(handle)
     if weak {
       LLVMSetWeak(i.raw, 1)
     }
@@ -941,7 +941,7 @@ public struct Module: ~Copyable {
     ordering: AtomicOrdering,
     singleThread: Bool,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(
       LLVMBuildAtomicRMW(
         p.llvm, operation.llvm, atomic.raw, value.raw, ordering.llvm,
@@ -955,7 +955,7 @@ public struct Module: ~Copyable {
   @discardableResult
   public mutating func insertFence(
     _ ordering: AtomicOrdering, singleThread: Bool, at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFence(p.llvm, ordering.llvm, singleThread ? 1 : 0, "")!)
   }
 
@@ -967,7 +967,7 @@ public struct Module: ~Copyable {
   @discardableResult
   public mutating func insertBr(
     to destination: BasicBlock.UnsafeReference, at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildBr(p.llvm, destination.raw)!)
   }
 
@@ -980,7 +980,7 @@ public struct Module: ~Copyable {
     then t: BasicBlock.UnsafeReference,
     else e: BasicBlock.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(
       LLVMBuildCondBr(
         p.llvm, condition.raw, t.raw, e.raw)!)
@@ -995,7 +995,7 @@ public struct Module: ~Copyable {
   >(
     on value: V.UnsafeReference, cases: C, default defaultCase: BasicBlock.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     let s = LLVMBuildSwitch(
       p.llvm, value.raw, defaultCase.raw, UInt32(cases.count))!
     for (caseValue, destination) in cases {
@@ -1015,7 +1015,7 @@ public struct Module: ~Copyable {
     cases: (repeat (UnsafeReference<each C>, BasicBlock.UnsafeReference)),
     default defaultCase: BasicBlock.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var erased = [(AnyValue.UnsafeReference, BasicBlock.UnsafeReference)]()
     for (caseValue, destination) in repeat each cases {
       erased.append((caseValue.erased, destination))
@@ -1027,7 +1027,9 @@ public struct Module: ~Copyable {
   ///
   /// - See https://llvm.org/docs/LangRef.html#ret-instruction.
   @discardableResult
-  public mutating func insertReturn(at p: borrowing InsertionPoint) -> Instruction.UnsafeReference {
+  public mutating func insertReturn(
+    at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildRetVoid(p.llvm)!)
   }
 
@@ -1037,7 +1039,7 @@ public struct Module: ~Copyable {
   @discardableResult
   public mutating func insertReturn<V: IRValue>(
     _ value: V.UnsafeReference, at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildRet(p.llvm, value.raw)!)
   }
 
@@ -1047,7 +1049,7 @@ public struct Module: ~Copyable {
   @discardableResult
   public mutating func insertUnreachable(
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildUnreachable(p.llvm)!)
   }
 
@@ -1061,7 +1063,7 @@ public struct Module: ~Copyable {
     from whole: V.UnsafeReference,
     at index: Int,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildExtractValue(p.llvm, whole.raw, UInt32(index), "")!)
   }
 
@@ -1074,7 +1076,7 @@ public struct Module: ~Copyable {
     at index: Int,
     into whole: V2.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildInsertValue(p.llvm, whole.raw, part.raw, UInt32(index), "")!)
   }
 
@@ -1086,7 +1088,7 @@ public struct Module: ~Copyable {
   public mutating func insertTrunc<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildTrunc(p.llvm, source.raw, target.raw, "")!)
   }
 
@@ -1096,7 +1098,7 @@ public struct Module: ~Copyable {
   public mutating func insertSignExtend<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildSExt(p.llvm, source.raw, target.raw, "")!)
   }
 
@@ -1106,7 +1108,7 @@ public struct Module: ~Copyable {
   public mutating func insertZeroExtend<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildZExt(p.llvm, source.raw, target.raw, "")!)
   }
 
@@ -1116,7 +1118,7 @@ public struct Module: ~Copyable {
   public mutating func insertIntToPtr<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildIntToPtr(p.llvm, source.raw, target.raw, "")!)
   }
 
@@ -1126,7 +1128,7 @@ public struct Module: ~Copyable {
   public mutating func insertIntToPtr<V: IRValue>(
     _ source: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     insertIntToPtr(source, to: ptr, at: p)
   }
 
@@ -1136,7 +1138,7 @@ public struct Module: ~Copyable {
   public mutating func insertPtrToInt<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildPtrToInt(p.llvm, source.raw, target.raw, "")!)
   }
 
@@ -1146,7 +1148,7 @@ public struct Module: ~Copyable {
   public mutating func insertFPTrunc<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFPTrunc(p.llvm, source.raw, target.raw, "")!)
   }
 
@@ -1156,7 +1158,7 @@ public struct Module: ~Copyable {
   public mutating func insertFPExtend<V: IRValue, T: IRType>(
     _ source: V.UnsafeReference, to target: T.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildFPExt(p.llvm, source.raw, target.raw, "")!)
   }
 
@@ -1169,7 +1171,7 @@ public struct Module: ~Copyable {
     _ callee: C.UnsafeReference,
     on arguments: [AnyValue.UnsafeReference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     let calleeTypeID = callee.unsafe[].valueType
     return insertCall(callee.erased, typed: calleeTypeID, on: arguments, at: p)
   }
@@ -1181,7 +1183,7 @@ public struct Module: ~Copyable {
     _ callee: C.UnsafeReference,
     on arguments: (repeat UnsafeReference<each A>),
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for a in repeat each arguments {
       erased.append(a.erased)
@@ -1201,7 +1203,7 @@ public struct Module: ~Copyable {
     typed calleeType: AnyType.UnsafeReference,
     on arguments: [AnyValue.UnsafeReference],
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var a = arguments.map({ $0.raw as Optional })
 
     if let f = FunctionType.UnsafeReference(calleeType)?.unsafe[] {
@@ -1227,7 +1229,7 @@ public struct Module: ~Copyable {
     typed calleeType: T.UnsafeReference,
     on arguments: (repeat UnsafeReference<each A>),
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for a in repeat each arguments {
       erased.append(a.erased)
@@ -1243,7 +1245,7 @@ public struct Module: ~Copyable {
     _ predicate: IntegerPredicate,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     precondition(lhs.unsafe[].type == rhs.unsafe[].type)
     return .init(LLVMBuildICmp(p.llvm, predicate.llvm, lhs.raw, rhs.raw, "")!)
   }
@@ -1256,7 +1258,7 @@ public struct Module: ~Copyable {
     _ predicate: FloatingPointPredicate,
     _ lhs: U.UnsafeReference, _ rhs: V.UnsafeReference,
     at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
+  ) -> AnyInstruction.UnsafeReference {
     precondition(lhs.unsafe[].type == rhs.unsafe[].type)
     return .init(LLVMBuildFCmp(p.llvm, predicate.llvm, lhs.raw, rhs.raw, "")!)
   }
