@@ -22,4 +22,20 @@ final class LoadTests: XCTestCase {
     XCTAssertEqual(s.unsafe[].alignment, 16)
   }
 
+  func testConversion() throws {
+    var m = try Module("foo", targetMachine: .host())
+    let i64 = m.integerType(64)
+
+    let f = m.declareFunction("fn", m.functionType(from: []))
+    let b = m.appendBlock(to: f)
+    let i = m.insertAlloca(i64, at: m.endOf(b))
+    m.insertStore(i64.unsafe[].constant(32), to: i, at: m.endOf(b))
+
+    let s = m.insertLoad(i64, from: i, at: m.endOf(b))
+    XCTAssertNotNil(Load.UnsafeReference(s.erased))
+
+    let u = m.i64.unsafe[].zero
+    XCTAssertNil(Load.UnsafeReference(u.erased))
+  }
+
 }
