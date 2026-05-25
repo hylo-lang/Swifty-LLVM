@@ -250,11 +250,11 @@ extension Module {
     // %3 = load atomic double, ptr %1 acquire, align 8
     // %4 = load atomic double, ptr %1 seq_cst, align 8
     let x2 = insertLoad(double, from: x1, at: endOf(b0))
-    setOrdering(.monotonic, for: x2)
+    setOrdering(.monotonic, for: .init(uncheckedFrom: x2.erased))
     let x3 = insertLoad(double, from: x1, at: endOf(b0))
-    setOrdering(.acquire, for: x3)
+    setOrdering(.acquire, for: .init(uncheckedFrom: x3.erased))
     let x4 = insertLoad(double, from: x1, at: endOf(b0))
-    setOrdering(.sequentiallyConsistent, for: x4)
+    setOrdering(.sequentiallyConsistent, for: .init(uncheckedFrom: x4.erased))
 
     // %5 = atomicrmw xchg ptr %1, double 0x400921FB54442D18 monotonic, align 8
     // %6 = atomicrmw xchg ptr %1, double 0x400921FB54442D18 acquire, align 8

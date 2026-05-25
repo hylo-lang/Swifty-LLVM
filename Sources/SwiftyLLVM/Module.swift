@@ -489,7 +489,14 @@ public struct Module: ~Copyable {
     LLVMSetAlignment(v.raw, UInt32(a))
   }
 
-  /// Sets the preferred alignment of `v` to `a`.
+  /// Sets the alignment of `v` to `a`.
+  ///
+  /// - Requires: `a` is a power of two.
+  public mutating func setAlignment(_ a: Int, for v: Load.UnsafeReference) {
+    LLVMSetAlignment(v.raw, UInt32(a))
+  }
+
+  /// Sets the alignment of `v` to `a`.
   ///
   /// - Requires: `a` is a power of two.
   public mutating func setAlignment(_ a: Int, for v: Store.UnsafeReference) {
@@ -834,8 +841,8 @@ public struct Module: ~Copyable {
   /// - See https://llvm.org/docs/LangRef.html#load-instruction.
   public mutating func insertLoad<T: IRType, V: IRValue>(
     _ type: T.UnsafeReference, from source: V.UnsafeReference, at p: borrowing InsertionPoint
-  ) -> Instruction.UnsafeReference {
-    .init(LLVMBuildLoad2(p.llvm, type.raw, source.raw, "")!)
+  ) -> Load.UnsafeReference {
+    Load.insert(type, from: source, at: p, in: &self)
   }
 
   /// Inserts a store instruction with alignment based on the `value`'s type.
