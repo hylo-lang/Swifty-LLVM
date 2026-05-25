@@ -3,7 +3,7 @@ internal import llvmc
 /// LLVM's `load` instruction.
 ///
 /// - See https://llvm.org/docs/LangRef.html#load-instruction.
-public struct Load: IRValue {
+public struct Load: IRInstruction {
 
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: ValueRef
