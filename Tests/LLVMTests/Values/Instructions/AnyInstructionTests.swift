@@ -9,10 +9,10 @@ final class AnyInstructionTests: XCTestCase {
     let b = m.appendBlock(to: f)
 
     let i = m.insertAlloca(m.i64, at: m.endOf(b))
-    XCTAssertNotNil(AnyInstruction.UnsafeReference(i.erased))
+    XCTAssertNotNil(AnyInstruction.UnsafeReference(i.asAnyValue))
 
     let u = m.i64.unsafe[].zero
-    XCTAssertNil(AnyInstruction.UnsafeReference(u.erased))
+    XCTAssertNil(AnyInstruction.UnsafeReference(u.asAnyValue))
   }
 
   func testEquality() throws {
@@ -22,12 +22,12 @@ final class AnyInstructionTests: XCTestCase {
 
     let i = m.insertAlloca(m.i64, at: m.endOf(b))
     let j = m.insertAlloca(m.i64, at: m.endOf(b))
-    XCTAssertNotEqual(i.instruction, j.instruction)
-    XCTAssertEqual(i.instruction, i.instruction)
+    XCTAssertNotEqual(i.asAnyInstruction, j.asAnyInstruction)
+    XCTAssertEqual(i.asAnyInstruction, i.asAnyInstruction)
 
-    XCTAssertEqual(i.instruction.erased, i.erased)
-    XCTAssertTrue(i.instruction == i)
-    XCTAssertTrue(i.instruction == i.erased)
+    XCTAssertEqual(i.asAnyInstruction.asAnyValue, i.asAnyValue)
+    XCTAssertTrue(i.asAnyInstruction == i)
+    XCTAssertTrue(i.asAnyInstruction == i.asAnyValue)
   }
 
 }

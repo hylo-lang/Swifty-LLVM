@@ -15,7 +15,7 @@ final class ModuleTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let t = m.structType(named: "T", ())
     let u = try XCTUnwrap(m.type(named: "T"))
-    XCTAssert(t.erased == u)
+    XCTAssert(t.asAnyType == u)
     XCTAssertNil(m.type(named: "U"))
   }
 

@@ -88,7 +88,7 @@ extension Module {
     let x2 = insertCall(prepare, on: (projectDegrees), at: endOf(b0))
     let projectDegreesType: AnyType.UnsafeReference = projectDegrees.unsafe[].valueType
     let x3 = insertCall(
-      x2.erased, typed: projectDegreesType, on: (x0, x1), at: endOf(b0))
+      x2.asAnyValue, typed: projectDegreesType, on: (x0, x1), at: endOf(b0))
 
     // %4 = extractvalue { ptr, ptr } %3, 1
     // %5 = load double, ptr %4, align 8
@@ -105,7 +105,7 @@ extension Module {
     let resumeType = functionType(from: (ptr, i1))
     let i1False = i1.unsafe[].constant(0)
     _ = insertCall(
-      x7.erased, typed: resumeType, on: (x0, i1False), at: endOf(b0))
+      x7.asAnyValue, typed: resumeType, on: (x0, i1False), at: endOf(b0))
 
     // %8 = load double, ptr %1, align 8
     // %9 = fcmp ueq double %8, 0.000000e+00

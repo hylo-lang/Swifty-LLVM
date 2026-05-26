@@ -255,7 +255,7 @@ public struct Module: ~Copyable {
   ) -> IntrinsicFunction.UnsafeReference? {
     var erased = [AnyType.UnsafeReference]()
     for p in repeat each parameters {
-      erased.append(p.erased)
+      erased.append(p.asAnyType)
     }
     return intrinsic(named: name, for: erased)
   }
@@ -289,7 +289,7 @@ public struct Module: ~Copyable {
     inAddressSpace s: AddressSpace = .default
   ) -> GlobalVariable.UnsafeReference {
     if let g = global(named: name) {
-      precondition(g.unsafe[].valueType == type.erased)
+      precondition(g.unsafe[].valueType == type.asAnyType)
       precondition(g.unsafe[].addressSpace == s)
       return g
     } else {
@@ -307,7 +307,7 @@ public struct Module: ~Copyable {
   ) -> Function.UnsafeReference {
     if let existing = function(named: name) {
       let existingType = existing.unsafe[].valueType
-      precondition(existingType == type.erased)
+      precondition(existingType == type.asAnyType)
       return existing
     }
 
@@ -428,7 +428,7 @@ public struct Module: ~Copyable {
   }
 
   /// Returns an insertion pointing before `i`.
-  public mutating func before<I: IRInstruction>(_ i: UnsafeReference<I>) -> InsertionPoint {
+  public mutating func before(_ i: UnsafeReference<some IRInstruction>) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
     LLVMPositionBuilderBefore(h, i.raw)
     return InsertionPoint(sinking: h)
@@ -785,7 +785,7 @@ public struct Module: ~Copyable {
   ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for i in repeat each indices {
-      erased.append(i.erased)
+      erased.append(i.asAnyValue)
     }
     return insertGetElementPointer(of: base, typed: baseType, indices: erased, at: p)
   }
@@ -818,7 +818,7 @@ public struct Module: ~Copyable {
   ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for i in repeat each indices {
-      erased.append(i.erased)
+      erased.append(i.asAnyValue)
     }
     return insertGetElementPointerInBounds(
       of: base, typed: baseType, indices: erased, at: p)
@@ -874,29 +874,29 @@ public struct Module: ~Copyable {
   // MARK: Atomics
 
   /// Sets the memory ordering of atomic instruction `i`.
-  public mutating func setOrdering<I: IRInstruction>(
-    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
+  public mutating func setOrdering(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<some IRInstruction>
   ) {
     LLVMSetOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the success ordering on compare-exchange instruction `i`.
-  public mutating func setCmpXchgSuccessOrdering<I: IRInstruction>(
-    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
+  public mutating func setCmpXchgSuccessOrdering(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<some IRInstruction>
   ) {
     LLVMSetCmpXchgSuccessOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the failure ordering on compare-exchange instruction `i`.
-  public mutating func setCmpXchgFailureOrdering<I: IRInstruction>(
-    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
+  public mutating func setCmpXchgFailureOrdering(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<some IRInstruction>
   ) {
     LLVMSetCmpXchgFailureOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the atomic read-modify-write operation kind of instruction `i`.
-  public mutating func setAtomicRMWBinOp<I: IRInstruction>(
-    _ binOp: AtomicRMWBinOp, for i: UnsafeReference<I>
+  public mutating func setAtomicRMWBinOp(
+    _ binOp: AtomicRMWBinOp, for i: UnsafeReference<some IRInstruction>
   ) {
     LLVMSetAtomicRMWBinOp(i.raw, binOp.llvm)
   }
@@ -905,7 +905,7 @@ public struct Module: ~Copyable {
   ///
   /// Effectively, `i` will only need to synchronize with
   /// signal handlers/interrupts executing on the same thread.
-  public mutating func setAtomicSingleThread<I: IRInstruction>(for i: UnsafeReference<I>) {
+  public mutating func setAtomicSingleThread(for i: UnsafeReference<some IRInstruction>) {
     LLVMSetAtomicSingleThread(i.raw, 1)
   }
 
@@ -1018,7 +1018,7 @@ public struct Module: ~Copyable {
   ) -> AnyInstruction.UnsafeReference {
     var erased = [(AnyValue.UnsafeReference, BasicBlock.UnsafeReference)]()
     for (caseValue, destination) in repeat each cases {
-      erased.append((caseValue.erased, destination))
+      erased.append((caseValue.asAnyValue, destination))
     }
     return insertSwitch(on: value, cases: erased, default: defaultCase, at: p)
   }
@@ -1173,7 +1173,7 @@ public struct Module: ~Copyable {
     at p: borrowing InsertionPoint
   ) -> AnyInstruction.UnsafeReference {
     let calleeTypeID = callee.unsafe[].valueType
-    return insertCall(callee.erased, typed: calleeTypeID, on: arguments, at: p)
+    return insertCall(callee.asAnyValue, typed: calleeTypeID, on: arguments, at: p)
   }
 
   /// Inserts a call to `callee`, passing `arguments`.
@@ -1186,7 +1186,7 @@ public struct Module: ~Copyable {
   ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for a in repeat each arguments {
-      erased.append(a.erased)
+      erased.append(a.asAnyValue)
     }
     return insertCall(callee, on: erased, at: p)
   }
@@ -1232,9 +1232,9 @@ public struct Module: ~Copyable {
   ) -> AnyInstruction.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for a in repeat each arguments {
-      erased.append(a.erased)
+      erased.append(a.asAnyValue)
     }
-    return insertCall(callee, typed: calleeType.erased, on: erased, at: p)
+    return insertCall(callee, typed: calleeType.asAnyType, on: erased, at: p)
   }
 
   /// Inserts an integer comparison instruction.
@@ -1289,7 +1289,7 @@ public struct Module: ~Copyable {
   public mutating func functionType(
     from: [AnyType.UnsafeReference], to: UnsafeReference<some IRType>
   ) -> FunctionType.UnsafeReference {
-    FunctionType.create(from: from, to: to.erased, in: &self)
+    FunctionType.create(from: from, to: to.asAnyType, in: &self)
   }
 
   /// Creates a function type with parameter and return types.
@@ -1313,9 +1313,9 @@ public struct Module: ~Copyable {
   ) -> FunctionType.UnsafeReference {
     var erased = [AnyType.UnsafeReference]()
     for p in repeat each parameters {
-      erased.append(p.erased)
+      erased.append(p.asAnyType)
     }
-    return functionType(from: erased, to: returnType.erased)
+    return functionType(from: erased, to: returnType.asAnyType)
   }
 
   /// Creates a void function type with parameters.
@@ -1327,9 +1327,9 @@ public struct Module: ~Copyable {
   ) -> FunctionType.UnsafeReference {
     var erased = [AnyType.UnsafeReference]()
     for p in repeat each parameters {
-      erased.append(p.erased)
+      erased.append(p.asAnyType)
     }
-    return functionType(from: erased, to: void.erased)
+    return functionType(from: erased, to: void.asAnyType)
   }
 
   /// Creates an array type of `count` elements of `element`.
@@ -1360,7 +1360,7 @@ public struct Module: ~Copyable {
   ) -> StructType.UnsafeReference {
     var erased = [AnyType.UnsafeReference]()
     for f in repeat each fields {
-      erased.append(f.erased)
+      erased.append(f.asAnyType)
     }
     return structType(erased, packed: packed)
   }
@@ -1412,7 +1412,7 @@ public struct Module: ~Copyable {
   ) -> StructType.UnsafeReference {
     var erased = [AnyType.UnsafeReference]()
     for f in repeat each fields {
-      erased.append(f.erased)
+      erased.append(f.asAnyType)
     }
     return structType(named: name, erased, packed: packed)
   }
@@ -1478,7 +1478,7 @@ public struct Module: ~Copyable {
   ) -> StructConstant.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for e in repeat each elements {
-      erased.append(e.erased)
+      erased.append(e.asAnyValue)
     }
     return structConstant(of: type, aggregating: erased)
   }
@@ -1498,7 +1498,7 @@ public struct Module: ~Copyable {
   ) -> StructConstant.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for e in repeat each elements {
-      erased.append(e.erased)
+      erased.append(e.asAnyValue)
     }
     return structConstant(aggregating: erased, packed: isPacked)
   }
@@ -1518,7 +1518,7 @@ public struct Module: ~Copyable {
   ) -> ArrayConstant.UnsafeReference {
     var erased = [AnyValue.UnsafeReference]()
     for e in repeat each elements {
-      erased.append(e.erased)
+      erased.append(e.asAnyValue)
     }
     return arrayConstant(of: type, containing: erased)
   }

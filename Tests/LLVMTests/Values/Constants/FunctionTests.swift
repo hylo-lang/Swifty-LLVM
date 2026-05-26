@@ -30,12 +30,12 @@ final class FunctionTests: XCTestCase {
 
     let f1 = m.declareFunction("f1", m.functionType(from: (m.i64)))
     XCTAssertEqual(f1.unsafe[].parameters.count, 1)
-    XCTAssert(f1.unsafe[].parameters[0].unsafe[].type == t.erased)
+    XCTAssert(f1.unsafe[].parameters[0].unsafe[].type == t.asAnyType)
 
     let f2 = m.declareFunction("f2", m.functionType(from: (m.i64, m.i32)))
     XCTAssertEqual(f2.unsafe[].parameters.count, 2)
-    XCTAssert(f2.unsafe[].parameters[0].unsafe[].type == t.erased)
-    XCTAssert(f2.unsafe[].parameters[1].unsafe[].type == u.erased)
+    XCTAssert(f2.unsafe[].parameters[0].unsafe[].type == t.asAnyType)
+    XCTAssert(f2.unsafe[].parameters[1].unsafe[].type == u.asAnyType)
   }
 
   func testParametersIteration() throws {
@@ -48,14 +48,14 @@ final class FunctionTests: XCTestCase {
     XCTAssertEqual(params.count, 3)
 
     let types = params.map({ $0.unsafe[].type })
-    XCTAssert(types[0] == m.i64.erased)
-    XCTAssert(types[1] == m.i32.erased)
-    XCTAssert(types[2] == m.double.erased)
+    XCTAssert(types[0] == m.i64.asAnyType)
+    XCTAssert(types[1] == m.i32.asAnyType)
+    XCTAssert(types[2] == m.double.asAnyType)
 
     let reversed = params.reversed().map({ $0.unsafe[].type })
-    XCTAssert(reversed[0] == m.double.erased)
-    XCTAssert(reversed[1] == m.i32.erased)
-    XCTAssert(reversed[2] == m.i64.erased)
+    XCTAssert(reversed[0] == m.double.asAnyType)
+    XCTAssert(reversed[1] == m.i32.asAnyType)
+    XCTAssert(reversed[2] == m.i64.asAnyType)
   }
 
   func testBasicBlocks() throws {
@@ -137,10 +137,10 @@ final class FunctionTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let t = m.declareFunction("fn", m.functionType(from: ()))
-    XCTAssertNotNil(Function.UnsafeReference(t.erased))
+    XCTAssertNotNil(Function.UnsafeReference(t.asAnyValue))
 
     let u = m.integerType(64).unsafe[].zero
-    XCTAssertNil(Function.UnsafeReference(u.erased))
+    XCTAssertNil(Function.UnsafeReference(u.asAnyValue))
   }
 
   func testEquality() throws {
@@ -185,7 +185,7 @@ final class FunctionTests: XCTestCase {
       "apply", m.functionType(from: (m.functionPointer, m.i32), to: m.i32))
     let applyEntry = m.appendBlock(to: apply)
     let forwardedResult = m.insertCall(
-      apply.unsafe[].parameters[0].erased,
+      apply.unsafe[].parameters[0].asAnyValue,
       typed: unaryI32FunctionType,
       on: (apply.unsafe[].parameters[1]),
       at: m.endOf(applyEntry))
