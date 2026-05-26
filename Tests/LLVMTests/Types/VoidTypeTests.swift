@@ -7,10 +7,10 @@ final class VoidTypeTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let t: VoidType.UnsafeReference = m.void
-    XCTAssertNotNil(VoidType.UnsafeReference(t.erased))
+    XCTAssertNotNil(VoidType.UnsafeReference(t.asAnyType))
 
     let u = m.integerType(64)
-    XCTAssertNil(VoidType.UnsafeReference(u.erased))
+    XCTAssertNil(VoidType.UnsafeReference(u.asAnyType))
   }
 
   func testEquality() throws {

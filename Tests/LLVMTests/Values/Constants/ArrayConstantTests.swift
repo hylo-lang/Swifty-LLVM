@@ -8,7 +8,7 @@ final class ArrayConstantTests: XCTestCase {
     let i32 = m.integerType(32)
 
     let a = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).erased }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).asAnyValue }))
     XCTAssertEqual(a.unsafe[].count, 5)
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][1]), i32.unsafe[].constant(1))
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][2]), i32.unsafe[].constant(2))
@@ -41,7 +41,7 @@ final class ArrayConstantTests: XCTestCase {
     let i32 = m.integerType(32)
 
     let elements = (0 ..< 5).map({ i32.unsafe[].constant($0) })
-    let a = m.arrayConstant(of: i32, containing: elements.map(\.erased))
+    let a = m.arrayConstant(of: i32, containing: elements.map(\.asAnyValue))
 
     XCTAssertEqual(a.unsafe[].startIndex, 0)
     XCTAssertEqual(a.unsafe[].endIndex, 5)
@@ -58,13 +58,13 @@ final class ArrayConstantTests: XCTestCase {
     let i32 = m.integerType(32)
 
     let a = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).erased }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).asAnyValue }))
     let b = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).erased }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).asAnyValue }))
     XCTAssertEqual(a, b)
 
     let c = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0 + 1).erased }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0 + 1).asAnyValue }))
     XCTAssertNotEqual(a, c)
   }
 

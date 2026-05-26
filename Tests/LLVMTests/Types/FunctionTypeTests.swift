@@ -6,26 +6,26 @@ final class FunctionTypeTests: XCTestCase {
   func testDefaultReturnType() throws {
     var m = try Module("foo", targetMachine: .host())
     let f = m.functionType(from: ())
-    XCTAssert(f.unsafe[].returnType == m.void.erased)
+    XCTAssert(f.unsafe[].returnType == m.void.asAnyType)
   }
   func testDefaultReturnTypeDynamic() throws {
     var m = try Module("foo", targetMachine: .host())
     let f = m.functionType(from: [])
-    XCTAssert(f.unsafe[].returnType == m.void.erased)
+    XCTAssert(f.unsafe[].returnType == m.void.asAnyType)
   }
 
   func testReturnType() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.i64
     let f = m.functionType(from: (), to: t)
-    XCTAssert(f.unsafe[].returnType == t.erased)
+    XCTAssert(f.unsafe[].returnType == t.asAnyType)
   }
 
   func testReturnTypeDynamic() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.i64
-    let f = m.functionType(from: [], to: t.erased)
-    XCTAssert(f.unsafe[].returnType == t.erased)
+    let f = m.functionType(from: [], to: t.asAnyType)
+    XCTAssert(f.unsafe[].returnType == t.asAnyType)
   }
 
   func testParameters() throws {
@@ -38,22 +38,22 @@ final class FunctionTypeTests: XCTestCase {
 
     let f1 = m.functionType(from: (t))
     XCTAssertEqual(f1.unsafe[].parameters.count, 1)
-    XCTAssert(f1.unsafe[].parameters[0] == t.erased)
+    XCTAssert(f1.unsafe[].parameters[0] == t.asAnyType)
 
     let f2 = m.functionType(from: (t, u))
     XCTAssertEqual(f2.unsafe[].parameters.count, 2)
-    XCTAssert(f2.unsafe[].parameters[0] == t.erased)
-    XCTAssert(f2.unsafe[].parameters[1] == u.erased)
+    XCTAssert(f2.unsafe[].parameters[0] == t.asAnyType)
+    XCTAssert(f2.unsafe[].parameters[1] == u.asAnyType)
   }
 
   func testConversion() throws {
     var m = try Module("foo", targetMachine: .host())
 
     let t = m.functionType(from: ())
-    XCTAssertNotNil(FunctionType.UnsafeReference(t.erased))
+    XCTAssertNotNil(FunctionType.UnsafeReference(t.asAnyType))
 
     let u = m.integerType(64)
-    XCTAssertNil(FunctionType.UnsafeReference(u.erased))
+    XCTAssertNil(FunctionType.UnsafeReference(u.asAnyType))
   }
 
   func testEquality() throws {

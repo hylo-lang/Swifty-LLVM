@@ -8,15 +8,15 @@ final class FloatingPointTypeTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let floatingPointTypes = [
-      m.half.erased, m.bfloat.erased, m.float.erased, m.double.erased,
-      m.x86_fp80.erased, m.fp128.erased, m.ppc_fp128.erased
+      m.half.asAnyType, m.bfloat.asAnyType, m.float.asAnyType, m.double.asAnyType,
+      m.x86_fp80.asAnyType, m.fp128.asAnyType, m.ppc_fp128.asAnyType
     ]
 
     for t in floatingPointTypes {
       XCTAssertNotNil(FloatingPointType.UnsafeReference(t))
     }
 
-    let u = m.integerType(64).erased
+    let u = m.integerType(64).asAnyType
     XCTAssertNil(FloatingPointType.UnsafeReference(u))
   }
 
@@ -24,7 +24,7 @@ final class FloatingPointTypeTests: XCTestCase {
     let m = try Module("foo", targetMachine: .host())
     let double = m.double.unsafe[]
     let x = double(1)
-    XCTAssertEqual(x.unsafe[].type, m.double.erased)
+    XCTAssertEqual(x.unsafe[].type, m.double.asAnyType)
     XCTAssertTrue(x.unsafe[].isConstant)
     XCTAssertEqual(x.unsafe[].value.value, 1, accuracy: .ulpOfOne)
   }

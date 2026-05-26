@@ -35,10 +35,10 @@ final class StoreTests: XCTestCase {
     let i = m.insertAlloca(i64, at: m.endOf(b))
 
     let s = m.insertStore(i64.unsafe[].constant(32), to: i, at: m.endOf(b))
-    XCTAssertNotNil(Store.UnsafeReference(s.erased))
+    XCTAssertNotNil(Store.UnsafeReference(s.asAnyValue))
 
     let u = m.i64.unsafe[].zero
-    XCTAssertNil(Store.UnsafeReference(u.erased))
+    XCTAssertNil(Store.UnsafeReference(u.asAnyValue))
   }
 
 }

@@ -14,13 +14,13 @@ final class IRTypeTests: XCTestCase {
     let t = m.integerType(64)
     let u = m.integerType(32)
 
-    XCTAssert(t == t.erased)
-    XCTAssert(t.erased == t)
-    XCTAssert(t.erased == t.erased)
+    XCTAssert(t == t.asAnyType)
+    XCTAssert(t.asAnyType == t)
+    XCTAssert(t.asAnyType == t.asAnyType)
 
-    XCTAssert(t != u.erased)
-    XCTAssert(u.erased != t)
-    XCTAssert(t.erased != u.erased)
+    XCTAssert(t != u.asAnyType)
+    XCTAssert(u.asAnyType != t)
+    XCTAssert(t.asAnyType != u.asAnyType)
   }
 
   func testStringConvertible() throws {

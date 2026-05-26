@@ -189,7 +189,7 @@ extension UnsafeReference<BasicBlock> {
 extension UnsafeReference where T: IRType {
 
   /// Type-erased reference to the IR type.
-  public var erased: UnsafeReference<AnyType> { .init(llvm) }
+  public var asAnyType: UnsafeReference<AnyType> { .init(llvm) }
 
   /// Native handle to the LLVM type reference.
   internal var raw: LLVMTypeRef { llvm.raw }
@@ -199,7 +199,7 @@ extension UnsafeReference where T: IRType {
 extension UnsafeReference where T: IRValue {
 
   /// Type-erased reference to the IR value.
-  public var erased: UnsafeReference<AnyValue> { .init(llvm) }
+  public var asAnyValue: UnsafeReference<AnyValue> { .init(llvm) }
 
   /// Native handle to the LLVM value reference.
   internal var raw: LLVMValueRef { llvm.raw }
@@ -209,7 +209,7 @@ extension UnsafeReference where T: IRValue {
 extension UnsafeReference where T: IRInstruction {
 
   /// Type-erased reference to the instruction.
-  public var instruction: UnsafeReference<AnyInstruction> { .init(llvm) }
+  public var asAnyInstruction: UnsafeReference<AnyInstruction> { .init(llvm) }
 
 }
 

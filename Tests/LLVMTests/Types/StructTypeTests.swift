@@ -28,7 +28,8 @@ final class StructTypeTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
     XCTAssert(m.structType((t, t), packed: true).unsafe[].isPacked)
-    XCTAssert(m.createStructType(named: "S", [t.erased, t.erased], packed: true).unsafe[].isPacked)
+    XCTAssert(
+      m.createStructType(named: "S", [t.asAnyType, t.asAnyType], packed: true).unsafe[].isPacked)
   }
 
   func testOpaqueStruct() throws {
@@ -64,10 +65,10 @@ final class StructTypeTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let t = m.structType([])
-    XCTAssertNotNil(StructType.UnsafeReference(t.erased))
+    XCTAssertNotNil(StructType.UnsafeReference(t.asAnyType))
 
     let u = m.integerType(64)
-    XCTAssertNil(StructType.UnsafeReference(u.erased))
+    XCTAssertNil(StructType.UnsafeReference(u.asAnyType))
   }
 
   func testEquality() throws {
@@ -104,27 +105,27 @@ final class StructTypeTests: XCTestCase {
     XCTAssertNotEqual(s0, s1)
     XCTAssertNotEqual(s0.llvm, s1.llvm)
 
-    XCTAssertEqual(s0.fields[0].erased, t.erased)
-    XCTAssertEqual(s0.fields[1].erased, u.erased)
+    XCTAssertEqual(s0.fields[0].asAnyType, t.asAnyType)
+    XCTAssertEqual(s0.fields[1].asAnyType, u.asAnyType)
 
-    XCTAssertEqual(s1.fields[0].erased, t.erased)
-    XCTAssertEqual(s1.fields[1].erased, u.erased)
+    XCTAssertEqual(s1.fields[0].asAnyType, t.asAnyType)
+    XCTAssertEqual(s1.fields[1].asAnyType, u.asAnyType)
   }
 
   func testSameNameDifferentFields() throws {
     var m = try Module("foo", targetMachine: .host())
-    let t = m.integerType(64).erased
-    let u = m.integerType(32).erased
+    let t = m.integerType(64).asAnyType
+    let u = m.integerType(32).asAnyType
 
     let s0 = m.createStructType(named: "S", [t, u]).unsafe[]
     let s1 = m.createStructType(named: "S", [u, t]).unsafe[]
     XCTAssertNotEqual(s0, s1)
 
-    XCTAssertEqual(s0.fields[0].erased, t.erased)
-    XCTAssertEqual(s0.fields[1].erased, u.erased)
+    XCTAssertEqual(s0.fields[0].asAnyType, t.asAnyType)
+    XCTAssertEqual(s0.fields[1].asAnyType, u.asAnyType)
 
-    XCTAssertEqual(s1.fields[0].erased, u.erased)
-    XCTAssertEqual(s1.fields[1].erased, t.erased)
+    XCTAssertEqual(s1.fields[0].asAnyType, u.asAnyType)
+    XCTAssertEqual(s1.fields[1].asAnyType, t.asAnyType)
   }
 
 }
