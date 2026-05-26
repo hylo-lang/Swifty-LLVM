@@ -54,13 +54,13 @@ final class IRValueTests: XCTestCase {
     let t = m.integerType(64).unsafe[].null
     let u = m.integerType(32).unsafe[].null
 
-    XCTAssertEqual(t, t.erased)
-    XCTAssertEqual(t.erased, t)
-    XCTAssertEqual(t.erased, t.erased)
+    XCTAssertEqual(t, t.asAnyValue)
+    XCTAssertEqual(t.asAnyValue, t)
+    XCTAssertEqual(t.asAnyValue, t.asAnyValue)
 
-    XCTAssertNotEqual(t, u.erased)
-    XCTAssertNotEqual(t.erased, u)
-    XCTAssertNotEqual(t.erased, u.erased)
+    XCTAssertNotEqual(t, u.asAnyValue)
+    XCTAssertNotEqual(t.asAnyValue, u)
+    XCTAssertNotEqual(t.asAnyValue, u.asAnyValue)
   }
 
   func testStringConvertible() throws {

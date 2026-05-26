@@ -19,10 +19,10 @@ final class StringConstantTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let t = m.stringConstant("Bonjour!")
-    XCTAssertNotNil(StringConstant.UnsafeReference(t.erased))
+    XCTAssertNotNil(StringConstant.UnsafeReference(t.asAnyValue))
 
     let u = m.i64.unsafe[].zero
-    XCTAssertNil(StringConstant.UnsafeReference(u.erased))
+    XCTAssertNil(StringConstant.UnsafeReference(u.asAnyValue))
   }
 
   func testEquality() throws {

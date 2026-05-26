@@ -7,10 +7,10 @@ final class PoisonTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let t = m.poisonValue(of: m.float)
-    XCTAssertNotNil(Poison.UnsafeReference(t.erased))
+    XCTAssertNotNil(Poison.UnsafeReference(t.asAnyValue))
 
     let u = m.i64.unsafe[].zero
-    XCTAssertNil(Poison.UnsafeReference(u.erased))
+    XCTAssertNil(Poison.UnsafeReference(u.asAnyValue))
   }
 
   func testEquality() throws {

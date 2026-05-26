@@ -43,12 +43,12 @@ final class IntegerConstantTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let i64 = m.integerType(64)
     let t = i64.unsafe[].zero
-    XCTAssertNotNil(IntegerConstant.UnsafeReference(t.erased))
+    XCTAssertNotNil(IntegerConstant.UnsafeReference(t.asAnyValue))
 
     let ft = FloatingPointType.float(in: &m)
     let ty = ft.unsafe[]
     let u = ty.zero
-    XCTAssertNil(IntegerConstant.UnsafeReference(u.erased))
+    XCTAssertNil(IntegerConstant.UnsafeReference(u.asAnyValue))
   }
 
   func testEquality() throws {

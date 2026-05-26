@@ -11,7 +11,7 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].index, 0)
     XCTAssertEqual(f.unsafe[].parameters[1].unsafe[].index, 1)
 
-    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].erased)
+    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].asAnyValue)
     XCTAssertEqual(p?.unsafe[].index, 1)
   }
   func testIndexDynamic() throws {
@@ -21,7 +21,7 @@ final class ParameterTests: XCTestCase {
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].index, 0)
     XCTAssertEqual(f.unsafe[].parameters[1].unsafe[].index, 1)
 
-    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].erased)
+    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].asAnyValue)
     XCTAssertEqual(p?.unsafe[].index, 1)
   }
 
@@ -62,10 +62,10 @@ final class ParameterTests: XCTestCase {
 
     let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
     let p = f.unsafe[].parameters[0]
-    XCTAssertNotNil(Parameter.UnsafeReference(p.erased))
+    XCTAssertNotNil(Parameter.UnsafeReference(p.asAnyValue))
 
     let q = m.i64.unsafe[].zero
-    XCTAssertNil(Parameter.UnsafeReference(q.erased))
+    XCTAssertNil(Parameter.UnsafeReference(q.asAnyValue))
   }
 
   func testReferenceEquality() throws {
