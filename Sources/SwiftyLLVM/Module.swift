@@ -986,13 +986,14 @@ public struct Module: ~Copyable {
         p.llvm, condition.raw, t.raw, e.raw)!)
   }
 
+  /// A case in a `switch` terminator.
+  public typealias SwitchCase = (AnyValue.UnsafeReference, BasicBlock.UnsafeReference)
+
   /// Inserts a `switch` terminator with `cases` and `defaultCase`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#switch-instruction.
   @discardableResult
-  public mutating func insertSwitch<
-    V: IRValue, C: Collection<(AnyValue.UnsafeReference, BasicBlock.UnsafeReference)>
-  >(
+  public mutating func insertSwitch<V: IRValue, C: Collection<SwitchCase>>(
     on value: V.UnsafeReference, cases: C, default defaultCase: BasicBlock.UnsafeReference,
     at p: borrowing InsertionPoint
   ) -> AnyInstruction.UnsafeReference {
@@ -1008,9 +1009,7 @@ public struct Module: ~Copyable {
   ///
   /// - See https://llvm.org/docs/LangRef.html#switch-instruction.
   @discardableResult
-  public mutating func insertSwitch<
-    V: IRValue, each C: IRValue
-  >(
+  public mutating func insertSwitch<V: IRValue, each C: IRValue>(
     on value: V.UnsafeReference,
     cases: (repeat (UnsafeReference<each C>, BasicBlock.UnsafeReference)),
     default defaultCase: BasicBlock.UnsafeReference,
