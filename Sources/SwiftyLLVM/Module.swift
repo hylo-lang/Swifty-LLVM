@@ -810,6 +810,20 @@ public struct Module: ~Copyable {
   ///
   /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
   /// - See https://llvm.org/docs/GetElementPtr.html.
+  public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType>(
+    of base: V.UnsafeReference, typed baseType: T.UnsafeReference,
+    indices: [Int], instancesOf indexType: IntegerType.UnsafeReference,
+    at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
+    var i = indices.map({ (x) in Optional.some(indexType.unsafe[].constant(x).raw) })
+    return .init(LLVMBuildInBoundsGEP2(p.llvm, baseType.raw, base.raw, &i, UInt32(i.count), "")!)
+  }
+
+  /// Inserts an instruction computing the address of successive indexing into `base` with
+  /// additional in-bounds requirements.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
+  /// - See https://llvm.org/docs/GetElementPtr.html.
   public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType, each I: IRValue>(
     of base: V.UnsafeReference,
     typed baseType: T.UnsafeReference,
@@ -820,8 +834,7 @@ public struct Module: ~Copyable {
     for i in repeat each indices {
       erased.append(i.asAnyValue)
     }
-    return insertGetElementPointerInBounds(
-      of: base, typed: baseType, indices: erased, at: p)
+    return insertGetElementPointerInBounds(of: base, typed: baseType, indices: erased, at: p)
   }
 
   /// Inserts a struct element address computation for field `index`.
