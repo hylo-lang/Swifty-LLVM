@@ -158,8 +158,8 @@ public struct Module: ~Copyable {
 
   /// Runs the default LLVM module pass pipeline tuned for `optimization` and `machine`.
   public mutating func runDefaultModulePasses(optimization: OptimizationLevel = .none) {
-    SwiftyLLVMRunDefaultModulePasses(llvmModule.raw, targetMachine.llvm,
-      optimization.swiftyLLVMRepresentation)
+    SwiftyLLVMRunDefaultModulePasses(
+      llvmModule.raw, targetMachine.llvm, optimization.swiftyLLVMRepresentation)
   }
 
   /// Writes the LLVM bitcode of this module to `filepath`.
@@ -271,11 +271,11 @@ public struct Module: ~Copyable {
     _ type: T.UnsafeReference,
     inAddressSpace s: AddressSpace = .default
   ) -> GlobalVariable.UnsafeReference {
-    guard let handle = LLVMAddGlobalInAddressSpace(llvmModule.raw, type.raw, name ?? "", s.llvm)
-    else {
+    if let handle = LLVMAddGlobalInAddressSpace(llvmModule.raw, type.raw, name ?? "", s.llvm) {
+      return GlobalVariable.UnsafeReference(handle)
+    } else {
       unreachable("Failed to add global variable '\(name ?? "")' in address space '\(s)'.")
     }
-    return GlobalVariable.UnsafeReference(handle)
   }
 
   /// Returns a global variable with `name` and `type`, declaring it if it doesn't exist.
@@ -309,9 +309,9 @@ public struct Module: ~Copyable {
       let existingType = existing.unsafe[].valueType
       precondition(existingType == type.asAnyType)
       return existing
+    } else {
+      return Function.UnsafeReference(LLVMAddFunction(llvmModule.raw, name, type.raw)!)
     }
-
-    return Function.UnsafeReference(LLVMAddFunction(llvmModule.raw, name, type.raw)!)
   }
 
   /// Creates a target-independent function attribute with `name` and optional `value` in `module`.
