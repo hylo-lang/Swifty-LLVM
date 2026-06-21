@@ -1556,6 +1556,23 @@ public struct Module: ~Copyable {
     StringConstant.create(text, nullTerminated: nullTerminated, in: &self)
   }
 
+  /// Creates a constant integer with the same bit pattern as the constant pointer `address`.
+  ///
+  /// The value of `address` is determined at compile-time. The result is an instance of `iptr`,
+  /// which is an integer whose size is equal to that of a pointer in the default address space.
+  public mutating func constantPointerToInteger<T: IRValue>(
+    bitPattern address: T.UnsafeReference
+  ) -> AnyValue.UnsafeReference {
+    .init(LLVMConstPtrToInt(address.raw, iptr.raw))
+  }
+
+  /// Creates a constant integer equal to the sum of `lhs` and `rhs`.
+  public mutating func constantAdd<T: IRValue, U: IRValue>(
+    _ lhs: T.UnsafeReference, _ rhs: U.UnsafeReference,
+  ) -> AnyValue.UnsafeReference {
+    .init(LLVMConstAdd(lhs.raw, rhs.raw))
+  }
+
   /// The LLVM IR string representation of this module.
   public var description: String { llCode() }
 
