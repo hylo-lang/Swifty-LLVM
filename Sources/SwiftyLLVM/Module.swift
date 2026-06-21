@@ -503,6 +503,13 @@ public struct Module: ~Copyable {
     LLVMSetAlignment(v.raw, UInt32(a))
   }
 
+  /// Sets the alignment of `v` to `a`.
+  ///
+  /// - Requires: `a` is a power of two.
+  public mutating func setAlignment(_ a: Int, for v: GlobalVariable.UnsafeReference) {
+    LLVMSetAlignment(v.raw, UInt32(a))
+  }
+
   /// The LLVM context of this module wrapped as a SwiftyLLVM reference.
   private var contextRef: ContextRef { .init(context) }
 
