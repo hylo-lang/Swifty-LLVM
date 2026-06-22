@@ -1,4 +1,4 @@
-// swift-tools-version:6.2
+// swift-tools-version:6.3
 
 // MARK: Poor person's pkg-config processing, required to handle pkg-config files on Windows.
 
