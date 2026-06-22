@@ -10,7 +10,7 @@ See also: [swift-llvm-bindings](https://github.com/apple/swift-llvm-bindings)
 
 ### Swift
 
-This package requires Swift 6.2
+This package requires Swift 6.3
 
 ### LLVM
 
