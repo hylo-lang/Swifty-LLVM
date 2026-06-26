@@ -68,7 +68,7 @@ extension Module {
   private mutating func emitMain(
     projectingDegreesWith projectDegrees: Function.UnsafeReference
   ) throws -> Function.UnsafeReference {
-    let s = functionType(from: (), to: i32)
+    let s = functionType(from: [], to: i32.t)
     let f = declareFunction("main", s)
 
     let b0 = appendBlock(named: "b0", to: f)
@@ -85,10 +85,10 @@ extension Module {
     // %2 = call ptr @llvm.coro.prepare.retcon(ptr @deg)
     // %3 = call { ptr, ptr } %2(ptr %0, ptr %1)
     let prepare = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.prepare.retcon))
-    let x2 = insertCall(prepare, on: (projectDegrees), at: endOf(b0))
+    let x2 = insertCall(prepare, on: [projectDegrees.v], at: endOf(b0))
     let projectDegreesType: AnyType.UnsafeReference = projectDegrees.unsafe[].valueType
     let x3 = insertCall(
-      x2.asAnyValue, typed: projectDegreesType, on: (x0, x1), at: endOf(b0))
+      x2.v, typed: projectDegreesType, on: [x0.v, x1.v], at: endOf(b0))
 
     // %4 = extractvalue { ptr, ptr } %3, 1
     // %5 = load double, ptr %4, align 8
@@ -102,10 +102,10 @@ extension Module {
     // %7 = extractvalue { ptr, ptr } %3, 0
     // call void %7(ptr %0, i1 false
     let x7 = insertExtractValue(from: x3, at: 0, at: endOf(b0))
-    let resumeType = functionType(from: (ptr, i1))
+    let resumeType = functionType(from: [ptr.t, i1.t])
     let i1False = i1.unsafe[].constant(0)
     _ = insertCall(
-      x7.asAnyValue, typed: resumeType, on: (x0, i1False), at: endOf(b0))
+      x7.v, typed: resumeType.t, on: [x0.v, i1False.v], at: endOf(b0))
 
     // %8 = load double, ptr %1, align 8
     // %9 = fcmp ueq double %8, 0.000000e+00
@@ -124,21 +124,21 @@ extension Module {
   /// Defines a coroutine that projects the value in degrees of an angle in radians.
   private mutating func emitProjectDegrees() throws -> Function.UnsafeReference {
     // declare void @slide(ptr, i1 zeroext)
-    let slide = declareFunction("slide", functionType(from: (ptr, i1)))
+    let slide = declareFunction("slide", functionType(from: [ptr.t, i1.t]))
     let slideParameter1 = slide.unsafe[].parameters[1]
     addParameterAttribute(
       parameterAttribute(.zeroext),
       to: slideParameter1)
 
     // declare noalias ptr @alloc(i32)
-    let alloc = declareFunction("alloc", functionType(from: (i32), to: ptr))
+    let alloc = declareFunction("alloc", functionType(from: [i32.t], to: ptr.t))
     addReturnAttribute(returnAttribute(.noalias), to: alloc)
 
     // declare void @dealloc(ptr)
-    let dealloc = declareFunction("dealloc", functionType(from: (ptr)))
+    let dealloc = declareFunction("dealloc", functionType(from: [ptr.t]))
     // define { ptr, ptr } @deg(ptr %0, ptr %1)
-    let pairOfPointers = structType((ptr, ptr))
-    let s = functionType(from: (ptr, ptr), to: pairOfPointers)
+    let pairOfPointers = structType([ptr.t, ptr.t])
+    let s = functionType(from: [ptr.t, ptr.t], to: pairOfPointers.t)
     let f = declareFunction("deg", s)
     let r = try XCTUnwrap(f.unsafe[].parameters.last)
     let b0 = appendBlock(named: "b0", to: f)
@@ -154,19 +154,19 @@ extension Module {
     let frameBuffer = try XCTUnwrap(f.unsafe[].parameters.first)
     let coroutineID = insertCall(
       retconOnce,
-      on: (
-        i32_16,  // size of the frame buffer
-        i32_8,  // alignment of the frame buffer
-        frameBuffer,  // the frame buffer
-        slide, alloc, dealloc
-      ),
+      on: [
+        i32_16.v,  // size of the frame buffer
+        i32_8.v,  // alignment of the frame buffer
+        frameBuffer.v,  // the frame buffer
+        slide.v, alloc.v, dealloc.v,
+      ],
       at: endOf(b0))
 
     // %4 = call ptr @llvm.coro.begin(token %3, ptr null)
     let begin = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.begin))
     let coroutineHandle = insertCall(
       begin,
-      on: (coroutineID, ptr.unsafe[].null),
+      on: [coroutineID.v, ptr.unsafe[].null.v],
       at: endOf(b0))
     let coroutineHandleID = coroutineHandle
 
@@ -181,8 +181,8 @@ extension Module {
 
     // %8 = call i1 (...) @llvm.coro.suspend.retcon.i1(ptr %2)
     let suspend = try XCTUnwrap(
-      intrinsic(named: IntrinsicFunction.llvm.coro.suspend.retcon, for: (i1)))
-    _ = insertCall(suspend, on: (x0), at: endOf(b0))
+      intrinsic(named: IntrinsicFunction.llvm.coro.suspend.retcon, for: [i1.t]))
+    _ = insertCall(suspend, on: [x0.v], at: endOf(b0))
 
     // %9 = load double, ptr %2, align 8
     // %10 = fmul double %9, 0x400921FB54442D18
@@ -201,11 +201,11 @@ extension Module {
     let end = try XCTUnwrap(intrinsic(named: IntrinsicFunction.llvm.coro.end))
     _ = insertCall(
       end,
-      on: (
-        coroutineHandleID,
-        i1.unsafe[].constant(0),
-        resultToken
-      ),
+      on: [
+        coroutineHandleID.v,
+        i1.unsafe[].constant(0).v,
+        resultToken.v,
+      ],
       at: endOf(b0))
 
     // unreachable
@@ -215,7 +215,7 @@ extension Module {
   }
 
   private mutating func emitTestAtomics() throws -> Function.UnsafeReference {
-    let s = functionType(from: ())
+    let s = functionType(from: [])
     let f = declareFunction("testAtomics", s)
 
     let b0 = appendBlock(named: "b0", to: f)

@@ -69,8 +69,8 @@ public struct Target: Hashable {
   }
 
   /// Returns `true` iff the normalized triple strings are equal.
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.triple == rhs.triple
+  public static func == (l: Self, r: Self) -> Bool {
+    l.triple == r.triple
   }
 
 }

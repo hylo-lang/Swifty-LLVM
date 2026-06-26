@@ -21,10 +21,10 @@ final class IntegerTypeTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let i64 = m.integerType(64)
-    XCTAssertNotNil(IntegerType.UnsafeReference(i64.asAnyType))
+    XCTAssertNotNil(IntegerType.UnsafeReference(i64.t))
 
     let float = m.float
-    XCTAssertNil(IntegerType.UnsafeReference(float.asAnyType))
+    XCTAssertNil(IntegerType.UnsafeReference(float.t))
   }
 
   func testEquality() throws {

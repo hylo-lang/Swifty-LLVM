@@ -5,7 +5,7 @@ import XCTest
 final class BasicBlockTests: XCTestCase {
   func testDescription() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: ()))
+    let f = m.declareFunction("fn", m.functionType(from: []))
 
     let b = m.appendBlock(named: "b", to: f)
     XCTAssertEqual(b.unsafe[].description, "b")
@@ -13,7 +13,7 @@ final class BasicBlockTests: XCTestCase {
   }
   func testEmptyNameDescription() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: ()))
+    let f = m.declareFunction("fn", m.functionType(from: []))
 
     let b = m.appendBlock(to: f)
     XCTAssertEqual(b.unsafe[].description, "<unnamed>")
@@ -23,7 +23,7 @@ final class BasicBlockTests: XCTestCase {
   func testNamedBasicBlockLLCode() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f = m.declareFunction("doubleValue", m.functionType(from: (m.i32), to: m.i32))
+    let f = m.declareFunction("doubleValue", m.functionType(from: [m.i32.t], to: m.i32.t))
     let b = m.appendBlock(named: "my_block", to: f)
 
     let double = m.insertAdd(
@@ -46,7 +46,7 @@ final class BasicBlockTests: XCTestCase {
 
   func testEmptyNameLLCode() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("doubleValue", m.functionType(from: (m.i32), to: m.i32))
+    let f = m.declareFunction("doubleValue", m.functionType(from: [m.i32.t], to: m.i32.t))
     let b = m.appendBlock(to: f)
 
     let double = m.insertAdd(
@@ -68,7 +68,7 @@ final class BasicBlockTests: XCTestCase {
 
   func testTwoUnnamedBlocksLLCode() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("doubleValue", m.functionType(from: (m.i32), to: m.i32))
+    let f = m.declareFunction("doubleValue", m.functionType(from: [m.i32.t], to: m.i32.t))
     let entry = m.appendBlock(to: f)
     let body = m.appendBlock(to: f)
 

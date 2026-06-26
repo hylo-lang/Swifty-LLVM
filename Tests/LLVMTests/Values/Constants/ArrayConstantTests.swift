@@ -8,7 +8,7 @@ final class ArrayConstantTests: XCTestCase {
     let i32 = m.integerType(32)
 
     let a = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).asAnyValue }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).v }))
     XCTAssertEqual(a.unsafe[].count, 5)
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][1]), i32.unsafe[].constant(1))
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][2]), i32.unsafe[].constant(2))
@@ -19,7 +19,7 @@ final class ArrayConstantTests: XCTestCase {
 
     let a = m.arrayConstant(
       of: m.i32,
-      containing: (m.i32.unsafe[].constant(1), m.i32.unsafe[].constant(2)))
+      containing: [m.i32.unsafe[].constant(1).v, m.i32.unsafe[].constant(2).v])
 
     XCTAssertEqual(a.unsafe[].count, 2)
     XCTAssertEqual(IntegerConstant.UnsafeReference(a.unsafe[][0]), m.i32.unsafe[].constant(1))
@@ -41,7 +41,7 @@ final class ArrayConstantTests: XCTestCase {
     let i32 = m.integerType(32)
 
     let elements = (0 ..< 5).map({ i32.unsafe[].constant($0) })
-    let a = m.arrayConstant(of: i32, containing: elements.map(\.asAnyValue))
+    let a = m.arrayConstant(of: i32, containing: elements.map(\.v))
 
     XCTAssertEqual(a.unsafe[].startIndex, 0)
     XCTAssertEqual(a.unsafe[].endIndex, 5)
@@ -58,13 +58,13 @@ final class ArrayConstantTests: XCTestCase {
     let i32 = m.integerType(32)
 
     let a = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).asAnyValue }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).v }))
     let b = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).asAnyValue }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0).v }))
     XCTAssertEqual(a, b)
 
     let c = m.arrayConstant(
-      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0 + 1).asAnyValue }))
+      of: i32, containing: (0 ..< 5).map({ i32.unsafe[].constant($0 + 1).v }))
     XCTAssertNotEqual(a, c)
   }
 

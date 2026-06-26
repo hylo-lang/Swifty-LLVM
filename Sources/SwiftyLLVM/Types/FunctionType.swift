@@ -21,7 +21,7 @@ public struct FunctionType: IRType, Hashable {
     to returnType: AnyType.UnsafeReference? = nil,
     in module: inout Module
   ) -> FunctionType.UnsafeReference {
-    let r = returnType ?? module.void.asAnyType
+    let r = returnType ?? module.void.t
 
     var mutableParameters = parameters.map { Optional.some($0.raw) }
 

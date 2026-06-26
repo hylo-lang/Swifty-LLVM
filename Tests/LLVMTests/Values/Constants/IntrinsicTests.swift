@@ -14,11 +14,11 @@ final class IntinsicTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     // llvm.va_start is overloaded for different address spaces.
-    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
+    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: [m.ptr.t]))
     XCTAssertTrue(f.unsafe[].isOverloaded)
 
     // llvm.smax is overloaded for different integer types.
-    let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.smax, for: (m.i16)))
+    let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.smax, for: [m.i16.t]))
     XCTAssert(g.unsafe[].isOverloaded)
 
     // llvm.trap is not overloaded.
@@ -35,11 +35,11 @@ final class IntinsicTests: XCTestCase {
   func testEquality() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
-    let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: (m.ptr)))
+    let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: [m.ptr.t]))
+    let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_start, for: [m.ptr.t]))
     XCTAssertEqual(f, g)
 
-    let h = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_end, for: (m.ptr)))
+    let h = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.va_end, for: [m.ptr.t]))
     XCTAssertNotEqual(f, h)
   }
 

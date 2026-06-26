@@ -35,8 +35,8 @@ extension Parameter: Hashable {
   }
 
   /// Checks reference equality of two `Parameter` wrappers.
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.llvm == rhs.llvm
+  public static func == (l: Self, r: Self) -> Bool {
+    l.llvm == r.llvm
   }
 
 }

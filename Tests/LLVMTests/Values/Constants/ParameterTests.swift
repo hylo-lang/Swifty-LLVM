@@ -7,40 +7,40 @@ final class ParameterTests: XCTestCase {
   func testIndex() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].index, 0)
     XCTAssertEqual(f.unsafe[].parameters[1].unsafe[].index, 1)
 
-    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].asAnyValue)
+    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].v)
     XCTAssertEqual(p?.unsafe[].index, 1)
   }
   func testIndexDynamic() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].index, 0)
     XCTAssertEqual(f.unsafe[].parameters[1].unsafe[].index, 1)
 
-    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].asAnyValue)
+    let p = Parameter.UnsafeReference(f.unsafe[].parameters[1].v)
     XCTAssertEqual(p?.unsafe[].index, 1)
   }
 
   func testParent() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].parent, f.unsafe[])
   }
 
   func testParentDynamic() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64)))
+    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].parent, f.unsafe[])
   }
   func testAttributes() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("f", m.functionType(from: (m.ptr)))
+    let f = m.declareFunction("f", m.functionType(from: [m.ptr.t]))
     let p = f.unsafe[].parameters[0]
     let a = m.parameterAttribute(.nofree)
     let b = m.parameterAttribute(.dereferenceable_or_null, 8)
@@ -60,28 +60,28 @@ final class ParameterTests: XCTestCase {
   func testConversion() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64)))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t]))
     let p = f.unsafe[].parameters[0]
-    XCTAssertNotNil(Parameter.UnsafeReference(p.asAnyValue))
+    XCTAssertNotNil(Parameter.UnsafeReference(p.v))
 
     let q = m.i64.unsafe[].zero
-    XCTAssertNil(Parameter.UnsafeReference(q.asAnyValue))
+    XCTAssertNil(Parameter.UnsafeReference(q.v))
   }
 
   func testReferenceEquality() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let p = m.declareFunction("fn", m.functionType(from: (m.i64))).unsafe[].parameters[0]
-    let q = m.declareFunction("fn", m.functionType(from: (m.i64))).unsafe[].parameters[0]
+    let p = m.declareFunction("fn", m.functionType(from: [m.i64.t])).unsafe[].parameters[0]
+    let q = m.declareFunction("fn", m.functionType(from: [m.i64.t])).unsafe[].parameters[0]
     XCTAssertEqual(p, q)
 
-    let r = m.declareFunction("fn1", m.functionType(from: (m.i64))).unsafe[].parameters[0]
+    let r = m.declareFunction("fn1", m.functionType(from: [m.i64.t])).unsafe[].parameters[0]
     XCTAssertNotEqual(p, r)
   }
 
   func testEquality() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32)))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i32.t]))
 
     let p0a = f.unsafe[].parameters[0].unsafe[]
     let p0b = f.unsafe[].parameters[0].unsafe[]
@@ -91,13 +91,13 @@ final class ParameterTests: XCTestCase {
 
   func testInequality() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i32)))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i32.t]))
 
     let p0 = f.unsafe[].parameters[0].unsafe[]
     let p1 = f.unsafe[].parameters[1].unsafe[]
     XCTAssertNotEqual(p0, p1)
 
-    let g = m.declareFunction("gn", m.functionType(from: (m.i64)))
+    let g = m.declareFunction("gn", m.functionType(from: [m.i64.t]))
     let q0 = g.unsafe[].parameters[0].unsafe[]
     XCTAssertNotEqual(p0, q0)
   }
