@@ -48,7 +48,7 @@ extension Function {
     public let parent: Function
 
     /// Creates a return value corresponding to the `parent` function.
-    fileprivate init(_ parent: some Callable) {
+    fileprivate init<C: Callable>(_ parent: C) {
       self.parent = Function(temporarilyWrapping: parent.llvm)
     }
 

@@ -19,18 +19,18 @@ public struct DataLayout: ~Copyable {
   }
 
   /// Returns the number of bits in the representation of `type`'s instances.
-  public func bitWidth(of type: UnsafeReference<some IRType>) -> Int {
+  public func bitWidth<T: IRType>(of type: UnsafeReference<T>) -> Int {
     Int(LLVMSizeOfTypeInBits(llvm, type.llvm.raw))
   }
 
   /// Returns the storage size of the representation of `type`'s instances in bytes.
-  public func storageSize(of type: UnsafeReference<some IRType>) -> Int {
+  public func storageSize<T: IRType>(of type: UnsafeReference<T>) -> Int {
     Int(LLVMStoreSizeOfType(llvm, type.llvm.raw))
   }
 
   /// Returns the number of bytes from one instance of `type` to the next when stored in contiguous
   /// memory.
-  public func storageStride(of type: UnsafeReference<some IRType>) -> Int {
+  public func storageStride<T: IRType>(of type: UnsafeReference<T>) -> Int {
     let align = abiAlignment(of: type)
     assert(align > 0)
     return (storageSize(of: type) + align - 1) / align * align
@@ -42,7 +42,7 @@ public struct DataLayout: ~Copyable {
   ///   - Less than or equal to the preferred alignment.
   ///   - A power of 2.
   /// - Requires: `type` is sized (i.e. not void or a function type).
-  public func abiAlignment(of type: UnsafeReference<some IRType>) -> Int {
+  public func abiAlignment<T: IRType>(of type: UnsafeReference<T>) -> Int {
     precondition(type.unsafe[].isSized, "Cannot get alignment of unsized type.")
     return Int(LLVMABIAlignmentOfType(llvm, type.raw))
   }
@@ -53,7 +53,7 @@ public struct DataLayout: ~Copyable {
   ///   - Greater than or equal to the ABI alignment.
   ///   - A power of 2.
   /// - Requires: `type` is sized (i.e. not void or a function type).
-  public func preferredAlignment(of type: UnsafeReference<some IRType>) -> Int {
+  public func preferredAlignment<T: IRType>(of type: UnsafeReference<T>) -> Int {
     precondition(type.unsafe[].isSized, "Cannot get alignment of unsized type.")
     return Int(LLVMPreferredAlignmentOfType(llvm, type.raw))
   }
