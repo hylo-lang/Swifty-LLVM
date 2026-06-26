@@ -16,8 +16,8 @@ public struct ArrayType: IRType, Hashable {
   /// Returns an array type of `count` elements of type `element`.
   ///
   /// - Requires: `element` is defined in the same LLVM context as `module`.
-  public static func create(
-    _ count: Int, _ element: UnsafeReference<some IRType>, in module: inout Module
+  public static func create<T: IRType>(
+    _ count: Int, _ element: UnsafeReference<T>, in module: inout Module
   ) -> ArrayType.UnsafeReference {
     precondition(LLVMGetTypeContext(element.llvm.raw) == module.context)
     return ArrayType.UnsafeReference(LLVMArrayType2(element.llvm.raw, UInt64(count)))
