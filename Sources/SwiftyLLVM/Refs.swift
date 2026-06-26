@@ -231,42 +231,42 @@ extension UnsafeReference where T == BasicBlock {
 }
 
 /// Returns `true` iff `l` and `r` references are equal.
-public func == (l: UnsafeReference<some IRType>, r: UnsafeReference<some IRType>) -> Bool {
+public func == <T: IRType, U: IRType>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm == r.llvm
 }
 
 /// Returns `true` iff `l` and `r` references are not equal.
-public func != (l: UnsafeReference<some IRType>, r: UnsafeReference<some IRType>) -> Bool {
+public func != <T: IRType, U: IRType>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm != r.llvm
 }
 
 /// Returns `true` iff `l` and `r` references are equal.
-public func == (l: UnsafeReference<some IRValue>, r: UnsafeReference<some IRValue>) -> Bool {
+public func == <T: IRValue, U: IRValue>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm == r.llvm
 }
 
 /// Returns `true` iff `l` and `r` references are not equal.
-public func != (l: UnsafeReference<some IRValue>, r: UnsafeReference<some IRValue>) -> Bool {
+public func != <T: IRValue, U: IRValue>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm != r.llvm
 }
 
 /// Returns `true` iff `l` and `r` references are equal.
-public func == (l: UnsafeReference<some IRAttribute>, r: AnyAttribute.UnsafeReference) -> Bool {
+public func == <T: IRAttribute>(l: UnsafeReference<T>, r: AnyAttribute.UnsafeReference) -> Bool {
   l.llvm == r.llvm
 }
 
 /// Returns `true` iff `l` and `r` references are not equal.
-public func != (l: UnsafeReference<some IRAttribute>, r: AnyAttribute.UnsafeReference) -> Bool {
+public func != <T: IRAttribute>(l: UnsafeReference<T>, r: AnyAttribute.UnsafeReference) -> Bool {
   l.llvm != r.llvm
 }
 
 /// Returns `true` iff `l` and `r` references are equal.
-public func == (l: AnyAttribute.UnsafeReference, r: UnsafeReference<some IRAttribute>) -> Bool {
+public func == <T: IRAttribute>(l: AnyAttribute.UnsafeReference, r: UnsafeReference<T>) -> Bool {
   l.llvm == r.llvm
 }
 
 /// Returns `true` iff `l` and `r` references are not equal.
-public func != (l: AnyAttribute.UnsafeReference, r: UnsafeReference<some IRAttribute>) -> Bool {
+public func != <T: IRAttribute>(l: AnyAttribute.UnsafeReference, r: UnsafeReference<T>) -> Bool {
   l.llvm != r.llvm
 }
 

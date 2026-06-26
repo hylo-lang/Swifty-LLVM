@@ -414,7 +414,7 @@ public struct Module: ~Copyable {
   }
 
   /// Returns an insertion pointing before `i`.
-  public mutating func before(_ i: UnsafeReference<some IRInstruction>) -> InsertionPoint {
+  public mutating func before<I: IRInstruction>(_ i: UnsafeReference<I>) -> InsertionPoint {
     let h = LLVMCreateBuilderInContext(context)!
     LLVMPositionBuilderBefore(h, i.raw)
     return InsertionPoint(sinking: h)
@@ -696,8 +696,8 @@ public struct Module: ~Copyable {
   /// Inserts a bitwise AND instruction.
   ///
   /// - See https://llvm.org/docs/LangRef.html#and-instruction.
-  public mutating func insertBitwiseAnd(
-    _ l: UnsafeReference<some IRValue>, _ r: UnsafeReference<some IRValue>,
+  public mutating func insertBitwiseAnd<V: IRValue, W: IRValue>(
+    _ l: UnsafeReference<V>, _ r: UnsafeReference<W>,
     at p: borrowing InsertionPoint
   ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildAnd(p.llvm, l.raw, r.raw, "")!)
@@ -706,8 +706,8 @@ public struct Module: ~Copyable {
   /// Inserts a bitwise OR instruction.
   ///
   /// - See https://llvm.org/docs/LangRef.html#or-instruction.
-  public mutating func insertBitwiseOr(
-    _ l: UnsafeReference<some IRValue>, _ r: UnsafeReference<some IRValue>,
+  public mutating func insertBitwiseOr<V: IRValue, W: IRValue>(
+    _ l: UnsafeReference<V>, _ r: UnsafeReference<W>,
     at p: borrowing InsertionPoint
   ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildOr(p.llvm, l.raw, r.raw, "")!)
@@ -716,8 +716,8 @@ public struct Module: ~Copyable {
   /// Inserts a bitwise XOR instruction.
   ///
   /// - See https://llvm.org/docs/LangRef.html#xor-instruction.
-  public mutating func insertBitwiseXor(
-    _ l: UnsafeReference<some IRValue>, _ r: UnsafeReference<some IRValue>,
+  public mutating func insertBitwiseXor<V: IRValue, W: IRValue>(
+    _ l: UnsafeReference<V>, _ r: UnsafeReference<W>,
     at p: borrowing InsertionPoint
   ) -> AnyInstruction.UnsafeReference {
     .init(LLVMBuildXor(p.llvm, l.raw, r.raw, "")!)
@@ -728,8 +728,8 @@ public struct Module: ~Copyable {
   /// Inserts a stack allocation instruction at insertion point `p`.
   ///
   /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
-  public mutating func insertAlloca(
-    _ type: UnsafeReference<some IRType>, at p: borrowing InsertionPoint
+  public mutating func insertAlloca<T: IRType>(
+    _ type: UnsafeReference<T>, at p: borrowing InsertionPoint
   ) -> Alloca.UnsafeReference {
     Alloca.insert(type, at: p, in: &self)
   }
@@ -843,29 +843,29 @@ public struct Module: ~Copyable {
   // MARK: Atomics
 
   /// Sets the memory ordering of atomic instruction `i`.
-  public mutating func setOrdering(
-    _ ordering: AtomicOrdering, for i: UnsafeReference<some IRInstruction>
+  public mutating func setOrdering<I: IRInstruction>(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
   ) {
     LLVMSetOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the success ordering on compare-exchange instruction `i`.
-  public mutating func setCmpXchgSuccessOrdering(
-    _ ordering: AtomicOrdering, for i: UnsafeReference<some IRInstruction>
+  public mutating func setCmpXchgSuccessOrdering<I: IRInstruction>(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
   ) {
     LLVMSetCmpXchgSuccessOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the failure ordering on compare-exchange instruction `i`.
-  public mutating func setCmpXchgFailureOrdering(
-    _ ordering: AtomicOrdering, for i: UnsafeReference<some IRInstruction>
+  public mutating func setCmpXchgFailureOrdering<I: IRInstruction>(
+    _ ordering: AtomicOrdering, for i: UnsafeReference<I>
   ) {
     LLVMSetCmpXchgFailureOrdering(i.raw, ordering.llvm)
   }
 
   /// Sets the atomic read-modify-write operation kind of instruction `i`.
-  public mutating func setAtomicRMWBinOp(
-    _ binOp: AtomicRMWBinOp, for i: UnsafeReference<some IRInstruction>
+  public mutating func setAtomicRMWBinOp<I: IRInstruction>(
+    _ binOp: AtomicRMWBinOp, for i: UnsafeReference<I>
   ) {
     LLVMSetAtomicRMWBinOp(i.raw, binOp.llvm)
   }
@@ -874,7 +874,7 @@ public struct Module: ~Copyable {
   ///
   /// Effectively, `i` will only need to synchronize with
   /// signal handlers/interrupts executing on the same thread.
-  public mutating func setAtomicSingleThread(for i: UnsafeReference<some IRInstruction>) {
+  public mutating func setAtomicSingleThread<I: IRInstruction>(for i: UnsafeReference<I>) {
     LLVMSetAtomicSingleThread(i.raw, 1)
   }
 
