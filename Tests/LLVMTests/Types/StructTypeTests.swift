@@ -7,7 +7,7 @@ final class StructTypeTests: XCTestCase {
   func testInlineStruct() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
-    let s = m.structType((t, t)).unsafe[]
+    let s = m.structType([t.t, t.t]).unsafe[]
     XCTAssert(s.isLiteral)
     XCTAssertFalse(s.isPacked)
     XCTAssertFalse(s.isOpaque)
@@ -17,7 +17,7 @@ final class StructTypeTests: XCTestCase {
   func testNamedStruct() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
-    let s = m.structType(named: "S", (t, t)).unsafe[]
+    let s = m.structType(named: "S", [t.t, t.t]).unsafe[]
     XCTAssertFalse(s.isLiteral)
     XCTAssertFalse(s.isPacked)
     XCTAssertFalse(s.isOpaque)
@@ -27,9 +27,9 @@ final class StructTypeTests: XCTestCase {
   func testPackedStruct() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.integerType(64)
-    XCTAssert(m.structType((t, t), packed: true).unsafe[].isPacked)
+    XCTAssert(m.structType([t.t, t.t], packed: true).unsafe[].isPacked)
     XCTAssert(
-      m.createStructType(named: "S", [t.asAnyType, t.asAnyType], packed: true).unsafe[].isPacked)
+      m.createStructType(named: "S", [t.t, t.t], packed: true).unsafe[].isPacked)
   }
 
   func testOpaqueStruct() throws {
@@ -51,11 +51,11 @@ final class StructTypeTests: XCTestCase {
     let s0 = m.structType([])
     XCTAssertEqual(s0.unsafe[].fields.count, 0)
 
-    let s1 = m.structType((t))
+    let s1 = m.structType([t.t])
     XCTAssertEqual(s1.unsafe[].fields.count, 1)
     XCTAssert(s1.unsafe[].fields[0] == t)
 
-    let s2 = m.structType((t, u))
+    let s2 = m.structType([t.t, u.t])
     XCTAssertEqual(s2.unsafe[].fields.count, 2)
     XCTAssert(s2.unsafe[].fields[0] == t)
     XCTAssert(s2.unsafe[].fields[1] == u)
@@ -65,10 +65,10 @@ final class StructTypeTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let t = m.structType([])
-    XCTAssertNotNil(StructType.UnsafeReference(t.asAnyType))
+    XCTAssertNotNil(StructType.UnsafeReference(t.t))
 
     let u = m.integerType(64)
-    XCTAssertNil(StructType.UnsafeReference(u.asAnyType))
+    XCTAssertNil(StructType.UnsafeReference(u.t))
   }
 
   func testEquality() throws {
@@ -76,10 +76,10 @@ final class StructTypeTests: XCTestCase {
     let t = m.integerType(64)
     let u = m.integerType(32)
 
-    let s0 = m.structType((t, u)).unsafe[]
-    let s1 = m.structType((t, u)).unsafe[]
+    let s0 = m.structType([t.t, u.t]).unsafe[]
+    let s1 = m.structType([t.t, u.t]).unsafe[]
     XCTAssertEqual(s0, s1)
-    let s2 = m.structType((u, t)).unsafe[]
+    let s2 = m.structType([u.t, t.t]).unsafe[]
     XCTAssertNotEqual(s0, s2)
   }
 
@@ -88,8 +88,8 @@ final class StructTypeTests: XCTestCase {
     let t = m.integerType(64)
     let u = m.integerType(32)
 
-    let s0 = m.structType(named: "S", (t, u)).unsafe[]
-    let s1 = m.structType(named: "S", (t, u)).unsafe[]
+    let s0 = m.structType(named: "S", [t.t, u.t]).unsafe[]
+    let s1 = m.structType(named: "S", [t.t, u.t]).unsafe[]
     XCTAssertEqual(s0, s1)
     XCTAssertEqual(s0.llvm, s1.llvm)
   }
@@ -99,33 +99,33 @@ final class StructTypeTests: XCTestCase {
     let t = m.integerType(64)
     let u = m.integerType(32)
 
-    let s0 = m.structType(named: "S", (t, u)).unsafe[]
-    let s1 = m.structType(named: "T", (t, u)).unsafe[]
+    let s0 = m.structType(named: "S", [t.t, u.t]).unsafe[]
+    let s1 = m.structType(named: "T", [t.t, u.t]).unsafe[]
 
     XCTAssertNotEqual(s0, s1)
     XCTAssertNotEqual(s0.llvm, s1.llvm)
 
-    XCTAssertEqual(s0.fields[0].asAnyType, t.asAnyType)
-    XCTAssertEqual(s0.fields[1].asAnyType, u.asAnyType)
+    XCTAssertEqual(s0.fields[0].t, t.t)
+    XCTAssertEqual(s0.fields[1].t, u.t)
 
-    XCTAssertEqual(s1.fields[0].asAnyType, t.asAnyType)
-    XCTAssertEqual(s1.fields[1].asAnyType, u.asAnyType)
+    XCTAssertEqual(s1.fields[0].t, t.t)
+    XCTAssertEqual(s1.fields[1].t, u.t)
   }
 
   func testSameNameDifferentFields() throws {
     var m = try Module("foo", targetMachine: .host())
-    let t = m.integerType(64).asAnyType
-    let u = m.integerType(32).asAnyType
+    let t = m.integerType(64).t
+    let u = m.integerType(32).t
 
     let s0 = m.createStructType(named: "S", [t, u]).unsafe[]
     let s1 = m.createStructType(named: "S", [u, t]).unsafe[]
     XCTAssertNotEqual(s0, s1)
 
-    XCTAssertEqual(s0.fields[0].asAnyType, t.asAnyType)
-    XCTAssertEqual(s0.fields[1].asAnyType, u.asAnyType)
+    XCTAssertEqual(s0.fields[0].t, t.t)
+    XCTAssertEqual(s0.fields[1].t, u.t)
 
-    XCTAssertEqual(s1.fields[0].asAnyType, u.asAnyType)
-    XCTAssertEqual(s1.fields[1].asAnyType, t.asAnyType)
+    XCTAssertEqual(s1.fields[0].t, u.t)
+    XCTAssertEqual(s1.fields[1].t, t.t)
   }
 
 }

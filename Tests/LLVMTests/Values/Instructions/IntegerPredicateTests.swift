@@ -15,7 +15,7 @@ final class IntegerPredicateTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     for p in IntegerPredicate.allCases {
-      let f = m.declareFunction("f_\(p)", m.functionType(from: (m.i32, m.i32), to: m.i1))
+      let f = m.declareFunction("f_\(p)", m.functionType(from: [m.i32.t, m.i32.t], to: m.i1.t))
       let b = m.appendBlock(to: f)
 
       let l = f.unsafe[].parameters[0]

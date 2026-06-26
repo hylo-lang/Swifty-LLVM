@@ -20,10 +20,10 @@ final class ArrayTypeTests: XCTestCase {
     let i16 = m.integerType(16)
 
     let t = m.arrayType(8, i16)
-    XCTAssertNotNil(ArrayType.UnsafeReference(t.asAnyType))
+    XCTAssertNotNil(ArrayType.UnsafeReference(t.t))
 
     let u = m.integerType(64)
-    XCTAssertNil(ArrayType.UnsafeReference(u.asAnyType))
+    XCTAssertNil(ArrayType.UnsafeReference(u.t))
   }
 
   func testEquality() throws {

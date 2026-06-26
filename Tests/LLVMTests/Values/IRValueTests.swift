@@ -30,7 +30,7 @@ final class IRValueTests: XCTestCase {
     let i64 = m.integerType(64)
     XCTAssert(i64.unsafe[].null.unsafe[].isConstant)
 
-    let f = m.declareFunction("fn", m.functionType(from: ()))
+    let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
     let i = m.insertAlloca(i64, at: m.endOf(b)).unsafe[]
     XCTAssertFalse(i.isConstant)
@@ -38,7 +38,7 @@ final class IRValueTests: XCTestCase {
 
   func testIsTerminator() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: ()))
+    let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
 
@@ -54,13 +54,13 @@ final class IRValueTests: XCTestCase {
     let t = m.integerType(64).unsafe[].null
     let u = m.integerType(32).unsafe[].null
 
-    XCTAssertEqual(t, t.asAnyValue)
-    XCTAssertEqual(t.asAnyValue, t)
-    XCTAssertEqual(t.asAnyValue, t.asAnyValue)
+    XCTAssertEqual(t, t.v)
+    XCTAssertEqual(t.v, t)
+    XCTAssertEqual(t.v, t.v)
 
-    XCTAssertNotEqual(t, u.asAnyValue)
-    XCTAssertNotEqual(t.asAnyValue, u)
-    XCTAssertNotEqual(t.asAnyValue, u.asAnyValue)
+    XCTAssertNotEqual(t, u.v)
+    XCTAssertNotEqual(t.v, u)
+    XCTAssertNotEqual(t.v, u.v)
   }
 
   func testStringConvertible() throws {

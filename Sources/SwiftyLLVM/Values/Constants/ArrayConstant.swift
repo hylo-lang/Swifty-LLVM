@@ -35,7 +35,7 @@ public struct ArrayConstant: IRValue, Hashable {
     bytes: S, in module: inout Module
   ) -> ArrayConstant.UnsafeReference where S.Element == UInt8 {
     let i8 = module.i8
-    let byteConstants = bytes.map({ i8.unsafe[].constant($0).asAnyValue })
+    let byteConstants = bytes.map({ i8.unsafe[].constant($0).v })
     return ArrayConstant.create(of: i8, containing: byteConstants, in: &module)
   }
 

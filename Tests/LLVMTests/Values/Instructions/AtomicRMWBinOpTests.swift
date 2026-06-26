@@ -14,7 +14,7 @@ final class AtomicRMWBinOpTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     for op in [AtomicRMWBinOp.xchg, .add, .sub, .and, .nand, .or, .xor, .max, .min, .uMax, .uMin] {
-      let f = m.declareFunction("f_\(op)", m.functionType(from: (m.ptr, m.i64), to: m.i64))
+      let f = m.declareFunction("f_\(op)", m.functionType(from: [m.ptr.t, m.i64.t], to: m.i64.t))
       let b = m.appendBlock(to: f)
       let a = f.unsafe[].parameters[0]
       let v = f.unsafe[].parameters[1]
@@ -30,7 +30,8 @@ final class AtomicRMWBinOpTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     for op in [AtomicRMWBinOp.xchg, .fAdd, .fSub, .fMax, .fMin] {
-      let f = m.declareFunction("f_\(op)", m.functionType(from: (m.ptr, m.double), to: m.double))
+      let f = m.declareFunction(
+        "f_\(op)", m.functionType(from: [m.ptr.t, m.double.t], to: m.double.t))
       let b = m.appendBlock(to: f)
       let a = f.unsafe[].parameters[0]
       let v = f.unsafe[].parameters[1]

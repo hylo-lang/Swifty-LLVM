@@ -32,10 +32,10 @@ final class LoadTests: XCTestCase {
     m.insertStore(i64.unsafe[].constant(32), to: i, at: m.endOf(b))
 
     let s = m.insertLoad(i64, from: i, at: m.endOf(b))
-    XCTAssertNotNil(Load.UnsafeReference(s.asAnyValue))
+    XCTAssertNotNil(Load.UnsafeReference(s.v))
 
     let u = m.i64.unsafe[].zero
-    XCTAssertNil(Load.UnsafeReference(u.asAnyValue))
+    XCTAssertNil(Load.UnsafeReference(u.v))
   }
 
 }
