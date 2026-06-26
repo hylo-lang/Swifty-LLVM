@@ -28,14 +28,16 @@ final class ParameterTests: XCTestCase {
   func testParent() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
+    let f: Function.UnsafeReference =
+      m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].parent, f.unsafe[])
   }
 
   func testParentDynamic() throws {
     var m = try Module("foo", targetMachine: .host())
 
-    let f: Function.UnsafeReference = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
+    let f: Function.UnsafeReference =
+      m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t]))
     XCTAssertEqual(f.unsafe[].parameters[0].unsafe[].parent, f.unsafe[])
   }
   func testAttributes() throws {
