@@ -32,11 +32,11 @@ final class FloatingPointConstantTests: XCTestCase {
 
     let ft = m.float
     let ty = ft.unsafe[]
-    XCTAssertNotNil(FloatingPointConstant.UnsafeReference(ty.zero.asAnyValue))
+    XCTAssertNotNil(FloatingPointConstant.UnsafeReference(ty.zero.v))
 
     let i64 = m.integerType(64)
     let u = i64.unsafe[].zero
-    XCTAssertNil(FloatingPointConstant.UnsafeReference(u.asAnyValue))
+    XCTAssertNil(FloatingPointConstant.UnsafeReference(u.v))
   }
 
   func testEquality() throws {

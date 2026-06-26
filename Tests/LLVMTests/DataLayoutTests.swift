@@ -36,7 +36,7 @@ final class DataLayoutTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
-    let s = m.structType((i32, i32))
+    let s = m.structType([i32.t, i32.t])
     XCTAssertEqual(m.layout.offset(of: 1, in: s), 4)
   }
 
@@ -44,7 +44,7 @@ final class DataLayoutTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let i32 = m.integerType(32)
-    let s = m.structType((i32, i32))
+    let s = m.structType([i32.t, i32.t])
     XCTAssertEqual(m.layout.index(at: 5, in: s), 1)
   }
 

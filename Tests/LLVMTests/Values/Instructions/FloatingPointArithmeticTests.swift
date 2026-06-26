@@ -6,7 +6,7 @@ final class FloatingPointArithmeticTests: XCTestCase {
 
   func testFAdd() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.double, m.double), to: m.double))
+    let f = m.declareFunction("fn", m.functionType(from: [m.double.t, m.double.t], to: m.double.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]
@@ -17,7 +17,7 @@ final class FloatingPointArithmeticTests: XCTestCase {
 
   func testFSub() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.double, m.double), to: m.double))
+    let f = m.declareFunction("fn", m.functionType(from: [m.double.t, m.double.t], to: m.double.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]
@@ -28,7 +28,7 @@ final class FloatingPointArithmeticTests: XCTestCase {
 
   func testFMul() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.double, m.double), to: m.double))
+    let f = m.declareFunction("fn", m.functionType(from: [m.double.t, m.double.t], to: m.double.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]
@@ -39,7 +39,7 @@ final class FloatingPointArithmeticTests: XCTestCase {
 
   func testFDiv() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.double, m.double), to: m.double))
+    let f = m.declareFunction("fn", m.functionType(from: [m.double.t, m.double.t], to: m.double.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]
@@ -50,7 +50,7 @@ final class FloatingPointArithmeticTests: XCTestCase {
 
   func testFRem() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.double, m.double), to: m.double))
+    let f = m.declareFunction("fn", m.functionType(from: [m.double.t, m.double.t], to: m.double.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]

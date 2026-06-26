@@ -19,10 +19,10 @@ final class AllocaTests: XCTestCase {
     let i64 = m.integerType(64)
 
     let i = m.insertAlloca(i64, at: m.endOf(b))
-    XCTAssertNotNil(Alloca.UnsafeReference(i.asAnyValue))
+    XCTAssertNotNil(Alloca.UnsafeReference(i.v))
 
     let u = m.i64.unsafe[].zero
-    XCTAssertNil(Alloca.UnsafeReference(u.asAnyValue))
+    XCTAssertNil(Alloca.UnsafeReference(u.v))
   }
 
 }

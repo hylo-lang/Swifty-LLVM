@@ -6,7 +6,7 @@ final class ShiftTests: XCTestCase {
 
   func testShl() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t], to: m.i64.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]
@@ -17,7 +17,7 @@ final class ShiftTests: XCTestCase {
 
   func testLShr() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t], to: m.i64.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]
@@ -28,7 +28,7 @@ final class ShiftTests: XCTestCase {
 
   func testAShr() throws {
     var m = try Module("foo", targetMachine: .host())
-    let f = m.declareFunction("fn", m.functionType(from: (m.i64, m.i64), to: m.i64))
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t, m.i64.t], to: m.i64.t))
     let b = m.appendBlock(to: f)
     let l = f.unsafe[].parameters[0]
     let r = f.unsafe[].parameters[1]

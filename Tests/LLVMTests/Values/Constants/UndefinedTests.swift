@@ -8,10 +8,10 @@ final class UndefinedTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     let t = m.undefinedValue(of: m.float)
-    XCTAssertNotNil(Undefined.UnsafeReference(t.asAnyValue))
+    XCTAssertNotNil(Undefined.UnsafeReference(t.v))
 
     let u = m.i64.unsafe[].zero
-    XCTAssertNil(Undefined.UnsafeReference(u.asAnyValue))
+    XCTAssertNil(Undefined.UnsafeReference(u.v))
   }
 
   func testEquality() throws {

@@ -92,9 +92,9 @@ extension Backend: Hashable {
     hasher.combine(llvm)
   }
 
-  /// Returns `true` iff `lhs` and `rhs` wrap the same LLVM target.
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.llvm == rhs.llvm
+  /// Returns `true` iff `l` and `r` wrap the same LLVM target.
+  public static func == (l: Self, r: Self) -> Bool {
+    l.llvm == r.llvm
   }
 
 }

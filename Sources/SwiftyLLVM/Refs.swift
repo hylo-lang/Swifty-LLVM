@@ -189,7 +189,7 @@ extension UnsafeReference<BasicBlock> {
 extension UnsafeReference where T: IRType {
 
   /// Type-erased reference to the IR type.
-  public var asAnyType: UnsafeReference<AnyType> { .init(llvm) }
+  public var t: UnsafeReference<AnyType> { .init(llvm) }
 
   /// Native handle to the LLVM type reference.
   internal var raw: LLVMTypeRef { llvm.raw }
@@ -199,7 +199,7 @@ extension UnsafeReference where T: IRType {
 extension UnsafeReference where T: IRValue {
 
   /// Type-erased reference to the IR value.
-  public var asAnyValue: UnsafeReference<AnyValue> { .init(llvm) }
+  public var v: UnsafeReference<AnyValue> { .init(llvm) }
 
   /// Native handle to the LLVM value reference.
   internal var raw: LLVMValueRef { llvm.raw }
@@ -209,7 +209,7 @@ extension UnsafeReference where T: IRValue {
 extension UnsafeReference where T: IRInstruction {
 
   /// Type-erased reference to the instruction.
-  public var asAnyInstruction: UnsafeReference<AnyInstruction> { .init(llvm) }
+  public var i: UnsafeReference<AnyInstruction> { .init(llvm) }
 
 }
 
@@ -230,52 +230,52 @@ extension UnsafeReference where T == BasicBlock {
 
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are equal.
-public func == (lhs: UnsafeReference<some IRType>, rhs: UnsafeReference<some IRType>) -> Bool {
-  lhs.llvm == rhs.llvm
+/// Returns `true` iff `l` and `r` references are equal.
+public func == (l: UnsafeReference<some IRType>, r: UnsafeReference<some IRType>) -> Bool {
+  l.llvm == r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are not equal.
-public func != (lhs: UnsafeReference<some IRType>, rhs: UnsafeReference<some IRType>) -> Bool {
-  lhs.llvm != rhs.llvm
+/// Returns `true` iff `l` and `r` references are not equal.
+public func != (l: UnsafeReference<some IRType>, r: UnsafeReference<some IRType>) -> Bool {
+  l.llvm != r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are equal.
-public func == (lhs: UnsafeReference<some IRValue>, rhs: UnsafeReference<some IRValue>) -> Bool {
-  lhs.llvm == rhs.llvm
+/// Returns `true` iff `l` and `r` references are equal.
+public func == (l: UnsafeReference<some IRValue>, r: UnsafeReference<some IRValue>) -> Bool {
+  l.llvm == r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are not equal.
-public func != (lhs: UnsafeReference<some IRValue>, rhs: UnsafeReference<some IRValue>) -> Bool {
-  lhs.llvm != rhs.llvm
+/// Returns `true` iff `l` and `r` references are not equal.
+public func != (l: UnsafeReference<some IRValue>, r: UnsafeReference<some IRValue>) -> Bool {
+  l.llvm != r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are equal.
-public func == (lhs: UnsafeReference<some IRAttribute>, rhs: AnyAttribute.UnsafeReference) -> Bool {
-  lhs.llvm == rhs.llvm
+/// Returns `true` iff `l` and `r` references are equal.
+public func == (l: UnsafeReference<some IRAttribute>, r: AnyAttribute.UnsafeReference) -> Bool {
+  l.llvm == r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are not equal.
-public func != (lhs: UnsafeReference<some IRAttribute>, rhs: AnyAttribute.UnsafeReference) -> Bool {
-  lhs.llvm != rhs.llvm
+/// Returns `true` iff `l` and `r` references are not equal.
+public func != (l: UnsafeReference<some IRAttribute>, r: AnyAttribute.UnsafeReference) -> Bool {
+  l.llvm != r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are equal.
-public func == (lhs: AnyAttribute.UnsafeReference, rhs: UnsafeReference<some IRAttribute>) -> Bool {
-  lhs.llvm == rhs.llvm
+/// Returns `true` iff `l` and `r` references are equal.
+public func == (l: AnyAttribute.UnsafeReference, r: UnsafeReference<some IRAttribute>) -> Bool {
+  l.llvm == r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are not equal.
-public func != (lhs: AnyAttribute.UnsafeReference, rhs: UnsafeReference<some IRAttribute>) -> Bool {
-  lhs.llvm != rhs.llvm
+/// Returns `true` iff `l` and `r` references are not equal.
+public func != (l: AnyAttribute.UnsafeReference, r: UnsafeReference<some IRAttribute>) -> Bool {
+  l.llvm != r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are equal.
-public func == (lhs: AnyAttribute.UnsafeReference, rhs: AnyAttribute.UnsafeReference) -> Bool {
-  lhs.llvm == rhs.llvm
+/// Returns `true` iff `l` and `r` references are equal.
+public func == (l: AnyAttribute.UnsafeReference, r: AnyAttribute.UnsafeReference) -> Bool {
+  l.llvm == r.llvm
 }
 
-/// Returns `true` iff `lhs` and `rhs` references are not equal.
-public func != (lhs: AnyAttribute.UnsafeReference, rhs: AnyAttribute.UnsafeReference) -> Bool {
-  lhs.llvm != rhs.llvm
+/// Returns `true` iff `l` and `r` references are not equal.
+public func != (l: AnyAttribute.UnsafeReference, r: AnyAttribute.UnsafeReference) -> Bool {
+  l.llvm != r.llvm
 }
