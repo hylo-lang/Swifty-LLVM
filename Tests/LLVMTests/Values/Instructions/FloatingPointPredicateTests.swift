@@ -15,7 +15,8 @@ final class FloatingPointPredicateTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
 
     for p in FloatingPointPredicate.allCases {
-      let f = m.declareFunction("f_\(p)", m.functionType(from: [m.double.t, m.double.t], to: m.i1.t))
+      let f =
+        m.declareFunction("f_\(p)", m.functionType(from: [m.double.t, m.double.t], to: m.i1.t))
       let b = m.appendBlock(to: f)
 
       let l = f.unsafe[].parameters[0]
