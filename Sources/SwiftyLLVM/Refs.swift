@@ -230,52 +230,52 @@ extension UnsafeReference where T == BasicBlock {
 
 }
 
-/// Returns `true` iff `l` and `r` references are equal.
+/// Returns `true` iff `l` and `r` refer to the same object.
 public func == <T: IRType, U: IRType>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm == r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are not equal.
+/// Returns `true` iff `l` and `r` refer to the same object.
 public func != <T: IRType, U: IRType>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm != r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are equal.
+/// Returns `true` iff `l` and `r` refer to the same object.
 public func == <T: IRValue, U: IRValue>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm == r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are not equal.
+/// Returns `true` iff `l` and `r` refer to different objects.
 public func != <T: IRValue, U: IRValue>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
   l.llvm != r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are equal.
+/// Returns `true` iff `l` and `r` refer to the same object.
 public func == <T: IRAttribute>(l: UnsafeReference<T>, r: AnyAttribute.UnsafeReference) -> Bool {
   l.llvm == r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are not equal.
+/// Returns `true` iff `l` and `r` refer to different objects.
 public func != <T: IRAttribute>(l: UnsafeReference<T>, r: AnyAttribute.UnsafeReference) -> Bool {
   l.llvm != r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are equal.
+/// Returns `true` iff `l` and `r` refer to the same object.
 public func == <T: IRAttribute>(l: AnyAttribute.UnsafeReference, r: UnsafeReference<T>) -> Bool {
   l.llvm == r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are not equal.
+/// Returns `true` iff `l` and `r` refer to different objects.
 public func != <T: IRAttribute>(l: AnyAttribute.UnsafeReference, r: UnsafeReference<T>) -> Bool {
   l.llvm != r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are equal.
+/// Returns `true` iff `l` and `r` refer to the same object.
 public func == (l: AnyAttribute.UnsafeReference, r: AnyAttribute.UnsafeReference) -> Bool {
   l.llvm == r.llvm
 }
 
-/// Returns `true` iff `l` and `r` references are not equal.
+/// Returns `true` iff `l` and `r` refer to different objects.
 public func != (l: AnyAttribute.UnsafeReference, r: AnyAttribute.UnsafeReference) -> Bool {
   l.llvm != r.llvm
 }
