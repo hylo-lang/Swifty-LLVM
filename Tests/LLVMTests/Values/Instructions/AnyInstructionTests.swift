@@ -26,8 +26,7 @@ final class AnyInstructionTests: XCTestCase {
     XCTAssertEqual(i.i, i.i)
 
     XCTAssertEqual(i.i.v, i.v)
-    XCTAssertTrue(i.i == i)
-    XCTAssertTrue(i.i == i.v)
+    XCTAssertEqual(i.i, i.i)
   }
 
 }

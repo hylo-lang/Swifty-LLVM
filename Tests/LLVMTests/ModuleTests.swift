@@ -15,7 +15,7 @@ final class ModuleTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let t = m.structType(named: "T", [])
     let u = try XCTUnwrap(m.type(named: "T"))
-    XCTAssert(t.t == u)
+    XCTAssertEqual(t.t, u)
     XCTAssertNil(m.type(named: "U"))
   }
 
@@ -30,7 +30,7 @@ final class ModuleTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: []))
     let g = try XCTUnwrap(m.function(named: "fn"))
-    XCTAssert(f == g)
+    XCTAssertEqual(f, g)
     XCTAssertNil(m.type(named: "gn"))
   }
 
@@ -38,25 +38,25 @@ final class ModuleTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let f = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
     let g = try XCTUnwrap(m.intrinsic(named: IntrinsicFunction.llvm.trap))
-    XCTAssert(f == g)
+    XCTAssertEqual(f, g)
   }
 
   func testGlobalNamed() throws {
     var m = try Module("foo", targetMachine: .host())
     let x = m.declareGlobalVariable("gl", m.ptr)
     let y = try XCTUnwrap(m.global(named: "gl"))
-    XCTAssert(x == y)
+    XCTAssertEqual(x, y)
     XCTAssertNil(m.type(named: "gn"))
 
     let z = m.declareGlobalVariable("gl", m.ptr)
-    XCTAssert(x == z)
+    XCTAssertEqual(x, z)
   }
 
   func testAddGlobalVariable() throws {
     var m = try Module("foo", targetMachine: .host())
     let x = m.addGlobalVariable("g", m.ptr)
     let y = m.addGlobalVariable("g", m.ptr)
-    XCTAssert(x != y)
+    XCTAssertNotEqual(x, y)
   }
 
   func testVerify() throws {
@@ -77,7 +77,7 @@ final class ModuleTests: XCTestCase {
     m.insertReturn(i32.unsafe[].zero, at: m.endOf(b))
 
     let a = try m.compile(.assembly)
-    XCTAssert(a.count != 0)
+    XCTAssertNotEqual(a.count, 0)
   }
 
   func testStandardModulePasses() throws {
