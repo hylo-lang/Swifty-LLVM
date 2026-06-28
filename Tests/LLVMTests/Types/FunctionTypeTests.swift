@@ -6,26 +6,26 @@ final class FunctionTypeTests: XCTestCase {
   func testDefaultReturnType() throws {
     var m = try Module("foo", targetMachine: .host())
     let f = m.functionType(from: [])
-    XCTAssert(f.unsafe[].returnType == m.void.t)
+    XCTAssertEqual(f.unsafe[].returnType, m.void.t)
   }
   func testDefaultReturnTypeDynamic() throws {
     var m = try Module("foo", targetMachine: .host())
     let f = m.functionType(from: [])
-    XCTAssert(f.unsafe[].returnType == m.void.t)
+    XCTAssertEqual(f.unsafe[].returnType, m.void.t)
   }
 
   func testReturnType() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.i64
     let f = m.functionType(from: [], to: t.t)
-    XCTAssert(f.unsafe[].returnType == t.t)
+    XCTAssertEqual(f.unsafe[].returnType, t.t)
   }
 
   func testReturnTypeDynamic() throws {
     var m = try Module("foo", targetMachine: .host())
     let t = m.i64
     let f = m.functionType(from: [], to: t.t)
-    XCTAssert(f.unsafe[].returnType == t.t)
+    XCTAssertEqual(f.unsafe[].returnType, t.t)
   }
 
   func testParameters() throws {
@@ -38,12 +38,12 @@ final class FunctionTypeTests: XCTestCase {
 
     let f1 = m.functionType(from: [t.t])
     XCTAssertEqual(f1.unsafe[].parameters.count, 1)
-    XCTAssert(f1.unsafe[].parameters[0] == t.t)
+    XCTAssertEqual(f1.unsafe[].parameters[0], t.t)
 
     let f2 = m.functionType(from: [t.t, u.t])
     XCTAssertEqual(f2.unsafe[].parameters.count, 2)
-    XCTAssert(f2.unsafe[].parameters[0] == t.t)
-    XCTAssert(f2.unsafe[].parameters[1] == u.t)
+    XCTAssertEqual(f2.unsafe[].parameters[0], t.t)
+    XCTAssertEqual(f2.unsafe[].parameters[1], u.t)
   }
 
   func testConversion() throws {

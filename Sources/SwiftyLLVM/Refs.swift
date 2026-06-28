@@ -231,51 +231,31 @@ extension UnsafeReference where T == BasicBlock {
 }
 
 /// Returns `true` iff `l` and `r` refer to the same object.
-public func == <T: IRType, U: IRType>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
+public func == <T: IRType>(l: UnsafeReference<T>, r: UnsafeReference<T>) -> Bool {
   l.llvm == r.llvm
 }
 
 /// Returns `true` iff `l` and `r` refer to the same object.
-public func != <T: IRType, U: IRType>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
+public func != <T: IRType>(l: UnsafeReference<T>, r: UnsafeReference<T>) -> Bool {
   l.llvm != r.llvm
 }
 
 /// Returns `true` iff `l` and `r` refer to the same object.
-public func == <T: IRValue, U: IRValue>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
+public func == <T: IRValue>(l: UnsafeReference<T>, r: UnsafeReference<T>) -> Bool {
   l.llvm == r.llvm
 }
 
 /// Returns `true` iff `l` and `r` refer to different objects.
-public func != <T: IRValue, U: IRValue>(l: UnsafeReference<T>, r: UnsafeReference<U>) -> Bool {
+public func != <V: IRValue>(l: UnsafeReference<V>, r: UnsafeReference<V>) -> Bool {
   l.llvm != r.llvm
 }
 
 /// Returns `true` iff `l` and `r` refer to the same object.
-public func == <T: IRAttribute>(l: UnsafeReference<T>, r: AnyAttribute.UnsafeReference) -> Bool {
+public func == <A: IRAttribute>(l: UnsafeReference<A>, r: UnsafeReference<A>) -> Bool {
   l.llvm == r.llvm
 }
 
 /// Returns `true` iff `l` and `r` refer to different objects.
-public func != <T: IRAttribute>(l: UnsafeReference<T>, r: AnyAttribute.UnsafeReference) -> Bool {
-  l.llvm != r.llvm
-}
-
-/// Returns `true` iff `l` and `r` refer to the same object.
-public func == <T: IRAttribute>(l: AnyAttribute.UnsafeReference, r: UnsafeReference<T>) -> Bool {
-  l.llvm == r.llvm
-}
-
-/// Returns `true` iff `l` and `r` refer to different objects.
-public func != <T: IRAttribute>(l: AnyAttribute.UnsafeReference, r: UnsafeReference<T>) -> Bool {
-  l.llvm != r.llvm
-}
-
-/// Returns `true` iff `l` and `r` refer to the same object.
-public func == (l: AnyAttribute.UnsafeReference, r: AnyAttribute.UnsafeReference) -> Bool {
-  l.llvm == r.llvm
-}
-
-/// Returns `true` iff `l` and `r` refer to different objects.
-public func != (l: AnyAttribute.UnsafeReference, r: AnyAttribute.UnsafeReference) -> Bool {
+public func != <A: IRAttribute>(l: UnsafeReference<A>, r: UnsafeReference<A>) -> Bool {
   l.llvm != r.llvm
 }

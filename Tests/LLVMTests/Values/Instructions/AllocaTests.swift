@@ -9,7 +9,7 @@ final class AllocaTests: XCTestCase {
     let b = m.appendBlock(to: f)
     let i64 = m.integerType(64)
     let i = m.insertAlloca(i64, at: m.endOf(b))
-    XCTAssert(i.unsafe[].allocatedType == m.i64)
+    XCTAssertEqual(i.unsafe[].allocatedType, m.i64.t)
   }
 
   func testConversion() throws {

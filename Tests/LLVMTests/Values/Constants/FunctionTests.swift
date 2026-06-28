@@ -30,12 +30,12 @@ final class FunctionTests: XCTestCase {
 
     let f1 = m.declareFunction("f1", m.functionType(from: [m.i64.t]))
     XCTAssertEqual(f1.unsafe[].parameters.count, 1)
-    XCTAssert(f1.unsafe[].parameters[0].unsafe[].type == t.t)
+    XCTAssertEqual(f1.unsafe[].parameters[0].unsafe[].type, t.t)
 
     let f2 = m.declareFunction("f2", m.functionType(from: [m.i64.t, m.i32.t]))
     XCTAssertEqual(f2.unsafe[].parameters.count, 2)
-    XCTAssert(f2.unsafe[].parameters[0].unsafe[].type == t.t)
-    XCTAssert(f2.unsafe[].parameters[1].unsafe[].type == u.t)
+    XCTAssertEqual(f2.unsafe[].parameters[0].unsafe[].type, t.t)
+    XCTAssertEqual(f2.unsafe[].parameters[1].unsafe[].type, u.t)
   }
 
   func testParametersIteration() throws {
@@ -48,14 +48,14 @@ final class FunctionTests: XCTestCase {
     XCTAssertEqual(params.count, 3)
 
     let types = params.map({ $0.unsafe[].type })
-    XCTAssert(types[0] == m.i64.t)
-    XCTAssert(types[1] == m.i32.t)
-    XCTAssert(types[2] == m.double.t)
+    XCTAssertEqual(types[0], m.i64.t)
+    XCTAssertEqual(types[1], m.i32.t)
+    XCTAssertEqual(types[2], m.double.t)
 
     let reversed = params.reversed().map({ $0.unsafe[].type })
-    XCTAssert(reversed[0] == m.double.t)
-    XCTAssert(reversed[1] == m.i32.t)
-    XCTAssert(reversed[2] == m.i64.t)
+    XCTAssertEqual(reversed[0], m.double.t)
+    XCTAssertEqual(reversed[1], m.i32.t)
+    XCTAssertEqual(reversed[2], m.i64.t)
   }
 
   func testBasicBlocks() throws {

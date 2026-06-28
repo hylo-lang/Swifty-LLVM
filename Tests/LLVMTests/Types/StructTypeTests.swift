@@ -53,12 +53,12 @@ final class StructTypeTests: XCTestCase {
 
     let s1 = m.structType([t.t])
     XCTAssertEqual(s1.unsafe[].fields.count, 1)
-    XCTAssert(s1.unsafe[].fields[0] == t)
+    XCTAssertEqual(s1.unsafe[].fields[0], t.t)
 
     let s2 = m.structType([t.t, u.t])
     XCTAssertEqual(s2.unsafe[].fields.count, 2)
-    XCTAssert(s2.unsafe[].fields[0] == t)
-    XCTAssert(s2.unsafe[].fields[1] == u)
+    XCTAssertEqual(s2.unsafe[].fields[0], t.t)
+    XCTAssertEqual(s2.unsafe[].fields[1], u.t)
   }
 
   func testConversion() throws {

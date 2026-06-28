@@ -14,13 +14,9 @@ final class IRTypeTests: XCTestCase {
     let t = m.integerType(64)
     let u = m.integerType(32)
 
-    XCTAssert(t == t.t)
-    XCTAssert(t.t == t)
-    XCTAssert(t.t == t.t)
-
-    XCTAssert(t != u.t)
-    XCTAssert(u.t != t)
-    XCTAssert(t.t != u.t)
+    XCTAssertEqual(t.t, t.t)
+    XCTAssertEqual(t, t)
+    XCTAssertNotEqual(t.t, u.t)
   }
 
   func testStringConvertible() throws {
