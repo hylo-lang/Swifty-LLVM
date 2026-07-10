@@ -294,6 +294,15 @@
 - [ ] LLVMIsAMDNode
 - [ ] LLVMIsAValueAsMetadata
 - [ ] LLVMIsAMDString
+- [x] LLVMGetOperand
+
+  `Operands.subscript[_:]`
+
+- [ ] LLVMGetOperandUse
+- [ ] LLVMSetOperand
+- [x] LLVMGetNumOperands
+
+  `Operands.count`
 
 #### Usage
 
