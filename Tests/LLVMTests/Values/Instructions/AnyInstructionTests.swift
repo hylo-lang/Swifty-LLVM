@@ -51,4 +51,19 @@ final class AnyInstructionTests: XCTestCase {
     }
   }
 
+  func testOperandsIndex() throws {
+    var m = try Module("foo", targetMachine: .host())
+    let n = m.integerType(64)
+    let f = m.declareFunction("fn", m.functionType(from: [n.t, n.t]))
+    let b = m.appendBlock(to: f)
+
+    let x0 = m.insertIntegerComparison(
+      .eq, f.unsafe[].parameters[0].v, f.unsafe[].parameters[1].v, at: m.endOf(b))
+
+    let i = x0.unsafe[].operands.startIndex
+    let j = x0.unsafe[].operands.endIndex
+    XCTAssertEqual(x0.unsafe[].operands.index(after: i), 1)
+    XCTAssertEqual(x0.unsafe[].operands.index(before: j), 1)
+  }
+
 }
