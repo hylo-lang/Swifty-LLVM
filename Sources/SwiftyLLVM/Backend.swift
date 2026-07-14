@@ -60,7 +60,8 @@ public struct Backend {
   }
 
   /// The initialization of the native target.
-  internal static let initializeHost: Void = {
+  public static let initializeHost: Void = {
+    // Should be private - https://github.com/swiftlang/swift/issues/90661
     LLVMInitializeNativeAsmParser()
     LLVMInitializeNativeAsmPrinter()
     LLVMInitializeNativeDisassembler()
@@ -72,7 +73,8 @@ public struct Backend {
   ///
   /// Set `SWIFTY_LLVM_CROSS_COMPILATION_ENABLED` to `true` using SPM
   /// `swift build -Xswiftc -DSWIFTY_LLVM_CROSS_COMPILATION_ENABLED`
-  private static let initializeCrossCompilation: Void = {
+  public static let initializeCrossCompilation: Void = {
+    // Should be private - https://github.com/swiftlang/swift/issues/90661
     // Note: this could be more granular, but for now we have two types
     // of LLVM distributables: one with only the native target, and one with all targets.
     LLVMInitializeAllTargetInfos()
