@@ -495,6 +495,20 @@ public struct Module: ~Copyable {
     LLVMSetAlignment(v.raw, UInt32(a))
   }
 
+  /// Sets the fast floating point flags for `i` to allow additional optimizations.
+  ///
+  /// Requires floating-point operations (fneg, fadd, fsub, fmul, fdiv, frem, fcmp, fptrunc, fpext),
+  /// uitofp, sitofp, and phi, select, or call instructions that return floating-point types.
+  /// - Note: calling this has no effect if `i` is a compile-time constant.
+  /// - See: https://llvm.org/docs/LangRef.html#fast-math-flags
+  public mutating func setFastMathFlags<I: IRInstruction>(
+    _ flags: FastMathFlags, for i: I.UnsafeReference
+  ) {
+    if !i.unsafe[].isConstant {
+      LLVMSetFastMathFlags(i.llvm.raw, flags.rawValue)
+    }
+  }
+
   /// The LLVM context of this module wrapped as a SwiftyLLVM reference.
   private var contextRef: ContextRef { .init(context) }
 
