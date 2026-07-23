@@ -59,4 +59,45 @@ final class FloatingPointArithmeticTests: XCTestCase {
     XCTAssertNoThrow(try m.verify())
   }
 
+  func testFlagsRuntime() throws {
+    var m = try Module("foo", targetMachine: .host())
+    let f = m.declareFunction("f", m.functionType(from: [m.double.t], to: m.double.t))
+    let b = m.appendBlock(to: f)
+    let p0 = f.unsafe[].parameters[0]
+
+    let i = m.insertFAdd(p0, p0, at: m.endOf(b))
+
+    XCTAssertEqual(i.unsafe[].fastMathFlags, FastMathFlags())
+
+    m.setFastMathFlags([.afn, .contract], for: i)
+
+    XCTAssertEqual(i.unsafe[].fastMathFlags, [.contract, .afn])
+    XCTAssertNotEqual(i.unsafe[].fastMathFlags, .fast)
+
+    m.setFastMathFlags(.fast, for: i)
+
+    XCTAssertEqual(i.unsafe[].fastMathFlags, .fast)
+
+    m.insertReturn(i, at: m.endOf(b))
+    XCTAssertNoThrow(try m.verify())
+  }
+
+
+  func testFlagsCompileTime() throws {
+    var m = try Module("foo", targetMachine: .host())
+    let f = m.declareFunction("f", m.functionType(from: []))
+    let b = m.appendBlock(to: f)
+
+    let i = m.insertFAdd(
+      m.double.unsafe[].constant(1), 
+      m.double.unsafe[].constant(1), at: m.endOf(b))
+    XCTAssertEqual(i.unsafe[].fastMathFlags, FastMathFlags())
+
+    m.setFastMathFlags([.afn, .contract], for: i)
+    XCTAssertEqual(i.unsafe[].fastMathFlags, [])
+
+    m.insertReturn(at: m.endOf(b))
+    XCTAssertNoThrow(try m.verify())
+  }
+
 }
