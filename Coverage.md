@@ -1021,10 +1021,22 @@
 
   `Module.insertSignedExtend(_:to:at:)`
 
-- [ ] LLVMBuildFPToUI
-- [ ] LLVMBuildFPToSI
-- [ ] LLVMBuildUIToFP
-- [ ] LLVMBuildSIToFP
+- [x] LLVMBuildFPToUI
+
+  `Module.insertFPToUI(_:to:at:)`
+
+- [x] LLVMBuildFPToSI
+
+  `Module.insertFPToSI(_:to:at:)`
+
+- [x] LLVMBuildUIToFP
+
+  `Module.insertUIToFP(_:to:at:)`
+
+- [x] LLVMBuildSIToFP
+
+  `Module.insertSIToFP(_:to:at:)`
+
 - [x] LLVMBuildFPTrunc
 
   `Module.insertFPTrunc(_:to:at:)`

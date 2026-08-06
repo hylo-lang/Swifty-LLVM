@@ -1127,6 +1127,46 @@ public struct Module: ~Copyable {
     .init(LLVMBuildFPExt(p.llvm, source.raw, target.raw, "")!)
   }
 
+  /// Inserts a floating-point to unsigned integer conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fptoui-to-instruction.
+  public mutating func insertFPToUI<V: IRValue, T: IRType>(
+    _ source: V.UnsafeReference, to target: T.UnsafeReference,
+    at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
+    .init(LLVMBuildFPToUI(p.llvm, source.raw, target.raw, "")!)
+  }
+
+  /// Inserts a floating-point to signed integer conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#fptosi-to-instruction.
+  public mutating func insertFPToSI<V: IRValue, T: IRType>(
+    _ source: V.UnsafeReference, to target: T.UnsafeReference,
+    at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
+    .init(LLVMBuildFPToSI(p.llvm, source.raw, target.raw, "")!)
+  }
+
+  /// Inserts an unsigned integer to floating-point conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#uitofp-to-instruction.
+  public mutating func insertUIToFP<V: IRValue, T: IRType>(
+    _ source: V.UnsafeReference, to target: T.UnsafeReference,
+    at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
+    .init(LLVMBuildUIToFP(p.llvm, source.raw, target.raw, "")!)
+  }
+
+  /// Inserts a signed integer to floating-point conversion.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#sitofp-to-instruction.
+  public mutating func insertSIToFP<V: IRValue, T: IRType>(
+    _ source: V.UnsafeReference, to target: T.UnsafeReference,
+    at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
+    .init(LLVMBuildSIToFP(p.llvm, source.raw, target.raw, "")!)
+  }
+
   // MARK: Others
 
   /// Inserts a call to `callee`, passing `arguments`.
