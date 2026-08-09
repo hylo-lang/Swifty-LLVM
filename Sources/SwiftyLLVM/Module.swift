@@ -750,7 +750,7 @@ public struct Module: ~Copyable {
   ///
   /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
   public mutating func insertAlloca<T: IRType>(
-    _ type: UnsafeReference<T>, at p: borrowing InsertionPoint
+    _ type: T.UnsafeReference, at p: borrowing InsertionPoint
   ) -> Alloca.UnsafeReference {
     Alloca.insert(type, at: p, in: &self)
   }
@@ -763,6 +763,15 @@ public struct Module: ~Copyable {
     _ type: T.UnsafeReference, atEntryOf f: Function.UnsafeReference
   ) -> Alloca.UnsafeReference {
     insertAlloca(type, at: startOf(entryOf(f)!))
+  }
+
+  /// Inserts a stack allocation instruction at insertion point `p`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
+  public mutating func insertAlloca<V: IRValue, T: IRType>(
+    arrayOf count: V.UnsafeReference, _ type: T.UnsafeReference, at p: borrowing InsertionPoint
+  ) -> Alloca.UnsafeReference {
+    Alloca.insert(arrayOf: count, type, at: p, in: &self)
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base`.

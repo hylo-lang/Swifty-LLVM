@@ -13,11 +13,20 @@ public struct Alloca: IRInstruction {
     self.llvm = handle
   }
 
-  /// Inserts an `alloca` instruction of `type` at insertion point `p`.
+  /// Inserts an `alloca` instruction allocating an instance of `type` at insertion point `p`.
   public static func insert<T: IRType>(
     _ type: T.UnsafeReference, at p: borrowing InsertionPoint, in module: inout Module
   ) -> Alloca.UnsafeReference {
     Alloca.UnsafeReference(LLVMBuildAlloca(p.llvm, type.raw, "")!)
+  }
+
+  /// Inserts an `alloca` instruction allocating an array of `count` instances of `type` at
+  /// insertion point `p`.
+  public static func insert<V: IRValue, T: IRType>(
+    arrayOf count: V.UnsafeReference, _ type: T.UnsafeReference,
+    at p: borrowing InsertionPoint, in module: inout Module
+  ) -> Alloca.UnsafeReference {
+    Alloca.UnsafeReference(LLVMBuildArrayAlloca(p.llvm, type.raw, count.raw, "")!)
   }
 
   /// The type of the value allocated by the instruction.
