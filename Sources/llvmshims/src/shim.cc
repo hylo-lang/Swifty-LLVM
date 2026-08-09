@@ -155,4 +155,14 @@ auto SwiftyLLVMGetFirstInvalidFeature(
   return LLVMCreateMessage(llvm::SubtargetFeatures::StripFlag(*it).str().c_str());
 }
 
+long SwiftyLLVMGetStackAlignment(LLVMTargetDataRef dataLayout) {
+  llvm::DataLayout *td = llvm::unwrap(dataLayout);
+  auto n = td->getStackAlignment();
+  if (n.has_value()) {
+    return n.value().value();
+  } else {
+    return -1;
+  }
+}
+
 } // extern "C"

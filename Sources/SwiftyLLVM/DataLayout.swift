@@ -72,6 +72,11 @@ public struct DataLayout: ~Copyable {
     Int(LLVMElementAtOffset(llvm, type.llvm.raw, UInt64(offset)))
   }
 
+  /// The natural stack alignment of the target, or `nil` if it isn't specified.
+  public var stackAlignment: Int? {
+    Int(SwiftyLLVMGetStackAlignment(llvm))
+  }
+
   /// The size of pointers in bytes in the default address space.
   public var pointerSize: Int {
     Int(LLVMPointerSize(llvm))
