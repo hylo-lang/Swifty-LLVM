@@ -61,9 +61,11 @@ final class DataLayoutTests: XCTestCase {
 
     XCTAssertGreaterThanOrEqual(preferredAlignment, abiAlignment)
     XCTAssertTrue(
-      preferredAlignment & (preferredAlignment - 1) == 0, "preferred alignment must be a power of 2"
-    )
-    XCTAssertTrue(abiAlignment & (abiAlignment - 1) == 0, "abi alignment must be a power of 2")
+      preferredAlignment & (preferredAlignment - 1) == 0,
+      "preferred alignment must be a power of 2")
+    XCTAssertTrue(
+      abiAlignment & (abiAlignment - 1) == 0,
+      "abi alignment must be a power of 2")
   }
 
   func testAlignmentGuarantees() throws {
@@ -78,6 +80,11 @@ final class DataLayoutTests: XCTestCase {
     assertAlignmentInvariants(m.float, in: m.layout)
     assertAlignmentInvariants(m.double, in: m.layout)
     assertAlignmentInvariants(m.fp128, in: m.layout)
+  }
+
+  func testStackAlignment() throws {
+    let m = try Module("foo", targetMachine: .host())
+    if let n = m.layout.stackAlignment { XCTAssertNotEqual(n, 0) }
   }
 
   func testPointerSize() throws {
