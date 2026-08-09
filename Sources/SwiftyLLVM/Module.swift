@@ -420,6 +420,13 @@ public struct Module: ~Copyable {
     return InsertionPoint(sinking: h)
   }
 
+  /// Returns the entry block of `f`, if any.
+  public mutating func entryOf(
+    _ f: Function.UnsafeReference
+  ) -> BasicBlock.UnsafeReference? {
+    LLVMGetFirstBasicBlock(f.raw).map { BasicBlock.UnsafeReference($0) }
+  }
+
   /// Returns an insertion point at the start of `b`.
   public mutating func startOf(_ b: BasicBlock.UnsafeReference) -> InsertionPoint {
     if let h = LLVMGetFirstInstruction(b.raw) {
@@ -746,13 +753,6 @@ public struct Module: ~Copyable {
     _ type: UnsafeReference<T>, at p: borrowing InsertionPoint
   ) -> Alloca.UnsafeReference {
     Alloca.insert(type, at: p, in: &self)
-  }
-
-  /// Returns the entry block of `f`, if any.
-  public mutating func entryOf(
-    _ f: Function.UnsafeReference
-  ) -> BasicBlock.UnsafeReference? {
-    LLVMGetFirstBasicBlock(f.raw).map { BasicBlock.UnsafeReference($0) }
   }
 
   /// Inserts an `alloca` that allocates stack memory for a value of `type`, at the entry of `f`.
