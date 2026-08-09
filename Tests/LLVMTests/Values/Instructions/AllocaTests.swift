@@ -7,8 +7,7 @@ final class AllocaTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
-    let i64 = m.integerType(64)
-    let i = m.insertAlloca(i64, at: m.endOf(b))
+    let i = m.insertAlloca(m.i64, at: m.endOf(b))
     XCTAssertEqual(i.unsafe[].allocatedType, m.i64.t)
   }
 
@@ -16,9 +15,8 @@ final class AllocaTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
-    let i64 = m.integerType(64)
 
-    let i = m.insertAlloca(i64, at: m.endOf(b))
+    let i = m.insertAlloca(m.i64, at: m.endOf(b))
     XCTAssertNotNil(Alloca.UnsafeReference(i.v))
 
     let u = m.i64.unsafe[].zero
@@ -29,10 +27,9 @@ final class AllocaTests: XCTestCase {
     var m = try Module("foo", targetMachine: .host())
     let f = m.declareFunction("fn", m.functionType(from: []))
     let b = m.appendBlock(to: f)
-    let i64 = m.integerType(64)
 
     // There's one operand denoting the number of instances to allocate.
-    let i = m.insertAlloca(i64, at: m.endOf(b))
+    let i = m.insertAlloca(m.i64, at: m.endOf(b))
     XCTAssertEqual(i.unsafe[].operands.count, 1)
   }
 
