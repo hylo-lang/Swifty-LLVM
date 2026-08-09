@@ -33,4 +33,16 @@ final class AllocaTests: XCTestCase {
     XCTAssertEqual(i.unsafe[].operands.count, 1)
   }
 
+  func testDynamic() throws {
+    var m = try Module("foo", targetMachine: .host())
+    let f = m.declareFunction("fn", m.functionType(from: []))
+    let b = m.appendBlock(to: f)
+
+    let s = m.i16.unsafe[].constant(8)
+    let i = m.insertAlloca(arrayOf: s, m.i64, at: m.endOf(b))
+    let n = try XCTUnwrap(i.unsafe[].operands.first)
+    XCTAssertEqual(IntegerConstant.UnsafeReference(n), m.i16.unsafe[].constant(8))
+    XCTAssertEqual(i.unsafe[].allocatedType, m.i64.t)
+  }
+
 }
