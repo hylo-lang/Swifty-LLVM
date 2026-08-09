@@ -62,6 +62,9 @@ char *SwiftyLLVMGetFirstInvalidFeature(
   LLVMTargetRef target, const char *triple, const char *features
 );
 
+/// Returns the natural stack alignment, or `-1` if one wasn't specified.
+long SwiftyLLVMGetStackAlignment(LLVMTargetDataRef dataLayout);
+
 LLVM_C_EXTERN_C_END
 
 #endif
