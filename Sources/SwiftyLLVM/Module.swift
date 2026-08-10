@@ -420,6 +420,13 @@ public struct Module: ~Copyable {
     return InsertionPoint(sinking: h)
   }
 
+  /// Returns the entry block of `f`, if any.
+  public mutating func entryOf(
+    _ f: Function.UnsafeReference
+  ) -> BasicBlock.UnsafeReference? {
+    LLVMGetFirstBasicBlock(f.raw).map { BasicBlock.UnsafeReference($0) }
+  }
+
   /// Returns an insertion point at the start of `b`.
   public mutating func startOf(_ b: BasicBlock.UnsafeReference) -> InsertionPoint {
     if let h = LLVMGetFirstInstruction(b.raw) {
@@ -743,16 +750,9 @@ public struct Module: ~Copyable {
   ///
   /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
   public mutating func insertAlloca<T: IRType>(
-    _ type: UnsafeReference<T>, at p: borrowing InsertionPoint
+    _ type: T.UnsafeReference, at p: borrowing InsertionPoint
   ) -> Alloca.UnsafeReference {
     Alloca.insert(type, at: p, in: &self)
-  }
-
-  /// Returns the entry block of `f`, if any.
-  public mutating func entryOf(
-    _ f: Function.UnsafeReference
-  ) -> BasicBlock.UnsafeReference? {
-    LLVMGetFirstBasicBlock(f.raw).map { BasicBlock.UnsafeReference($0) }
   }
 
   /// Inserts an `alloca` that allocates stack memory for a value of `type`, at the entry of `f`.
@@ -763,6 +763,15 @@ public struct Module: ~Copyable {
     _ type: T.UnsafeReference, atEntryOf f: Function.UnsafeReference
   ) -> Alloca.UnsafeReference {
     insertAlloca(type, at: startOf(entryOf(f)!))
+  }
+
+  /// Inserts a stack allocation instruction at insertion point `p`.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#alloca-instruction.
+  public mutating func insertAlloca<V: IRValue, T: IRType>(
+    arrayOf count: V.UnsafeReference, _ type: T.UnsafeReference, at p: borrowing InsertionPoint
+  ) -> Alloca.UnsafeReference {
+    Alloca.insert(arrayOf: count, type, at: p, in: &self)
   }
 
   /// Inserts an instruction computing the address of successive indexing into `base`.
