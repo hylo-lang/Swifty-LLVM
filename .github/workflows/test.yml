@@ -149,7 +149,7 @@ jobs:
           path: Swifty-LLVM
 
       - name: Set up LLVM
-        uses: hylo-lang/get-llvm@v0.3.0
+        uses: hylo-lang/get-llvm@6a49368ad6b8b735b444d4b9840b0bc466e7875a # v0.4.0
         id: get-llvm
         with:
           llvmVersion: ${{ env.HYLO_LLVM_VERSION }}
@@ -223,7 +223,7 @@ jobs:
           path: Swifty-LLVM
 
       - name: Set up LLVM
-        uses: hylo-lang/get-llvm@v0.3.0
+        uses: hylo-lang/get-llvm@6a49368ad6b8b735b444d4b9840b0bc466e7875a # v0.4.0
         id: get-llvm
         with:
           llvmVersion: ${{ env.HYLO_LLVM_VERSION }}
