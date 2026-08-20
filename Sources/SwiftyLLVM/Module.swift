@@ -809,7 +809,7 @@ public struct Module: ~Copyable {
   /// - See https://llvm.org/docs/LangRef.html#getelementptr-instruction.
   /// - See https://llvm.org/docs/GetElementPtr.html.
   public mutating func insertGetElementPointerInBounds<V: IRValue, T: IRType>(
-    of base: V.UnsafeReference, typed baseType: T.UnsafeReference, indices: [Int], 
+    of base: V.UnsafeReference, typed baseType: T.UnsafeReference, indices: [Int],
     indexType: IntegerType.UnsafeReference, at p: borrowing InsertionPoint
   ) -> AnyInstruction.UnsafeReference {
     var i = indices.map({ (x) in Optional.some(indexType.unsafe[].constant(x).raw) })
@@ -1203,19 +1203,8 @@ public struct Module: ~Copyable {
     on arguments: [AnyValue.UnsafeReference],
     at p: borrowing InsertionPoint
   ) -> AnyInstruction.UnsafeReference {
-    var a = arguments.map({ $0.raw as Optional })
-
-    if let f = FunctionType.UnsafeReference(calleeType)?.unsafe[] {
-      if f.parameters.count != arguments.count && !f.isVarArg {
-        let functionName = Function.UnsafeReference(callee)!.unsafe[].name
-        var debugInfo = "Parameter count mismatch on LLVM function call: \(functionName)\n"
-        debugInfo += "Expected parameters: \(f.parameters.count)\n"
-        debugInfo += "Provided arguments: \(arguments.count)\n"
-        preconditionFailure(debugInfo)
-      }
-    }
-
-    return .init(LLVMBuildCall2(p.llvm, calleeType.raw, callee.raw, &a, UInt32(a.count), "")!)
+    var xs = arguments.map({ (x) in x.raw as Optional })
+    return .init(LLVMBuildCall2(p.llvm, calleeType.raw, callee.raw, &xs, UInt32(xs.count), "")!)
   }
 
   /// Inserts an integer comparison instruction.
