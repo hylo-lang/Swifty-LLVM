@@ -74,7 +74,8 @@ public struct DataLayout: ~Copyable {
 
   /// The natural stack alignment of the target, or `nil` if it isn't specified.
   public var stackAlignment: Int? {
-    Int(SwiftyLLVMGetStackAlignment(llvm))
+    let a = SwiftyLLVMGetStackAlignment(llvm)
+    return (a >= 0) ? Int(a) : nil
   }
 
   /// The size of pointers in bytes in the default address space.
