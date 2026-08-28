@@ -87,6 +87,28 @@ final class DataLayoutTests: XCTestCase {
     if let n = m.layout.stackAlignment { XCTAssertNotEqual(n, 0) }
   }
 
+  func testStackAlignmentOfTargetSpecifyingOne() throws {
+    #if !SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
+      throw XCTSkip()
+    #else
+      // The data layout of x86_64 Linux specifies a natural stack alignment of 128 bits.
+      let t = try TargetSpecification(target: .init("x86_64-unknown-linux-gnu"))
+      let m = Module("foo", targetMachine: .init(target: t))
+      XCTAssertEqual(m.layout.stackAlignment, 16)
+    #endif
+  }
+
+  func testStackAlignmentOfTargetSpecifyingNone() throws {
+    #if !SWIFTY_LLVM_CROSS_COMPILATION_ENABLED
+      throw XCTSkip()
+    #else
+      // The data layout of AVR doesn't specify any natural stack alignment.
+      let t = try TargetSpecification(target: .init("avr-unknown-unknown"))
+      let m = Module("foo", targetMachine: .init(target: t))
+      XCTAssertNil(m.layout.stackAlignment)
+    #endif
+  }
+
   func testPointerSize() throws {
     let m = try Module("foo", targetMachine: .host())
 
