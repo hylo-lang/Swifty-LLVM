@@ -1209,16 +1209,17 @@ public struct Module: ~Copyable {
     let f = FunctionType.UnsafeReference(calleeType)!.unsafe[]
     precondition(f.isVarArg ?
       (arguments.count >= f.parameterCount) : (arguments.count == f.parameterCount),
-      argumentMismatch(providedCount: arguments.count, for: callee, ofType: f))
+      withExtendedLifetime(self) { (_) in
+        Self.argumentMismatch(providedCount: arguments.count, for: callee, ofType: f)
+      })
 
     return .init(LLVMBuildCall2(p.llvm, calleeType.raw, callee.raw, &a, UInt32(a.count), "")!)
   }
 
   /// Returns a diagnosis for an argument number mismatch between `providedCount` and `callee`.
-  private func argumentMismatch(
+  private static func argumentMismatch(
     providedCount: Int, for callee: AnyValue.UnsafeReference, ofType f: FunctionType
   ) -> String {
-    // Note: We borrow `self`, otherwise it might be deinitialized before dereferencing `callee`.
 
     let functionName = Function.UnsafeReference(callee)?.unsafe[].name ?? "<indirect>"
 
