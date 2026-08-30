@@ -1193,7 +1193,8 @@ public struct Module: ~Copyable {
   /// Inserts a call to `callee` with explicit `calleeType`, passing `arguments`.
   ///
   /// - Requires:
-  ///   - argument count must match the function type, unless it's variadic.
+  ///   - argument count matches the function type, or is at least that number if `calleeType is
+  ///     variadic.
   ///   - `callee` is of a callable type.
   ///
   /// - See https://llvm.org/docs/LangRef.html#call-instruction.
@@ -1205,17 +1206,28 @@ public struct Module: ~Copyable {
   ) -> AnyInstruction.UnsafeReference {
     var a = arguments.map({ $0.raw as Optional })
 
-    if let f = FunctionType.UnsafeReference(calleeType)?.unsafe[] {
-      if f.parameters.count != arguments.count && !f.isVarArg {
-        let functionName = Function.UnsafeReference(callee)!.unsafe[].name
-        var debugInfo = "Parameter count mismatch on LLVM function call: \(functionName)\n"
-        debugInfo += "Expected parameters: \(f.parameters.count)\n"
-        debugInfo += "Provided arguments: \(arguments.count)\n"
-        preconditionFailure(debugInfo)
-      }
-    }
+    let f = FunctionType.UnsafeReference(calleeType)!.unsafe[]
+    precondition(f.isVarArg ?
+      (arguments.count >= f.parameterCount) : (arguments.count == f.parameterCount),
+      withExtendedLifetime(self) { (_) in
+        Self.argumentMismatch(providedCount: arguments.count, for: callee, ofType: f)
+      })
 
     return .init(LLVMBuildCall2(p.llvm, calleeType.raw, callee.raw, &a, UInt32(a.count), "")!)
+  }
+
+  /// Returns a diagnosis for an argument number mismatch between `providedCount` and `callee`.
+  private static func argumentMismatch(
+    providedCount: Int, for callee: AnyValue.UnsafeReference, ofType f: FunctionType
+  ) -> String {
+
+    let functionName = Function.UnsafeReference(callee)?.unsafe[].name ?? "<indirect>"
+
+    return """
+      Parameter count mismatch on function call: \(functionName) \
+      expected: \(f.parameterCount), \
+      found: \(providedCount)
+      """
   }
 
   /// Inserts an integer comparison instruction.

@@ -43,6 +43,9 @@ public struct FunctionType: IRType, Hashable {
     return handles.map { AnyType.UnsafeReference($0!) }
   }
 
+  /// The number of parameters of the function.
+  public var parameterCount: Int { Int(LLVMCountParamTypes(llvm.raw)) }
+
   /// `true` iff the function accepts a variable number of arguments.
   ///
   /// E.g. a function like `declare i1 @llvm.coro.suspend.retcon(...)`.
