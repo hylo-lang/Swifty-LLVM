@@ -1230,6 +1230,20 @@ public struct Module: ~Copyable {
       """
   }
 
+  /// Inserts a call to `llvm.memcpy` copying `count` bytes from `source` to `target`, both
+  /// assumed to be aligned at `alignment` bytes.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#llvm-memcpy-intrinsic.
+  public mutating func insertMemcpy<T: IRValue, U: IRValue, V: IRValue>(
+    to target: T.UnsafeReference, from source: U.UnsafeReference, count: V.UnsafeReference,
+    alignedAt alignment: Int, at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
+    precondition(alignment > 0)
+    return .init(
+      LLVMBuildMemCpy(
+        p.llvm, target.raw, UInt32(alignment), source.raw, UInt32(alignment), count.raw)!)
+  }
+
   /// Inserts an integer comparison instruction.
   ///
   /// - Requires: `l` and `r` have the same type.
