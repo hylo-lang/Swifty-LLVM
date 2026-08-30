@@ -1224,9 +1224,9 @@ public struct Module: ~Copyable {
     let functionName = Function.UnsafeReference(callee)?.unsafe[].name ?? "<indirect>"
 
     return """
-      Parameter count mismatch on LLVM function call: \(functionName)
-      Expected parameters: \(f.parameterCount)
-      Provided arguments: \(providedCount)
+      Parameter count mismatch on function call: \(functionName) \
+      expected: \(f.parameterCount), \
+      found: \(providedCount)
       """
   }
 
