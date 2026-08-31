@@ -8,6 +8,49 @@ public struct FunctionType: IRType, Hashable {
   /// A handle to the LLVM object wrapped by this instance.
   public let llvm: TypeRef
 
+  private let parameterStorage = SharedMutable<[LLVMTypeRef?]?>(nil)
+
+  public func hash(into hasher: inout Hasher) {
+    llvm.hash(into: &hasher)
+  }
+
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.llvm == rhs.llvm
+  }
+
+  public struct Parameters: RandomAccessCollection {
+    private let llvmFunction: TypeRef
+    private let lazyStorage: SharedMutable<[LLVMTypeRef?]?>
+
+    internal init(llvmFunction: TypeRef, lazyStorage: SharedMutable<[LLVMTypeRef?]?>) {
+      self.llvmFunction = llvmFunction
+      self.lazyStorage = lazyStorage
+    }
+
+    public typealias Element = AnyType.UnsafeReference
+
+    public var startIndex: Int { 0 }
+    public var endIndex: Int {
+      lazyStorage.read(
+        applying: { $0.map(\.count) ?? Int(LLVMCountParamTypes(llvmFunction.raw)) } )
+    }
+
+    public subscript(position: Int) -> AnyType.UnsafeReference {
+      lazyStorage.modify(
+        applying: {
+          let x = $0 ?? modify(
+            &$0, {
+              let n = LLVMCountParamTypes(llvmFunction.raw)
+              var r: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
+              LLVMGetParamTypes(llvmFunction.raw, &r)
+              $0 = r
+              return r
+            })
+          return .init(x[position]!)
+        })
+    }
+  }
+
   /// Creates an instance wrapping `llvm`.
   public init(temporarilyWrapping llvm: TypeRef) {
     self.llvm = llvm
@@ -36,15 +79,9 @@ public struct FunctionType: IRType, Hashable {
   /// The parameters of the function.
   ///
   /// Complexity: O(parameters.count)
-  public var parameters: [AnyType.UnsafeReference] {
-    let n = LLVMCountParamTypes(llvm.raw)
-    var handles: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
-    LLVMGetParamTypes(llvm.raw, &handles)
-    return handles.map { AnyType.UnsafeReference($0!) }
+  public var parameters: Parameters {
+    return Parameters(llvmFunction: self.llvm, lazyStorage: parameterStorage)
   }
-
-  /// The number of parameters of the function.
-  public var parameterCount: Int { Int(LLVMCountParamTypes(llvm.raw)) }
 
   /// `true` iff the function accepts a variable number of arguments.
   ///

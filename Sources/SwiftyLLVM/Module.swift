@@ -1208,7 +1208,7 @@ public struct Module: ~Copyable {
 
     let f = FunctionType.UnsafeReference(calleeType)!.unsafe[]
     precondition(f.isVarArg ?
-      (arguments.count >= f.parameterCount) : (arguments.count == f.parameterCount),
+      (arguments.count >= f.parameters.count) : (arguments.count == f.parameters.count),
       withExtendedLifetime(self) { (_) in
         Self.argumentMismatch(providedCount: arguments.count, for: callee, ofType: f)
       })
@@ -1225,7 +1225,7 @@ public struct Module: ~Copyable {
 
     return """
       Parameter count mismatch on function call: \(functionName) \
-      expected: \(f.parameterCount), \
+      expected: \(f.parameters.count), \
       found: \(providedCount)
       """
   }
