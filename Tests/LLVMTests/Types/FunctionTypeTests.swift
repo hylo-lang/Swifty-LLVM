@@ -44,6 +44,8 @@ final class FunctionTypeTests: XCTestCase {
     XCTAssertEqual(f2.unsafe[].parameters.count, 2)
     XCTAssertEqual(f2.unsafe[].parameters[0], t.t)
     XCTAssertEqual(f2.unsafe[].parameters[1], u.t)
+    XCTAssertEqual(Array(f2.unsafe[].parameters), [t.t, u.t])
+    XCTAssertEqual(Array(f2.unsafe[].parameters.reversed()), [u.t, t.t])
   }
 
   func testConversion() throws {

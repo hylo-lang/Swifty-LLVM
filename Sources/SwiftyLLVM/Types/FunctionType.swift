@@ -1,4 +1,5 @@
 internal import llvmc
+internal import llvmshims
 
 /// A function type in LLVM IR.
 ///
@@ -34,17 +35,7 @@ public struct FunctionType: IRType, Hashable {
   public var returnType: AnyType.UnsafeReference { .init(LLVMGetReturnType(llvm.raw)) }
 
   /// The parameters of the function.
-  ///
-  /// Complexity: O(parameters.count)
-  public var parameters: [AnyType.UnsafeReference] {
-    let n = LLVMCountParamTypes(llvm.raw)
-    var handles: [LLVMTypeRef?] = .init(repeating: nil, count: Int(n))
-    LLVMGetParamTypes(llvm.raw, &handles)
-    return handles.map { AnyType.UnsafeReference($0!) }
-  }
-
-  /// The number of parameters of the function.
-  public var parameterCount: Int { Int(LLVMCountParamTypes(llvm.raw)) }
+  public var parameters: Parameters { .init(of: self) }
 
   /// `true` iff the function accepts a variable number of arguments.
   ///
@@ -64,6 +55,58 @@ extension UnsafeReference<FunctionType> {
     } else {
       return nil
     }
+  }
+
+}
+
+extension FunctionType {
+
+  /// A collection containing the parameter types of a function type in LLVM IR.
+  public struct Parameters: BidirectionalCollection {
+
+    /// The collection index type.
+    public typealias Index = Int
+
+    /// The collection element type.
+    public typealias Element = AnyType.UnsafeReference
+
+    /// The function type containing the elements of the collection.
+    private let parent: FunctionType
+
+    /// Creates a collection containing the parameters of `t`.
+    fileprivate init(of t: FunctionType) {
+      self.parent = t
+    }
+
+    /// The number of parameters in the collection.
+    public var count: Int {
+      Int(LLVMCountParamTypes(parent.llvm.raw))
+    }
+
+    /// The position of the first element.
+    public var startIndex: Int { 0 }
+
+    /// The position one past the last element.
+    public var endIndex: Int { count }
+
+    /// Returns the index immediately after `position`.
+    public func index(after position: Int) -> Int {
+      precondition(position < count, "index is out of bounds")
+      return position + 1
+    }
+
+    /// Returns the index immediately before `position`.
+    public func index(before position: Int) -> Int {
+      precondition(position > 0, "index is out of bounds")
+      return position - 1
+    }
+
+    /// The parameter type at `position`.
+    public subscript(position: Int) -> AnyType.UnsafeReference {
+      precondition(position >= 0 && position < count, "index is out of bounds")
+      return .init(SwiftyLLVMGetParamType(parent.llvm.raw, UInt32(position)))
+    }
+
   }
 
 }

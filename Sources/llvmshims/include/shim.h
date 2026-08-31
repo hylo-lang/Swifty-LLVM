@@ -4,6 +4,7 @@
 #include "llvm-c/ExternC.h"
 #include "llvm-c/Target.h"
 #include "llvm-c/TargetMachine.h"
+#include "llvm-c/Types.h"
 #include <stdbool.h>
 
 LLVM_C_EXTERN_C_BEGIN
@@ -61,6 +62,13 @@ bool SwiftyLLVMIsCPUValid(LLVMTargetRef target, const char *triple, const char *
 char *SwiftyLLVMGetFirstInvalidFeature(
   LLVMTargetRef target, const char *triple, const char *features
 );
+
+/// Returns the type of the parameter at `index` in the function type `functionType`.
+///
+/// - Requires:
+///   - `functionType` must be non-null and be a function type.
+///   - `index` must be less than the number of parameters of `functionType`.
+LLVMTypeRef SwiftyLLVMGetParamType(LLVMTypeRef functionType, unsigned int index);
 
 /// Returns the natural stack alignment, or `-1` if one wasn't specified.
 long SwiftyLLVMGetStackAlignment(LLVMTargetDataRef dataLayout);
