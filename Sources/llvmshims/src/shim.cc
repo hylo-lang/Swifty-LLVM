@@ -23,6 +23,7 @@
 #include "llvm-c/Core.h"
 #include "llvm-c/TargetMachine.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/GlobalValue.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -153,6 +154,13 @@ auto SwiftyLLVMGetFirstInvalidFeature(
     return nullptr;
 
   return LLVMCreateMessage(llvm::SubtargetFeatures::StripFlag(*it).str().c_str());
+}
+
+auto SwiftyLLVMGetParamType(LLVMTypeRef functionType, unsigned int index) -> LLVMTypeRef {
+  assert(functionType && "`functionType` must not be null");
+  auto *t = llvm::cast<llvm::FunctionType>(llvm::unwrap(functionType));
+  assert(index < t->getNumParams() && "`index` is out of bounds");
+  return llvm::wrap(t->getParamType(index));
 }
 
 long SwiftyLLVMGetStackAlignment(LLVMTargetDataRef dataLayout) {
