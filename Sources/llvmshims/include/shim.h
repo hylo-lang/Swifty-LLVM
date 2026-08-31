@@ -65,9 +65,7 @@ char *SwiftyLLVMGetFirstInvalidFeature(
 
 /// Returns the type of the parameter at `index` in the function type `functionType`.
 ///
-/// - Requires:
-///   - `functionType` must be non-null and be a function type.
-///   - `index` must be less than the number of parameters of `functionType`.
+/// - Requires: `index` must be less than the number of parameters of `functionType`.
 LLVMTypeRef SwiftyLLVMGetParamType(LLVMTypeRef functionType, unsigned int index);
 
 /// Returns the natural stack alignment, or `-1` if one wasn't specified.
