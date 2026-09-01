@@ -62,7 +62,7 @@ extension UnsafeReference<FunctionType> {
 extension FunctionType {
 
   /// A collection containing the parameter types of a function type in LLVM IR.
-  public struct Parameters: BidirectionalCollection {
+  public struct Parameters: RandomAccessCollection {
 
     /// The collection index type.
     public typealias Index = Int

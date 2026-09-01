@@ -82,7 +82,7 @@ extension UnsafeReference<StructType> {
 extension StructType {
 
   /// A collection containing the fields of a struct type in LLVM IR.
-  public struct Fields: BidirectionalCollection {
+  public struct Fields: RandomAccessCollection {
 
     /// The collection index type.
     public typealias Index = Int

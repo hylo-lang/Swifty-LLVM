@@ -59,7 +59,7 @@ extension Function {
 extension Function {
 
   /// A collection containing the parameters of an LLVM IR function.
-  public struct Parameters: BidirectionalCollection {
+  public struct Parameters: RandomAccessCollection {
 
     /// The collection index type.
     public typealias Index = Int
