@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A collection containing the opereands of an LLVM instruction.
-public struct Operands: BidirectionalCollection {
+public struct Operands: RandomAccessCollection {
 
   /// The collection index type.
   public typealias Index = Int

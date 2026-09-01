@@ -1,7 +1,7 @@
 internal import llvmc
 
 /// A constant aggregate (e.g., a constant array) in LLVM IR.
-public protocol AggregateConstant: IRValue, BidirectionalCollection {
+public protocol AggregateConstant: IRValue, RandomAccessCollection {
 
   /// The number of elements in this value.
   var count: Int { get }
