@@ -14,7 +14,7 @@ This package requires Swift 6.3
 
 ### LLVM
 
-This package requires LLVM 20.  Major versions of LLVM are not
+This package requires LLVM 23. Major versions of LLVM are not
 interchangeable or backward-compatible.
 
 If you are using this package for development we strongly recommend
@@ -106,4 +106,3 @@ swift test -c release
 1. Add `platforms: [.macOS("xxx")]` to `Package.swift` where `xxx` is
    your macOS version to address the warning complaining that an
    "object file was built for newer macOS version than being linked".
-2. You may need to add the path to `zstd` library in `llvm.pc`.

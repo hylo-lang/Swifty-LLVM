@@ -17,8 +17,6 @@ typedef enum {
   SwiftyLLVMPassOptimizationLevelO1,
   SwiftyLLVMPassOptimizationLevelO2,
   SwiftyLLVMPassOptimizationLevelO3,
-  SwiftyLLVMPassOptimizationLevelOs,
-  SwiftyLLVMPassOptimizationLevelOz,
 } SwiftyLLVMPassOptimizationLevel;
 
 /// Runs the default module passes on module `m`, using target machine `t` and `optimization`.

@@ -36,10 +36,15 @@ public struct IntegerType: IRType, Hashable {
     constant(v)
   }
 
-  /// Returns a constant whose LLVM IR type is `self` and whose value is `v`, truncating or
-  /// sign-extending if needed to fit `self.bitWidth`.
+  /// Returns an LLVM constant of `v`, having type `self`.
+  ///
+  /// - Requires: `v` is representable as `self` and the value fits in 64 bits.
   public func constant<T: BinaryInteger>(_ v: T) -> IntegerConstant.UnsafeReference {
-    .init(LLVMConstInt(llvm.raw, UInt64(truncatingIfNeeded: v), 0))
+    if v < 0 {
+      .init(LLVMConstInt(llvm.raw, UInt64(bitPattern: Int64(v)), 1))
+    } else {
+      .init(LLVMConstInt(llvm.raw, UInt64(v), 0))
+    }
   }
 
   /// Returns a constant of type `self`, with value parsed from `text` with `radix`.

@@ -29,6 +29,7 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/TargetParser/SubtargetFeature.h"
+#include "llvm/TargetParser/Triple.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -46,10 +47,6 @@ auto as_llvm(SwiftyLLVMPassOptimizationLevel x) -> llvm::OptimizationLevel {
     return llvm::OptimizationLevel::O2;
   case SwiftyLLVMPassOptimizationLevelO3:
     return llvm::OptimizationLevel::O3;
-  case SwiftyLLVMPassOptimizationLevelOs:
-    return llvm::OptimizationLevel::Os;
-  case SwiftyLLVMPassOptimizationLevelOz:
-    return llvm::OptimizationLevel::Oz;
   default:
     assert(!"fatal error: unhandled optimization level");
     return llvm::OptimizationLevel::O0;
@@ -117,7 +114,9 @@ auto SwiftyLLVMIsCPUValid(LLVMTargetRef target, const char *triple, const char *
     return 1;
 
   auto *llvmTarget = reinterpret_cast<const llvm::Target *>(target); // Un-erase opaque pointer.
-  std::unique_ptr<llvm::MCSubtargetInfo> i(llvmTarget->createMCSubtargetInfo(triple, "", ""));
+  std::unique_ptr<llvm::MCSubtargetInfo> i(
+    llvmTarget->createMCSubtargetInfo(llvm::Triple(triple), "", "")
+  );
   assert(i && "invalid triple: failed to create MCSubtargetInfo for validated triple");
 
   return i->isCPUStringValid(cpu) ? 1 : 0;
@@ -134,8 +133,9 @@ auto SwiftyLLVMGetFirstInvalidFeature(
     return nullptr;
 
   const auto *llvmTarget = reinterpret_cast<llvm::Target *>(target); // Un-erase opaque pointer.
-  const auto subtarget =
-    std::unique_ptr<llvm::MCSubtargetInfo>(llvmTarget->createMCSubtargetInfo(triple, "", ""));
+  const auto subtarget = std::unique_ptr<llvm::MCSubtargetInfo>(
+    llvmTarget->createMCSubtargetInfo(llvm::Triple(triple), "", "")
+  );
   assert(subtarget && "failed to create MCSubtargetInfo for validated triple");
 
   auto knownFeatures = subtarget->getAllProcessorFeatures();
@@ -146,7 +146,7 @@ auto SwiftyLLVMGetFirstInvalidFeature(
   auto it = llvm::find_if_not(parts, [&](const std::string &entry) {
     const auto name = llvm::SubtargetFeatures::StripFlag(entry);
     return llvm::any_of(knownFeatures, [&](const llvm::SubtargetFeatureKV &kv) {
-      return llvm::StringRef(kv.Key) == name;
+      return llvm::StringRef(kv.key()) == name;
     });
   });
 
