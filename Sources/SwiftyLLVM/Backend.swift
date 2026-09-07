@@ -5,7 +5,9 @@ internal import llvmshims
 ///
 /// Instances are wrapping eternal immutable LLVM target objects, so they are safe to use
 /// across multiple threads, and can be compared for equality by their handle.
-public struct Backend {
+///
+// `Sendable` is safe because the wrapped instance is a statically allocated and immutable.
+public struct Backend: @unchecked Sendable {
 
   /// A handle to the LLVM object wrapped by this instance.
   internal let llvm: LLVMTargetRef
