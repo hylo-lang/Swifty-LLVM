@@ -6,7 +6,7 @@ internal import llvmshims
 /// - Invariant: `backend` corresponds to `triple`.
 /// 
 /// Instances are equal if they have the same normalized triple string.
-public struct Target: Hashable {
+public struct Target: Hashable, Sendable {
 
   /// The normalized triple string (e.g. "x86_64-unknown-linux-gnu").
   public let triple: String

@@ -28,7 +28,7 @@ public enum TargetSpecificationError: Error, CustomStringConvertible, Equatable 
 ///
 /// The initialiser validates the CPU and features against the target's processor
 /// table and throws `TargetSpecificationError` if either is unrecognised.
-public struct TargetSpecification: Equatable {
+public struct TargetSpecification: Hashable, Sendable {
 
   /// The target triple.
   public let target: Target
