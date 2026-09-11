@@ -53,6 +53,9 @@ jobs:
             HYLO_LLVM_BUILD_TYPE: MinSizeRel
 
     runs-on: ubuntu-24.04
+    env:
+      HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -68,8 +71,6 @@ jobs:
     - name: Build and run via CMake
       uses: devcontainers/ci@v0.3
       if: ${{ matrix.build-system == 'cmake' }}
-      env:
-        HYLO_LLVM_BUILD_TYPE: ${{ matrix.HYLO_LLVM_BUILD_TYPE }}
       with:
         runCmd: >
           set -exu # fail fast, print commands before executing, treat unset variables as an error
