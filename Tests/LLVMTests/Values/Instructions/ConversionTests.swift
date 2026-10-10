@@ -47,4 +47,14 @@ final class ConversionTests: XCTestCase {
     XCTAssert(m.description.contains("sitofp"))
   }
 
+  func testBitCast() throws {
+    var m = try Module("foo", targetMachine: .host())
+    let f = m.declareFunction("fn", m.functionType(from: [m.i64.t], to: m.i64.t))
+    let b = m.appendBlock(to: f)
+    let s = f.unsafe[].parameters[0]
+
+    m.insertReturn(m.insertBitCast(s, to: m.i64, at: m.endOf(b)), at: m.endOf(b))
+    XCTAssertNoThrow(try m.verify())
+  }
+
 }
