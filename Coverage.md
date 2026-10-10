@@ -1053,7 +1053,10 @@
 
   `Module.insertIntToPtr(_:to:at:)`
 
-- [ ] LLVMBuildBitCast
+- [x] LLVMBuildBitCast
+
+  `Module.insertBitCast(_:to:at:)`
+
 - [ ] LLVMBuildAddrSpaceCast
 - [ ] LLVMBuildZExtOrBitCast
 - [ ] LLVMBuildSExtOrBitCast

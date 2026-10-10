@@ -1176,6 +1176,16 @@ public struct Module: ~Copyable {
     .init(LLVMBuildSIToFP(p.llvm, source.raw, target.raw, "")!)
   }
 
+  /// Inserts a bitcast.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#bitcast-to-instruction.
+  public mutating func insertBitCast<V: IRValue, T: IRType>(
+    _ source: V.UnsafeReference, to target: T.UnsafeReference,
+    at p: borrowing InsertionPoint
+  ) -> AnyInstruction.UnsafeReference {
+    .init(LLVMBuildBitCast(p.llvm, source.raw, target.raw, "")!)
+  }
+
   // MARK: Others
 
   /// Inserts a call to `callee`, passing `arguments`.
