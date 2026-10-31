@@ -253,10 +253,21 @@
 
 #### PHI Nodes
 
-- [ ] LLVMAddIncoming
-- [ ] LLVMCountIncoming
-- [ ] LLVMGetIncomingValue
-- [ ] LLVMGetIncomingBlock (LLVMValueRef PhiNode, unsigned Index)
+- [x] LLVMAddIncoming
+
+  `Module.insertPhi(_:mergning:at:)`
+
+- [x] LLVMCountIncoming
+
+  `Phi.Incoming.count`
+
+- [x] LLVMGetIncomingValue
+
+  `Phi.Incoming.value`
+
+- [x] LLVMGetIncomingBlock
+
+  `Phi.Incoming.block`
 
 ### Values
 
@@ -1075,7 +1086,10 @@
 
   `Module.insertFloatingPointComparison(_:_:_:at:)`
 
-- [ ] LLVMBuildPhi
+- [x] LLVMBuildPhi
+
+  `Module.insertPhi(_:mergning:at:)`
+
 - [x] LLVMBuildCall2
 
   `Module.insertCall(_:typed:on:at:)`
