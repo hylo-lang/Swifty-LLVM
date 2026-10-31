@@ -1280,6 +1280,28 @@ public struct Module: ~Copyable {
     return .init(LLVMBuildFCmp(p.llvm, predicate.llvm, l.raw, r.raw, "")!)
   }
 
+  /// Inserts a phi instruction.
+  ///
+  /// - See https://llvm.org/docs/LangRef.html#phi-instruction.
+  public mutating func insertPhi<T: IRType, S: Sequence>(
+    _ t: T.UnsafeReference, merging incoming: S,
+    at p: borrowing InsertionPoint
+  ) -> Phi.UnsafeReference where
+    S.Element == (AnyValue.UnsafeReference, BasicBlock.UnsafeReference)
+  {
+    let phi = LLVMBuildPhi(p.llvm, t.raw, "")
+
+    var values: [LLVMValueRef?] = []
+    var blocks: [LLVMBasicBlockRef?] = []
+    for (v, b) in incoming {
+      values.append(v.raw)
+      blocks.append(b.raw)
+    }
+    LLVMAddIncoming(phi, &values, &blocks, UInt32(values.count))
+
+    return .init(phi!)
+  }
+
   // MARK: Type constructors
 
   /// Returns the integer type spanning `bitWidth` number of bits.
