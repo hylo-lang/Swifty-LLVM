@@ -161,7 +161,7 @@
 - [ ] LLVMGetBasicBlockTerminator
 - [x] LLVMCountBasicBlocks
 
-  Implemented as the `count` property of `Function.basicBlocks`.
+  `Function.basicBlocks.count`
 
 - [x] LLVMGetBasicBlocks
 
@@ -501,7 +501,7 @@
 
 - [x] LLVMGetAttributeCountAtIndex
 
-  Implemented as the `count` property of `Function.attributes`.
+  `Function.attributes.count`
 
 - [x] LLVMGetAttributesAtIndex
 
@@ -680,7 +680,7 @@
 
 - [x] LLVMCountParamTypes
 
-  Implemented as the `count` property of `FunctionType.parameters`.
+  `FunctionType.parameters.count`
 
 - [x] LLVMGetParamTypes
 
