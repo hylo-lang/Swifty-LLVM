@@ -21,7 +21,7 @@ env:
   spm-build-options: -Xswiftc -enable-testing --explicit-target-dependency-import-check error
   spm-test-options: --parallel
   swift-version: '6.3'
-  HYLO_LLVM_BUILD_RELEASE: 20260905-220739
+  HYLO_LLVM_BUILD_RELEASE: 20261121-234846
   HYLO_LLVM_VERSION: '23.1.0'
 
 jobs:
@@ -166,14 +166,16 @@ jobs:
           xcode-version: '26.0.1'
 
       - name: Set up swift
-        uses: SwiftyLab/setup-swift@latest
+        uses: SwiftyLab/setup-swift@38f54a76b70d989321de9dc7c840618c08cf56e9 # v1.14.0
         with:
           swift-version: ${{ env.swift-version }}
 
       - name: Download Recent Visual Studio and Windows SDK
-        uses: compnerd/gha-setup-vsdevenv@main
+        uses: compnerd/gha-setup-vsdevenv@452f99effa381b81c025ccfbdccaca509bff1b29
         with:
           winsdk: "10.0.26100.0"
+          # Must match the toolset that built the LLVM binaries.
+          toolset_version: "14.44"
           # Note: The GitHub windows-2025 runner has only a very old version of the Windows SDK available by default.
           #       Swift is said to require version 10.0.22621.0: https://forums.swift.org/t/swiftpm-plugin-doesnt-work-with-the-latest-visual-studio-version/78183/14
           #       That no longer works, so we had to upgrade to 10.0.26100.0.
@@ -245,14 +247,16 @@ jobs:
           cmakeVersion: latest
 
       - name: Set up swift
-        uses: SwiftyLab/setup-swift@latest
+        uses: SwiftyLab/setup-swift@38f54a76b70d989321de9dc7c840618c08cf56e9 # v1.14.0
         with:
           swift-version: ${{ env.swift-version }}
 
       - name: Download Recent Visual Studio and Windows SDK
-        uses: compnerd/gha-setup-vsdevenv@main
+        uses: compnerd/gha-setup-vsdevenv@452f99effa381b81c025ccfbdccaca509bff1b29
         with:
           winsdk: "10.0.26100.0"
+          # Must match the toolset that built the LLVM binaries.
+          toolset_version: "14.44"
           # Note: The GitHub windows-2025 runner has only a very old version of the Windows SDK available by default.
           #       Swift is said to require version 10.0.22621.0: https://forums.swift.org/t/swiftpm-plugin-doesnt-work-with-the-latest-visual-studio-version/78183/14
           #       That no longer works, so we had to upgrade to 10.0.26100.0.
